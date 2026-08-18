@@ -17,6 +17,7 @@ import re
 import sys
 import time
 import socket
+import difflib
 from socket import error as SocketError
 from src.utils import menu
 from os.path import splitext
@@ -45,7 +46,7 @@ Check if the content of the given URL is stable over time.
 """
 def is_url_content_stable(url, response=None, fetch_time=None):
   status = "stable"
-  debug_msg = "Testing if the target URL content remains consistent between requests."
+  debug_msg = "Checking if the target URL content is stable."
   settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
   try:
     if response is not None:
@@ -75,7 +76,9 @@ def is_url_content_stable(url, response=None, fetch_time=None):
       second_response.close()
 
     if first_response_content != second_response_content:
-      status = "dynamic"
+      ratio = difflib.SequenceMatcher(None, first_response_content, second_response_content).ratio()
+      if ratio < settings.STABILITY_SIMILARITY_THRESHOLD:
+        status = "dynamic"
 
   except Exception:
     msg = "Unable to determine target URL content stability due to retrieval errors."
@@ -753,8 +756,10 @@ def encoding_detection(response):
   try:
     # Read once
     content_bytes = response.read()
+    # A charset meta tag is always within the first 1024 bytes (same window
+    # browsers use for charset prescanning) - no need to decode/scan the rest.
     try:
-      content_text = content_bytes.decode("utf-8", errors="ignore")
+      content_text = content_bytes[:1024].decode("utf-8", errors="ignore")
     except (Exception, SystemExit):
       content_text = ""
 
@@ -818,15 +823,22 @@ def encoding_detection(response):
 """
 Identify the target application's type based on the URL extension.
 """
-def application_identification(url):
+def application_identification(url, response=None):
   found_application_extension = False
 
   if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Detecting the type of target application based on URL and headers."
+    debug_msg = "Detecting the type of target application based on the URL extension."
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
 
   root, application_extension = splitext(_urllib.parse.urlparse(url).path)
   settings.TARGET_APPLICATION = application_extension[1:].upper()
+
+  # Extensionless URL - fall back to a header-based hint instead of giving up.
+  if not settings.TARGET_APPLICATION and response is not None:
+    x_powered_by = response.info().get(settings.X_POWERED_BY, "")
+    match = re.search(r"PHP|ASP\.NET|JSP", x_powered_by, re.IGNORECASE)
+    if match:
+      settings.TARGET_APPLICATION = match.group(0).upper()
 
   if settings.TARGET_APPLICATION:
     found_application_extension = True
@@ -902,13 +914,15 @@ def technology_identification(response):
       debug_msg = "Detecting the underlying technology or framework powering the target application."
       settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
 
-      if x_powered_by:
+    if x_powered_by:
+      if settings.VERBOSITY_LEVEL != 0:
         debug_msg = "Target application technology detected as " + x_powered_by + "."
         settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
-        check_os(x_powered_by)
-      else:
-        warn_msg = "Failed to identify the technology supporting the target application."
-        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+      # Run regardless of verbosity - this is a real OS-detection fallback, not just a log line.
+      check_os(x_powered_by)
+    elif settings.VERBOSITY_LEVEL != 0:
+      warn_msg = "Failed to identify the technology supporting the target application."
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
   except Exception:
     if settings.VERBOSITY_LEVEL != 0:

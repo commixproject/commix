@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Fixed: Multiple bug-fixes improving detection accuracy and reliability for results-based techniques.
 * Fixed: Improved timing-delay reliability and thread-safety for time-related techniques.
 * Revised: Improved redirect handling and connection performance.
 * Fixed: Multiple bug-fixes affecting the reliability of `--tmp-path` and `--web-root`.

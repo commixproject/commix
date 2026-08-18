@@ -598,7 +598,7 @@ def main(filename, url, http_request_method):
           # Procedure for target server identification.
           requests.server_identification(response)
           # Procedure for target application identification
-          requests.application_identification(url)
+          requests.application_identification(url, response)
           # Specifies the technology supporting the web application
           requests.technology_identification(response)
           # Procedure for target server's operating system identification.

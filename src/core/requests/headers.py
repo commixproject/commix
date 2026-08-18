@@ -101,6 +101,8 @@ def print_http_response(response_headers, code, page):
 
   if settings.VERBOSITY_LEVEL >= 3 or menu.options.traffic_file:
     if settings.VERBOSITY_LEVEL >= 3:
+      # Blank line separating this response block from the request block printed before it.
+      settings.print_data_to_stdout("")
       resp_msg = "HTTP response [" + settings.print_request_num(settings.TOTAL_OF_REQUESTS) + "] (" + str(code) + "):"
       settings.print_data_to_stdout(settings.print_response_msg(resp_msg))
     if menu.options.traffic_file:
@@ -109,11 +111,16 @@ def print_http_response(response_headers, code, page):
     http_response(response_headers, code)
   if settings.VERBOSITY_LEVEL >= 4 or menu.options.traffic_file:
     if settings.VERBOSITY_LEVEL >= 4:
-      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+      # Blank line separating response headers from the response body below.
+      settings.print_data_to_stdout("")
     try:
       http_response_content(page)
     except AttributeError:
       http_response_content(page.decode(settings.DEFAULT_CODEC))
+
+  if settings.VERBOSITY_LEVEL >= 3:
+    # Blank line closing out this traffic block before whatever's printed next.
+    settings.print_data_to_stdout("")
 
 """
 Checking the HTTP Headers & HTTP/S Request.
@@ -133,19 +140,26 @@ def check_http_traffic(request):
   class connection(http_client):
     def send(self, req):
       headers = req.decode()
+      # http.client sends headers and body as separate send() calls - a headers
+      # chunk always ends in a blank line, so that's where the body (printed on
+      # the next send() call) will visually start.
+      ends_with_blank_line = headers.endswith(settings.END_LINE.CRLF + settings.END_LINE.CRLF)
       request_http_headers = str(headers).split(settings.END_LINE.CRLF)
       unique_request_http_headers = []
       [unique_request_http_headers.append(item) for item in request_http_headers if item not in unique_request_http_headers]
       request_http_headers = [x for x in unique_request_http_headers if x]
-      if settings.USER_DEFINED_POST_DATA and \
-         len(request_http_headers) == 1 and \
-         settings.VERBOSITY_LEVEL >= 2:
-        settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
       for header in request_http_headers:
         if settings.VERBOSITY_LEVEL >= 2:
           settings.print_data_to_stdout(settings.print_traffic(header))
         if menu.options.traffic_file:
           logs.log_traffic(settings.END_LINE.LF + header)
+      if ends_with_blank_line and settings.USER_DEFINED_POST_DATA and settings.VERBOSITY_LEVEL >= 2:
+        settings.print_data_to_stdout("")
+      # This is the body-only send() call (headers always end in a blank line,
+      # this doesn't). At verbosity 2, responses aren't printed to close out
+      # the block themselves, so do it here instead.
+      elif not ends_with_blank_line and settings.USER_DEFINED_POST_DATA and settings.VERBOSITY_LEVEL == 2:
+        settings.print_data_to_stdout("")
       http_client.send(self, req)
 
   class connection_handler(_urllib.request.HTTPSHandler, _urllib.request.HTTPHandler, object):

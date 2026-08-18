@@ -22,8 +22,8 @@ The dynamic code evaluation (aka eval-based) technique.
 """
 Evaluate test results.
 """
-def injection_test_results(response, TAG, randvcalc, technique):
-  return injector.injection_test_results(response, TAG, randvcalc, technique)
+def injection_test_results(response, TAG, randvcalc, technique, payload=None):
+  return injector.injection_test_results(response, TAG, randvcalc, technique, payload)
 
 """
 The main command injection exploitation.

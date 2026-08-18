@@ -583,7 +583,7 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
                   response = requests.url_reload(url, timesec)
                 # Evaluate test results.
                 time.sleep(timesec)
-                shell = injector.injection_test_results(response, TAG, randvcalc, technique)
+                shell = injector.injection_test_results(response, TAG, randvcalc, technique, payload)
                 if settings.VERBOSITY_LEVEL == 0:
                   percent, float_percent = checks.percentage_calculation(i, total)
                   percent = checks.print_percentage(float_percent, no_result, shell)

@@ -88,6 +88,11 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
   # Warn about network load once before the first command that needs it.
   checks.time_related_attaks_msg()
 
+  # Ask upfront instead of waiting for the first delayed response.
+  if settings.EXPLOITATION_PHASE and settings.ADJUST_TIME_DELAY_CHOICE is None:
+    msg = "Do you want commix to try to optimize the value(s) for delay responses (option '--time-sec')? [Y/n] "
+    settings.ADJUST_TIME_DELAY_CHOICE = common.read_input(msg, default="Y", check_batch=True) in settings.CHOICE_YES
+
   # An interrupted prior run's partial value carries an already-confirmed length.
   _stored_partial = None
   if not menu.options.ignore_session:
@@ -917,7 +922,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec, technique):
 """
 Evaluate test results.
 """
-def injection_test_results(response, TAG, randvcalc, technique):
+def injection_test_results(response, TAG, randvcalc, technique, payload=None):
   if type(response) is bool and response != True or response is None:
     return False
 
@@ -935,6 +940,7 @@ def injection_test_results(response, TAG, randvcalc, technique):
     html_data = unescape(html_data)
     # Replace non-ASCII characters with a single space
     re.sub(r"[^\x00-\x7f]",r" ", html_data)
+    html_data = checks.remove_reflected_values(html_data, payload)
     if settings.SKIP_CALC:
       shell = re.findall(r"" + TAG + TAG + TAG, html_data)
     else:
@@ -944,6 +950,7 @@ def injection_test_results(response, TAG, randvcalc, technique):
   else:
     html_data = checks.process_page_content(response, action="decode")
     html_data = re.sub(settings.END_LINE.LF, settings.SINGLE_WHITESPACE, html_data)
+    html_data = checks.remove_reflected_values(html_data, payload)
     if settings.SKIP_CALC:
       shell = re.findall(r"" + TAG + settings.SINGLE_WHITESPACE + TAG + settings.SINGLE_WHITESPACE + TAG + settings.SINGLE_WHITESPACE , html_data)
     else:

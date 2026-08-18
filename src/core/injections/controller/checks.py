@@ -758,6 +758,21 @@ def process_page_content(response, action):
     raise SystemExit()
 
 """
+Ignore verbatim payload reflections so they cannot trigger a false positive.
+"""
+def remove_reflected_values(html_data, payload):
+  if not payload:
+    return html_data
+  decoded_payload = _urllib.parse.unquote(payload)
+  if decoded_payload and decoded_payload in html_data:
+    if not settings.REFLECTIVE_VALUE_FOUND:
+      settings.REFLECTIVE_VALUE_FOUND = True
+      warn_msg = "Target parameter value(s) appear to be reflected in the response - filtering reflected content."
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    html_data = html_data.replace(decoded_payload, settings.SINGLE_WHITESPACE)
+  return html_data
+
+"""
 Returns header value ignoring the letter case
 """
 def get_header(headers, key):
@@ -1445,9 +1460,8 @@ def time_related_shell(url_time_response, exec_time, timesec):
   lower_limit = current_delay_threshold()
   delayed = exec_time >= lower_limit if lower_limit is not None else exec_time >= timesec
 
-  # Asked once, the first time any response actually reads as delayed - same gate
-  # governs both raising the delay on failure and shrinking it on good responses.
-  if delayed and settings.ADJUST_TIME_DELAY_CHOICE is None:
+  # Prompt once on the first delayed exploitation response; use the same gate for delay adjustments.
+  if delayed and settings.EXPLOITATION_PHASE and settings.ADJUST_TIME_DELAY_CHOICE is None:
     msg = "Do you want commix to try to optimize the value(s) for delay responses (option '--time-sec')? [Y/n] "
     settings.ADJUST_TIME_DELAY_CHOICE = common.read_input(msg, default="Y", check_batch=True) in settings.CHOICE_YES
 

@@ -296,7 +296,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "74"
+REVISION = "75"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -553,6 +553,12 @@ INIT_CONNECTION_URL = None
 
 # Max wait before re-checking page stability.
 STABILITY_CHECK_DELAY = 0.5
+
+# Below this similarity ratio, two page fetches count as "dynamic".
+STABILITY_SIMILARITY_THRESHOLD = 0.98
+
+# One-time "reflected value(s) found" notice already shown this run.
+REFLECTIVE_VALUE_FOUND = False
 
 RESPONSE_DELAYS = False
 
