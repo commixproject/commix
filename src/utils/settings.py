@@ -296,7 +296,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "77"
+REVISION = "78"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1267,6 +1267,8 @@ FORBIDDEN_ERROR = "403"
 NOT_FOUND_ERROR = "404"
 NOT_ALLOWED = "405"
 NOT_ACCEPTABLE_ERROR = "406"
+TOO_MANY_REQUESTS = "429"
+UNAVAILABLE_FOR_LEGAL_REASONS = "451"
 INTERNAL_SERVER_ERROR = "500"
 NOT_IMPLEMENTED = "501"
 BAD_GATEWAY = "502"
@@ -1278,12 +1280,23 @@ HTTP_ERROR_CODES = [  BAD_REQUEST,
                       NOT_FOUND_ERROR,
                       NOT_ALLOWED,
                       NOT_ACCEPTABLE_ERROR,
+                      TOO_MANY_REQUESTS,
+                      UNAVAILABLE_FOR_LEGAL_REASONS,
                       INTERNAL_SERVER_ERROR,
                       NOT_IMPLEMENTED,
                       BAD_GATEWAY,
                       SERVICE_UNAVAILABLE,
                       GATEWAY_TIMEOUT
                     ]
+
+# HTTP status codes a WAF/IPS typically returns when it blocks a request.
+WAF_BLOCK_HTTP_CODES = [ FORBIDDEN_ERROR,
+                         NOT_ACCEPTABLE_ERROR,
+                         TOO_MANY_REQUESTS,
+                         UNAVAILABLE_FOR_LEGAL_REASONS,
+                         NOT_IMPLEMENTED,
+                         SERVICE_UNAVAILABLE
+                       ]
 
 HTTP_ERROR_CODES_SUM = []
 
@@ -1416,6 +1429,8 @@ BROWSER_VERIFICATION = None
 # Regular expression used for recognition of generic "your ip has been blocked" messages.
 BLOCKED_IP_REGEX = r"(?i)(\A|\b)ip\b.*\b(banned|blocked|block list|firewall)"
 
+BLOCKED_IP_DETECTED = None
+
 # Prefix for Google analytics cookie names
 GOOGLE_ANALYTICS_COOKIE_PREFIX = "__UTM"
 
@@ -1429,6 +1444,8 @@ SETTINGS_PATH = os.path.abspath("src/utils/settings.py")
 NAGGING_DAYS = 31
 
 TARGET_URL = ""
+# Host:port (matches session_handler.table_name()'s hashing), unlike TARGET_URL above.
+TARGET_NETLOC = ""
 DOC_ROOT_TARGET_MARK = "%TARGET%"
 
 # Windows common document roots

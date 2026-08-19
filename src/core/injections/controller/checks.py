@@ -73,6 +73,30 @@ def exit():
   os._exit(0)
 
 """
+Persist a new WAF/IPS finding when possible; defer the import to avoid a circular dependency.
+"""
+def _persist_waf_finding():
+  if menu.options.ignore_session or not settings.TARGET_NETLOC:
+    return
+  from src.utils import session_handler
+  session_handler.import_waf_status(settings.TARGET_NETLOC, True)
+
+"""
+Flags the target as WAF/IPS-protected on a block-like HTTP status code.
+"""
+def detect_waf(err_code):
+  if str(err_code) in settings.WAF_BLOCK_HTTP_CODES and \
+     not menu.options.skip_waf and \
+     not settings.HOST_INJECTION:
+    if not settings.WAF_ENABLED:
+      warn_msg = "It seems some kind of WAF/IPS is protecting the target."
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+      settings.WAF_ENABLED = True
+      _persist_waf_finding()
+    return True
+  return False
+
+"""
 Detection of WAF/IPS protection.
 """
 def check_waf(url, http_request_method):
@@ -843,7 +867,10 @@ def get_header(headers, key):
 Checks regarding a recognition of generic "your ip has been blocked" messages.
 """
 def blocked_ip(page):
-  if re.search(settings.BLOCKED_IP_REGEX, page):
+  if not settings.BLOCKED_IP_DETECTED and re.search(settings.BLOCKED_IP_REGEX, page):
+    settings.BLOCKED_IP_DETECTED = True
+    settings.WAF_ENABLED = True
+    _persist_waf_finding()
     warn_msg = "It appears the target server has blocked you."
     settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
 
@@ -853,6 +880,8 @@ Checks regarding a potential browser verification protection mechanism.
 def browser_verification(page):
   if not settings.BROWSER_VERIFICATION and re.search(r"(?i)browser.?verification", page or ""):
     settings.BROWSER_VERIFICATION = True
+    settings.WAF_ENABLED = True
+    _persist_waf_finding()
     warn_msg = "Potential browser verification protection mechanism detected"
     if re.search(r"(?i)CloudFlare", page):
       warn_msg += " (CloudFlare)."
@@ -868,6 +897,8 @@ def captcha_check(page):
     for match in re.finditer(r"(?si)<form.+?</form>", page):
       if re.search(r"(?i)captcha", match.group(0)):
         settings.CAPTCHA_DETECED = True
+        settings.WAF_ENABLED = True
+        _persist_waf_finding()
         warn_msg = "Potential CAPTCHA protection mechanism detected"
         if re.search(r"(?i)<title>[^<]*CloudFlare", page):
           warn_msg += " (CloudFlare)."
@@ -1071,13 +1102,7 @@ def continue_tests(err):
 
   # Possible WAF/IPS
   try:
-    if (str(err.code) == settings.FORBIDDEN_ERROR or \
-       str(err.code) == settings.NOT_ACCEPTABLE_ERROR) and \
-       not menu.options.skip_waf and \
-       not settings.HOST_INJECTION :
-      warn_msg = "It seems some kind of WAF/IPS is protecting the target."
-      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-      settings.WAF_ENABLED = True
+    detect_waf(err.code)
 
     message = ""
     if str(err.code) == settings.NOT_FOUND_ERROR:

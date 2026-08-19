@@ -475,6 +475,48 @@ def export_stored_cmd(url, cmd, vuln_parameter):
 
 
 """
+Store whether the target was found to be WAF/IPS-protected, so a resumed
+session against the same target doesn't need to redo the heuristic probe.
+"""
+def import_waf_status(url, waf_enabled):
+  try:
+    with _session_connection() as conn:
+      table = table_name(url) + "_waf"
+      conn.execute("CREATE TABLE IF NOT EXISTS \"" + table + "\" (waf_enabled VARCHAR);")
+      conn.execute("DELETE FROM \"" + table + "\";")
+      conn.execute("INSERT INTO \"" + table + "\" (waf_enabled) VALUES (?)", (str(waf_enabled),))
+      conn.commit()
+  except (sqlite3.OperationalError, sqlite3.DatabaseError):
+    pass
+
+"""
+Retrieve a previously stored WAF/IPS detection result for the given target.
+Returns None if nothing is stored yet.
+"""
+def check_stored_waf_status(url):
+  try:
+    with _session_connection() as conn:
+      table = table_name(url) + "_waf"
+      query = "SELECT name FROM sqlite_master WHERE name = ? AND type = 'table';"
+      if not conn.execute(query, (table,)).fetchone():
+        return None
+      row = conn.execute("SELECT waf_enabled FROM \"" + table + "\" LIMIT 1;").fetchone()
+      return row[0] == "True" if row else None
+  except (sqlite3.OperationalError, sqlite3.DatabaseError):
+    return None
+
+"""
+Restore a WAF/IPS finding from a previous session, before testing starts.
+"""
+def restore_waf_status(url):
+  if menu.options.skip_waf or menu.options.ignore_session or menu.options.flush_session:
+    return
+  if not settings.WAF_ENABLED and check_stored_waf_status(url):
+    settings.WAF_ENABLED = True
+    info_msg = "Previous session heuristics detected that the target is protected by some kind of WAF/IPS."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
+"""
 Save valid authentication credentials (e.g., username and password) discovered during testing into the session database.
 """
 def import_valid_credentials(url, authentication_type, admin_panel, username, password):

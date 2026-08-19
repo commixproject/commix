@@ -275,6 +275,9 @@ def url_response(url, http_request_method):
   # Check if http / https
   url = checks.check_http_s(url)
   request, url = init_request(url, http_request_method)
+  # Set early so WAF detection can persist the finding.
+  settings.TARGET_URL = _urllib.parse.urlparse(url).hostname
+  settings.TARGET_NETLOC = _urllib.parse.urlparse(url).netloc
   # Cache clean-request timing to avoid repeating the measurement, resetting it first to prevent stale values.
   settings.INIT_CONNECTION_TIME = None
   settings.INIT_CONNECTION_FETCH_TIME = None
@@ -297,7 +300,6 @@ def url_response(url, http_request_method):
     settings.INIT_CONNECTION_TIME = _conn_end - _conn_start
     settings.INIT_CONNECTION_FETCH_TIME = _conn_end
     settings.INIT_CONNECTION_URL = conn_url
-  settings.TARGET_URL = _urllib.parse.urlparse(url).hostname
   if settings.MULTI_TARGETS or settings.CRAWLING:
     settings.TOR_CHECK_AGAIN = False
     # initiate total of requests
@@ -998,6 +1000,7 @@ try:
       response, url = url_response(url, http_request_method)
       if response != False:
         filename = logs.logs_filename_creation(url)
+        session_handler.restore_waf_status(url)
         main(filename, url, http_request_method)
 
     else:
@@ -1151,6 +1154,7 @@ try:
             response, form_url = url_response(form_url, settings.HTTPMETHOD.POST)
             if response != False:
               filename = logs.logs_filename_creation(form_url)
+              session_handler.restore_waf_status(form_url)
               main(filename, form_url, settings.HTTPMETHOD.POST)
           except KeyboardInterrupt:
             checks.handle_early_interrupt(filename, form_url)
@@ -1224,6 +1228,7 @@ try:
                 response, url = url_response(url, http_request_method)
                 if response != False:
                   filename = logs.logs_filename_creation(url)
+                  session_handler.restore_waf_status(url)
                   main(filename, url, http_request_method)
               except KeyboardInterrupt:
                 checks.handle_early_interrupt(filename, url)

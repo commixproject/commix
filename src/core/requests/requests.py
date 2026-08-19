@@ -401,6 +401,11 @@ def request_failed(err_msg):
       error_msg += "status code received."
     elif "forcibly closed" in str(error_msg) or "Connection is already closed" in str(error_msg):
       error_msg = "Connection was forcibly closed by the target URL."
+    elif checks.detect_waf(getattr(err_msg, "code", None)):
+      # First request never reaches continue_tests(), so check here too.
+      if not settings.NOT_FOUND_ERROR in str(err_msg).lower():
+        return False
+      return True
     elif [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]:
       status_code = [err_code for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]
       warn_msg = "The web server responded with an HTTP error code '" + str(status_code[0]) 

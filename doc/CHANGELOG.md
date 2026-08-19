@@ -1,5 +1,6 @@
 ## Version 4.2 (TBA)
-* Added: Interactive Ctrl-C handling during detection and exploitation, allowing the scan to skip the current technique, parameter, or target instead of aborting.
+* Revised: Improved WAF/IPS detection coverage, now cached per target across resumed scans.
+* Added: Interactive Ctrl-C handling during detection and exploitation, with cleaner exit handling.
 * Fixed: Multiple bug-fixes improving detection accuracy and reliability for results-based techniques.
 * Fixed: Improved timing-delay reliability and thread-safety for time-related techniques.
 * Revised: Improved redirect handling and connection performance.
