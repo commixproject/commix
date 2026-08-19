@@ -34,17 +34,17 @@ def logfile_parser():
   Warning message for mutiple request in same log file.
   """
   def multi_requests():
-    err_msg = "Multiple"
+    err_msg = "This tool does not support multiple"
     if menu.options.requestfile:
       err_msg += " requests"
     elif menu.options.logfile:
       err_msg += " targets"
-    err_msg += " are not supported, thus all coming"
+    err_msg += ", so it will ignore all coming"
     if menu.options.requestfile:
-      err_msg += " requests "
+      err_msg += " requests"
     elif menu.options.logfile:
-      err_msg += " targets "
-    err_msg += "will be ignored."
+      err_msg += " targets"
+    err_msg += "."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     
     return False
@@ -68,7 +68,7 @@ def logfile_parser():
     request_file = menu.options.logfile
 
   if not os.path.exists(request_file):
-    err_msg = "It seems the '" + request_file + "' file, does not exist."
+    err_msg = "It seems the '" + request_file + "' file does not exist."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 

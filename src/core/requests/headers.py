@@ -234,7 +234,7 @@ def check_http_traffic(request):
     except ValueError as err:
       if settings.VERBOSITY_LEVEL < 2:
         settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-      err_msg = "Invalid target URL has been given."
+      err_msg = "You provided an invalid target URL."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
@@ -351,7 +351,7 @@ def check_http_traffic(request):
       if stability.should_retry_connection_error(err):
         response = False
         continue
-      err_msg = "The target host is not responding. Please ensure that is up and try again."
+      err_msg = "The target host is not responding. Please ensure it is up and try again."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
 

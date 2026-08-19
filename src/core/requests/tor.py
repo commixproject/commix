@@ -29,7 +29,7 @@ Check if Tor HTTP proxy is defined.
 """
 
 def tor_connection_error():
-  err_msg = "Tor connection could not be established. "
+  err_msg = "Could not establish a Tor connection. "
   err_msg += "Please ensure Tor is running and reachable"
   err_msg += " and that any provided options (e.g., '--tor-port') are correct."
   settings.print_data_to_stdout(settings.print_error_msg(err_msg))

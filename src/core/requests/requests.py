@@ -220,8 +220,8 @@ def estimate_response_time(url, timesec, http_request_method):
             # Basic authentication
             if menu.options.auth_type.lower() == settings.AUTH_TYPE.BASIC:
               if not int(settings.UNAUTHORIZED_ERROR) in settings.IGNORE_CODE:
-                warn_msg = menu.options.auth_type.capitalize() + " "
-                warn_msg += "HTTP authentication credentials are required."
+                warn_msg = "This target requires " + menu.options.auth_type.lower() + " "
+                warn_msg += "HTTP authentication credentials."
                 settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
                 while True:
                   message = "Do you want to perform a dictionary-based attack? [Y/n] > "
@@ -244,8 +244,8 @@ def estimate_response_time(url, timesec, http_request_method):
             # Digest authentication
             elif menu.options.auth_type.lower() == settings.AUTH_TYPE.DIGEST:
               if not int(settings.UNAUTHORIZED_ERROR) in settings.IGNORE_CODE:
-                warn_msg = menu.options.auth_type.capitalize() + " "
-                warn_msg += "HTTP authentication credentials are required."
+                warn_msg = "This target requires " + menu.options.auth_type.lower() + " "
+                warn_msg += "HTTP authentication credentials."
                 settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
                 # Check if failed to identify the realm attribute.
                 if not realm:
@@ -301,10 +301,10 @@ def _finish_response_time_estimate(diff, timesec):
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     url_time_response = int(round(diff))
     warn_msg = "Target's estimated response time is " + str(url_time_response)
-    warn_msg += " second" + "s"[url_time_response == 1:] + ". Data extraction may be delayed"
+    warn_msg += " second" + "s"[url_time_response == 1:] + ". This may delay"
     if url_time_response >= 3:
-      warn_msg += " and/or corrupted"
-    warn_msg += "."
+      warn_msg += " and/or corrupt"
+    warn_msg += " data extraction."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
   if int(timesec) == int(url_time_response):
@@ -413,15 +413,14 @@ def request_failed(err_msg):
       # Likely transient noise, not a dead target.
       return True
     else:
-      error_msg = "The provided target URL seems not reachable. "
+      error_msg = "The provided target URL does not seem reachable. "
       items = []
       if not menu.options.random_agent:
           items.append("'--random-agent' switch")
       if not any((menu.options.proxy, menu.options.ignore_proxy, menu.options.tor)):
         items.append("proxy switches ('--proxy', '--ignore-proxy'...).")
       if items:
-        error_msg += "In case that it is, "
-        error_msg += "you can try to rerun with "
+        error_msg += "It might still be reachable. Try rerunning with "
         error_msg += " and/or ".join(items)
     settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
     if not settings.CRAWLING:

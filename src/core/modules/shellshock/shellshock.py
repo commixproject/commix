@@ -253,7 +253,7 @@ def check_options(url, cmd, cve, check_header, filename, os_shell_option, http_r
 
   # The "os_shell" option
   elif os_shell_option == "os_shell": 
-    warn_msg = "You are into the '" + os_shell_option + "' mode."
+    warn_msg = "You are in the '" + os_shell_option + "' mode."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     return go_back, go_back_again
 

@@ -734,7 +734,7 @@ def reverse_tcp_options(separator):
     )
 
     if reverse_tcp_option.lower() == "reverse_tcp":
-      warn_msg = "You are into '" + reverse_tcp_option.lower() + "' mode."
+      warn_msg = "You are in '" + reverse_tcp_option.lower() + "' mode."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       continue
 
@@ -786,7 +786,7 @@ def configure_reverse_tcp(separator):
     option = _input()
 
     if option.lower() == "reverse_tcp":
-      warn_msg = "You are into the '" + option.lower() + "' mode."
+      warn_msg = "You are in the '" + option.lower() + "' mode."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       continue
 
@@ -829,8 +829,8 @@ def configure_reverse_tcp(separator):
 
       # RHOST is not supported in reverse TCP mode.
       elif option[4:10].lower() == "rhost ":
-        err_msg = "The '" + option[4:9].upper() + "' option, is not "
-        err_msg += "usable for 'reverse_tcp' mode. Use 'LHOST' option."
+        err_msg = "The '" + option[4:9].upper() + "' option is not "
+        err_msg += "usable for 'reverse_tcp' mode. Use the 'LHOST' option."
         settings.print_data_to_stdout(settings.print_error_msg(err_msg))
         continue
 

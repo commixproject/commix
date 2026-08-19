@@ -35,7 +35,7 @@ def remove():
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
-  info_msg = settings.APPLICATION.capitalize() + " and all related components have been successfully removed."
+  info_msg = "Successfully removed " + settings.APPLICATION.capitalize() + " and all related components."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
 # Abort for Unsupported Systems 
@@ -58,7 +58,7 @@ def installer():
     abort_unsupported(packages, dependencies)
 
   if not common.running_as_admin():
-    err_msg = "Administrative privileges are required to run this option."
+    err_msg = "This option requires administrative privileges to run."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
@@ -66,7 +66,7 @@ def installer():
   launcher_path = os.path.join(settings.WRAPPER_PATH, settings.APPLICATION)
 
   if os.path.isdir(app_install_path):
-    warn_msg = "An existing installation of " + settings.APPLICATION + " was detected."
+    warn_msg = "Detected an existing installation of " + settings.APPLICATION + "."
     settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
 
     while True:
@@ -126,7 +126,7 @@ def installer():
     settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
     raise SystemExit()
 
-  info_msg = "Installation has been completed."
+  info_msg = "Completed the installation."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
 # eof

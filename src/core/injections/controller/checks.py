@@ -77,7 +77,7 @@ Detection of WAF/IPS protection.
 """
 def check_waf(url, http_request_method):
   payload = _urllib.parse.quote(settings.WAF_CHECK_PAYLOAD)
-  info_msg = "Checking whether the target is protected by some kind of WAF/IPS."
+  info_msg = "Checking whether some kind of WAF/IPS is protecting the target."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   if settings.VERBOSITY_LEVEL >= 1:
     settings.print_data_to_stdout(settings.print_payload(payload))
@@ -386,7 +386,7 @@ def user_aborted(filename, url):
   settings.clear_current_line()
   abort_msg = "User aborted procedure "
   abort_msg += "during the " + assessment_phase()
-  abort_msg += " phase (Ctrl-C was pressed)."
+  abort_msg += " phase (Ctrl-C pressed)."
   settings.print_data_to_stdout(settings.print_abort_msg(abort_msg))
   raise exit()
 
@@ -395,7 +395,7 @@ Ctrl-C during detection - ask how to proceed instead of aborting outright.
 """
 def handle_detection_interrupt(filename, url):
   settings.clear_current_line()
-  warn_msg = "User aborted during the detection phase (Ctrl-C was pressed)."
+  warn_msg = "User aborted during the detection phase (Ctrl-C pressed)."
   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
   if settings.MULTI_TARGETS:
     msg = "How do you want to proceed? [ne(X)t target/(S)kip current technique/(e)nd detection phase/(n)ext parameter/(q)uit] > "
@@ -425,7 +425,7 @@ def handle_early_interrupt(filename, url):
   if not settings.MULTI_TARGETS:
     user_aborted(filename, url)
   settings.clear_current_line()
-  warn_msg = "User aborted during the detection phase (Ctrl-C was pressed)."
+  warn_msg = "User aborted during the detection phase (Ctrl-C pressed)."
   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
   msg = "How do you want to proceed? [ne(X)t target/(q)uit] > "
   choice = common.read_input(msg, default="X", check_batch=True)
@@ -438,7 +438,7 @@ is already confirmed, so the only real choice is whether to keep going.
 """
 def handle_exploitation_interrupt(filename, url):
   settings.clear_current_line()
-  warn_msg = "User aborted during the exploitation phase (Ctrl-C was pressed)."
+  warn_msg = "User aborted during the exploitation phase (Ctrl-C pressed)."
   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
   msg = "How do you want to proceed? [(C)ontinue/(q)uit] > "
   choice = common.read_input(msg, default="C", check_batch=True)
@@ -570,7 +570,7 @@ def load_cmd_history():
   except (IOError, AttributeError, UnicodeError) as e:
     warn_msg = "There was a problem loading the history file '" + cli_history + "'."
     if settings.IS_WINDOWS:
-      warn_msg += " More info can be found at 'https://github.com/pyreadline/pyreadline/issues/30'"
+      warn_msg += " See 'https://github.com/pyreadline/pyreadline/issues/30' for more info."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
@@ -806,10 +806,10 @@ def process_page_content(response, action):
 
   # If there was an error, advise the user
   if error_occurred:
-    err_msg += "You are advised to rerun with "
+    err_msg += "Rerun with"
     if menu.options.codec is None:
-      err_msg += "out "
-    err_msg += "option '--codec'."
+      err_msg += "out"
+    err_msg += " option '--codec'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
@@ -823,7 +823,7 @@ def remove_reflected_values(html_data, payload):
   if decoded_payload and decoded_payload in html_data:
     if not settings.REFLECTIVE_VALUE_FOUND:
       settings.REFLECTIVE_VALUE_FOUND = True
-      warn_msg = "Target parameter value(s) appear to be reflected in the response - filtering reflected content."
+      warn_msg = "The response appears to reflect the target parameter value(s). Filtering reflected content."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     html_data = html_data.replace(decoded_payload, settings.SINGLE_WHITESPACE)
   return html_data
@@ -844,7 +844,7 @@ Checks regarding a recognition of generic "your ip has been blocked" messages.
 """
 def blocked_ip(page):
   if re.search(settings.BLOCKED_IP_REGEX, page):
-    warn_msg = "It appears that you have been blocked by the target server."
+    warn_msg = "It appears the target server has blocked you."
     settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
 
 """
@@ -899,7 +899,7 @@ False positive or unexploitable injection point detected.
 def unexploitable_point(retry_attempt=None, retry_total=None):
   if settings.VERBOSITY_LEVEL == 0:
     settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-  warn_msg = "False positive or unexploitable injection point has been detected. Trying for re-verification"
+  warn_msg = "Detected a false positive or unexploitable injection point. Trying for re-verification"
   warn_msg += (" (" + str(retry_attempt) + "/" + str(retry_total) + ").") if retry_attempt else "."
   settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
 
@@ -1075,7 +1075,7 @@ def continue_tests(err):
        str(err.code) == settings.NOT_ACCEPTABLE_ERROR) and \
        not menu.options.skip_waf and \
        not settings.HOST_INJECTION :
-      warn_msg = "It seems the target is protected by some kind of WAF/IPS."
+      warn_msg = "It seems some kind of WAF/IPS is protecting the target."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       settings.WAF_ENABLED = True
 
@@ -1296,7 +1296,7 @@ def check_connection(url):
           raise SystemExit()
       except (socket.error, UnicodeError) as e:
         err_msg = "Problem occurred while "
-        err_msg += "resolving a host name '" + hostname + "'"
+        err_msg += "resolving the hostname '" + hostname + "'"
         if not settings.MULTI_TARGETS:
           settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
           raise SystemExit()
@@ -1313,7 +1313,7 @@ def user_defined_os():
       return True
     else:
       err_msg = "You defined an invalid value '" + menu.options.os + "' "
-      err_msg += "for operation system. The value, must be 'Windows' or 'Unix'."
+      err_msg += "for the operating system. The value must be 'Windows' or 'Unix'."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
@@ -1351,8 +1351,8 @@ is different than the one identified by heuristics.
 """
 def identified_os():
     if settings.IGNORE_IDENTIFIED_TARGET_OS == None:
-      warn_msg = "Identified different operating system (i.e. '"
-      warn_msg += settings.TARGET_OS.title() + "'), than the defined (i.e. '" + menu.options.os.title() + "')."
+      warn_msg = "Identified a different operating system (i.e. '"
+      warn_msg += settings.TARGET_OS.title() + "') than the one you defined (i.e. '" + menu.options.os.title() + "')."
       settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
       message = "How do you want to proceed? [(C)ontinue/(s)kip] > "
       proceed_option = common.read_input(message, default="S", check_batch=True)
@@ -1392,15 +1392,15 @@ def third_party_dependencies():
       try:
         import pyreadline
       except ImportError:
-        err_msg = "The 'pyreadline' (third-party) library is required "
-        err_msg += "to enable TAB completion and history support features."
+        err_msg = "TAB completion and history support features require "
+        err_msg += "the 'pyreadline' (third-party) library."
         settings.print_data_to_stdout(settings.print_error_msg(err_msg))
     elif settings.PLATFORM == "posix":
       try:
         import gnureadline
       except ImportError:
-        err_msg = "The 'gnureadline' (third-party) library is required "
-        err_msg += "to enable TAB completion and history support features."
+        err_msg = "TAB completion and history support features require "
+        err_msg += "the 'gnureadline' (third-party) library."
         settings.print_data_to_stdout(settings.print_error_msg(err_msg))
     pass
 
@@ -1536,7 +1536,7 @@ def time_related_attaks_msg():
 Check if defined "--url-reload" option.
 """
 def reload_url_msg(technique):
-  warn_msg = "On the " + technique + "technique, the '--url-reload' option is not available."
+  warn_msg = "On the " + technique + " technique, the '--url-reload' option is not available."
   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
@@ -2163,13 +2163,11 @@ def perform_payload_modification(payload):
 Skip parameters when the provided value is empty.
 """
 def skip_empty(empty_parameters, http_request_method):
-  warn_msg = "The " + http_request_method
+  warn_msg = "Skipped the " + http_request_method
   warn_msg += ('', ' (JSON)')[settings.IS_JSON] + ('', ' (SOAP/XML)')[settings.IS_XML]
   warn_msg += " parameter" + "s"[len(empty_parameters.split(",")) == 1:][::-1]
-  warn_msg += " '" + empty_parameters + "'"
-  warn_msg += (' have ', ' has ')[len(empty_parameters.split(",")) == 1]
-  warn_msg += "been skipped from testing"
-  warn_msg += " because user specified testing of only parameter(s) with non-empty value" + "s"[len(empty_parameters.split(",")) == 1:][::-1] + "."
+  warn_msg += " '" + empty_parameters + "' from testing"
+  warn_msg += " because you specified testing of only parameter(s) with non-empty value" + "s"[len(empty_parameters.split(",")) == 1:][::-1] + "."
   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
@@ -2209,7 +2207,7 @@ def no_parameters_found():
   err_msg = "No parameter(s) found for testing in the provided data "
   err_msg += "(e.g. GET parameter 'id' in 'www.site.com/index.php?id=1'). "
   if not menu.options.crawldepth:
-    err_msg += "You are advised to rerun with '--crawl=2'."
+    err_msg += "Rerun with '--crawl=2'."
   settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
   raise SystemExit()
 
@@ -2264,8 +2262,8 @@ def is_empty(multi_parameters, http_request_method):
       warn_msg += " parameter" + "s"[len(empty_parameters.split(",")) == 1:][::-1]
       warn_msg += " '" + empty_parameters + "'"
       warn_msg += (' are ', ' is ')[len(empty_parameters.split(",")) == 1] + "empty. "
-      warn_msg += "You are advised to use only valid values, so " + settings.APPLICATION
-      warn_msg += " could be able to run properly."
+      warn_msg += "Use only valid values, so " + settings.APPLICATION
+      warn_msg += " can run properly."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       return False
 
@@ -2396,7 +2394,7 @@ def print_ps_version(ps_version, filename, _):
         output_file.write(re.compile(re.compile(settings.ANSI_COLOR_REMOVAL)).sub("",settings.INFO_BOLD_SIGN) + info_msg)
   except ValueError:
     warn_msg = "Failed to identify the version of Powershell, "
-    warn_msg += "which means that some payloads or injection techniques may be failed."
+    warn_msg += "which means some payloads or injection techniques may fail."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     settings.PS_ENABLED = False
     ps_check_failed()
@@ -2572,7 +2570,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
         # Check for appropriate '/etc/passwd' format.
         if len(sys_users) % 3 != 0 :
           warn_msg = "It seems '" + settings.PASSWD_FILE + "' file is "
-          warn_msg += "not in the appropriate format. Thus, it is expoted as a text file."
+          warn_msg += "not in the appropriate format. Thus, exporting it as a text file."
           settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
           sys_users = " ".join(str(p) for p in sys_users).strip()
           settings.print_data_to_stdout(sys_users)
@@ -2638,7 +2636,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
               except ValueError:
                 if count == 1 :
                   warn_msg = "It seems '" + settings.PASSWD_FILE + "' file is not in the "
-                  warn_msg += "appropriate format. Thus, it is expoted as a text file."
+                  warn_msg += "appropriate format. Thus, exporting it as a text file."
                   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
                 sys_users = " ".join(str(p) for p in sys_users.split(":"))
                 settings.print_data_to_stdout(sys_users)
@@ -2693,7 +2691,7 @@ def print_passes(sys_passes, filename, _, alter_shell):
         except IndexError:
           if count == 1 :
             warn_msg = "It seems '" + settings.SHADOW_FILE + "' file is not "
-            warn_msg += "in the appropriate format. Thus, it is expoted as a text file."
+            warn_msg += "in the appropriate format. Thus, exporting it as a text file."
             settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
           settings.print_data_to_stdout(fields[0])
           with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as output_file:
@@ -2853,7 +2851,7 @@ def file_read_status(shell, file_to_read, filename):
         info_msg += file_to_read + "' : " + shell + settings.END_LINE.LF
         output_file.write(re.compile(settings.ANSI_COLOR_REMOVAL).sub("",settings.INFO_BOLD_SIGN) + info_msg)
   else:
-    warn_msg = "No content was retrieved for the file '" + file_to_read + "'. "
+    warn_msg = "Retrieved no content for the file '" + file_to_read + "'. "
     warn_msg += "This could mean the file does not exist, is empty, or you do not have permission to read it."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
@@ -2936,16 +2934,16 @@ Check for wrong flags
 def check_wrong_flags():
   if settings.TARGET_OS == settings.OS.WINDOWS:
     if menu.options.is_root :
-      warn_msg = "Switching '--is-root' to '--is-admin' because the "
-      warn_msg += "target has been identified as Windows."
+      warn_msg = "Identified the target as Windows. Switching "
+      warn_msg += "'--is-root' to '--is-admin'."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     if menu.options.passwords:
       warn_msg = "The '--passwords' option is not yet supported on Windows targets."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
   else:
     if menu.options.is_admin :
-      warn_msg = "Switching '--is-admin' to '--is-root' because "
-      warn_msg += "the target has been identified as Unix-like. "
+      warn_msg = "Identified the target as Unix-like. Switching "
+      warn_msg += "'--is-admin' to '--is-root'. "
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
@@ -3264,7 +3262,7 @@ Message regarding the MSF handler.
 def msf_launch_msg(output):
     info_msg = "Type \"msfconsole -r " + os.path.abspath(output) + "\" (in a new window)."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-    info_msg = "Once the loading is done, press here any key to continue..."
+    info_msg = "Once the loading finishes, press any key here to continue..."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
     sys.stdin.readline().replace(settings.END_LINE.LF, "")
     # Remove the ouput file.
@@ -3275,7 +3273,7 @@ Check for available shell options.
 """
 def shell_options(option):
   if option.lower() == "reverse_tcp" or option.lower() == "bind_tcp" :
-    warn_msg = "You are into the '" + option.lower() + "' mode."
+    warn_msg = "You are in the '" + option.lower() + "' mode."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
   elif option.lower() == "?":
     menu.reverse_tcp_options()
@@ -3285,15 +3283,15 @@ def shell_options(option):
   elif option[0:4].lower() == "set ":
     if option[4:10].lower() == "lhost ":
       if option.lower() == "bind_tcp":
-        err_msg =  "The '" + option[4:9].upper() + "' option, is not "
-        err_msg += "usable for '" + option.lower() + "' mode. Use 'RHOST' option."
+        err_msg =  "The '" + option[4:9].upper() + "' option is not "
+        err_msg += "usable for '" + option.lower() + "' mode. Use the 'RHOST' option."
         settings.print_data_to_stdout(settings.print_error_msg(err_msg))
       else:
         check_lhost(option[10:])
     if option[4:10].lower() == "rhost ":
       if option.lower() == "reverse_tcp":
-        err_msg =  "The '" + option[4:9].upper() + "' option, is not "
-        err_msg += "usable for '" + option.lower() + "' mode. Use 'LHOST' option."
+        err_msg =  "The '" + option[4:9].upper() + "' option is not "
+        err_msg += "usable for '" + option.lower() + "' mode. Use the 'LHOST' option."
         settings.print_data_to_stdout(settings.print_error_msg(err_msg))
       else:
         check_rhost(option[10:])

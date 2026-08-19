@@ -418,7 +418,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
          menu.options.failed_tries:
         warn_msg = "Due to the provided (unsuitable) injection technique"
         warn_msg += "s"[len(menu.options.tech) == 1:][::-1] + ", "
-        warn_msg += "the option '--failed-tries' will be ignored."
+        warn_msg += "ignoring the option '--failed-tries'."
         settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
       # Procced with file-based semiblind command injection technique,

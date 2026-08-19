@@ -69,12 +69,12 @@ def updater():
   info_msg += settings.APPLICATION + " from GitHub repository. "
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   if menu.options.offline:
-    err_msg = "You cannot update " + settings.APPLICATION + " via GitHub without access on the Internet."
+    err_msg = "You cannot update " + settings.APPLICATION + " via GitHub without access to the Internet."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
   # Check if windows
   if settings.IS_WINDOWS:
-    err_msg = "For updating purposes on Windows platform, it's recommended "
+    err_msg = "For updating purposes on the Windows platform, it's recommended "
     err_msg += "to use a GitHub client for Windows (http://windows.github.com/)."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
@@ -94,7 +94,7 @@ def updater():
           revision_num()
           os._exit(0)
         else:
-          err_msg = "The '.git' directory not found. Do it manually: "
+          err_msg = "The '.git' directory was not found. Do it manually: "
           err_msg += "'git clone " + settings.GIT_URL + " " + settings.APPLICATION + "' "
           settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
           raise SystemExit()
@@ -150,12 +150,12 @@ def unicorn_updater(current_version):
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   if menu.options.offline:
     err_msg = "You cannot update TrustedSec's Magic Unicorn "
-    err_msg += "via GitHub without access on the Internet."
+    err_msg += "via GitHub without access to the Internet."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
   # Check if windows
   if settings.IS_WINDOWS:
-    err_msg = "For updating purposes on Windows platform, it's recommended "
+    err_msg = "For updating purposes on the Windows platform, it's recommended "
     err_msg += "to use a GitHub client for Windows (http://windows.github.com/)."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
@@ -207,10 +207,10 @@ def check_unicorn_version(current_version):
        ((int(current_version.replace(".", "")[:2]) == int(latest_version.replace(".", "")[:2])) and \
          int(current_version.replace(".", "")[2:]) < int(latest_version.replace(".", "")[2:])):
       if len(current_version) != 0:
-        warn_msg = "Current version of TrustedSec's Magic Unicorn (" + current_version + ") seems to be out-of-date."
+        warn_msg = "The current version of TrustedSec's Magic Unicorn (" + current_version + ") seems to be out-of-date."
         settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       else:
-        warn_msg = "TrustedSec's Magic Unicorn seems to be not installed."
+        warn_msg = "TrustedSec's Magic Unicorn does not seem to be installed."
         settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       while True:
         if len(current_version) == 0:

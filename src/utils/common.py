@@ -149,7 +149,7 @@ Get total number of days from last update
 def days_from_last_update():
   days_from_last_update = int(time.time() - os.path.getmtime(settings.SETTINGS_PATH)) // (3600 * 24)
   if days_from_last_update > settings.NAGGING_DAYS:
-    warn_msg = "Last update " + str(days_from_last_update) + " days ago, update check is recommended."
+    warn_msg = "Last update " + str(days_from_last_update) + " days ago. Consider checking for updates."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
@@ -230,7 +230,7 @@ def create_github_issue(err_msg, exc_msg):
       info_msg = "That issue seems to be already reported"
       if closed:
         info_msg += " and resolved. Please update to the latest "
-        info_msg += "(dev) version from official GitHub repository at '"
+        info_msg += "(dev) version from the official GitHub repository at '"
         info_msg += settings.GIT_URL + "'"
       info_msg += "."
       settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
@@ -287,8 +287,8 @@ def unhandled_exception():
     raise SystemExit()
 
   elif "must be pinned buffer, not bytearray" in exc_msg:
-    err_msg = "Error occurred at Python interpreter which "
-    err_msg += "is fixed in 2.7.x. Please update accordingly. "
+    err_msg = "Error occurred at Python interpreter. "
+    err_msg += "Python 2.7.x fixes this. Please update accordingly. "
     err_msg += "(Reference: https://bugs.python.org/issue8104)"
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
@@ -316,7 +316,7 @@ def unhandled_exception():
 
   elif "Invalid argument" in exc_msg:
     err_msg = "Corrupted installation detected. "
-    err_msg += "You should retrieve the latest (dev) version from official GitHub "
+    err_msg += "You should retrieve the latest (dev) version from the official GitHub "
     err_msg += "repository at '" + settings.GIT_URL + "'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
@@ -328,13 +328,13 @@ def unhandled_exception():
 
   elif all(_ in exc_msg for _ in ("No such file", "_'")):
     err_msg = "Corrupted installation detected ('" + exc_msg.strip().split(settings.END_LINE.LF)[-1] + "'). "
-    err_msg += "You should retrieve the latest (dev) version from official GitHub "
+    err_msg += "You should retrieve the latest (dev) version from the official GitHub "
     err_msg += "repository at '" + settings.GIT_URL + "'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
   elif "Invalid IPv6 URL" in exc_msg:
-    err_msg = "invalid URL ('" + exc_msg.strip().split(settings.END_LINE.LF)[-1] + "')"
+    err_msg = "Invalid URL ('" + exc_msg.strip().split(settings.END_LINE.LF)[-1] + "')"
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
@@ -383,8 +383,8 @@ def unhandled_exception():
 
   else:
     err_msg = "Unhandled exception occurred in '" + settings.VERSION[1:] + "'. "
-    err_msg += "It is recommended to retry your run with the latest (dev) version from the official GitHub repository at '" + settings.GIT_URL + "'. "
-    err_msg += "If the issue still occurs, you can report it on GitHub by generating a sanitized report, that removes sensitive data, or by submitting the details manually." + settings.END_LINE.LF
+    err_msg += "We recommend retrying your run with the latest (dev) version from the official GitHub repository at '" + settings.GIT_URL + "'. "
+    err_msg += "If the issue still occurs, you can report it on GitHub by generating a sanitized report that removes sensitive data, or by submitting the details manually." + settings.END_LINE.LF
     err_msg += settings.SUB_CONTENT_SIGN_TYPE + " " + settings.APPLICATION.capitalize() + " version: " + settings.VERSION[1:] + settings.END_LINE.LF
     err_msg += settings.SUB_CONTENT_SIGN_TYPE + " Python version: " + settings.PYTHON_VERSION + settings.END_LINE.LF
     err_msg += settings.SUB_CONTENT_SIGN_TYPE + " Operating system: " + os.name + settings.END_LINE.LF

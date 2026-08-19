@@ -511,7 +511,7 @@ def main(filename, url, http_request_method):
         if skip_tech_name in menu.options.skip_tech:
           menu.options.tech = menu.options.tech.replace(skip_tech_name, "")
       if len(menu.options.tech) == 0:
-        err_msg = "Detection procedure was aborted due to skipping all injection techniques."
+        err_msg = "Aborted the detection procedure due to skipping all injection techniques."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
         raise SystemExit()
 
@@ -550,7 +550,7 @@ def main(filename, url, http_request_method):
 
     # Check the file-destination
     if menu.options.file_write is not None and not menu.options.file_dest:
-      err_msg = "Host's absolute filepath to write, must be specified (i.e. '--file-dest')."
+      err_msg = "You must specify the host's absolute filepath to write (i.e. '--file-dest')."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
@@ -638,10 +638,10 @@ def main(filename, url, http_request_method):
   # Accidental stop / restart of the target host server.
   except (_http_client.BadStatusLine, SocketError) as err_msg:
     if any((settings.REVERSE_TCP, settings.BIND_TCP)):
-      err_msg = "Connection failed to be established."
+      err_msg = "Failed to establish a connection."
     else:
       err_msg = "The target host is not responding."
-      err_msg += " Please ensure that is up and try again."
+      err_msg += " Please ensure it is up and try again."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     logs.print_logs_notification(filename, url)
     if any((settings.REVERSE_TCP, settings.BIND_TCP)):
@@ -751,7 +751,7 @@ try:
         settings.DEFAULT_CODEC  = menu.options.codec.lower()
 
     if menu.options.header and len(menu.options.header.split(settings.END_LINE.ESCAPED_LF))> 1:
-        warn_msg = "Due to multiple provided HTTP headers, swithing '--header' to '--headers'."
+        warn_msg = "Due to multiple provided HTTP headers, switching '--header' to '--headers'."
         settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
     if menu.options.method:
@@ -916,7 +916,7 @@ try:
     if menu.options.tor:
       settings.TIMESEC = settings.TIMESEC * 2
       warn_msg = "Increasing default value for option '--time-sec' to"
-      warn_msg += " " + str(settings.TIMESEC) + ", because switch '--tor' was provided."
+      warn_msg += " " + str(settings.TIMESEC) + ", because you provided switch '--tor'."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
     if menu.options.sitemap_url:
@@ -927,7 +927,7 @@ try:
 
     if menu.options.crawl_exclude:
       if not settings.CRAWLING:
-        err_msg = "The '--crawl-exclude' option requires usage of '--crawl' option."
+        err_msg = "The '--crawl-exclude' option requires usage of the '--crawl' option."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
         raise SystemExit()
       try:
@@ -1011,12 +1011,12 @@ try:
           settings.print_data_to_stdout(settings.print_info_msg(info_msg))
           
         if not os.path.exists(bulkfile):
-          err_msg = "It seems the '" + os.path.split(bulkfile)[1] + "' file, does not exist."
+          err_msg = "It seems the '" + os.path.split(bulkfile)[1] + "' file does not exist."
           settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
           raise SystemExit()
 
         elif os.stat(bulkfile).st_size == 0:
-          err_msg = "It seems the '" + os.path.split(bulkfile)[1] + "' file, is empty."
+          err_msg = "It seems the '" + os.path.split(bulkfile)[1] + "' file is empty."
           settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
           raise SystemExit()
 
@@ -1240,7 +1240,7 @@ except KeyboardInterrupt:
   try:
     checks.user_aborted(filename, url)
   except NameError:
-    abort_msg = "User quit (Ctrl-C was pressed)."
+    abort_msg = "User quit (Ctrl-C pressed)."
     settings.print_data_to_stdout(settings.print_abort_msg(abort_msg))
   raise checks.exit()
 

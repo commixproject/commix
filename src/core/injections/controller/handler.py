@@ -643,7 +643,7 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
                         raise
 
                   elif str(e.getcode()) == settings.UNAUTHORIZED_ERROR:
-                    err_msg = "Authorization is required to access this page: '" + settings.DEFINED_WEBROOT + "'."
+                    err_msg = "You need authorization to access this page: '" + settings.DEFINED_WEBROOT + "'."
                     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
                     checks.quit(filename, url, _ = False)
 

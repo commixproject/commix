@@ -39,8 +39,8 @@ def tamper(payload):
 
   else:
     if not _warned_once:
-      warn_msg = "JSON data do not support the use of '" + __tamper__ + "', "
-      warn_msg += "which is ineffective for JSON payloads.  Skipping tamper script."
+      warn_msg = "The tamper script '" + __tamper__ + "' is ineffective for JSON payloads. "
+      warn_msg += "Skipping tamper script."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       _warned_once = True
 

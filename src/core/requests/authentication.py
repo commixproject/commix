@@ -40,7 +40,7 @@ The authentication process
 """
 def authentication_process(http_request_method):
   if not menu.options.auth_data:
-    err_msg = "The '--auth-url' option requires the '--auth-data' option to be provided too."
+    err_msg = "The '--auth-url' option requires you to also provide the '--auth-data' option."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
@@ -181,7 +181,7 @@ def http_auth_cracker(url, realm, http_request_method):
 
     err_msg = "Use the '--auth-cred' option to provide a valid pair of "
     err_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\") "
-    err_msg += "or place an other dictionary into '"
+    err_msg += "or place another dictionary in the '"
     err_msg += os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'txt')) + "/' directory."
     settings.print_data_to_stdout(settings.END_LINE.LF + settings.print_critical_msg(err_msg))
     return False

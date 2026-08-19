@@ -897,7 +897,7 @@ Insert 'marker' right after the N-th occurrence of 'value' in 'text'.
 def place_marker(text, value, occurrence, marker):
   index = find_occurrence(text, value, occurrence)
   if index == -1:
-    err_msg = "It seems the requested value could not be found in the provided data."
+    err_msg = "It seems the provided data does not contain the requested value."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
   end = index + len(value)
@@ -959,7 +959,7 @@ def insert_empty_multipart(text, parameter):
   pattern = r'name="' + re.escape(parameter.name) + r'"[^\r\n]*(\r\n\r\n|\n\n)'
   match = re.search(pattern, text)
   if not match:
-    err_msg = "It seems the empty field '" + parameter.name + "' could not be found in the provided data."
+    err_msg = "It seems the provided data does not contain the empty field '" + parameter.name + "'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
   return text[:match.end()] + settings.INJECT_TAG + text[match.end():]

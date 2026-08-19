@@ -296,7 +296,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "76"
+REVISION = "77"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1306,7 +1306,7 @@ SKIP_CALC = False
 USE_BACKTICKS = False
 
 METASPLOIT_ERROR_MSG =  "You need to have Metasploit installed. "
-METASPLOIT_ERROR_MSG += "Please ensure Metasploit is installed in the right path."
+METASPLOIT_ERROR_MSG += "Please ensure it is installed in the right path."
 
 # Target URL reload
 URL_RELOAD = False

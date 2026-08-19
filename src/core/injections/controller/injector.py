@@ -148,7 +148,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
     settings.LAGGING_CHECKED = True
     if len(settings.RESPONSE_TIMES) > 1 and statistics.pstdev(settings.RESPONSE_TIMES) > settings.WARN_TIME_STDEV:
       length_suspect = lagging_detected = settings.JITTER_SEEN = True
-      warn_msg = "Considerable lagging has been detected in the connection response(s). "
+      warn_msg = "Detected considerable lagging in the connection response(s). "
       warn_msg += "Consider using a higher '--time-sec' value (e.g. '5' or more)."
       settings.print_data_to_stdout(settings.print_critical_msg(warn_msg))
 
@@ -620,9 +620,9 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
     boundary_char = chr(max(settings.CHAR_POOL_MULTI))
     if output.count(boundary_char) >= 2 or conn_error_positions or lagging_detected:
       if threaded:
-        warn_msg = "The extracted data may be corrupted by concurrent (threaded) requests overloading the target. Consider re-running with '--threads=1' to confirm it."
+        warn_msg = "Concurrent (threaded) requests overloading the target may have corrupted the extracted data. Consider re-running with '--threads=1' to confirm it."
       else:
-        warn_msg = "The extracted data may be corrupted due to connection instability with the target. Consider re-running to confirm it."
+        warn_msg = "Connection instability with the target may have corrupted the extracted data. Consider re-running to confirm it."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
     check_end  = time.time()
@@ -686,7 +686,7 @@ def results_based_injection(separator, TAG, cmd, prefix, suffix, whitespace, htt
         response = check_injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, technique)
         tries = tries + 1
       else:
-        err_msg = "Something went wrong, the request has failed (" + str(tries) + ") times continuously."
+        err_msg = "Something went wrong. The request has failed (" + str(tries) + ") times in a row."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
         raise SystemExit()
 

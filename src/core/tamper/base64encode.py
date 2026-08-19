@@ -30,7 +30,7 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 
 def tamper(payload):
   if len(settings.WHITESPACES) != 0 and settings.WHITESPACES[0] == _urllib.parse.quote_plus(settings.SINGLE_WHITESPACE):
-    err_msg = "Tamper script '" +  __tamper__  + "' is unlikely to work combined with the tamper script 'space2plus'."
+    err_msg = "Tamper script '" + __tamper__ + "' is unlikely to work when combined with the tamper script 'space2plus'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
   else:

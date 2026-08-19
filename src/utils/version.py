@@ -31,7 +31,7 @@ def python_version():
   if PYTHON_VERSION.split(".")[0] != "3":
     warn_msg = "Deprecated Python version detected: "
     warn_msg += PYTHON_VERSION + ". "
-    warn_msg += "You are advised to re-run with Python 3."
+    warn_msg += "Re-run with Python 3."
     settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
 
 # eof

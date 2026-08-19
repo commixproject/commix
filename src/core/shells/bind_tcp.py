@@ -492,7 +492,7 @@ def bind_tcp_options(separator):
     )
 
     if bind_tcp_option.lower() == "bind_tcp":
-      warn_msg = "You are into '" + bind_tcp_option.lower() + "' mode."
+      warn_msg = "You are in '" + bind_tcp_option.lower() + "' mode."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       continue
 
@@ -544,7 +544,7 @@ def configure_bind_tcp(separator):
     option = _input()
 
     if option.lower() == "bind_tcp":
-      warn_msg = "You are into the '" + option.lower() + "' mode."
+      warn_msg = "You are in the '" + option.lower() + "' mode."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       continue
 
@@ -587,8 +587,8 @@ def configure_bind_tcp(separator):
 
       # LHOST is not supported in bind TCP mode.
       elif option[4:10].lower() == "lhost ":
-        err_msg = "The '" + option[4:9].upper() + "' option, is not "
-        err_msg += "usable for 'bind_tcp' mode. Use 'RHOST' option."
+        err_msg = "The '" + option[4:9].upper() + "' option is not "
+        err_msg += "usable for 'bind_tcp' mode. Use the 'RHOST' option."
         settings.print_data_to_stdout(settings.print_error_msg(err_msg))
         continue
 

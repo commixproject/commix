@@ -231,7 +231,7 @@ def import_injection_points(url, technique, injection_type, filename, separator,
 
   except sqlite3.OperationalError as err_msg:
     err_msg = str(err_msg)[:1].upper() + str(err_msg)[1:] + "."
-    err_msg += " You are advised to rerun with switch '--flush-session'."
+    err_msg += " Rerun with switch '--flush-session'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     checks.quit(filename, url, _=False)
 
