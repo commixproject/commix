@@ -152,12 +152,14 @@ Get response output
 def get_response(output):
   request = _urllib.request.Request(output)
   headers.do_check(request)
-  headers.check_http_traffic(request)
-  # Check if defined any HTTP Proxy (--proxy option).
-  if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
-    response = proxy.use_proxy(request)
-  else:
-    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+  # Reuse check_http_traffic()'s result instead of sending the request again.
+  response = headers.check_http_traffic(request)
+  if response is None:
+    # Check if defined any HTTP Proxy (--proxy option).
+    if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor:
+      response = proxy.use_proxy(request)
+    else:
+      response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
   return response
 
 """
@@ -440,8 +442,6 @@ Ctrl-C during detection - ask how to proceed instead of aborting outright.
 """
 def handle_detection_interrupt(filename, url):
   settings.clear_current_line()
-  warn_msg = "User aborted during the detection phase (Ctrl-C pressed)."
-  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
   if settings.MULTI_TARGETS:
     msg = "How do you want to proceed? [ne(X)t target/(S)kip current technique/(e)nd detection phase/(n)ext parameter/(v)erbosity/(q)uit] "
     default = "X"
@@ -450,12 +450,18 @@ def handle_detection_interrupt(filename, url):
     msg = "How do you want to proceed? [(S)kip current technique/(e)nd detection phase/(n)ext parameter/(v)erbosity/(q)uit] "
     default = "S"
     valid_choices = ("s", "e", "n", "v", "q")
-  while True:
-    # Ctrl-C is itself an explicit request for attention - always prompt, even under --batch.
-    choice = (common.read_input(msg, default=default, check_batch=False) or default).strip().lower()
-    if choice in valid_choices:
-      break
-    common.invalid_option(choice)
+  choice = "q"
+  try:
+    while True:
+      # Ctrl-C is itself an explicit request for attention - always prompt, even under --batch.
+      choice = (common.read_input(msg, default=default, check_batch=False) or default).strip().lower()
+      if choice in valid_choices:
+        break
+      common.invalid_option(choice)
+  except KeyboardInterrupt:
+    # A second Ctrl-C here means "quit now" - don't let it escape and re-trigger this same prompt one level up.
+    settings.print_data_to_stdout(settings.END_LINE.CR)
+    choice = "q"
   if choice == "v":
     # No further prompting - changing verbosity redoes the current technique from the top, not skip past it.
     change_verbosity()
@@ -480,15 +486,19 @@ def handle_early_interrupt(filename, url):
   if not settings.MULTI_TARGETS:
     user_aborted(filename, url)
   settings.clear_current_line()
-  warn_msg = "User aborted during the detection phase (Ctrl-C pressed)."
-  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
   msg = "How do you want to proceed? [ne(X)t target/(v)erbosity/(q)uit] "
-  while True:
-    # Ctrl-C is itself an explicit request for attention - always prompt, even under --batch.
-    choice = (common.read_input(msg, default="X", check_batch=False) or "X").strip().lower()
-    if choice in ("x", "v", "q"):
-      break
-    common.invalid_option(choice)
+  choice = "q"
+  try:
+    while True:
+      # Ctrl-C is itself an explicit request for attention - always prompt, even under --batch.
+      choice = (common.read_input(msg, default="X", check_batch=False) or "X").strip().lower()
+      if choice in ("x", "v", "q"):
+        break
+      common.invalid_option(choice)
+  except KeyboardInterrupt:
+    # A second Ctrl-C here means "quit now" - don't let it escape and re-trigger this same prompt one level up.
+    settings.print_data_to_stdout(settings.END_LINE.CR)
+    choice = "q"
   if choice == "v":
     # No further prompting - changing verbosity just continues (next target).
     change_verbosity()
@@ -502,16 +512,20 @@ is already confirmed, so the only real choice is whether to keep going.
 """
 def handle_exploitation_interrupt(filename, url):
   settings.clear_current_line()
-  warn_msg = "User aborted during the exploitation phase (Ctrl-C pressed)."
-  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
   # "v" here, not "c" - "C" is already taken by "Continue" in this menu.
   msg = "How do you want to proceed? [(C)ontinue/(v)erbosity/(q)uit] "
-  while True:
-    # Ctrl-C is itself an explicit request for attention - always prompt, even under --batch.
-    choice = (common.read_input(msg, default="C", check_batch=False) or "C").strip().lower()
-    if choice in ("c", "v", "q"):
-      break
-    common.invalid_option(choice)
+  choice = "q"
+  try:
+    while True:
+      # Ctrl-C is itself an explicit request for attention - always prompt, even under --batch.
+      choice = (common.read_input(msg, default="C", check_batch=False) or "C").strip().lower()
+      if choice in ("c", "v", "q"):
+        break
+      common.invalid_option(choice)
+  except KeyboardInterrupt:
+    # A second Ctrl-C here means "quit now" - don't let it escape and re-trigger this same prompt one level up.
+    settings.print_data_to_stdout(settings.END_LINE.CR)
+    choice = "q"
   if choice == "v":
     # No further prompting - changing verbosity just continues.
     change_verbosity()

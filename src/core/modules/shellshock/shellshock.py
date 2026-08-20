@@ -306,12 +306,15 @@ def shellshock_handler(url, http_request_method, filename):
         if check_header == settings.USER_AGENT:
           menu.options.agent = payload
         log_http_headers.do_check(request)
-        log_http_headers.check_http_traffic(request)
-        # Check if defined any HTTP Proxy.
-        if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
-          response = proxy.use_proxy(request)
-        else:
-          response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+        # check_http_traffic() already sends the request - reuse its result
+        # instead of sending the same request again.
+        response = log_http_headers.check_http_traffic(request)
+        if response is None:
+          # Check if defined any HTTP Proxy.
+          if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor:
+            response = proxy.use_proxy(request)
+          else:
+            response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
 
         if type(response) is bool:
           response_info = ""
@@ -536,12 +539,15 @@ def cmd_exec(url, cmd, cve, check_header, filename):
       if check_header == settings.USER_AGENT:
         menu.options.agent = payload
       log_http_headers.do_check(request)
-      log_http_headers.check_http_traffic(request)
-      # Check if defined any HTTP Proxy.
-      if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
-        response = proxy.use_proxy(request)
-      else:
-        response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+      # check_http_traffic() already sends the request - reuse its result
+      # instead of sending the same request again.
+      response = log_http_headers.check_http_traffic(request)
+      if response is None:
+        # Check if defined any HTTP Proxy.
+        if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor:
+          response = proxy.use_proxy(request)
+        else:
+          response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
       if check_header == settings.USER_AGENT:
         menu.options.agent = default_user_agent  
       shell = checks.process_page_content(response, action="decode").rstrip().replace(settings.END_LINE.LF,' ')

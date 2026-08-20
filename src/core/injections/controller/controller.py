@@ -16,6 +16,9 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import os
 import sys
+import time
+import random
+import string
 from src.utils import menu
 from src.utils import logs
 from src.utils import settings
@@ -321,10 +324,79 @@ def check_parameter_in_http_header(check_parameter):
   return inject_http_headers
 
 """
+Replace the parameter value with a disposable placeholder if the response stays the same but gets faster.
+"""
+def attempt_skip_testable_value(url, http_request_method, check_parameter):
+  if settings.LOAD_SESSION or not settings.TESTABLE_VALUE:
+    return url
+  if any((settings.COOKIE_INJECTION, settings.USER_AGENT_INJECTION, settings.REFERER_INJECTION,
+          settings.HOST_INJECTION, settings.CUSTOM_HEADER_INJECTION)):
+    return url
+
+  marker = settings.TESTABLE_VALUE + settings.INJECT_TAG
+  in_data = bool(menu.options.data) and marker in menu.options.data
+  in_url = marker in url
+  if not in_data and not in_url:
+    return url
+
+  param_label = ("POST" if in_data else "GET") + " parameter '" + check_parameter + "'"
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Testing if " + param_label + " requires its original value."
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+
+  def build(value):
+    if in_data:
+      data = menu.options.data.replace(marker, value)
+      request = _urllib.request.Request(url, data.encode(settings.DEFAULT_CODEC), method=http_request_method)
+    else:
+      request = _urllib.request.Request(url.replace(marker, value), method=http_request_method)
+    headers.do_check(request)
+    return request
+
+  placeholder = ''.join(random.choice(string.ascii_uppercase) for _ in range(3))
+  try:
+    start = time.time()
+    real_response = _urllib.request.urlopen(build(settings.TESTABLE_VALUE), timeout=settings.TIMEOUT)
+    real_body = real_response.read()
+    real_status = real_response.getcode()
+    real_time = time.time() - start
+
+    start = time.time()
+    placeholder_response = _urllib.request.urlopen(build(placeholder), timeout=settings.TIMEOUT)
+    placeholder_body = placeholder_response.read()
+    placeholder_status = placeholder_response.getcode()
+    placeholder_time = time.time() - start
+  except Exception:
+    return url
+
+  same_status = real_status == placeholder_status
+  similar_size = abs(len(real_body) - len(placeholder_body)) <= max(50, len(real_body) * 0.2)
+  meaningfully_faster = placeholder_time < real_time * 0.7 and (real_time - placeholder_time) >= 0.5
+
+  if same_status and similar_size and meaningfully_faster:
+    if in_data:
+      menu.options.data = menu.options.data.replace(marker, placeholder + settings.INJECT_TAG)
+    else:
+      url = url.replace(marker, placeholder + settings.INJECT_TAG)
+    settings.TESTABLE_VALUE = placeholder
+    settings.TESTABLE_VALUE_OPTIMIZED = True
+    # Don't reset settings.RESPONSE_TIMES - MIN_SAFE_TIMESEC already floors timesec, and resetting forces a slow, silent re-warm-up.
+    if settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "The real parameter value isn't required. Skipping it for faster requests."
+      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+  elif settings.VERBOSITY_LEVEL != 0:
+    debug_msg = param_label + " appears to require its original value."
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+
+  return url
+
+"""
 Proceed to the injection process for the appropriate parameter.
 """
 def injection_proccess(url, check_parameter, http_request_method, filename, timesec):
   settings.NOT_TESTABLE_PARAMETERS = False
+
+  url = attempt_skip_testable_value(url, http_request_method, check_parameter)
 
   os_targets = ([settings.TARGET_OS] if settings.TARGET_OS else
                 list(vars(settings.OS).values())[:settings.OS_CHECKS_NUM] if settings.CHECK_BOTH_OS else
@@ -358,16 +430,28 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
       the_type = " parameter"
       inject_parameter = " '" + check_parameter + "'"
 
+    # Nothing left to probe when all required time-related techniques were resumed.
+    time_techniques_resumed = False
+    if not menu.options.tech or "t" in menu.options.tech or "f" in menu.options.tech:
+      needed_time_techniques = set()
+      if not menu.options.tech or "t" in menu.options.tech:
+        needed_time_techniques.add(settings.INJECTION_TECHNIQUE.TIME_BASED)
+      if not menu.options.tech or "f" in menu.options.tech:
+        needed_time_techniques.add(settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED)
+      time_techniques_resumed = settings.LOAD_SESSION and needed_time_techniques.issubset(settings.STORED_TECHNIQUES.keys())
+
     # Defer response-time estimation until a time-related technique is about to run.
     url_time_response = 0
     _time_warmup_done = False
     def _ensure_time_warmup():
       nonlocal timesec, url_time_response, _time_warmup_done
-      if _time_warmup_done or settings.SKIP_COMMAND_INJECTIONS or settings.LOAD_SESSION:
+      if _time_warmup_done or settings.SKIP_COMMAND_INJECTIONS:
         return
       _time_warmup_done = True
-      timesec, url_time_response = requests.estimate_response_time(url, timesec, http_request_method)
-      if not menu.options.tech or "t" in menu.options.tech or "f" in menu.options.tech:
+      if time_techniques_resumed:
+        url_time_response = 0
+      else:
+        timesec, url_time_response = requests.estimate_response_time(url, timesec, http_request_method)
         checks.warm_up_response_baseline(url, http_request_method)
         checks.check_lagging()
 

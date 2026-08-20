@@ -53,9 +53,11 @@ def authentication_process(http_request_method):
     request = _urllib.request.Request(auth_url, auth_data.encode(settings.DEFAULT_CODEC), method=http_request_method)
     # Check if defined extra headers.
     headers.do_check(request)
-    headers.check_http_traffic(request)
-    # Get the response of the request.
-    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+    # check_http_traffic() already sends the request and returns the response -
+    # reuse it instead of sending the same request a second time.
+    response = headers.check_http_traffic(request)
+    if response is None:
+      response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     # HTTPCookieProcessor only fills the jar after the response is received.
     cookies = ""
     for cookie in cj:
@@ -143,11 +145,15 @@ def http_auth_cracker(url, realm, http_request_method):
           _urllib.request.install_opener(opener)
           request = _urllib.request.Request(url, method=http_request_method)
           headers.do_check(request)
-          headers.check_http_traffic(request)
-          # Check if defined any HTTP Proxy (--proxy option).
-          if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
-            proxy.use_proxy(request)
-          response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+          # check_http_traffic() already sends the request - reuse its result
+          # instead of sending the same request again for every credential tried.
+          response = headers.check_http_traffic(request)
+          if response is None:
+            # Check if defined any HTTP Proxy (--proxy option).
+            if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor:
+              response = proxy.use_proxy(request)
+            else:
+              response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
           found = True
         except KeyboardInterrupt :
           raise

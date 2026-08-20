@@ -24,12 +24,9 @@ except ImportError:
 from src.utils import menu
 from src.utils import settings
 from src.utils import common
-from src.core.requests import requests
-from socket import error as SocketError
 from src.core.injections.controller import checks
 from src.thirdparty.six.moves import input as _input
 from src.thirdparty.six.moves import urllib as _urllib
-from src.thirdparty.six.moves import http_client as _http_client
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 class Request(_urllib.request.Request):
@@ -64,14 +61,7 @@ def do_check(request, url, redirect_url, http_request_method):
   ---
   [1] https://gist.github.com/FiloSottile/2077115
   """
-  try:
-    opener = _urllib.request.build_opener(RedirectHandler())
-    _urllib.request.install_opener(opener)
-    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
-  except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.IncompleteRead, _http_client.InvalidURL) as err_msg:
-    if settings.CRAWLING:
-      requests.crawler_request(redirect_url, http_request_method)
-
+  # settings.REDIRECT_CODE is already set by the caller's own request - no need to resend it here.
   try:
     if (not settings.REDIRECT_CODE) or (settings.CRAWLING and redirect_url in settings.HREF_SKIPPED):
       return redirect_url

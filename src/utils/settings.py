@@ -296,7 +296,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "79"
+REVISION = "80"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -572,6 +572,9 @@ TESTABLE_PARAMETER = ""
 
 TESTABLE_VALUE = ""
 
+# Whether TESTABLE_VALUE has already been swapped for a disposable placeholder this scan.
+TESTABLE_VALUE_OPTIMIZED = False
+
 # The HTTP header name.
 HTTP_HEADER = ""
 
@@ -646,7 +649,7 @@ DELAY = 0
 TIMESEC = 0
 
 # Minimum safe delay.
-MIN_SAFE_TIMESEC = 1
+MIN_SAFE_TIMESEC = 5
 
 # Higher minimum delay applied once this run has confirmed the target is unstable.
 MIN_SAFE_TIMESEC_UNSTABLE = 10

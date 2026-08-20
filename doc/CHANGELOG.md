@@ -1,8 +1,8 @@
 ## Version 4.2 (TBA)
-* Added: Faster detection when a parameter's real value isn't required for testing.
+* Revised: Optimized parameter detection by skipping unnecessary value retrieval during testing.
 * Revised: Improved data extraction performance for time-related techniques.
 * Fixed: Resumed stored techniques are trusted immediately, without a redundant live re-check.
-Revised: Improved switch `--purge` only to clear the current target's session.
+* Revised: Improved switch `--purge` only to clear the current target's session.
 * Revised: Improved WAF/IPS detection coverage, now cached per target across resumed scans.
 * Added: Interactive Ctrl-C handling during detection and exploitation, with cleaner exit handling.
 * Fixed: Multiple bug-fixes improving detection accuracy and reliability for results-based techniques.

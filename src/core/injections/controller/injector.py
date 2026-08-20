@@ -146,14 +146,13 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
   # Guard timesec so concurrent payloads use the same value for sending and validation.
   timesec_lock = threading.Lock()
 
-  # Shrink the delay on a clearly-good read, but never below the same safety floor the initial calibration used.
+  # Shrink the delay on a clearly-good read - no static floor, the stdev term self-protects jittery targets.
   delay_candidates = [0] * settings.TIME_DELAY_CANDIDATES
-  min_safe_timesec = checks.time_related_timesec()
   def _adjust_time_delay(exec_time, lower_limit):
     nonlocal timesec
     if settings.ADJUST_TIME_DELAY_DISABLED or settings.ADJUST_TIME_DELAY_CHOICE == False:
       return
-    candidate = max(settings.TIME_DELAY_STEP + int(round(lower_limit)), min_safe_timesec)
+    candidate = settings.TIME_DELAY_STEP + int(round(lower_limit))
     with timesec_lock:
       delay_candidates.insert(0, candidate)
       del delay_candidates[settings.TIME_DELAY_CANDIDATES:]

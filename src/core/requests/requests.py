@@ -118,11 +118,14 @@ def crawler_request(url, http_request_method):
       data = None
     request = _urllib.request.Request(url, data, method=http_request_method)
     headers.do_check(request)
-    headers.check_http_traffic(request)
-    if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
-      response = proxy.use_proxy(request)
-    else:
-      response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+    # check_http_traffic() already sends the request - reusing its result instead
+    # of discarding it and sending a second, identical one.
+    response = headers.check_http_traffic(request)
+    if response is None:
+      if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor:
+        response = proxy.use_proxy(request)
+      else:
+        response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     if type(response) is not bool and settings.FOLLOW_REDIRECT and response is not None:
       if response.geturl() != url:
         href = redirection.do_check(request, url, response.geturl(), http_request_method)
@@ -596,11 +599,14 @@ def cookie_injection(url, vuln_parameter, payload, http_request_method):
       cookie = checks.process_injectable_value(encoded_payload, menu.options.cookie)
       request.add_header(settings.COOKIE, cookie)
     try:
-      headers.check_http_traffic(request)
-      if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
-        response = proxy.use_proxy(request)
-      else:
-        response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+      # check_http_traffic() already sends the request - reuse its result
+      # instead of sending the same request again.
+      response = headers.check_http_traffic(request)
+      if response is None:
+        if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor:
+          response = proxy.use_proxy(request)
+        else:
+          response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
       return response
     except ValueError:
       pass
@@ -639,11 +645,14 @@ def user_agent_injection(url, vuln_parameter, payload, http_request_method):
     payload = checks.normalize_newlines(payload)
     request.add_header(settings.USER_AGENT, payload)
     try:
-      headers.check_http_traffic(request)
-      if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
-        response = proxy.use_proxy(request)
-      else:
-        response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+      # check_http_traffic() already sends the request - reuse its result
+      # instead of sending the same request again.
+      response = headers.check_http_traffic(request)
+      if response is None:
+        if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor:
+          response = proxy.use_proxy(request)
+        else:
+          response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
       return response
     except ValueError:
       pass
@@ -682,11 +691,14 @@ def referer_injection(url, vuln_parameter, payload, http_request_method):
     payload = checks.normalize_newlines(payload)
     request.add_header(settings.REFERER, payload)
     try:
-      headers.check_http_traffic(request)
-      if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
-        response = proxy.use_proxy(request)
-      else:
-        response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+      # check_http_traffic() already sends the request - reuse its result
+      # instead of sending the same request again.
+      response = headers.check_http_traffic(request)
+      if response is None:
+        if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor:
+          response = proxy.use_proxy(request)
+        else:
+          response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
       return response
     except ValueError:
       pass
@@ -725,11 +737,14 @@ def host_injection(url, vuln_parameter, payload, http_request_method):
     payload = checks.normalize_newlines(payload)
     request.add_header(settings.HOST, payload)
     try:
-      headers.check_http_traffic(request)
-      if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
-        response = proxy.use_proxy(request)
-      else:
-        response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+      # check_http_traffic() already sends the request - reuse its result
+      # instead of sending the same request again.
+      response = headers.check_http_traffic(request)
+      if response is None:
+        if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor:
+          response = proxy.use_proxy(request)
+        else:
+          response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
       return response
     except ValueError:
       pass
@@ -768,11 +783,14 @@ def custom_header_injection(url, vuln_parameter, payload, http_request_method):
     payload = checks.normalize_newlines(payload)
     request.add_header(settings.CUSTOM_HEADER_NAME, payload)
     try:
-      headers.check_http_traffic(request)
-      if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor: 
-        response = proxy.use_proxy(request)
-      else:
-        response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+      # check_http_traffic() already sends the request - reuse its result
+      # instead of sending the same request again.
+      response = headers.check_http_traffic(request)
+      if response is None:
+        if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor:
+          response = proxy.use_proxy(request)
+        else:
+          response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
       return response
     except ValueError:
       pass

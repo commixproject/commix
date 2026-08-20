@@ -199,19 +199,20 @@ def import_injection_points(url, technique, injection_type, filename, separator,
                    "(id INTEGER PRIMARY KEY, url VARCHAR, technique VARCHAR, injection_type VARCHAR, separator VARCHAR, "
                    "shell VARCHAR, vuln_parameter VARCHAR, prefix VARCHAR, suffix VARCHAR, "
                    "TAG VARCHAR, alter_shell VARCHAR, payload VARCHAR, http_header VARCHAR, http_request_method VARCHAR, url_time_response INTEGER, "
-                   "timesec INTEGER, exec_time INTEGER, output_length INTEGER, is_vulnerable VARCHAR, data VARCHAR, cookie VARCHAR, tamper VARCHAR);")
+                   "timesec INTEGER, exec_time INTEGER, output_length INTEGER, is_vulnerable VARCHAR, data VARCHAR, cookie VARCHAR, tamper VARCHAR, "
+                   "target_os VARCHAR);")
 
       # Check if an exact matching record already exists to avoid duplicates
       query_check = ("SELECT 1 FROM \"" + table + "\" WHERE url = ? AND technique = ? AND injection_type = ? AND separator = ? AND "
                      "shell = ? AND vuln_parameter = ? AND prefix = ? AND suffix = ? AND TAG = ? AND alter_shell = ? AND payload = ? AND "
                      "http_header = ? AND http_request_method = ? AND url_time_response = ? AND timesec = ? AND exec_time = ? AND "
-                     "output_length = ? AND is_vulnerable = ? AND data = ? AND cookie = ? AND tamper = ? LIMIT 1;")
+                     "output_length = ? AND is_vulnerable = ? AND data = ? AND cookie = ? AND tamper = ? AND target_os = ? LIMIT 1;")
 
       params = (str(url), str(technique), str(injection_type), str(separator), str(shell), str(vuln_parameter or ""),
                 str(prefix), str(suffix), str(TAG), str(alter_shell), str(payload), str(settings.HTTP_HEADER),
                 str(http_request_method), int(url_time_response), int(timesec), int(exec_time),
                 int(output_length), str(is_vulnerable), str(menu.options.data), str(menu.options.cookie),
-                str(menu.options.tamper or ""))
+                str(menu.options.tamper or ""), str(settings.TARGET_OS))
 
       # URL-encode base64 padding within the url field only, so it isn't
       # mistaken for part of the URL structure itself.
@@ -224,8 +225,8 @@ def import_injection_points(url, technique, injection_type, filename, separator,
       if cursor.fetchone() is None:
         conn.execute("INSERT INTO \"" + table + "\" (url, technique, injection_type, separator, "
                      "shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_header, http_request_method, "
-                     "url_time_response, timesec, exec_time, output_length, is_vulnerable, data, cookie, tamper) "
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", params)
+                     "url_time_response, timesec, exec_time, output_length, is_vulnerable, data, cookie, tamper, target_os) "
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", params)
         conn.commit()
 
     # Mark injection checker as True to indicate session contains injection data
@@ -446,6 +447,8 @@ def apply_stored_technique(row):
    timesec, exec_time, output_length, is_vulnerable, data, cookie) = row[:20]
   # Older sessions (pre-tamper-column) won't have this field - default to "".
   tamper = row[20] if len(row) > 20 else ""
+  # Older sessions (pre-target_os-column) won't have this field either.
+  target_os = row[21] if len(row) > 21 else None
 
   if http_header:
     settings.HTTP_HEADER = http_header
@@ -463,6 +466,13 @@ def apply_stored_technique(row):
                   "'). Using the stored value to replay this technique consistently.")
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     menu.options.tamper = tamper
+  if target_os and target_os != "None":
+    if menu.options.os and menu.options.os.lower() != target_os:
+      warn_msg = ("The stored session was found against target OS '" + target_os.title() + "', "
+                  "which differs from the '--os' value provided now ('" + menu.options.os.title() +
+                  "'). Using the stored value to replay this technique consistently.")
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    settings.TARGET_OS = target_os
 
   return (url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix,
           TAG, alter_shell, payload, http_request_method, url_time_response, timesec,

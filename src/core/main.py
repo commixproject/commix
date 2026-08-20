@@ -285,8 +285,7 @@ def url_response(url, http_request_method):
 
   # Piggyback the WAF probe on the same request to avoid an extra round-trip.
   conn_request, conn_url = request, url
-  # Skip the active WAF probe on a likely resume; '--ignore-session' forces it.
-  do_waf = not menu.options.skip_waf and not settings.LIKELY_RESUME
+  do_waf = not menu.options.skip_waf
   if do_waf:
     settings.COOKIE_INJECTION = None
     conn_request, conn_url = checks.check_waf(url, http_request_method)
