@@ -18,6 +18,7 @@ import sys
 import time
 import socket
 import difflib
+import statistics
 from socket import error as SocketError
 from src.utils import menu
 from os.path import splitext
@@ -44,10 +45,21 @@ from src.thirdparty.colorama import Fore, Back, Style, init
 """
 Check if the content of the given URL is stable over time.
 """
-def is_url_content_stable(url, response=None, fetch_time=None):
+def is_url_content_stable(url, response=None, fetch_time=None, http_request_method=None):
   status = "stable"
-  debug_msg = "Checking if the target URL content is stable."
-  settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+  info_msg = "Checking if the target URL content is stable."
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
+  def _build_request():
+    # Must mirror the real request (method + POST body) - comparing against a bare GET makes a stable page look "dynamic".
+    method = http_request_method or settings.HTTPMETHOD.GET
+    if settings.USER_DEFINED_POST_DATA:
+      request = _urllib.request.Request(url, settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC), method=method)
+    else:
+      request = _urllib.request.Request(url, method=method)
+    headers.do_check(request)
+    return request
+
   try:
     if response is not None:
       # Reuse the connection-test response and make .read() reusable for later checks.
@@ -55,7 +67,7 @@ def is_url_content_stable(url, response=None, fetch_time=None):
       first_response_content = raw_body.strip()
       response.read = (lambda _b: lambda *a, **kw: _b)(raw_body)
     else:
-      first_response = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
+      first_response = _urllib.request.urlopen(_build_request(), timeout=settings.TIMEOUT)
       try:
         first_response_content = first_response.read().strip()
       finally:
@@ -69,7 +81,8 @@ def is_url_content_stable(url, response=None, fetch_time=None):
     if remaining:
       time.sleep(remaining)
 
-    second_response = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
+    # Bare urlopen(url) would drop the user's cookie/headers, making an authenticated target look different.
+    second_response = _urllib.request.urlopen(_build_request(), timeout=settings.TIMEOUT)
     try:
       second_response_content = second_response.read().strip()
     finally:
@@ -77,6 +90,10 @@ def is_url_content_stable(url, response=None, fetch_time=None):
 
     if first_response_content != second_response_content:
       ratio = difflib.SequenceMatcher(None, first_response_content, second_response_content).ratio()
+      if settings.VERBOSITY_LEVEL != 0:
+        debug_msg = "Content similarity ratio between the two samples: " + str(round(ratio, 4))
+        debug_msg += " (threshold: " + str(settings.STABILITY_SIMILARITY_THRESHOLD) + ")."
+        settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
       if ratio < settings.STABILITY_SIMILARITY_THRESHOLD:
         status = "dynamic"
 
@@ -86,7 +103,7 @@ def is_url_content_stable(url, response=None, fetch_time=None):
     return
 
   msg = "Target URL content is " + status + "."
-  settings.print_data_to_stdout(settings.print_bold_debug_msg(msg))
+  settings.print_data_to_stdout(settings.print_info_msg(msg))
 
 
 """
@@ -123,17 +140,29 @@ def crawler_request(url, http_request_method):
         request_failed(err_msg)
 
 """
-Estimating the response time (in seconds).
+A single, best-effort clean response-time sample; returns None on failure instead of raising.
 """
-def estimate_response_time(url, timesec, http_request_method):
+def quick_response_time_sample(url, http_request_method):
+  try:
+    if menu.options.data:
+      request = _urllib.request.Request(url, menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.TESTABLE_VALUE).encode(settings.DEFAULT_CODEC), method=http_request_method)
+    else:
+      request = _urllib.request.Request(url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.TESTABLE_VALUE), method=http_request_method)
+    headers.do_check(request)
+    start = time.time()
+    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+    response.read(1)
+    response.close()
+    return time.time() - start
+  except Exception:
+    return None
+
+"""
+Sends one clean request and times it, with full auth-error handling - the authoritative first sample for estimate_response_time() below.
+"""
+def _measure_response_time_with_auth_handling(url, http_request_method):
   stored_auth_creds = False
   _ = False
-
-  # Reuse url_response()'s clean response to avoid a duplicate round-trip.
-  if settings.INIT_CONNECTION_TIME is not None:
-    diff = settings.INIT_CONNECTION_TIME
-    settings.INIT_CONNECTION_TIME = None
-    return _finish_response_time_estimate(diff, timesec)
 
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Estimating the target URL response time. "
@@ -224,7 +253,7 @@ def estimate_response_time(url, timesec, http_request_method):
                 warn_msg += "HTTP authentication credentials."
                 settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
                 while True:
-                  message = "Do you want to perform a dictionary-based attack? [Y/n] > "
+                  message = "Do you want to perform a dictionary-based attack? [Y/n] "
                   do_update = common.read_input(message, default="Y", check_batch=True)
                   if do_update in settings.CHOICE_YES:
                     auth_creds = authentication.http_auth_cracker(url, realm, http_request_method)
@@ -252,7 +281,7 @@ def estimate_response_time(url, timesec, http_request_method):
                   warn_msg = "Failed to identify the realm attribute."
                   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
                 while True:
-                  message = "Do you want to perform a dictionary-based attack? [Y/n] > "
+                  message = "Do you want to perform a dictionary-based attack? [Y/n] "
                   do_update = common.read_input(message, default="Y", check_batch=True)
                   if do_update in settings.CHOICE_YES:
                     auth_creds = authentication.http_auth_cracker(url, realm, http_request_method)
@@ -286,6 +315,27 @@ def estimate_response_time(url, timesec, http_request_method):
 
   end = time.time()
   diff = end - start
+  return diff
+
+"""
+Estimating the response time (in seconds) - median of several samples, since one alone is too noisy to trust for the slow-target decision.
+"""
+def estimate_response_time(url, timesec, http_request_method):
+  samples = []
+
+  # Reuse url_response()'s own connection-test timing instead of repeating the round-trip.
+  if settings.INIT_CONNECTION_TIME is not None:
+    samples.append(settings.INIT_CONNECTION_TIME)
+    settings.INIT_CONNECTION_TIME = None
+  else:
+    samples.append(_measure_response_time_with_auth_handling(url, http_request_method))
+
+  for _ in range(settings.RESPONSE_TIME_SAMPLES - len(samples)):
+    extra = quick_response_time_sample(url, http_request_method)
+    if extra is not None:
+      samples.append(extra)
+
+  diff = statistics.median(samples)
   return _finish_response_time_estimate(diff, timesec)
 
 """
@@ -307,10 +357,8 @@ def _finish_response_time_estimate(diff, timesec):
     warn_msg += " data extraction."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
-  if int(timesec) == int(url_time_response):
-    timesec = int(timesec) + int(url_time_response)
-  else:
-    timesec = int(timesec)
+  # No preemptive bump - the real delay decision uses the adaptive baseline threshold, not this estimate.
+  timesec = int(timesec)
 
   settings.URL_TIME_RESPONSE = url_time_response
   return timesec, url_time_response

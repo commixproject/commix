@@ -78,7 +78,7 @@ HTTP auth wordlists for usernames and passwords
 def define_wordlists():
 
   while True:
-    message = "Do you want to use default wordlists for dictionary-based attack? [Y/n] > "
+    message = "Do you want to use default wordlists for dictionary-based attack? [Y/n] "
     do_update = common.read_input(message, default="Y", check_batch=True)
     
     if do_update in settings.CHOICE_YES:

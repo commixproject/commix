@@ -111,7 +111,7 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     from src.core.injections.semiblind.techniques.tempfile_based import tfb_injector as injector
   _ = False
   cmd, file_to_read = checks.file_content_to_read()
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+  if not checks.usable_stored_cmd(session_handler.export_stored_cmd(url, cmd, vuln_parameter)) or menu.options.ignore_session:
     if settings.TIME_RELATED_ATTACK:
       if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
         check_exec_time, shell = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, alter_shell, filename, url_time_response, technique)
@@ -154,7 +154,7 @@ Check stored session
 def stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, alter_shell, filename, url_time_response, technique):
   if settings.FILE_ACCESS_DONE == True :
     while True:
-      message = "Do you want to ignore stored session and access files again? [y/N] > "
+      message = "Do you want to ignore stored session and access files again? [y/N] "
       file_access_again = common.read_input(message, default="N", check_batch=True)
       if file_access_again in settings.CHOICE_YES:
         if not menu.options.ignore_session:

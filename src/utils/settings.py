@@ -296,7 +296,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "78"
+REVISION = "79"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -539,7 +539,12 @@ MAX_CONNECTION_TOTAL_SIZE = 100 * 1024 * 1024
 # Slow target response.
 SLOW_TARGET_RESPONSE = 3
 
-# Measure the target's baseline latency once to floor the initial --time-sec value.
+# Number of samples estimate_response_time() takes the median of, before gating the "slow target" decision.
+RESPONSE_TIME_SAMPLES = 3
+
+# Pre-injection baseline (estimate_response_time()) - the target's own
+# round-trip time before any delay logic runs. Floors the initial --time-sec
+# calibration so a target this slow doesn't get a delay smaller than its own latency.
 URL_TIME_RESPONSE = 0
 
 # Cache url_response()'s connection-test timing for reuse by estimate_response_time().
@@ -640,7 +645,7 @@ DELAY = 0
 # Seconds to delay the OS response.
 TIMESEC = 0
 
-# Minimum safe delay for time-related techniques.
+# Minimum safe delay.
 MIN_SAFE_TIMESEC = 1
 
 # Higher minimum delay applied once this run has confirmed the target is unstable.
@@ -814,6 +819,10 @@ class NextParameterException(Exception):
   pass
 
 class NextTargetException(Exception):
+  pass
+
+# Raised after a verbosity change mid-detection, to redo the current technique from the top.
+class RetryTechniqueException(Exception):
   pass
 
 # Default Scheme
@@ -1141,6 +1150,8 @@ SRVPORT = 8080
 # Session Handler
 SESSION_FILE = ""
 LOAD_SESSION = None
+# Whether a stored technique likely exists for the current target (host + method).
+LIKELY_RESUME = False
 # Cache stored techniques per parameter to avoid repeated session database queries.
 STORED_TECHNIQUES = {}
 
@@ -1352,10 +1363,12 @@ WARN_TIME_STDEV = 0.5
 
 # One escalate/shrink step, in seconds - separate from the floor above.
 TIME_DELAY_STEP = 1
-MIN_TIME_RESPONSES = 50
+# Target size of the upfront baseline warm-up - the adaptive threshold itself doesn't wait for this many samples to activate.
+MIN_TIME_RESPONSES = 30
 MAX_TIME_RESPONSES = 200
 RESPONSE_TIMES = []
 LAGGING_CHECKED = False
+LAGGING_DETECTED = False
 TIME_DELAY_CANDIDATES = 3
 
 # Best known timesec for this target, reused across commands to avoid recalibration.
@@ -1368,6 +1381,9 @@ MAX_LENGTH_REVALIDATIONS = 5
 # Use the observed charset for bisection when it is small enough; otherwise use the full range.
 NARROWING_MIN_OBSERVED = 3
 NARROWING_MAX_SET_SIZE = 64
+
+# Probe the most-frequent characters first to speed up extraction for skewed distributions.
+FREQUENCY_PROBE_TOP_K = 3
 
 # Prevent auto-shrink from undoing a delay increase after validation.
 ADJUST_TIME_DELAY_DISABLED = False
@@ -1386,7 +1402,7 @@ THREADED_TIME_RETRIEVAL_CHOICE = None
 SKIP_NEXT_TECHNIQUE_TITLE = None
 
 # Retries for the false-positive/unexploitable-point re-verification during detection.
-FALSE_POSITIVE_RETRIES = 5
+FALSE_POSITIVE_RETRIES = 3
 
 # Prefix marking an interrupted command result for resumption instead of replay.
 PARTIAL_VALUE_MARKER = "\x02COMMIX_PARTIAL\x02"

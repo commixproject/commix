@@ -285,7 +285,8 @@ def url_response(url, http_request_method):
 
   # Piggyback the WAF probe on the same request to avoid an extra round-trip.
   conn_request, conn_url = request, url
-  do_waf = not menu.options.skip_waf
+  # Skip the active WAF probe on a likely resume; '--ignore-session' forces it.
+  do_waf = not menu.options.skip_waf and not settings.LIKELY_RESUME
   if do_waf:
     settings.COOKIE_INJECTION = None
     conn_request, conn_url = checks.check_waf(url, http_request_method)
@@ -591,10 +592,11 @@ def main(filename, url, http_request_method):
                                                    )
       try:
         try:
-          info_msg = "Performing heuristic (passive) tests on the target URL."
-          settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-          if settings.VERBOSITY_LEVEL != 0:
-            requests.is_url_content_stable(settings.INIT_CONNECTION_URL or url, response, settings.INIT_CONNECTION_FETCH_TIME)
+          # Skip stability probing on resume unless content-reflection techniques ('c'/'e') are in scope.
+          if not settings.LIKELY_RESUME and (not menu.options.tech or "c" in menu.options.tech or "e" in menu.options.tech):
+            requests.is_url_content_stable(settings.INIT_CONNECTION_URL or url, response, settings.INIT_CONNECTION_FETCH_TIME, http_request_method)
+            info_msg = "Performing heuristic (passive) tests on the target URL."
+            settings.print_data_to_stdout(settings.print_info_msg(info_msg))
           # Webpage encoding detection.
           requests.encoding_detection(response)
           # Procedure for target server identification.
@@ -856,7 +858,7 @@ try:
     if menu.options.wizard:
       info_msg = "Starting wizard interface."
       settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-      message = "Please enter full target URL (-u) > "
+      message = "Please enter full target URL (-u) "
       if menu.options.url:
         settings.print_data_to_stdout(settings.print_message(message + str(menu.options.url)))
       elif not menu.options.url and not settings.STDIN_PARSING:
@@ -866,7 +868,7 @@ try:
             pass
           else:
             break
-      message = "POST data (--data) [Enter for None] > "
+      message = "POST data (--data) [Enter for None] "
       if settings.STDIN_PARSING or menu.options.data:
         settings.print_data_to_stdout(settings.print_message(message + str(menu.options.data)))
       else:
@@ -874,7 +876,7 @@ try:
         if menu.options.data is not None and len(menu.options.data) == 0:
           menu.options.data = False
       while True:
-        message = "Injection difficulty (--level) [1-3, Default: 1] > "
+        message = "Injection difficulty (--level) [1-3, Default: 1] "
         if settings.STDIN_PARSING:
           settings.print_data_to_stdout(settings.print_message(message + str(settings.INJECTION_LEVEL)))
           break
@@ -911,9 +913,9 @@ try:
         settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       else:
         settings.THREADS = menu.options.threads
-      if settings.THREADS > 1:
-        info_msg = "Setting " + str(settings.THREADS) + " concurrent HTTP requests."
-        settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+      if settings.THREADS > 1 and settings.VERBOSITY_LEVEL != 0:
+        debug_msg = "Setting " + str(settings.THREADS) + " concurrent HTTP requests."
+        settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
 
     if menu.options.tor:
       settings.TIMESEC = settings.TIMESEC * 2
@@ -997,6 +999,8 @@ try:
     if not settings.STDIN_PARSING and not menu.options.bulkfile and not settings.CRAWLING:
       if os_checks_num == 0:
         settings.INIT_TEST = True
+      # Skip upfront detection-only probes below when a stored technique already exists.
+      settings.LIKELY_RESUME = session_handler.has_any_stored_technique(url, http_request_method)
       response, url = url_response(url, http_request_method)
       if response != False:
         filename = logs.logs_filename_creation(url)
@@ -1099,7 +1103,7 @@ try:
           if settings.SKIP_VULNERABLE_HOST is None:
             while True:
               message = "An injection point has already been detected against '" + _urllib.parse.urlparse(form_url).netloc + "'. "
-              message += "Do you want to skip further tests involving it? [Y/n] > "
+              message += "Do you want to skip further tests involving it? [Y/n] "
               skip_host = common.read_input(message, default="Y", check_batch=True)
               if skip_host in settings.CHOICE_YES:
                 settings.SKIP_VULNERABLE_HOST = True
@@ -1125,7 +1129,7 @@ try:
         perform_check = True
         while True:
           settings.print_data_to_stdout(settings.print_message("[" + str(form_num) + "/" + str(len(clean_output_forms)) + "] FORM - POST " + form_url + " - " + form_data))
-          message = "Do you want to use form #" + str(form_num) + " for testing? [Y/n] > "
+          message = "Do you want to use form #" + str(form_num) + " for testing? [Y/n] "
           next_form = common.read_input(message, default="Y", check_batch=True)
           if next_form in settings.CHOICE_YES:
             info_msg = "Testing form '" + form_url + "'."
@@ -1169,7 +1173,7 @@ try:
           if settings.SKIP_VULNERABLE_HOST is None:
             while True:
               message = "An injection point has already been detected against '" + _urllib.parse.urlparse(url).netloc + "'. "
-              message += "Do you want to skip further tests involving it? [Y/n] > "
+              message += "Do you want to skip further tests involving it? [Y/n] "
               skip_host = common.read_input(message, default="Y", check_batch=True)
               if skip_host in settings.CHOICE_YES:
                 settings.SKIP_VULNERABLE_HOST = True
@@ -1197,7 +1201,7 @@ try:
             perform_check = True
             while True:
               settings.print_data_to_stdout(settings.print_message("[" + str(url_num) + "/" + str(len(clean_output_href)) + "] URL - " + http_request_method + " " + url))
-              message = "Do you want to use URL #" + str(url_num) + " for testing? [Y/n] > "
+              message = "Do you want to use URL #" + str(url_num) + " for testing? [Y/n] "
               next_url = common.read_input(message, default="Y", check_batch=True)
               if next_url in settings.CHOICE_YES:
                 info_msg = "Testing URL '" + url + "'."

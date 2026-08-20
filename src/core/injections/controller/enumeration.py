@@ -43,7 +43,7 @@ def powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
   cmd = settings.PS_VERSION
   if not settings.TIME_RELATED_ATTACK and alter_shell:
     cmd = checks.escape_single_quoted_cmd(cmd)
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+  if not checks.usable_stored_cmd(session_handler.export_stored_cmd(url, cmd, vuln_parameter)) or menu.options.ignore_session:
     if settings.TIME_RELATED_ATTACK:
       _ = True
       if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
@@ -87,7 +87,7 @@ def hostname(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, h
   if settings.TARGET_OS == settings.OS.WINDOWS:
     settings.HOSTNAME = settings.WIN_HOSTNAME
   cmd = settings.HOSTNAME
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+  if not checks.usable_stored_cmd(session_handler.export_stored_cmd(url, cmd, vuln_parameter)) or menu.options.ignore_session:
     # Command execution results.
     if settings.TIME_RELATED_ATTACK:
       _ = True
@@ -136,7 +136,7 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
   cmd = settings.RECOGNISE_OS
   if not settings.TIME_RELATED_ATTACK and settings.TARGET_OS == settings.OS.WINDOWS and alter_shell:
     cmd = "cmd /c " + cmd
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+  if not checks.usable_stored_cmd(session_handler.export_stored_cmd(url, cmd, vuln_parameter)) or menu.options.ignore_session:
     # Command execution results.
     if settings.TIME_RELATED_ATTACK:
       _ = True
@@ -169,7 +169,7 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
       if not settings.TIME_RELATED_ATTACK:
         if settings.USE_BACKTICKS:
           cmd = checks.remove_command_substitution(cmd)
-      if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+      if not checks.usable_stored_cmd(session_handler.export_stored_cmd(url, cmd, vuln_parameter)) or menu.options.ignore_session:
         # Command execution results.
         if settings.TIME_RELATED_ATTACK:
           if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
@@ -199,7 +199,7 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
       cmd = settings.RECOGNISE_HP
     if settings.TIME_RELATED_ATTACK and settings.VERBOSITY_LEVEL == 0 and _:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-    if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+    if not checks.usable_stored_cmd(session_handler.export_stored_cmd(url, cmd, vuln_parameter)) or menu.options.ignore_session:
       # Command execution results.
       if settings.TIME_RELATED_ATTACK:
         _ = True
@@ -245,7 +245,7 @@ def current_user(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
   if settings.TARGET_OS == settings.OS.WINDOWS:
     settings.CURRENT_USER = settings.WIN_CURRENT_USER
   cmd = settings.CURRENT_USER
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+  if not checks.usable_stored_cmd(session_handler.export_stored_cmd(url, cmd, vuln_parameter)) or menu.options.ignore_session:
     # Command execution results.
     if settings.TIME_RELATED_ATTACK:
       _ = True
@@ -292,7 +292,7 @@ def check_current_user_privs(separator, maxlen, TAG, cmd, prefix, suffix, whites
     cmd = settings.IS_ROOT
     if settings.USE_BACKTICKS:
       cmd = checks.remove_command_substitution(cmd)
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+  if not checks.usable_stored_cmd(session_handler.export_stored_cmd(url, cmd, vuln_parameter)) or menu.options.ignore_session:
     # Command execution results.
     if settings.TIME_RELATED_ATTACK:
       _ = True
@@ -342,7 +342,7 @@ def system_users(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
       cmd = checks.escape_single_quoted_cmd(cmd)
     if not settings.TIME_RELATED_ATTACK:
       cmd = checks.add_new_cmd(cmd)
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+  if not checks.usable_stored_cmd(session_handler.export_stored_cmd(url, cmd, vuln_parameter)) or menu.options.ignore_session:
     # Command execution results.
     if settings.TIME_RELATED_ATTACK:
       _ = True
@@ -387,7 +387,7 @@ def system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, ti
 
   _ = False
   cmd = settings.SYS_PASSES
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+  if not checks.usable_stored_cmd(session_handler.export_stored_cmd(url, cmd, vuln_parameter)) or menu.options.ignore_session:
     # Command execution results.
     if settings.TIME_RELATED_ATTACK:
       _ = True
@@ -431,7 +431,8 @@ def single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
 
   cmd =  menu.options.os_cmd
   checks.print_enumenation().print_single_os_cmd_msg(cmd)
-  if session_handler.export_stored_cmd(url, cmd, vuln_parameter) == None or menu.options.ignore_session:
+  _stored_shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
+  if not checks.usable_stored_cmd(_stored_shell) or menu.options.ignore_session:
     # Command execution results.
     if settings.TIME_RELATED_ATTACK:
       _ = True
@@ -455,7 +456,7 @@ def single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
     if settings.TIME_RELATED_ATTACK and settings.VERBOSITY_LEVEL == 0:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
   else:
-    shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
+    shell = _stored_shell
   checks.print_single_os_cmd(cmd, shell, filename)
 
 """
@@ -514,7 +515,7 @@ def stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, time
   new_line = True
   if settings.ENUMERATION_DONE == True :
     while True:
-      message = "Do you want to ignore stored session and enumerate again? [y/N] > "
+      message = "Do you want to ignore stored session and enumerate again? [y/N] "
       enumerate_again = common.read_input(message, default="N", check_batch=True)
       if enumerate_again in settings.CHOICE_YES:
         if not menu.options.ignore_session:

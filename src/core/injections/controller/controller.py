@@ -358,8 +358,18 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
       the_type = " parameter"
       inject_parameter = " '" + check_parameter + "'"
 
-    # Estimating the response time (in seconds)
-    timesec, url_time_response = requests.estimate_response_time(url, timesec, http_request_method)
+    # Defer response-time estimation until a time-related technique is about to run.
+    url_time_response = 0
+    _time_warmup_done = False
+    def _ensure_time_warmup():
+      nonlocal timesec, url_time_response, _time_warmup_done
+      if _time_warmup_done or settings.SKIP_COMMAND_INJECTIONS or settings.LOAD_SESSION:
+        return
+      _time_warmup_done = True
+      timesec, url_time_response = requests.estimate_response_time(url, timesec, http_request_method)
+      if not menu.options.tech or "t" in menu.options.tech or "f" in menu.options.tech:
+        checks.warm_up_response_baseline(url, http_request_method)
+        checks.check_lagging()
 
     # Load modules
     modules_handler.load_modules(url, http_request_method, filename)
@@ -392,14 +402,24 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
         info_msg = "Performing heuristic (basic) tests to the " + settings.CHECKING_PARAMETER + "."
         settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
-        if not (len(menu.options.tech) == 1 and "e" in menu.options.tech):
-          url = command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
+        try:
+          if not (len(menu.options.tech) == 1 and "e" in menu.options.tech):
+            url = command_injection_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
 
-        if not settings.IDENTIFIED_COMMAND_INJECTION and "e" in menu.options.tech:
-          # Check for identified warnings
-          url = code_injections_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
-          if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
-            checks.skip_testing(filename, url)
+          if not settings.IDENTIFIED_COMMAND_INJECTION and "e" in menu.options.tech:
+            # Check for identified warnings
+            url = code_injections_heuristic_basic(url, http_request_method, check_parameter, the_type, header_name, inject_http_headers)
+            if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
+              checks.skip_testing(filename, url)
+        except KeyboardInterrupt:
+          # Nested try - a sibling except: here would never catch what handle_detection_interrupt() raises.
+          try:
+            checks.handle_detection_interrupt(filename, url)
+          except (settings.SkipTechniqueException, settings.RetryTechniqueException):
+            # No technique is running yet at this stage - just skip past heuristics.
+            pass
+          except settings.EndDetectionPhaseException:
+            break
 
         if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:
           settings.HEURISTIC_TEST.POSITIVE = False
@@ -430,17 +450,30 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
 
       settings.START_SCANNING = True
       end_detection = False
+      def _run_time_based():
+        _ensure_time_warmup()
+        return timebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
+
+      def _run_file_based():
+        _ensure_time_warmup()
+        return filebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
+
       techniques = [
         lambda: classic_command_injection_technique(url, timesec, filename, http_request_method),
         lambda: dynamic_code_evaluation_technique(url, timesec, filename, http_request_method),
-        lambda: timebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response),
-        lambda: filebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response),
+        _run_time_based,
+        _run_file_based,
       ]
-      for run_technique in techniques:
+      technique_idx = 0
+      while technique_idx < len(techniques):
         try:
-          run_technique()
+          techniques[technique_idx]()
+          technique_idx += 1
         except settings.SkipTechniqueException:
-          continue
+          technique_idx += 1
+        except settings.RetryTechniqueException:
+          # Same index again - redo this technique from the top instead of moving past it.
+          pass
         except settings.EndDetectionPhaseException:
           end_detection = True
           break
@@ -644,6 +677,15 @@ def do_injection(found, data_type, header_name, url, http_request_method, filena
 
   # Final set of injection targets
   injection_targets = base_params.union(custom_params)
+
+  # Test already-confirmed parameters first, not in request order.
+  if not menu.options.ignore_session and not menu.options.flush_session and os.path.isfile(settings.SESSION_FILE):
+    def has_stored_session(check_param):
+      try:
+        return bool(session_handler.load_stored_techniques(url, check_param, http_request_method))
+      except Exception:
+        return False
+    check_parameters.sort(key=lambda param: not has_stored_session(param))
 
   for check_param in check_parameters:
     contextual_name = get_contextual_name(check_param)

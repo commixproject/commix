@@ -29,7 +29,7 @@ from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
-Open the session DB and always close it; retry transient open failures.
+Open the session DB and always close it; retry after recreating a deleted directory.
 """
 @contextlib.contextmanager
 def _session_connection():
@@ -37,6 +37,9 @@ def _session_connection():
   last_err = None
   for attempt in range(5):
     try:
+      session_dir = os.path.dirname(settings.SESSION_FILE)
+      if session_dir and not os.path.isdir(session_dir):
+        os.makedirs(session_dir, exist_ok=True)
       conn = sqlite3.connect(settings.SESSION_FILE, timeout=10)
       break
     except sqlite3.OperationalError as err:
@@ -296,6 +299,42 @@ def applied_levels(url, http_request_method):
     settings.LOAD_SESSION = None
     return level
 
+
+"""
+Where the session file for this URL would live - settings.SESSION_FILE isn't set this early.
+"""
+def compute_expected_session_file(url):
+  if menu.options.session_file:
+    return menu.options.session_file
+  output_dir = menu.options.output_dir or settings.OUTPUT_DIR
+  host = _urllib.parse.urlparse(url).netloc.replace(":", "_")
+  return os.path.join(output_dir, host, "session.db")
+
+"""
+Cheap, coarse (no parameter match yet) check for any stored injection point for this (host, method).
+"""
+def has_any_stored_technique(url, http_request_method):
+  if menu.options.ignore_session or menu.options.flush_session:
+    return False
+  session_file = compute_expected_session_file(url)
+  if not os.path.isfile(session_file):
+    return False
+  try:
+    conn = sqlite3.connect(session_file, timeout=5)
+    try:
+      table = table_name(url) + "_ip"
+      cursor = conn.cursor()
+      cursor.execute("SELECT name FROM sqlite_master WHERE name = ? AND type = 'table';", (table,))
+      if not cursor.fetchall():
+        return False
+      like_url = "%" + escape_like(split_url(url)) + "%"
+      query = "SELECT technique FROM \"" + table + "\" WHERE url LIKE ? ESCAPE '\\' AND http_request_method = ?;"
+      cursor.execute(query, (like_url, http_request_method))
+      return any(not menu.options.tech or technique_letter(row[0]) in menu.options.tech for row in cursor.fetchall())
+    finally:
+      conn.close()
+  except (sqlite3.OperationalError, sqlite3.DatabaseError):
+    return False
 
 """
 Find a stored injection point matching the URL, parameter, and HTTP method, then restore its settings.

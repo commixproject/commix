@@ -75,7 +75,7 @@ def exit():
 """
 Persist a new WAF/IPS finding when possible; defer the import to avoid a circular dependency.
 """
-def _persist_waf_finding():
+def persist_waf_finding():
   if menu.options.ignore_session or not settings.TARGET_NETLOC:
     return
   from src.utils import session_handler
@@ -92,7 +92,7 @@ def detect_waf(err_code):
       warn_msg = "It seems some kind of WAF/IPS is protecting the target."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       settings.WAF_ENABLED = True
-      _persist_waf_finding()
+      persist_waf_finding()
     return True
   return False
 
@@ -167,7 +167,7 @@ def process_non_custom():
   if settings.CUSTOM_INJECTION_MARKER and not settings.SKIP_NON_CUSTOM_PARAMS:
     while True:
       message = "Other non-custom parameters found."
-      message += " Do you want to process them too? [Y/n] > "
+      message += " Do you want to process them too? [Y/n] "
       process = common.read_input(message, default="Y", check_batch=True)
       if process in settings.CHOICE_YES:
         settings.CUSTOM_INJECTION_MARKER = False
@@ -264,7 +264,7 @@ def custom_injection_marker_character(url, http_request_method):
   if settings.CUSTOM_INJECTION_MARKER:
     while True:
       message = "Custom injection marker ('" + settings.CUSTOM_INJECTION_MARKER_CHAR + "') found in " + option +". "
-      message += "Do you want to process it? [Y/n] > "
+      message += "Do you want to process it? [Y/n] "
       procced_option = common.read_input(message, default="Y", check_batch=True)
       if procced_option in settings.CHOICE_YES:
         return True
@@ -291,7 +291,7 @@ def keep_testing_others(filename, url):
   if not settings.LOAD_SESSION:
     if settings.SKIP_COMMAND_INJECTIONS:
       while True:
-        message = "Do you want to keep testing the others? [y/N] > "
+        message = "Do you want to keep testing the others? [y/N] "
         procced_option = common.read_input(message, default="N", check_batch=True)
         if procced_option in settings.CHOICE_YES:
           settings.SKIP_COMMAND_INJECTIONS = True
@@ -317,7 +317,7 @@ def skip_testing(filename, url):
       _ = " further testing"
     while True:
       message = "Do you want to skip" + _ + " on the " 
-      message += settings.CHECKING_PARAMETER + "? (recommended if certain) [Y/n] > "
+      message += settings.CHECKING_PARAMETER + "? (recommended if certain) [Y/n] "
       procced_option = common.read_input(message, default="Y", check_batch=True)
       if procced_option in settings.CHOICE_YES:
         settings.SKIP_COMMAND_INJECTIONS = True
@@ -342,7 +342,7 @@ def mobile_user_agents():
   mobile_agents = common.load_list_from_file(settings.MOBILE_USER_AGENT_LIST, "mobile user-agent list")
 
   while True:
-    message = "Which smartphone do you want to imitate through HTTP User-Agent header? > "
+    message = "Which smartphone do you want to imitate through HTTP User-Agent header? "
     mobile_user_agent = common.read_input(message, default="1", check_batch=True)
     try:
       choice = int(mobile_user_agent)
@@ -415,6 +415,27 @@ def user_aborted(filename, url):
   raise exit()
 
 """
+Prompts for and applies a new verbosity level (0-4) - used by the Ctrl-C menus.
+"""
+def change_verbosity():
+  msg = "Enter new verbosity level (0-4) [current: " + str(settings.VERBOSITY_LEVEL) + "] "
+  # Ctrl-C is itself an explicit request for attention - always prompt for
+  # real input here, even under --batch.
+  choice = common.read_input(msg, default=str(settings.VERBOSITY_LEVEL), check_batch=False)
+  try:
+    level = int(choice or settings.VERBOSITY_LEVEL)
+  except ValueError:
+    level = None
+  if level is not None and 0 <= level <= 4:
+    settings.VERBOSITY_LEVEL = level
+    menu.options.verbose = level
+    info_msg = "Verbosity level set to " + str(level) + "."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  else:
+    warn_msg = "Invalid verbosity level - keeping the current value (" + str(settings.VERBOSITY_LEVEL) + ")."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
+"""
 Ctrl-C during detection - ask how to proceed instead of aborting outright.
 """
 def handle_detection_interrupt(filename, url):
@@ -422,14 +443,24 @@ def handle_detection_interrupt(filename, url):
   warn_msg = "User aborted during the detection phase (Ctrl-C pressed)."
   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
   if settings.MULTI_TARGETS:
-    msg = "How do you want to proceed? [ne(X)t target/(S)kip current technique/(e)nd detection phase/(n)ext parameter/(q)uit] > "
+    msg = "How do you want to proceed? [ne(X)t target/(S)kip current technique/(e)nd detection phase/(n)ext parameter/(v)erbosity/(q)uit] "
     default = "X"
+    valid_choices = ("x", "s", "e", "n", "v", "q")
   else:
-    msg = "How do you want to proceed? [(S)kip current technique/(e)nd detection phase/(n)ext parameter/(q)uit] > "
+    msg = "How do you want to proceed? [(S)kip current technique/(e)nd detection phase/(n)ext parameter/(v)erbosity/(q)uit] "
     default = "S"
-  choice = common.read_input(msg, default=default, check_batch=True)
-  choice = (choice or default).strip().lower()
-  if choice == "x" and settings.MULTI_TARGETS:
+    valid_choices = ("s", "e", "n", "v", "q")
+  while True:
+    # Ctrl-C is itself an explicit request for attention - always prompt, even under --batch.
+    choice = (common.read_input(msg, default=default, check_batch=False) or default).strip().lower()
+    if choice in valid_choices:
+      break
+    common.invalid_option(choice)
+  if choice == "v":
+    # No further prompting - changing verbosity redoes the current technique from the top, not skip past it.
+    change_verbosity()
+    raise settings.RetryTechniqueException()
+  elif choice == "x":
     raise settings.NextTargetException()
   elif choice == "e":
     raise settings.EndDetectionPhaseException()
@@ -438,7 +469,7 @@ def handle_detection_interrupt(filename, url):
   elif choice == "q":
     user_aborted(filename, url)
   else:
-    # Anything else (including the default "s") - move on to the next technique.
+    # "s" - move on to the next technique.
     raise settings.SkipTechniqueException()
 
 """
@@ -451,9 +482,18 @@ def handle_early_interrupt(filename, url):
   settings.clear_current_line()
   warn_msg = "User aborted during the detection phase (Ctrl-C pressed)."
   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-  msg = "How do you want to proceed? [ne(X)t target/(q)uit] > "
-  choice = common.read_input(msg, default="X", check_batch=True)
-  if (choice or "X").strip().lower() == "q":
+  msg = "How do you want to proceed? [ne(X)t target/(v)erbosity/(q)uit] "
+  while True:
+    # Ctrl-C is itself an explicit request for attention - always prompt, even under --batch.
+    choice = (common.read_input(msg, default="X", check_batch=False) or "X").strip().lower()
+    if choice in ("x", "v", "q"):
+      break
+    common.invalid_option(choice)
+  if choice == "v":
+    # No further prompting - changing verbosity just continues (next target).
+    change_verbosity()
+    return
+  if choice == "q":
     user_aborted(filename, url)
 
 """
@@ -464,9 +504,19 @@ def handle_exploitation_interrupt(filename, url):
   settings.clear_current_line()
   warn_msg = "User aborted during the exploitation phase (Ctrl-C pressed)."
   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-  msg = "How do you want to proceed? [(C)ontinue/(q)uit] > "
-  choice = common.read_input(msg, default="C", check_batch=True)
-  if (choice or "C").strip().lower() == "q":
+  # "v" here, not "c" - "C" is already taken by "Continue" in this menu.
+  msg = "How do you want to proceed? [(C)ontinue/(v)erbosity/(q)uit] "
+  while True:
+    # Ctrl-C is itself an explicit request for attention - always prompt, even under --batch.
+    choice = (common.read_input(msg, default="C", check_batch=False) or "C").strip().lower()
+    if choice in ("c", "v", "q"):
+      break
+    common.invalid_option(choice)
+  if choice == "v":
+    # No further prompting - changing verbosity just continues.
+    change_verbosity()
+    return
+  if choice == "q":
     user_aborted(filename, url)
 
 """
@@ -531,7 +581,7 @@ def handle_server_cookies(response):
             message = "You declared some cookie(s), "
             message += "but the server is setting additional ones ('"
             message += mask_cookie_value(candidate)
-            message += "'). Do you want to merge them? [Y/n] > "
+            message += "'). Do you want to merge them? [Y/n] "
             merge_option = common.read_input(message, default="Y", check_batch=True)
             if merge_option in settings.CHOICE_YES:
               menu.options.cookie += settings.COOKIE_PARAM_DELIMITER + candidate
@@ -551,7 +601,7 @@ def handle_server_cookies(response):
           message = "You have not declared any cookie(s), "
           message += "but the server wants to set its own ('"
           message += mask_cookie_value(candidate)
-          message += "'). Do you want to use those? [Y/n] > "
+          message += "'). Do you want to use those? [Y/n] "
           set_cookies = common.read_input(message, default="Y", check_batch=True)
           if set_cookies in settings.CHOICE_YES:
             menu.options.cookie = candidate
@@ -698,7 +748,7 @@ def value_inside_boundaries(parameter, http_request_method):
           while True:
             message = "It appears that provided value '" + value_inside_boundaries + "' has boundaries."
             message += " Do you want to add the PCRE '" + settings.PCRE_MODIFIER + "'"
-            message += " modifier outside boundaries? ('" + pcre_mod_value + "') [Y/n] > "
+            message += " modifier outside boundaries? ('" + pcre_mod_value + "') [Y/n] "
             modifier_check = common.read_input(message, default="Y", check_batch=True)
             if modifier_check in settings.CHOICE_YES:
               parameter = parameter.replace(value_inside_boundaries, pcre_mod_value)
@@ -716,7 +766,7 @@ def value_inside_boundaries(parameter, http_request_method):
           value = value_inside_boundaries.replace(value, value + settings.CUSTOM_INJECTION_MARKER_CHAR)
           while True:
             message = "Do you want to inject the provided value '" + value + "' inside boundaries?"
-            message += " ('" + value + "') [Y/n] > "
+            message += " ('" + value + "') [Y/n] "
             procced_option = common.read_input(message, default="Y", check_batch=True)
             if procced_option in settings.CHOICE_YES:
               settings.INJECT_INSIDE_BOUNDARIES = True
@@ -870,7 +920,7 @@ def blocked_ip(page):
   if not settings.BLOCKED_IP_DETECTED and re.search(settings.BLOCKED_IP_REGEX, page):
     settings.BLOCKED_IP_DETECTED = True
     settings.WAF_ENABLED = True
-    _persist_waf_finding()
+    persist_waf_finding()
     warn_msg = "It appears the target server has blocked you."
     settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
 
@@ -881,7 +931,7 @@ def browser_verification(page):
   if not settings.BROWSER_VERIFICATION and re.search(r"(?i)browser.?verification", page or ""):
     settings.BROWSER_VERIFICATION = True
     settings.WAF_ENABLED = True
-    _persist_waf_finding()
+    persist_waf_finding()
     warn_msg = "Potential browser verification protection mechanism detected"
     if re.search(r"(?i)CloudFlare", page):
       warn_msg += " (CloudFlare)."
@@ -898,7 +948,7 @@ def captcha_check(page):
       if re.search(r"(?i)captcha", match.group(0)):
         settings.CAPTCHA_DETECED = True
         settings.WAF_ENABLED = True
-        _persist_waf_finding()
+        persist_waf_finding()
         warn_msg = "Potential CAPTCHA protection mechanism detected"
         if re.search(r"(?i)<title>[^<]*CloudFlare", page):
           warn_msg += " (CloudFlare)."
@@ -916,7 +966,7 @@ def check_for_false_positive_result(false_positive_warning):
   info_msg = "Identified a potential injection point on "
   info_msg += settings.CHECKING_PARAMETER + "."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-  info_msg = "Testing" + (", with a longer delay to rule out noise," if false_positive_warning else "")
+  info_msg = "Testing" + (" with a longer delay to rule out noise" if false_positive_warning else "")
   info_msg += " if the injection point is a false positive"  
   if settings.VERBOSITY_LEVEL != 0:
     info_msg = info_msg + "." + settings.END_LINE.LF
@@ -974,7 +1024,7 @@ Procced to the next attack vector.
 def next_attack_vector(technique, go_back):
   if not settings.LOAD_SESSION:
     while True:
-      message = "Do you want to continue testing using the " + technique + "? [y/N] > "
+      message = "Do you want to continue testing using the " + technique + "? [y/N] "
       next_attack_vector = common.read_input(message, default="N", check_batch=True)
       if next_attack_vector in settings.CHOICE_YES:
         # Check injection state
@@ -1025,7 +1075,7 @@ def enable_shell(url):
     message += " injection point from stored session"
   else:
     message += " is likely vulnerable"
-  message += ". Do you want to spawn a pseudo-terminal shell? [Y/n] > "
+  message += ". Do you want to spawn a pseudo-terminal shell? [Y/n] "
   if settings.CRAWLING:
     settings.CRAWLED_URLS_INJECTED.append(_urllib.parse.urlparse(url).netloc)
   gotshell = common.read_input(message, default="Y", check_batch=True)
@@ -1054,7 +1104,7 @@ def procced_with_file_based_technique():
   while True:
     message = "Due to the provided '--web-root' option, "
     message += "do you want to proceed with the (semi-blind) "
-    message += "file-based injection technique? [y/N] > "
+    message += "file-based injection technique? [y/N] "
     enable_fb = common.read_input(message, default="N", check_batch=True)
     if enable_fb in settings.CHOICE_YES:
       return True
@@ -1110,7 +1160,7 @@ def continue_tests(err):
     
     while True:
       message += "Do you want to ignore HTTP response code '" + str(err.code)
-      message += "' and proceed with testing? [y/N] > "
+      message += "' and proceed with testing? [y/N] "
       continue_tests = common.read_input(message, default="N", check_batch=True)
       if continue_tests in settings.CHOICE_YES:
         settings.IGNORE_CODE.append(err.code)
@@ -1184,7 +1234,7 @@ def ps_check():
     while True:
       message = "Some payloads in the selected options require PowerShell. "
       message += "Do you want to use the '--ps-version' flag "
-      message += "to ensure it is enabled? [Y/n] > "
+      message += "to ensure it is enabled? [Y/n] "
       ps_check = common.read_input(message, default="Y", check_batch=True)
       if ps_check in settings.CHOICE_YES:
         menu.options.ps_version = True
@@ -1202,7 +1252,7 @@ If PowerShell is disabled.
 """
 def ps_check_failed():
   while True:
-    message = "Do you want to proceed despite the above warning? [Y/n] > "
+    message = "Do you want to proceed despite the above warning? [Y/n] "
     ps_check = common.read_input(message, default="Y", check_batch=True)
     if ps_check in settings.CHOICE_YES:
       break
@@ -1232,7 +1282,7 @@ def check_CGI_scripts(url):
       _ = True
       settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
       while True:
-        message = "Do you want to enable the Shellshock module ('--shellshock')? [Y/n] > "
+        message = "Do you want to enable the Shellshock module ('--shellshock')? [Y/n] "
         shellshock_check = common.read_input(message, default="Y", check_batch=True)
         if shellshock_check in settings.CHOICE_YES:
           menu.options.shellshock = True
@@ -1352,7 +1402,7 @@ def define_target_os():
   else:
     while True:
       message = "Do you recognize the server's underlying operating system? "
-      message += "[(N)o/(u)nix-like/(w)indows/(q)uit] > "
+      message += "[(N)o/(u)nix-like/(w)indows/(q)uit] "
       got_os = common.read_input(message, default="N", check_batch=True)
       if got_os.lower() in settings.CHOICE_OS :
         if got_os.lower() == "u":
@@ -1379,20 +1429,20 @@ def identified_os():
       warn_msg = "Identified a different operating system (i.e. '"
       warn_msg += settings.TARGET_OS.title() + "') than the one you defined (i.e. '" + menu.options.os.title() + "')."
       settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
-      message = "How do you want to proceed? [(C)ontinue/(s)kip] > "
-      proceed_option = common.read_input(message, default="S", check_batch=True)
-      if proceed_option.lower() in settings.CHOICE_PROCEED :
-        if proceed_option.lower() == "c":
-          settings.IGNORE_IDENTIFIED_TARGET_OS = True
-          return settings.IGNORE_IDENTIFIED_TARGET_OS
-        elif proceed_option.lower() == "s":
-          settings.IGNORE_IDENTIFIED_TARGET_OS = False
-          return settings.IGNORE_IDENTIFIED_TARGET_OS
-        elif proceed_option.lower() == "q":
-          raise SystemExit()
-      else:
+      message = "How do you want to proceed? [(C)ontinue/(s)kip] "
+      while True:
+        proceed_option = (common.read_input(message, default="S", check_batch=True) or "S").strip().lower()
+        if proceed_option in ("c", "s", "q"):
+          break
         common.invalid_option(proceed_option)
-        pass
+      if proceed_option == "c":
+        settings.IGNORE_IDENTIFIED_TARGET_OS = True
+        return settings.IGNORE_IDENTIFIED_TARGET_OS
+      elif proceed_option == "s":
+        settings.IGNORE_IDENTIFIED_TARGET_OS = False
+        return settings.IGNORE_IDENTIFIED_TARGET_OS
+      elif proceed_option == "q":
+        raise SystemExit()
 
 """
 Checking for all required third-party library dependencies.
@@ -1481,7 +1531,7 @@ def time_delay_due_to_unstable_request(timesec):
   message = "Unexpected time delays have been identified."
   settings.print_data_to_stdout(settings.END_LINE.CR)
   while True:
-    message = message + " How do you want to proceed? [(C)ontinue with a longer delay/(s)kip this candidate and try the next] > "
+    message = message + " How do you want to proceed? [(C)ontinue with a longer delay/(s)kip this candidate and try the next] "
     proceed_option = common.read_input(message, default="C", check_batch=True)
     if proceed_option.lower() in settings.CHOICE_PROCEED :
       if proceed_option.lower() == "c":
@@ -1499,6 +1549,12 @@ def time_delay_due_to_unstable_request(timesec):
     else:
       common.invalid_option(proceed_option)
       pass
+
+"""
+True only for a genuinely finished stored value - a partial (interrupted-run) marker isn't a result yet, and must be treated the same as "nothing stored" so the caller re-runs (and thereby resumes) it instead of handing back the raw marker.
+"""
+def usable_stored_cmd(stored_value):
+  return stored_value is not None and not stored_value.startswith(settings.PARTIAL_VALUE_MARKER)
 
 """
 Drop high-latency spikes from a response-time sample via a median/MAD cutoff.
@@ -1524,15 +1580,50 @@ def record_baseline_response_time(exec_time):
     settings.RESPONSE_TIMES[:] = settings.RESPONSE_TIMES[-(settings.MAX_TIME_RESPONSES // 2):]
 
 """
-Return the adaptive delay threshold, or None until enough baseline data is available.
+Blocking warm-up: fills the response-time model to MIN_TIME_RESPONSES before the first real timing comparison, instead of running that decision on a thin or empty model.
+"""
+def warm_up_response_baseline(url, http_request_method):
+  if len(settings.RESPONSE_TIMES) >= settings.MIN_TIME_RESPONSES:
+    return
+  info_msg = "Time-related response comparison requires a larger statistical model"
+  info_msg += "." if settings.VERBOSITY_LEVEL != 0 else ", please wait..."
+  settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_info_msg(info_msg))
+  while len(settings.RESPONSE_TIMES) < settings.MIN_TIME_RESPONSES:
+    sample = requests.quick_response_time_sample(url, http_request_method)
+    if sample is not None:
+      record_baseline_response_time(sample)
+    if settings.VERBOSITY_LEVEL == 0:
+      settings.print_data_to_stdout(".")
+  if settings.VERBOSITY_LEVEL == 0:
+    settings.print_data_to_stdout(" (done)")
+
+"""
+Warns once (whichever call site reaches it first) if the connection is already too jittery to trust automatically, and disables timesec auto-shrinking for the rest of the run. Returns True if lagging is (or was already found to be) detected.
+"""
+def check_lagging():
+  if not settings.LAGGING_CHECKED:
+    settings.LAGGING_CHECKED = True
+    if len(settings.RESPONSE_TIMES) > 1 and statistics.pstdev(settings.RESPONSE_TIMES) > settings.WARN_TIME_STDEV:
+      settings.LAGGING_DETECTED = settings.JITTER_SEEN = settings.ADJUST_TIME_DELAY_DISABLED = True
+      warn_msg = "Detected considerable lagging in the connection response(s). "
+      warn_msg += "Consider using a higher '--time-sec' value (e.g. 10 or more)."
+      settings.print_data_to_stdout(settings.print_critical_msg(warn_msg))
+  return settings.LAGGING_DETECTED
+
+"""
+Current adaptive delay threshold (mean + N*stdev of the baseline), or None if there's no data to compute a deviation from yet.
 """
 def current_delay_threshold():
   sample = strip_time_outliers(settings.RESPONSE_TIMES)
-  if len(sample) >= settings.MIN_TIME_RESPONSES:
-    deviation = statistics.pstdev(sample)
-    if deviation:
-      return max(settings.MIN_VALID_DELAYED_RESPONSE, statistics.mean(sample) + settings.TIME_STDEV_COEFF * deviation)
-  return None
+  if len(sample) < 2:
+    return None
+  deviation = statistics.pstdev(sample)
+  if not deviation:
+    return None
+  if len(sample) < settings.MIN_TIME_RESPONSES and settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Time-based standard deviation method used on a model with less than " + str(settings.MIN_TIME_RESPONSES) + " response times."
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+  return max(settings.MIN_VALID_DELAYED_RESPONSE, statistics.mean(sample) + settings.TIME_STDEV_COEFF * deviation)
 
 """
 Time related shell condition. Uses the adaptive threshold once available, else a fixed one.
@@ -1573,18 +1664,18 @@ def identified_http_auth_type(auth_type):
   warn_msg += auth_type.lower() + ") than that you have provided ("
   warn_msg += menu.options.auth_type + ")."
   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-  message = "How do you want to proceed? [(C)ontinue/(s)kip] > "
-  proceed_option = common.read_input(message, default="C", check_batch=True)
-  if proceed_option.lower() in settings.CHOICE_PROCEED :
-    if proceed_option.lower() == "s":
-      return False
-    elif proceed_option.lower() == "c":
-      return True
-    elif proceed_option.lower() == "q":
-      raise SystemExit()
-  else:
+  message = "How do you want to proceed? [(C)ontinue/(s)kip] "
+  while True:
+    proceed_option = (common.read_input(message, default="C", check_batch=True) or "C").strip().lower()
+    if proceed_option in ("c", "s", "q"):
+      break
     common.invalid_option(proceed_option)
-    pass
+  if proceed_option == "s":
+    return False
+  elif proceed_option == "c":
+    return True
+  elif proceed_option == "q":
+    raise SystemExit()
 
 """
 Retrieve everything from the supported enumeration options.
@@ -1962,7 +2053,7 @@ def check_encoders(payload):
   for encode_type in list(settings.MULTI_ENCODED_PAYLOAD):
     if encode_type == 'base64encode' or encode_type == 'hexencode':
       while True:
-        message = "Do you want to keep using the '" + encode_type + "' tamper script? [y/N] > "
+        message = "Do you want to keep using the '" + encode_type + "' tamper script? [y/N] "
         procced_option = common.read_input(message, default="N", check_batch=True)
         if procced_option in settings.CHOICE_YES:
           break
@@ -2020,7 +2111,7 @@ def check_encoders(payload):
   if is_decoded:
     while True:
       message = "The value appears to be " + encoded_with + "-encoded. "
-      message += "Do you want to use the '" + encoded_with + "encode' tamper script? [Y/n] > "
+      message += "Do you want to use the '" + encoded_with + "encode' tamper script? [Y/n] "
       procced_option = common.read_input(message, default="Y", check_batch=True)
       if procced_option in settings.CHOICE_YES:
         break
@@ -2332,7 +2423,7 @@ def process_data(data_type, http_request_method):
   while True:
     info_msg = str(data_type) + " data found in " + str(http_request_method) + " body."
     message = info_msg
-    message += " Do you want to process it? [Y/n] > "
+    message += " Do you want to process it? [Y/n] "
     process = common.read_input(message, default="Y", check_batch=True)
     if process in settings.CHOICE_YES:
       return True
@@ -2989,13 +3080,13 @@ def define_py_working_dir():
   if settings.TARGET_OS == settings.OS.WINDOWS and menu.options.alter_shell:
     while True:
       message = "Do you want to use '" + settings.WIN_PYTHON_INTERPRETER
-      message += "' as Python working directory on the target host? [Y/n] > "
+      message += "' as Python working directory on the target host? [Y/n] "
       python_dir = common.read_input(message, default="Y", check_batch=True)
       if python_dir in settings.CHOICE_YES:
         break
       elif python_dir in settings.CHOICE_NO:
         message = "Please provide a custom working directory for Python (e.g. '"
-        message += settings.WIN_PYTHON_INTERPRETER + "') > "
+        message += settings.WIN_PYTHON_INTERPRETER + "') "
         settings.WIN_PYTHON_INTERPRETER = common.read_input(message, default=None, check_batch=True)
         break
       else:
@@ -3111,7 +3202,7 @@ def custom_web_root(url, timesec, filename, http_request_method, url_time_respon
     else:
       default_root_dir = settings.LINUX_DEFAULT_DOC_ROOTS[0].replace(settings.DOC_ROOT_TARGET_MARK,settings.TARGET_URL)
     message = "Enter a writable directory to use for file operations (e.g. '"
-    message += default_root_dir + "') > "
+    message += default_root_dir + "') "
     settings.WEB_ROOT = common.read_input(message, default=default_root_dir, check_batch=True)
     if len(settings.WEB_ROOT) == 0:
       settings.WEB_ROOT = default_root_dir
@@ -3189,7 +3280,7 @@ def use_temp_folder(no_result, url, timesec, filename, http_request_method, url_
   tmp_path = check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
   while True:
     message = "Insufficient permissions on directory '" + settings.WEB_ROOT + "'. "
-    message += "Do you want to use '" + tmp_path + "' instead? [Y/n] > "
+    message += "Do you want to use '" + tmp_path + "' instead? [Y/n] "
     tmp_upload = common.read_input(message, default="Y", check_batch=True)
     if tmp_upload in settings.CHOICE_YES:
       exit_loops = True
@@ -3222,8 +3313,9 @@ def time_related_timesec():
   else:
     min_safe_delay = settings.MIN_SAFE_TIMESEC
   # Never start below the measured baseline, or normal slow responses look delayed.
+  # x2: detection-phase checks run before the adaptive baseline has enough samples to take over, so this flat margin needs to hold up on its own.
   if settings.URL_TIME_RESPONSE:
-    min_safe_delay = max(min_safe_delay, settings.URL_TIME_RESPONSE + settings.TIME_DELAY_STEP)
+    min_safe_delay = max(min_safe_delay, settings.URL_TIME_RESPONSE + settings.TIME_DELAY_STEP * 2)
   if settings.TIME_RELATED_ATTACK and settings.TIMESEC < min_safe_delay:
     if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Adjusting '--time-sec' to minimum safe delay of " + str(min_safe_delay) + " second" + ("s" if min_safe_delay > 1 else "") + ". In case of inconsistencies, it will be auto-increased."
@@ -3336,12 +3428,12 @@ Set up the PHP working directory on the target host.
 def set_php_working_dir():
   while True:
     message = "Do you want to use '" + settings.WIN_PHP_DIR
-    message += "' as PHP working directory on the target host? [Y/n] > "
+    message += "' as PHP working directory on the target host? [Y/n] "
     php_dir = common.read_input(message, default="Y", check_batch=True)
     if php_dir in settings.CHOICE_YES:
       break
     elif php_dir in settings.CHOICE_NO:
-      message = "Please provide a custom working directory for PHP (e.g. '" + settings.WIN_PHP_DIR + "') > "
+      message = "Please provide a custom working directory for PHP (e.g. '" + settings.WIN_PHP_DIR + "') "
       settings.WIN_PHP_DIR = common.read_input(message, default=settings.WIN_PHP_DIR, check_batch=True)
       settings.USER_DEFINED_PHP_DIR = True
       break
@@ -3355,12 +3447,12 @@ Set up the Python working directory on the target host.
 def set_python_working_dir():
   while True:
     message = "Do you want to use '" + settings.WIN_PYTHON_INTERPRETER
-    message += "' as Python interpreter on the target host? [Y/n] > "
+    message += "' as Python interpreter on the target host? [Y/n] "
     python_dir = common.read_input(message, default="Y", check_batch=True)
     if python_dir in settings.CHOICE_YES:
       break
     elif python_dir in settings.CHOICE_NO:
-      message = "Please specify the full path to the Python interpreter executable (e.g., '" + settings.WIN_CUSTOM_PYTHON_INTERPRETER  + "') > "
+      message = "Please specify the full path to the Python interpreter executable (e.g., '" + settings.WIN_CUSTOM_PYTHON_INTERPRETER  + "') "
       settings.WIN_PYTHON_INTERPRETER = common.read_input(message, default=settings.WIN_CUSTOM_PYTHON_INTERPRETER, check_batch=True)
       settings.USER_DEFINED_PYTHON_DIR = True
       break
@@ -3373,7 +3465,7 @@ Check if to use '/bin' standard subdirectory
 """
 def use_bin_subdir(nc_alternative, shell):
   while True:
-    message = "Do you want to use '/bin' standard subdirectory? [y/N] > "
+    message = "Do you want to use '/bin' standard subdirectory? [y/N] "
     enable_bin_subdir = common.read_input(message, default="N", check_batch=True)
     if enable_bin_subdir in settings.CHOICE_YES :
       nc_alternative = "/bin/" + nc_alternative
@@ -3393,12 +3485,12 @@ Set up the Python interpreter on linux target host.
 def set_python_interpreter():
   while True:
     message = "Do you want to use '" + settings.LINUX_PYTHON_INTERPRETER
-    message += "' as Python interpreter on the target host? [Y/n] > "
+    message += "' as Python interpreter on the target host? [Y/n] "
     python_interpreter = common.read_input(message, default="Y", check_batch=True)
     if python_interpreter in settings.CHOICE_YES:
       break
     elif python_interpreter in settings.CHOICE_NO:
-      message = "Please specify the full filesystem path of a custom Python interpreter to use (e.g. '" + settings.LINUX_CUSTOM_PYTHON_INTERPRETER + "') > "
+      message = "Please specify the full filesystem path of a custom Python interpreter to use (e.g. '" + settings.LINUX_CUSTOM_PYTHON_INTERPRETER + "') "
       settings.LINUX_PYTHON_INTERPRETER = common.read_input(message, default=settings.LINUX_CUSTOM_PYTHON_INTERPRETER, check_batch=True)
       settings.USER_DEFINED_PYTHON_INTERPRETER = True
       break

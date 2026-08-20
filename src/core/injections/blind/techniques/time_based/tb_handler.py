@@ -45,7 +45,7 @@ def exploitation(url, timesec, filename, http_request_method, url_time_response,
       if go_back == True:
         return False
       message = "High response delays make time-related techniques unreliable. "
-      message += "How do you want to proceed? [(C)ontinue/(s)kip] > "
+      message += "How do you want to proceed? [(C)ontinue/(s)kip] "
       proceed_option = common.read_input(message, default="C", check_batch=True)
       if proceed_option.lower() in settings.CHOICE_PROCEED :
         if proceed_option.lower() == "c":

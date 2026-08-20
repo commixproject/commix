@@ -189,7 +189,9 @@ The main Time-related exploitation proccess.
 """
 def do_time_related_proccess(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path):
 
-  if settings.THREADS > 1 and settings.THREADED_TIME_RETRIEVAL_CHOICE is None:
+  # Don't ask if we're just re-verifying a resumed technique.
+  resuming_stored = settings.LOAD_SESSION and technique in settings.STORED_TECHNIQUES
+  if settings.THREADS > 1 and settings.THREADED_TIME_RETRIEVAL_CHOICE is None and not resuming_stored:
     msg = "Multi-threading is considered unsafe for time-related data retrieval. "
     msg += "Do you want to continue using threads anyway? [Y/n] "
     settings.THREADED_TIME_RETRIEVAL_CHOICE = common.read_input(msg, default="Y", check_batch=True) in settings.CHOICE_YES
@@ -261,10 +263,39 @@ def do_time_related_proccess(url, timesec, filename, http_request_method, url_ti
                 OUTPUT_TEXTFILE = injector.select_output_filename(technique, tmp_path, TAG, prompt=False)
               cmd = shell = ""
               checks.check_for_stored_tamper(payload)
-              settings.FOUND_EXEC_TIME = exec_time
-              settings.FOUND_DIFF = exec_time - timesec
-              possibly_vulnerable = True
-              resumed = True
+
+              # Re-verify the resumed injection point still works, rather than trusting a
+              # possibly-stale session (target patched, WAF added, app restarted since).
+              randv1 = random.randrange(0, 4)
+              randv2 = random.randrange(1, 5)
+              randvcalc = randv1 + randv2
+              if settings.TARGET_OS == settings.OS.WINDOWS:
+                if alter_shell:
+                  verify_cmd = settings.WIN_PYTHON_INTERPRETER + " -c \"print (" + str(randv1) + " + " + str(randv2) + ")\""
+                else:
+                  verify_cmd = "powershell.exe -InputFormat none write (" + str(randvcalc) + ")"
+              else:
+                verify_cmd = "expr " + str(randv1) + " %2B " + str(randv2)
+              # Only tfb_injector's false_positive_check() takes OUTPUT_TEXTFILE.
+              verify_kwargs = dict(
+                separator=separator, TAG=TAG, cmd=verify_cmd, prefix=prefix, suffix=suffix,
+                whitespace=whitespace, timesec=timesec, http_request_method=http_request_method,
+                url=url, vuln_parameter=vuln_parameter,
+                randvcalc=randvcalc, alter_shell=alter_shell, exec_time=exec_time,
+                url_time_response=url_time_response, false_positive_warning=False, technique=technique)
+              if technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
+                verify_kwargs["OUTPUT_TEXTFILE"] = OUTPUT_TEXTFILE
+              # Re-verifying, not detecting - skip the "identified/testing" chatter.
+              verify_exec_time, verify_output = injector.false_positive_check(**verify_kwargs, silent=True)
+
+              if checks.time_related_shell(url_time_response, verify_exec_time, timesec) and str(verify_output) == str(randvcalc):
+                settings.FOUND_EXEC_TIME = exec_time
+                settings.FOUND_DIFF = exec_time - timesec
+                possibly_vulnerable = True
+                resumed = True
+              else:
+                warn_msg = "The stored session for this technique no longer appears to be valid - re-detecting."
+                settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
             except TypeError:
               checks.error_loading_session_file()
 

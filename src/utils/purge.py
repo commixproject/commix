@@ -23,13 +23,20 @@ import functools
 from src.utils import menu
 from src.utils import settings
 from src.thirdparty.colorama import Fore, Back, Style, init
+from src.thirdparty.six.moves import urllib as _urllib
 
 """
-Safely removes (purges) output directory.
+Safely removes (purges) output directory. With -u, scoped to just that target's subdirectory.
 """
 
 def purge():
   directory = settings.OUTPUT_DIR
+  if menu.options.url:
+    host = _urllib.parse.urlparse(menu.options.url).netloc.replace(":", "_")
+    if host:
+      directory = os.path.join(directory, host)
+  # Absolute - the chdir below would otherwise break this relative path.
+  directory = os.path.abspath(directory)
   if not os.path.isdir(directory):
     warn_msg = "Skipping purging of directory '" + directory + "', as it does not exist."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))

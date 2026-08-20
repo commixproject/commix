@@ -360,7 +360,7 @@ def shellshock_handler(url, http_request_method, filename):
           # Enumeration options.
           if settings.ENUMERATION_DONE:
             while True:
-              message = "Do you want to ignore stored session and enumerate again? [y/N] > "
+              message = "Do you want to ignore stored session and enumerate again? [y/N] "
               enumerate_again = common.read_input(message, default="N", check_batch=True)
               if enumerate_again in settings.CHOICE_YES:
                 enumeration(url, cve, check_header, filename)
@@ -378,7 +378,7 @@ def shellshock_handler(url, http_request_method, filename):
           # File access options.
           if settings.FILE_ACCESS_DONE == True:
             while True:
-              message = "Do you want to ignore stored session and access files again? [y/N] > "
+              message = "Do you want to ignore stored session and access files again? [y/N] "
               file_access_again = common.read_input(message, default="N", check_batch=True)
               if file_access_again in settings.CHOICE_YES:
                 file_access(url, cve, check_header, filename)

@@ -50,7 +50,7 @@ Change the crawling depth level.
 """
 def set_crawling_depth():
   while True:
-    message = "Do you want to change the crawling depth level (" + str(menu.options.crawldepth) + ")? [y/N] > "
+    message = "Do you want to change the crawling depth level (" + str(menu.options.crawldepth) + ")? [y/N] "
     message = common.read_input(message, default="N", check_batch=True)
     if message in settings.CHOICE_YES or message in settings.CHOICE_NO:
       break
@@ -63,7 +63,7 @@ def set_crawling_depth():
   # Change the crawling depth level.
   if message in settings.CHOICE_YES:
     while True:
-      message = "Please enter the crawling depth level: > "
+      message = "Please enter the crawling depth level: "
       message = common.read_input(message, default="1", check_batch=True)
       menu.options.crawldepth = message
       return
@@ -75,7 +75,7 @@ Normalize crawling results.
 def normalize_results(output_href):
   results = []
   while True:
-    message = "Do you want to normalize crawling results? [Y/n] > "
+    message = "Do you want to normalize crawling results? [Y/n] "
     message = common.read_input(message, default="Y", check_batch=True)
     if message in settings.CHOICE_YES:
       # Dedupe by path and parameter names, keeping the first occurrence.
@@ -113,7 +113,7 @@ def store_crawling(output_href):
   try:
     while True:
       message = "Do you want to store crawling results to a temporary file "
-      message += "(for eventual further processing with other tools)? [y/N] > "
+      message += "(for eventual further processing with other tools)? [y/N] "
       message = common.read_input(message, default="N", check_batch=True)
       if message in settings.CHOICE_YES:
         filename = tempfile.mkstemp(suffix=settings.OUTPUT_FILE_EXT)[1]
@@ -153,7 +153,7 @@ def sitemap(url, http_request_method):
         while True:
           warn_msg = "A sitemap recursion detected (" + url + ")."
           settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-          message = "Do you want to follow? [Y/n] > "
+          message = "Do you want to follow? [Y/n] "
           message = common.read_input(message, default="Y", check_batch=True)
           if message in settings.CHOICE_YES:
             sitemap(url, http_request_method)
@@ -234,7 +234,7 @@ def enable_crawler():
   message = ""
   if not settings.CRAWLING:
     while True:
-      message = "Do you want to enable crawler? [y/N] > "
+      message = "Do you want to enable crawler? [y/N] "
       message = common.read_input(message, default="N", check_batch=True)
       if message in settings.CHOICE_YES:
         menu.options.crawldepth = 1
@@ -254,7 +254,7 @@ Check for the existence of site's sitemap
 def check_sitemap():
   while True:
     message = "Do you want to check target"+ ('', 's')[settings.MULTI_TARGETS] + " for "
-    message += "the existence of site's sitemap(.xml)? [y/N] > "
+    message += "the existence of site's sitemap(.xml)? [y/N] "
     message = common.read_input(message, default="N", check_batch=True)
     if message in settings.CHOICE_YES:
       settings.SITEMAP_CHECK = True

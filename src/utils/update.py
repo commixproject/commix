@@ -126,7 +126,7 @@ def check_for_update():
        ((int(settings.VERSION_NUM.replace(".", "")[:2]) == int(update_version.replace(".", "")[:2])) and \
          int(settings.VERSION_NUM.replace(".", "")[2:]) < int(update_version.replace(".", "")[2:])):
       while True:
-        message = "Do you want to update to the latest version now? [Y/n] > "
+        message = "Do you want to update to the latest version now? [Y/n] "
         do_update = common.read_input(message, default="Y", check_batch=True)
         if do_update in settings.CHOICE_YES:
           updater()
@@ -217,7 +217,7 @@ def check_unicorn_version(current_version):
           action = "install"
         else:
           action = "update to"
-        message = "Do you want to " + action + " the latest version now? [Y/n] > "
+        message = "Do you want to " + action + " the latest version now? [Y/n] "
         do_update = common.read_input(message, default="Y", check_batch=True)
         if do_update in settings.CHOICE_YES:
             unicorn_updater(current_version)
