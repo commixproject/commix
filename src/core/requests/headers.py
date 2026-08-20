@@ -211,6 +211,8 @@ def check_http_traffic(request):
   _ = False
   response = False
   unauthorized = False
+  # Reused below instead of a fresh request, so a matched error isn't sent twice.
+  pending_error = None
   while stability.should_keep_retrying(_, unauthorized):
     if any((settings.REVERSE_TCP, settings.BIND_TCP)):
       _ = True
@@ -253,6 +255,7 @@ def check_http_traffic(request):
         with settings.REQUESTS_LOCK:
           stability.expand_retry_budget()
       if [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(err_msg)]:
+        pending_error = err_msg
         break
 
     except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.RemoteDisconnected, _http_client.IncompleteRead, _http_client.InvalidURL, Exception) as err_msg:
@@ -261,11 +264,15 @@ def check_http_traffic(request):
       else:
         if not settings.INIT_TEST:
           checks.connection_exceptions(err_msg)
+        if isinstance(err_msg, (_urllib.error.HTTPError, _urllib.error.URLError, SocketError, _http_client.BadStatusLine, _http_client.RemoteDisconnected, _http_client.IncompleteRead)):
+          pending_error = err_msg
         break
 
   while True:
     try:
       if response is False:
+        if pending_error is not None:
+          raise pending_error
         response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
       # Make .read() idempotent so callers can safely reuse this response.
       _raw_body = response.read()

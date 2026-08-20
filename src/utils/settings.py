@@ -296,7 +296,7 @@ DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "80"
+REVISION = "81"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1373,6 +1373,8 @@ RESPONSE_TIMES = []
 LAGGING_CHECKED = False
 LAGGING_DETECTED = False
 TIME_DELAY_CANDIDATES = 3
+# Retries for a failed (not just slow) request during time-based measurement.
+TIME_RELATED_ATTACK_RETRIES = 3
 
 # Best known timesec for this target, reused across commands to avoid recalibration.
 CALIBRATED_TIMESEC = None

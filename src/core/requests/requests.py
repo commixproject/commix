@@ -567,6 +567,12 @@ def init_injection(payload, http_request_method, url):
   response = get_request_response(request)
 
   if settings.TIME_RELATED_ATTACK:
+    # A failed request measured nothing real - retry instead of using its elapsed time.
+    failed_attempts = 0
+    while response is False and failed_attempts < settings.TIME_RELATED_ATTACK_RETRIES:
+      failed_attempts += 1
+      start = time.time()
+      response = get_request_response(request)
     end = time.time()
     response = end - start
   else:

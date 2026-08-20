@@ -1,7 +1,9 @@
 ## Version 4.2 (TBA)
-* Revised: Optimized parameter detection by skipping unnecessary value retrieval during testing.
+* Revised: Improved HTTP error handling reliability and performance.
 * Revised: Improved data extraction performance for time-related techniques.
 * Fixed: Resumed stored techniques are trusted immediately, without a redundant live re-check.
+* Added: Time-related techniques can skip a parameter's real, slow value once proven unnecessary for detection.
+* Fixed: Improved reliability of HTTP error handling to avoid duplicate requests and inaccurate delay measurements.
 * Revised: Improved switch `--purge` only to clear the current target's session.
 * Revised: Improved WAF/IPS detection coverage, now cached per target across resumed scans.
 * Added: Interactive Ctrl-C handling during detection and exploitation, with cleaner exit handling.

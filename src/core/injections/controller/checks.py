@@ -1157,7 +1157,7 @@ def check_bind_tcp_options(bind_tcp_option):
     return 3
 
 """
-Ignore error messages and continue the tests.
+Ignore the error and continue testing; the choice is remembered for this code.
 """
 def continue_tests(err):
   # Ignoring (problematic) HTTP error codes.
@@ -1167,27 +1167,11 @@ def continue_tests(err):
   # Possible WAF/IPS
   try:
     detect_waf(err.code)
-
-    message = ""
-    if str(err.code) == settings.NOT_FOUND_ERROR:
-      message = "Continuing in such cases is not recommended. "
-    
-    while True:
-      message += "Do you want to ignore HTTP response code '" + str(err.code)
-      message += "' and proceed with testing? [y/N] "
-      continue_tests = common.read_input(message, default="N", check_batch=True)
-      if continue_tests in settings.CHOICE_YES:
-        settings.IGNORE_CODE.append(err.code)
-        return True
-      elif continue_tests in settings.CHOICE_NO:
-        info_msg = "Skipping further testing on the target URL."
-        settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-        return False
-      elif continue_tests in settings.CHOICE_QUIT:
-        return False
-      else:
-        common.invalid_option(continue_tests)
-        pass
+    warn_msg = "The web server responded with an HTTP error code '" + str(err.code)
+    warn_msg += "', which could interfere with the results of the tests."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    settings.IGNORE_CODE.append(err.code)
+    return True
   except AttributeError:
     # No HTTP code (e.g. connection reset) - retry a bounded number of times.
     if stability.should_retry_connection_error(err):
