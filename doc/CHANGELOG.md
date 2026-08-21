@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Fixed: Refactored `--disable-coloring` switch to reliably strip ANSI color codes from output.
 * Revised: Improved `--time-limit` to reliably abort the scan at the configured limit.
 * Fixed: Improved login authentication to correctly capture cookies and submit via POST.
 * Revised: Improved file-read reliability by checking file existence before extraction.
@@ -7,7 +8,7 @@
 * Revised: Improved data extraction performance for time-related techniques.
 * Fixed: Resumed stored techniques are trusted immediately, without a redundant live re-check.
 * Fixed: Improved reliability of HTTP error handling to avoid duplicate requests and inaccurate delay measurements.
-* Revised: Improved switch `--purge` only to clear the current target's session.
+* Revised: Improved `--purge` switch only to clear the current target's session.
 * Revised: Improved WAF/IPS detection coverage, now cached per target across resumed scans.
 * Added: Interactive Ctrl-C handling during detection and exploitation, with cleaner exit handling.
 * Fixed: Multiple bug-fixes improving detection accuracy and reliability for results-based techniques.

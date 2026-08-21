@@ -50,6 +50,12 @@ def sys_argv_checks():
 sys_argv_checks()
 from src.thirdparty.colorama import Fore, Back, Style, init
 
+from src.utils import colors
+if not colors.ENABLE_COLORING:
+  # Strip ANSI codes at write time - the print_*_msg helpers below always
+  # build them in, regardless of this flag.
+  init(strip=True, convert=False)
+
 class HTTPMETHOD(object):
   GET = "GET"
   POST = "POST"
@@ -285,7 +291,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "85"
+REVISION = "86"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:

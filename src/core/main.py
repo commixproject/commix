@@ -57,8 +57,9 @@ if settings.IS_WINDOWS:
   import codecs
   # Reference: https://github.com/nodejs/node/issues/12786#issuecomment-298652440
   codecs.register(lambda name: codecs.lookup("utf-8") if name == "cp65001" else None)
-  # Use Colorama to make Termcolor work on Windows too :)
-  init()
+  # Use Colorama to make Termcolor work on Windows too :) - keep stripping if '--disable-coloring' set it.
+  from src.utils import colors
+  init(strip=(True if not colors.ENABLE_COLORING else None), convert=(False if not colors.ENABLE_COLORING else None))
 
 
 """
