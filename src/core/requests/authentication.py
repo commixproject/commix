@@ -50,14 +50,13 @@ def authentication_process(http_request_method):
     cj = _http_cookiejar.CookieJar()
     opener = _urllib.request.build_opener(_urllib.request.HTTPCookieProcessor(cj), redirection.RedirectHandler())
     _urllib.request.install_opener(opener)
-    request = _urllib.request.Request(auth_url, auth_data.encode(settings.DEFAULT_CODEC), method=http_request_method)
+    # Login data is always form-submitted as POST, regardless of the target URL's own method.
+    request = _urllib.request.Request(auth_url, auth_data.encode(settings.DEFAULT_CODEC), method=settings.HTTPMETHOD.POST)
     # Check if defined extra headers.
     headers.do_check(request)
-    # check_http_traffic() already sends the request and returns the response -
-    # reuse it instead of sending the same request a second time.
-    response = headers.check_http_traffic(request)
-    if response is None:
-      response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+    # Must go through the cookie-jar opener installed above (not
+    # check_http_traffic()'s own opener), or the jar never gets filled.
+    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     # HTTPCookieProcessor only fills the jar after the response is received.
     cookies = ""
     for cookie in cj:

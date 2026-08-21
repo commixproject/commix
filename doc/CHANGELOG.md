@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Fixed: Improved login authentication to correctly capture cookies and submit via POST.
 * Revised: Improved file-read reliability by checking file existence before extraction.
 * Revised: Improved HTTP error handling reliability and performance.
 * Revised: Optimized parameter detection by skipping unnecessary value retrieval during testing.
