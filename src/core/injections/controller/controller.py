@@ -166,7 +166,6 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
 
   settings.CLASSIC_STATE = True
   try:
-    # checks.perform_payload_modification(payload="")
     for whitespace in settings.WHITESPACES:
       if not settings.IDENTIFIED_COMMAND_INJECTION:
         _ = 0
@@ -457,10 +456,8 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
 
     # Load modules
     modules_handler.load_modules(url, http_request_method, filename)
-    # checks.tamper_scripts(stored_tamper_scripts=False)
 
     settings.CHECKING_PARAMETER = ""
-    settings.TESTABLE_PARAMETER = check_parameter
     if not header_name == settings.COOKIE and not the_type == "HTTP Header":
       settings.CHECKING_PARAMETER = checks.check_http_method(url)
       settings.CHECKING_PARAMETER += ('', ' JSON')[settings.IS_JSON] + ('', ' SOAP/XML')[settings.IS_XML]
@@ -532,7 +529,6 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
         if checks.procced_with_file_based_technique():
           menu.options.tech = "f"
 
-      settings.START_SCANNING = True
       end_detection = False
       def _run_time_based():
         _ensure_time_warmup()
@@ -782,8 +778,6 @@ def do_injection(found, data_type, header_name, url, http_request_method, filena
     except (KeyError, ValueError):
       continue
 
-    settings.TESTABLE_PARAMETER = check_param
-    
     if settings.USER_DEFINED_POST_DATA:
       active_targets = injection_targets
     else:

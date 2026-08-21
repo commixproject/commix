@@ -118,7 +118,6 @@ def reverse_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_req
       elif result == 3:
         settings.REVERSE_TCP = False
         bind_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again, timesec, payload, OUTPUT_TEXTFILE, technique)
-        #reverse_tcp_config(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, alter_shell, filename, os_shell_option, go_back, go_back_again)
       return go_back, go_back_again
 
     # execute reverse TCP shell

@@ -55,12 +55,6 @@ def _session_connection():
 """
 Split the URL and return only the base part without any query parameters.
 """
-no_such_table = False
-
-"""
-Generate a safe and valid SQLite table name derived from the host part of the given URL.
-Replaces special characters with underscores to comply with SQLite naming rules.
-"""
 def split_url(url):
   return url.split("?")[0]
 

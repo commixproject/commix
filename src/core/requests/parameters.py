@@ -136,7 +136,6 @@ def do_GET_check(url, http_request_method):
   url = checks.process_custom_injection_data(url)
   # Check for REST-ful URLs format.
   if "?" not in url:
-    settings.USER_DEFINED_URL_DATA = False
     if settings.INJECT_TAG not in url and not menu.options.shellshock:
       if len(settings.TESTABLE_PARAMETERS_LIST) != 0 or \
          len(settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST) != 0 or \
@@ -866,103 +865,5 @@ Wrapper for processing a custom-defined HTTP header injection.
 """
 def specify_custom_header_parameter(custom_header_value):
   return specify_header_injection_parameter(custom_header_value, settings.CUSTOM_HEADER_NAME)
-
-"""
-A multipart field: name, value, and occurrence index.
-"""
-class Parameter(object):
-
-  def __init__(self, name, value, occurrence=0):
-    self.name = name
-    self.value = value
-    self.occurrence = occurrence
-
-"""
-Index of the N-th (0-indexed) occurrence of 'substring' in 'text', or -1.
-"""
-def find_occurrence(text, substring, n):
-  if not substring:
-    return -1
-  start = 0
-  for _ in range(n + 1):
-    index = text.find(substring, start)
-    if index == -1:
-      return -1
-    start = index + 1
-  return index
-
-"""
-Insert 'marker' right after the N-th occurrence of 'value' in 'text'.
-"""
-def place_marker(text, value, occurrence, marker):
-  index = find_occurrence(text, value, occurrence)
-  if index == -1:
-    err_msg = "It seems the provided data does not contain the requested value."
-    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
-  end = index + len(value)
-  return text[:end] + marker + text[end:]
-
-"""
-Builds one candidate variant of 'text' per parameter, marker after its value.
-"""
-def build_variants(text, parameters, insert_empty, marker=None):
-  if marker is None:
-    marker = settings.INJECT_TAG
-  variants = []
-  for parameter in parameters:
-    if not parameter.value:
-      if menu.options.skip_empty:
-        continue
-      variants.append(insert_empty(text, parameter))
-    else:
-      variants.append(place_marker(text, parameter.value, parameter.occurrence, marker))
-  return variants
-
-"""
-Parses a 'multipart/form-data' body into a list of Parameters.
-"""
-def get_multipart_parameters(data, boundary):
-  delimiter = "--" + boundary
-  parameters = []
-  # Track occurrences instead of data.find(), which always matches the first.
-  seen_counts = {}
-  for part in data.split(delimiter)[1:-1]:
-    part = part.lstrip(settings.END_LINE.CRLF)
-    match = re.search(r"(\r\n\r\n|\n\n)", part)
-    if not match:
-      continue
-    part_headers, part_body = part[:match.start()], part[match.end():]
-    part_body = re.sub(r"(\r\n|\n)\Z", "", part_body)
-    name_match = re.search(r'name="([^"]*)"', part_headers)
-    if not name_match:
-      continue
-    name = name_match.group(1)
-    filename_match = re.search(r'filename="([^"]*)"', part_headers)
-    if filename_match:
-      filename = filename_match.group(1)
-      occurrence = seen_counts.get(filename, 0)
-      seen_counts[filename] = occurrence + 1
-      parameters.append(Parameter(name + "[filename]", filename, occurrence))
-    if part_body:
-      occurrence = seen_counts.get(part_body, 0)
-      seen_counts[part_body] = occurrence + 1
-      parameters.append(Parameter(name, part_body, occurrence))
-    else:
-      parameters.append(Parameter(name, ""))
-  return parameters
-
-"""
-'insert_empty' for multipart: marker after the empty field's blank line.
-"""
-def insert_empty_multipart(text, parameter):
-  pattern = r'name="' + re.escape(parameter.name) + r'"[^\r\n]*(\r\n\r\n|\n\n)'
-  match = re.search(pattern, text)
-  if not match:
-    err_msg = "It seems the provided data does not contain the empty field '" + parameter.name + "'."
-    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
-  return text[:match.end()] + settings.INJECT_TAG + text[match.end():]
-
 
 # eof

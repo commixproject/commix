@@ -107,10 +107,9 @@ def logfile_parser():
     settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
     raise SystemExit()
 
-  single_request = True
   pattern = r'HTTP/([\d.]+)'
   if len(re.findall(pattern, request)) > 1:
-    single_request = multi_requests()
+    multi_requests()
 
   # Safely determine HTTP method
   if len(settings.HTTP_METHOD) == 0:

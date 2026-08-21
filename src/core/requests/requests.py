@@ -300,8 +300,6 @@ def _measure_response_time_with_auth_handling(url, http_request_method):
                   else:
                     common.invalid_option(do_update)
                     pass
-                else:
-                  checks.http_auth_err_msg()
         else:
           raise SystemExit()
 

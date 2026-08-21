@@ -54,12 +54,6 @@ class HTTPMETHOD(object):
   GET = "GET"
   POST = "POST"
   HEAD = "HEAD"
-  PUT = "PUT"
-  DELETE = "DELETE"
-  TRACE = "TRACE"
-  OPTIONS = "OPTIONS"
-  CONNECT = "CONNECT"
-  PATCH = "PATCH"
 
 # Status
 FAIL_MSG = Fore.RED + " " * 10 + Style.RESET_ALL
@@ -181,10 +175,6 @@ def print_request_num(number):
   result = TOTAL_OF_REQUESTS_COLOR + "#" + str(number) + Style.RESET_ALL
   return result
 
-def print_output(output):
-  result = Fore.GREEN + Style.BRIGHT + str(output) + Style.RESET_ALL
-  return result
-
 # Print HTTP response content (verbose mode)
 def print_http_response_content(content):
   result = HTTP_CONTENT_SIGN + str(content) + Style.RESET_ALL
@@ -293,10 +283,9 @@ The global variables.
 # About
 APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
-DESCRIPTION = "The command injection exploiter"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "82"
+REVISION = "83"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -354,7 +343,6 @@ AUTH_CRED_REGEX = r"^(.*?):(.*?)$"
 INJECT_TAG = "INJECT_HERE"
 INJECT_TAG_REGEX = r"(?i)INJECT[_]?HERE"
 VALUE_BOUNDARIES = r'[\\/](.+?)[\\/]'
-INJECT_INSIDE_BOUNDARIES = None
 
 # Safe characters to keep unescaped in URL paths
 SAFE_PATH = "*%/"
@@ -430,7 +418,6 @@ CODE_INJECTION_WARNINGS = ["eval()'d code", "runtime-created function", "usort()
 SKIP_CODE_INJECTIONS = False
 SKIP_COMMAND_INJECTIONS = False
 
-USER_DEFINED_URL_DATA = False
 # User-defined stored POST data.
 USER_DEFINED_POST_DATA = ""
 # Ignore user-defined stored POST data.
@@ -459,9 +446,6 @@ NOT_TESTABLE_PARAMETERS = True
 TESTED_PARAMETERS_LIST = []
 METHODS_WITH_NON_LISTED_PARAMS = []
 
-# Skip testing for given parameter(s) - comma separated.
-SKIP_PARAMETER = ""
-
 # Use a proxy to connect to the target URL.
 SCHEME = ""
 
@@ -477,9 +461,6 @@ IGNORE_IDENTIFIED_TARGET_OS = None
 
 # Verbosity level (0-4, Default: 0)
 VERBOSITY_LEVEL = 0
-
-HTML_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "html"))
-DISABLED_CONTENT_EXTENSIONS = (".py", ".pyc", ".md", ".txt", ".bak", ".conf", ".zip", "~")
 
 # Detection / Exploitation phase(s)
 WAF_DETECTION_PHASE = False
@@ -507,9 +488,6 @@ SESSION_APPLIED_TECHNIQUES = ""
 PLATFORM = os.name
 IS_WINDOWS = PLATFORM == "nt"
 
-# Check if OS is Windows.
-#IS_WINDOWS = hasattr(sys, "getwindowsversion")
-
 # Git URL.
 GIT_URL = "https://github.com/commixproject/" + APPLICATION + ".git"
 
@@ -532,9 +510,6 @@ OUTPUT_FILE = OUTPUT_FILE_NAME + OUTPUT_FILE_EXT
 MAXLEN = 10000
 
 STDIN_PARSING = False
-
-# Maximum response total page size (trimmed if larger)
-MAX_CONNECTION_TOTAL_SIZE = 100 * 1024 * 1024
 
 # Slow target response.
 SLOW_TARGET_RESPONSE = 3
@@ -566,9 +541,6 @@ STABILITY_SIMILARITY_THRESHOLD = 0.98
 REFLECTIVE_VALUE_FOUND = False
 
 RESPONSE_DELAYS = False
-
-# The testable parameter.
-TESTABLE_PARAMETER = ""
 
 TESTABLE_VALUE = ""
 
@@ -678,9 +650,6 @@ INJECTION_LEVEL = 0
 USER_APPLIED_LEVEL = False
 PERFORM_BASIC_SCANS = True
 
-# Start scanning state
-START_SCANNING = None
-
 # Default Temp Directory
 TMP_PATH = ""
 
@@ -750,7 +719,7 @@ FILE_WRITE = "printf "
 # /etc/passwd
 PASSWD_FILE = "/etc/passwd"
 
-SYS_USERS = EVAL_SYS_USERS  = "awk -F ':' '{print $1}{print $3}{print $6}' " + PASSWD_FILE
+SYS_USERS = "awk -F ':' '{print $1}{print $3}{print $6}' " + PASSWD_FILE
 
 # Exports users of localgroup
 WIN_SYS_USERS = "powershell.exe -InputFormat none write-host (([string]$(net user)[4..($(net user).length-3)]))"
@@ -834,7 +803,6 @@ SCHEME = ""
 # TOR HTTP Proxy
 TOR_HTTP_PROXY_IP = "127.0.0.1"
 TOR_HTTP_PROXY_PORT = "8118"
-TOR_HTTP_PROXY_SCHEME = "https"
 CHECK_TOR_PAGE = "https://check.torproject.org/"
 
 # Cookie injection
@@ -856,9 +824,6 @@ CUSTOM_HEADERS_NAMES = []
 CUSTOM_HEADER_CHECK = ""
 CUSTOM_HEADER_NAME = ""
 CUSTOM_HEADER_VALUE = ""
-
-# Valid URL format check
-VALID_URL_FORMAT = r"https?://(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%?#-]{1,310})?"
 
 VALID_URL = True
 
@@ -1073,11 +1038,9 @@ SHOW_LOGS_MSG = False
 
 # Enumeration options
 ENUMERATION_DONE = False
-ENUMERATE_AGAIN = False
 
 # FIle access options
 FILE_ACCESS_DONE = False
-FILE_ACCESS_AGAIN = False
 
 # Set when '--file-dest' targets the "/tmp/" directory, to switch straight to the tempfile-based technique.
 CALL_TMP_BASED = False
@@ -1107,9 +1070,6 @@ BASE64_RECOGNITION_REGEX = r'^[A-Za-z0-9+/]+[=]{0,2}$'
 # Hex encoded characters recognition
 HEX_RECOGNITION_REGEX = r'^(0[xX])?[0-9a-fA-F]+$'
 
-# GET parameters recognition
-GET_PARAMETERS_REGEX = r"(.*?)\?(.+)"
-
 DIRECTORY_REGEX = r'(?:/[^/]+)+?/\w+\.\w+'
 
 # TFB Decimal
@@ -1123,7 +1083,6 @@ WIN_PHP_DIR = "C:\\xampp\\php\\php.exe"
 USER_DEFINED_PHP_DIR = False
 
 # Comment out
-WIN_COMMENT = "REM"
 COMMENT = "#"
 
 #Delete command
@@ -1175,7 +1134,6 @@ CGI_SCRIPTS = os.path.join(TXT_DIR, "shocker-cgi_list.txt")
 
 REQUIRED_AUTHENTICATION = False
 
-INJECTED_HTTP_HEADER = False
 INJECTION_CHECKER = False
 
 INSTALL_DIR = "/usr/share/"
@@ -1416,14 +1374,8 @@ PARTIAL_VALUE_MARKER = "\x02COMMIX_PARTIAL\x02"
 # a long output shows only a trailing window of this width instead of growing unbounded.
 PROGRESS_DISPLAY_WIDTH = 60
 
-# End of file
-EOF = False
-
 # Init Test
 INIT_TEST = ""
-
-# Check Tor again
-TOR_CHECK_AGAIN = True
 
 # URL for checking internet connection.
 CHECK_INTERNET_ADDRESS = "http://ipinfo.io"
@@ -1498,33 +1450,13 @@ HOST = "Host"
 USER_AGENT = "User-Agent"
 REFERER = "Referer"
 ACCEPT = "Accept"
-ACCEPT_CHARSET = "Accept-Charset"
 ACCEPT_ENCODING = "Accept-Encoding"
-ACCEPT_LANGUAGE = "Accept-Language"
 AUTHORIZATION = "Authorization"
-CACHE_CONTROL = "Cache-Control"
-CONNECTION = "Connection"
-CONTENT_ENCODING = "Content-Encoding"
 CONTENT_LENGTH = "Content-Length"
-CONTENT_RANGE = "Content-Range"
 CONTENT_TYPE = "Content-Type"
-EXPIRES = "Expires"
-IF_MODIFIED_SINCE = "If-Modified-Since"
-IF_NONE_MATCH = "If-None-Match"
-LAST_MODIFIED = "Last-Modified"
-LOCATION = "Location"
-PRAGMA = "Pragma"
-PROXY_AUTHORIZATION = "Proxy-Authorization"
-PROXY_CONNECTION = "Proxy-Connection"
-RANGE = "Range"
-REFERER = "Referer"
-REFRESH = "Refresh"  # Reference: http://stackoverflow.com/a/283794
 SERVER = "Server"
 SET_COOKIE = "Set-Cookie"
-TRANSFER_ENCODING = "Transfer-Encoding"
-VIA = "Via"
 X_POWERED_BY = "X-Powered-By"
-X_DATA_ORIGIN = "X-Data-Origin"
 # HTTP Headers values
 ACCEPT_VALUE = "*/*"
 
@@ -1532,16 +1464,12 @@ ACCEPT_VALUE = "*/*"
 HTTP_HEADERS = [ USER_AGENT.lower(), REFERER.lower(), HOST.lower() ]
 SHELLSHOCK_HTTP_HEADERS =[ COOKIE, USER_AGENT, REFERER ]
 
-# Regular expression used for ignoring some special chars
-IGNORE_SPECIAL_CHAR_REGEX = "[^/()A-Za-z0-9.:,_+]"
 IGNORE_JSON_CHAR_REGEX = r"[{}\"\[\]]"
 
 FLATTEN_JSON_SEPARATOR = ''.join(random.choice("{}") for _ in range(10)) + "_"
 JSON_ENUMERATION_STARTED = False
 
 PERFORM_CRACKING = False
-
-PAGE_COMPRESSION = None
 
 # Force usage of given HTTP method (e.g. PUT).
 HTTP_METHOD = ""
@@ -1592,7 +1520,6 @@ CHECKING_PARAMETER = ""
 # Run host OS command(s) when injection point is found.
 ALERT = False
 
-USE_PCRE_E_MODIFIER = None
 PCRE_MODIFIER = "/e"
 
 # eof

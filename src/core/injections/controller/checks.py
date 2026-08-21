@@ -240,7 +240,7 @@ def custom_injection_marker_character(url, http_request_method):
   
   if url and settings.CUSTOM_INJECTION_MARKER_CHAR in url:
     option = "'-u'"
-    _ = settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.URL = settings.USER_DEFINED_URL_DATA = True
+    _ = settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.URL = True
   if menu.options.data and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.data:
     option = str(http_request_method) + " body"
     _ = settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.DATA = True
@@ -740,16 +740,6 @@ def print_percentage(float_percent, no_result, shell):
   return percent
 
 """
-Get value inside boundaries.
-"""
-def get_value_value_inside_boundaries(value):
-  try:
-    value = re.search(settings.VALUE_BOUNDARIES, value).group(1)
-  except Exception as e:
-    pass
-  return value
-
-"""
 Check value inside boundaries.
 """
 def value_inside_boundaries(parameter, http_request_method):
@@ -783,11 +773,9 @@ def value_inside_boundaries(parameter, http_request_method):
             message += " ('" + value + "') [Y/n] "
             procced_option = common.read_input(message, default="Y", check_batch=True)
             if procced_option in settings.CHOICE_YES:
-              settings.INJECT_INSIDE_BOUNDARIES = True
               parameter = parameter.replace(value_inside_boundaries, value)
               break
             elif procced_option in settings.CHOICE_NO:
-              settings.INJECT_INSIDE_BOUNDARIES = False
               break
             elif procced_option in settings.CHOICE_QUIT:
               raise SystemExit()
@@ -871,12 +859,10 @@ def process_page_content(response, action):
       else:  # gzip / x-gzip
         with contextlib.closing(gzip.GzipFile(fileobj=io.BytesIO(page), mode='rb')) as gz:
           page = gz.read()
-      settings.PAGE_COMPRESSION = True
     except (zlib.error, OSError, EOFError) as e:
       # Only catch relevant decompression errors
       warn_msg = "Page decompression failed, turning off page compression."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-      settings.PAGE_COMPRESSION = False
 
   # Encode or decode page content
   error_occurred = False
@@ -1190,16 +1176,6 @@ def unavailable_option(check_option):
   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
-Transformation of separators if time-based injection
-"""
-def time_based_separators(separator, http_request_method):
-  if separator == "||"  or separator == "&&" :
-    separator = separator[:1]
-    if menu.options.data:
-      separator = _urllib.parse.quote(separator)
-  return separator
-
-"""
 Information message if platform does not have
 GNU 'readline' module installed.
 """
@@ -1506,14 +1482,6 @@ def EOFError_err_msg():
     settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
   err_msg = "Exiting, due to EOFError."
   settings.print_data_to_stdout(settings.print_error_msg(err_msg))
-
-"""
-Message regarding unexpected time delays
-"""
-def time_delay_recommendation():
-  warn_msg = "Due to unexpected time delays, it is highly "
-  warn_msg += "recommended to enable the 'reverse_tcp' option." + settings.END_LINE.LF
-  settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_warning_msg(warn_msg))
 
 """
 Message regarding unexpected time delays due to unstable requests
@@ -2357,9 +2325,6 @@ def is_empty(multi_parameters, http_request_method):
 
   if len(empty_parameters) == len(multi_parameters):
     all_empty = True
-    
-  if menu.options.skip_empty:
-    settings.SKIP_PARAMETER = empty_parameters
 
   empty_parameters = ", ".join(empty_parameters)
   if len(empty_parameters) > 0:
@@ -2399,7 +2364,7 @@ def check_quotes_json_data(data):
 def is_JSON_check(parameter):
   try:
     # Attempt to load the JSON string
-    json_object = json.loads(parameter.replace(settings.INJECT_TAG,""))
+    json.loads(parameter.replace(settings.INJECT_TAG,""))
     settings.IS_VALID_JSON = True
     return settings.IS_VALID_JSON
   except json.JSONDecodeError as err_msg:
@@ -2712,7 +2677,6 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
               sys_users = ":".join(str(p) for p in sys_users)
               count = count + 1
               fields = sys_users.split(":")
-              fields1 = "".join(str(p) for p in fields)
               # System users privileges enumeration
               try:
                 if not fields[2].startswith("/"):
@@ -3347,7 +3311,6 @@ def time_related_export_injection_results(cmd, separator, output, check_exec_tim
   if output != "" and check_exec_time != 0 :
     info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(check_exec_time)) + "."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-    # settings.print_data_to_stdout(settings.print_output(output))
   else:
     # Could be separator filtration on target host, or simply an invalid/wrong command.
     if output != False :

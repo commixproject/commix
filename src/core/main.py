@@ -301,7 +301,6 @@ def url_response(url, http_request_method):
     settings.INIT_CONNECTION_FETCH_TIME = _conn_end
     settings.INIT_CONNECTION_URL = conn_url
   if settings.MULTI_TARGETS or settings.CRAWLING:
-    settings.TOR_CHECK_AGAIN = False
     # initiate total of requests
     settings.TOTAL_OF_REQUESTS = 0
 
@@ -1220,8 +1219,6 @@ try:
             if perform_check:
               if os_checks_num == 0:
                 settings.INIT_TEST = True
-              if url == clean_output_href[-1]:
-                settings.EOF = True
               # Reset the injection level
               if settings.INJECTION_LEVEL > settings.HTTP_HEADER_INJECTION_LEVEL:
                 settings.INJECTION_LEVEL = 1

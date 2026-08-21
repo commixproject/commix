@@ -82,7 +82,6 @@ def updater():
     try:
       requirement = "git"
       # Check if 'git' is installed.
-      # requirements.do_check(requirement)
       if requirements.do_check(requirement) == True:
         if settings.VERBOSITY_LEVEL != 0:
           debug_msg = settings.APPLICATION.capitalize() + " will try to update itself using '" + requirement + "' command."
@@ -163,7 +162,6 @@ def unicorn_updater(current_version):
     try:
       requirement = "git"
       # Check if 'git' is installed.
-      # requirements.do_check(requirement)
       if requirements.do_check(requirement) == True:
         settings.print_data_to_stdout(settings.SUCCESS_STATUS)
         if len(current_version) == 0:

