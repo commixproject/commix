@@ -18,6 +18,7 @@ import os
 import sys
 import time
 import random
+import signal
 from src.thirdparty.six.moves import http_client as _http_client
 # accept overly long result lines
 _http_client._MAXLINE = 1 * 1024 * 1024
@@ -686,6 +687,15 @@ try:
     raise SystemExit()
   else:
     settings.VERBOSITY_LEVEL = menu.options.verbose
+
+  # Hard '--time-limit' cutoff - a signal, immune to exception handling elsewhere.
+  if menu.options.time_limit and hasattr(signal, "alarm"):
+    def _time_limit_reached(signum, frame):
+      err_msg = "Reached the specified time limit of " + str(menu.options.time_limit) + " second(s)."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      os._exit(0)
+    signal.signal(signal.SIGALRM, _time_limit_reached)
+    signal.alarm(max(1, int(round(menu.options.time_limit))))
 
   if settings.VERBOSITY_LEVEL != 0:
     settings.print_data_to_stdout(settings.execution("Starting"))

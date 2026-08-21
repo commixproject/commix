@@ -1154,7 +1154,7 @@ def continue_tests(err):
   try:
     detect_waf(err.code)
     warn_msg = "The web server responded with an HTTP error code '" + str(err.code)
-    warn_msg += "', which could interfere with the results of the tests."
+    warn_msg += "' which could interfere with the results of the tests."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     settings.IGNORE_CODE.append(err.code)
     return True

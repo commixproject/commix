@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Revised: Improved `--time-limit` to reliably abort the scan at the configured limit.
 * Fixed: Improved login authentication to correctly capture cookies and submit via POST.
 * Revised: Improved file-read reliability by checking file existence before extraction.
 * Revised: Improved HTTP error handling reliability and performance.

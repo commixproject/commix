@@ -458,7 +458,7 @@ def request_failed(err_msg):
     elif [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]:
       status_code = [err_code for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]
       warn_msg = "The web server responded with an HTTP error code '" + str(status_code[0]) 
-      warn_msg += "', which could interfere with the results of the tests."
+      warn_msg += "' which could interfere with the results of the tests."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       if not settings.NOT_FOUND_ERROR in str(err_msg).lower():
         return False
