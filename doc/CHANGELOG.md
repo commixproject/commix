@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Revised: Improved `--alter-shell` character extraction to bisect instead of scan linearly.
 * Added: Dynamic parameter detection to identify parameters whose values change between requests.
 * Fixed: Time-related techniques persist the skip-testable-value optimization across resumed sessions.
 * Fixed: Benign patterns like 'Accept: */*' are no longer misdetected as a custom injection marker.

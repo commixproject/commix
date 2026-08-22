@@ -291,7 +291,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "88"
+REVISION = "89"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
