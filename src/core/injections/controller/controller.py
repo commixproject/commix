@@ -608,11 +608,13 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
           menu.options.tech = "f"
 
       def _run_time_based():
-        _ensure_time_warmup()
+        if len(menu.options.tech) == 0 or "t" in menu.options.tech:
+          _ensure_time_warmup()
         return timebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
 
       def _run_file_based():
-        _ensure_time_warmup()
+        if len(menu.options.tech) == 0 or "f" in menu.options.tech:
+          _ensure_time_warmup()
         return filebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
 
       end_detection = False

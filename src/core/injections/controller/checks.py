@@ -1565,6 +1565,7 @@ def warm_up_response_baseline(url, http_request_method):
       settings.print_data_to_stdout(".")
   if settings.VERBOSITY_LEVEL == 0:
     settings.print_data_to_stdout(" (done)")
+    settings.close_progress_line()
 
 """
 Warns once (whichever call site reaches it first) if the connection is already too jittery to trust automatically, and disables timesec auto-shrinking for the rest of the run. Returns True if lagging is (or was already found to be) detected.

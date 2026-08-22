@@ -126,7 +126,6 @@ def purge():
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
   try:
     failed = False
-    os.chdir(os.path.join(directory, ".."))
     shutil.rmtree(directory)
   except OSError as e:
     failed = True

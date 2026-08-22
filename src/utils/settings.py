@@ -254,6 +254,17 @@ def clear_current_line():
     PROGRESS_LINE_OPEN = False
 
 """
+Close the current spinner line with a trailing newline.
+"""
+def close_progress_line():
+  global PROGRESS_LINE_OPEN
+  with PRINT_LOCK:
+    if PROGRESS_LINE_OPEN:
+      sys.stdout.write(END_LINE.LF)
+      sys.stdout.flush()
+    PROGRESS_LINE_OPEN = False
+
+"""
 argv input errors
 """
 def sys_argv_errors():
@@ -291,7 +302,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "89"
+REVISION = "90"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
