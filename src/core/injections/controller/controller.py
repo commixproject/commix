@@ -19,6 +19,7 @@ import sys
 import time
 import random
 import string
+import difflib
 from src.utils import menu
 from src.utils import logs
 from src.utils import settings
@@ -323,6 +324,68 @@ def check_parameter_in_http_header(check_parameter):
   return inject_http_headers
 
 """
+Warn if changing the parameter never changes the response; classic/dynamic_code require reflection.
+"""
+def check_parameter_dynamism(url, http_request_method, check_parameter):
+  if settings.LOAD_SESSION or not settings.TESTABLE_VALUE:
+    return
+  if menu.options.tech and "c" not in menu.options.tech and "e" not in menu.options.tech:
+    return
+
+  marker = settings.TESTABLE_VALUE + settings.INJECT_TAG
+
+  def build(header_name, option_value, value):
+    if settings.USER_DEFINED_POST_DATA:
+      data = settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC)
+    else:
+      data = None
+    request = _urllib.request.Request(url, data, method=http_request_method)
+    headers.do_check(request)
+    request.add_header(header_name, option_value.replace(marker, value))
+    return request
+
+  if settings.COOKIE_INJECTION and menu.options.cookie and marker in menu.options.cookie:
+    param_label = "Cookie parameter '" + check_parameter + "'"
+    fetch = lambda v: build(settings.COOKIE, menu.options.cookie, v)
+  elif settings.USER_AGENT_INJECTION and menu.options.agent and marker in menu.options.agent:
+    param_label = "User-Agent HTTP header"
+    fetch = lambda v: build(settings.USER_AGENT, menu.options.agent, v)
+  elif settings.REFERER_INJECTION and menu.options.referer and marker in menu.options.referer:
+    param_label = "Referer HTTP header"
+    fetch = lambda v: build(settings.REFERER, menu.options.referer, v)
+  elif settings.HOST_INJECTION and menu.options.host and marker in menu.options.host:
+    param_label = "Host HTTP header"
+    fetch = lambda v: build(settings.HOST, menu.options.host, v)
+  else:
+    in_data = bool(menu.options.data) and marker in menu.options.data
+    if not in_data and marker not in url:
+      return
+    param_label = ("POST" if in_data else "GET") + " parameter '" + check_parameter + "'"
+    def fetch(v):
+      if in_data:
+        data = menu.options.data.replace(marker, v)
+        request = _urllib.request.Request(url, data.encode(settings.DEFAULT_CODEC), method=http_request_method)
+      else:
+        request = _urllib.request.Request(url.replace(marker, v), method=http_request_method)
+      headers.do_check(request)
+      return request
+
+  info_msg = "Testing if " + param_label + " is dynamic."
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
+  placeholder = ''.join(random.choice(string.ascii_uppercase) for _ in range(3))
+  try:
+    real_body = _urllib.request.urlopen(fetch(settings.TESTABLE_VALUE), timeout=settings.TIMEOUT).read()
+    placeholder_body = _urllib.request.urlopen(fetch(placeholder), timeout=settings.TIMEOUT).read()
+  except Exception:
+    return
+
+  ratio = difflib.SequenceMatcher(None, real_body, placeholder_body).ratio()
+  if ratio >= settings.STABILITY_SIMILARITY_THRESHOLD:
+    warn_msg = param_label + " does not appear to be dynamic."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
+"""
 Replace the parameter value with a disposable placeholder if the response stays the same but gets faster.
 """
 def attempt_skip_testable_value(url, http_request_method, check_parameter):
@@ -409,6 +472,7 @@ Proceed to the injection process for the appropriate parameter.
 def injection_proccess(url, check_parameter, http_request_method, filename, timesec):
   settings.NOT_TESTABLE_PARAMETERS = False
 
+  check_parameter_dynamism(url, http_request_method, check_parameter)
   url = attempt_skip_testable_value(url, http_request_method, check_parameter)
 
   os_targets = ([settings.TARGET_OS] if settings.TARGET_OS else
@@ -543,7 +607,6 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
         if checks.procced_with_file_based_technique():
           menu.options.tech = "f"
 
-      end_detection = False
       def _run_time_based():
         _ensure_time_warmup()
         return timebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
@@ -552,6 +615,7 @@ def injection_proccess(url, check_parameter, http_request_method, filename, time
         _ensure_time_warmup()
         return filebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
 
+      end_detection = False
       techniques = [
         lambda: classic_command_injection_technique(url, timesec, filename, http_request_method),
         lambda: dynamic_code_evaluation_technique(url, timesec, filename, http_request_method),

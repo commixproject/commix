@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: Dynamic parameter detection to identify parameters whose values change between requests.
 * Fixed: Time-related techniques persist the skip-testable-value optimization across resumed sessions.
 * Fixed: Benign patterns like 'Accept: */*' are no longer misdetected as a custom injection marker.
 * Fixed: Refactored `--disable-coloring` switch to reliably strip ANSI color codes from output.
