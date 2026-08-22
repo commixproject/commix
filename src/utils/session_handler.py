@@ -14,6 +14,7 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import os
+import re
 import sys
 import time
 import base64
@@ -558,6 +559,62 @@ def restore_waf_status(url):
     settings.WAF_ENABLED = True
     info_msg = "Previous session heuristics detected that the target is protected by some kind of WAF/IPS."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
+"""
+Store a confirmed testable-value placeholder, so a resumed session can reuse
+it instead of re-probing whether the parameter's real value is required.
+"""
+def import_testable_value_status(url, vuln_parameter, http_request_method, placeholder):
+  try:
+    with _session_connection() as conn:
+      table = table_name(url) + "_tv"
+      conn.execute("CREATE TABLE IF NOT EXISTS \"" + table + "\" (vuln_parameter VARCHAR, http_request_method VARCHAR, placeholder VARCHAR);")
+      conn.execute("DELETE FROM \"" + table + "\" WHERE vuln_parameter = ? AND http_request_method = ?;", (vuln_parameter, http_request_method))
+      conn.execute("INSERT INTO \"" + table + "\" (vuln_parameter, http_request_method, placeholder) VALUES (?, ?, ?)", (vuln_parameter, http_request_method, placeholder))
+      conn.commit()
+  except (sqlite3.OperationalError, sqlite3.DatabaseError):
+    pass
+
+"""
+Retrieve a previously confirmed testable-value placeholder. Returns None if nothing is stored.
+"""
+def check_stored_testable_value(url, vuln_parameter, http_request_method):
+  try:
+    with _session_connection() as conn:
+      table = table_name(url) + "_tv"
+      query = "SELECT name FROM sqlite_master WHERE name = ? AND type = 'table';"
+      if not conn.execute(query, (table,)).fetchone():
+        return None
+      row = conn.execute("SELECT placeholder FROM \"" + table + "\" WHERE vuln_parameter = ? AND http_request_method = ?;", (vuln_parameter, http_request_method)).fetchone()
+      return row[0] if row else None
+  except (sqlite3.OperationalError, sqlite3.DatabaseError):
+    return None
+
+"""
+Re-apply the stored placeholder to URL/data/prefix; the stored prefix still has the original value.
+"""
+def reapply_testable_value(url, vuln_parameter, http_request_method, prefix=None):
+  placeholder = check_stored_testable_value(url, vuln_parameter, http_request_method)
+  if not placeholder:
+    return (url, prefix) if prefix is not None else url
+  # Use the reloaded row's value; settings.TESTABLE_VALUE may already be a placeholder.
+  tag_pattern = r'([^&=]*)' + re.escape(settings.INJECT_TAG)
+  if menu.options.data and settings.INJECT_TAG in menu.options.data:
+    match = re.search(tag_pattern, menu.options.data)
+    if match and match.group(1) != placeholder:
+      menu.options.data = menu.options.data.replace(match.group(1) + settings.INJECT_TAG, placeholder + settings.INJECT_TAG)
+      settings.TESTABLE_VALUE = placeholder
+      settings.TESTABLE_VALUE_OPTIMIZED = True
+  elif settings.INJECT_TAG in url:
+    match = re.search(tag_pattern, url)
+    if match and match.group(1) != placeholder:
+      url = url.replace(match.group(1) + settings.INJECT_TAG, placeholder + settings.INJECT_TAG)
+      settings.TESTABLE_VALUE = placeholder
+      settings.TESTABLE_VALUE_OPTIMIZED = True
+  if prefix is not None and prefix and prefix != placeholder:
+    prefix = placeholder
+    settings.TESTABLE_VALUE_OPTIMIZED = True
+  return (url, prefix) if prefix is not None else url
 
 """
 Save valid authentication credentials (e.g., username and password) discovered during testing into the session database.

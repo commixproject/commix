@@ -291,7 +291,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "86"
+REVISION = "87"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -436,6 +436,8 @@ ASTERISK_MARKER = "__ASTERISK__"
 CUSTOM_INJECTION_MARKER_PARAMETERS_LIST = []
 PRE_CUSTOM_INJECTION_MARKER_CHAR = ""
 POST_CUSTOM_INJECTION_MARKER_CHAR = ""
+# Benign patterns that legitimately contain '*' (e.g. 'Accept: */*') - excluded from marker detection.
+PROBLEMATIC_CUSTOM_INJECTION_PATTERNS = r"(;q=[^;'*]+)|(\*/\*)"
 
 class INJECTION_MARKER_LOCATION(object):
   URL = False

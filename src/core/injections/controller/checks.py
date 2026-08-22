@@ -246,16 +246,19 @@ def custom_injection_marker_character(url, http_request_method):
     _ = settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.DATA = True
   if not _:
     option = "option '--header(s)/--user-agent/--referer/--cookie'"
-  if menu.options.cookie and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.cookie:
+  # Values like 'Accept: */*' or ';q=0.9' legitimately contain '*' - don't misread them as a marker.
+  def has_marker(value):
+    return bool(value) and settings.CUSTOM_INJECTION_MARKER_CHAR in re.sub(settings.PROBLEMATIC_CUSTOM_INJECTION_PATTERNS, "", value)
+
+  if has_marker(menu.options.cookie):
     settings.CUSTOM_INJECTION_MARKER = settings.COOKIE_INJECTION = settings.INJECTION_MARKER_LOCATION.COOKIE = True
-  if menu.options.agent and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.agent:
+  if has_marker(menu.options.agent):
     settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS = settings.USER_AGENT_INJECTION = True
-  if menu.options.referer and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.referer:
+  if has_marker(menu.options.referer):
     settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS = settings.REFERER_INJECTION = True
-  if menu.options.host and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.host:
+  if has_marker(menu.options.host):
     settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS = settings.HOST_INJECTION = True
-  if (menu.options.header and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.header) or \
-     (menu.options.headers and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.headers):
+  if has_marker(menu.options.header) or has_marker(menu.options.headers):
      settings.CUSTOM_INJECTION_MARKER = True
   if settings.CUSTOM_HEADER_CHECK and settings.CUSTOM_HEADER_CHECK != settings.ACCEPT:
     if settings.CUSTOM_HEADER_CHECK not in settings.TESTABLE_PARAMETERS_LIST:

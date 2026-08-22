@@ -1,4 +1,6 @@
 ## Version 4.2 (TBA)
+* Fixed: Time-related techniques persist the skip-testable-value optimization across resumed sessions.
+* Fixed: Benign patterns like 'Accept: */*' are no longer misdetected as a custom injection marker.
 * Fixed: Refactored `--disable-coloring` switch to reliably strip ANSI color codes from output.
 * Revised: Improved `--time-limit` to reliably abort the scan at the configured limit.
 * Fixed: Improved login authentication to correctly capture cookies and submit via POST.

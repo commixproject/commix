@@ -229,6 +229,7 @@ def probe_skip_testable_value_post_detection(separator, timesec, http_request_me
     return original_url, prefix
 
   settings.TESTABLE_VALUE_OPTIMIZED = True
+  session_handler.import_testable_value_status(url, vuln_parameter, http_request_method, placeholder)
   # Don't reset settings.RESPONSE_TIMES - MIN_SAFE_TIMESEC already floors timesec, and resetting forces a slow, silent re-warm-up.
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "The real parameter value isn't required. Skipping it for faster requests."
@@ -305,6 +306,7 @@ def do_time_related_proccess(url, timesec, filename, http_request_method, url_ti
           if stored_row:
             try:
               url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable = session_handler.apply_stored_technique(stored_row)
+              url, prefix = session_handler.reapply_testable_value(url, vuln_parameter, http_request_method, prefix)
               # Re-apply the minimum safe delay to the stored session.
               if technique in (settings.INJECTION_TECHNIQUE.TIME_BASED, settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED):
                 timesec = max(timesec, settings.MIN_SAFE_TIMESEC)
@@ -592,6 +594,7 @@ def do_results_based_proccess(url, timesec, filename, http_request_method, injec
           if stored_row:
             try:
               url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, alter_shell, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable = session_handler.apply_stored_technique(stored_row)
+              url, prefix = session_handler.reapply_testable_value(url, vuln_parameter, http_request_method, prefix)
               if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
                 settings.FILE_BASED_STATE = True
                 checks.check_for_stored_tamper(payload)

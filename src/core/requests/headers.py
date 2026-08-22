@@ -496,11 +496,13 @@ def do_check(request):
         # Check if it is a custom header injection.
         if http_header_name not in [settings.ACCEPT, settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE]:
           if not settings.CUSTOM_HEADER_INJECTION:
-            if settings.CUSTOM_INJECTION_MARKER_CHAR in http_header_value:
+            # Values like 'Accept: */*' or ';q=0.9' legitimately contain '*' - don't misread them as a marker.
+            benign_value = re.sub(settings.PROBLEMATIC_CUSTOM_INJECTION_PATTERNS, "", http_header_value)
+            if settings.CUSTOM_INJECTION_MARKER_CHAR in benign_value:
               settings.CUSTOM_INJECTION_MARKER = True
               settings.CUSTOM_HEADER_CHECK = http_header_name
-              
-            if settings.CUSTOM_INJECTION_MARKER_CHAR in http_header_value or \
+
+            if settings.CUSTOM_INJECTION_MARKER_CHAR in benign_value or \
                http_header_name in settings.TESTABLE_PARAMETERS_LIST or \
                settings.INJECT_TAG in http_header_value or \
                settings.ASTERISK_MARKER in http_header_value:

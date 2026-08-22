@@ -326,7 +326,7 @@ def check_parameter_in_http_header(check_parameter):
 Replace the parameter value with a disposable placeholder if the response stays the same but gets faster.
 """
 def attempt_skip_testable_value(url, http_request_method, check_parameter):
-  if settings.LOAD_SESSION or not settings.TESTABLE_VALUE:
+  if not settings.TESTABLE_VALUE:
     return url
   if any((settings.COOKIE_INJECTION, settings.USER_AGENT_INJECTION, settings.REFERER_INJECTION,
           settings.HOST_INJECTION, settings.CUSTOM_HEADER_INJECTION)):
@@ -336,6 +336,19 @@ def attempt_skip_testable_value(url, http_request_method, check_parameter):
   in_data = bool(menu.options.data) and marker in menu.options.data
   in_url = marker in url
   if not in_data and not in_url:
+    return url
+
+  if settings.LOAD_SESSION:
+    # Trust a previously confirmed placeholder outright - no live probe on resume.
+    stored_placeholder = session_handler.check_stored_testable_value(url, check_parameter, http_request_method)
+    if not stored_placeholder:
+      return url
+    if in_data:
+      menu.options.data = menu.options.data.replace(marker, stored_placeholder + settings.INJECT_TAG)
+    else:
+      url = url.replace(marker, stored_placeholder + settings.INJECT_TAG)
+    settings.TESTABLE_VALUE = stored_placeholder
+    settings.TESTABLE_VALUE_OPTIMIZED = True
     return url
 
   param_label = ("POST" if in_data else "GET") + " parameter '" + check_parameter + "'"
@@ -379,6 +392,7 @@ def attempt_skip_testable_value(url, http_request_method, check_parameter):
       url = url.replace(marker, placeholder + settings.INJECT_TAG)
     settings.TESTABLE_VALUE = placeholder
     settings.TESTABLE_VALUE_OPTIMIZED = True
+    session_handler.import_testable_value_status(url, check_parameter, http_request_method, placeholder)
     # Don't reset settings.RESPONSE_TIMES - MIN_SAFE_TIMESEC already floors timesec, and resetting forces a slow, silent re-warm-up.
     if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "The real parameter value isn't required. Skipping it for faster requests."
