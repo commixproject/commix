@@ -324,6 +324,17 @@ def filebased_command_injection_technique(url, timesec, filename, http_request_m
 Check parameter in HTTP header.
 """
 def check_parameter_in_http_header(check_parameter):
+  # A parameter that is actually supplied in the POST body is a real data parameter,
+  # not an HTTP header - even when its name happens to collide with a header name
+  # (e.g. a POST field literally named 'host'). Without this guard the name match
+  # below reroutes it to HTTP header testing, so the body parameter is never injected
+  # and a real (e.g. OS command) injection is missed. Prefer data injection in that case.
+  cp = check_parameter.lower()
+  post_data = (menu.options.data or "").lower()
+  if post_data and (cp + "=" in post_data or '"' + cp + '"' in post_data):
+    inject_http_headers = False
+    init_http_header_injection_status()
+    return inject_http_headers
   if any(x in check_parameter.lower() for x in settings.HTTP_HEADERS) or \
      check_parameter.lower() in settings.CUSTOM_HEADER_NAME.lower():
     if settings.ACCEPT_VALUE not in settings.CUSTOM_HEADER_VALUE:
