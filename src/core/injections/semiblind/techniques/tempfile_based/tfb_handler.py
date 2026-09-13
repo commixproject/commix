@@ -13,6 +13,7 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+from src.utils import menu
 from src.utils import settings
 from src.core.injections.controller import handler
 from src.core.injections.controller import checks
@@ -38,9 +39,16 @@ def exploitation(url, timesec, filename, tmp_path, http_request_method, url_time
   if not settings.TIME_RELATED_ATTACK :
     settings.TIME_RELATED_ATTACK = True
 
-  injection_type = settings.INJECTION_TYPE.SEMI_BLIND
+  # The temporary file proves execution either way - which sink filled it is what the type names.
+  if menu.options.eval_sink:
+    injection_type = settings.INJECTION_TYPE.SEMI_BLIND_CE
+  else:
+    injection_type = settings.INJECTION_TYPE.SEMI_BLIND
   technique = settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED
   settings.BASELINE_TARGET = (url, http_request_method)
+  # Taken before the technique says what it is testing, rather than in the middle of it: the model
+  # is what the first timing is read against, so filling it belongs with settling into '/tmp/'.
+  checks.warm_up_response_baseline(url, http_request_method)
 
   if tfb_injection_handler(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path) == False:
     settings.TIME_RELATED_ATTACK = settings.TEMPFILE_BASED_STATE = False

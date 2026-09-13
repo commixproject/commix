@@ -35,10 +35,10 @@ Hostname enumeration
 """
 def hostname(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique):
   injector = execution.select_injector(technique)
-  if settings.TARGET_OS == settings.OS.WINDOWS:
-    settings.HOSTNAME = settings.WIN_HOSTNAME
+  # Chosen for this target, not written over the constant: these are read again for the next one.
+  cmd = settings.WIN_HOSTNAME if settings.TARGET_OS == settings.OS.WINDOWS else settings.HOSTNAME
   execute_cmd = execution.make_execute_cmd(injector, separator, maxlen, TAG, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, interpreter, filename, url_time_response, technique, OUTPUT_TEXTFILE)
-  shell, fresh = execute_cmd(settings.HOSTNAME)
+  shell, fresh = execute_cmd(cmd)
   checks.print_hostname(shell, filename, settings.TIME_RELATED_ATTACK and fresh)
 
 """
@@ -46,9 +46,8 @@ Retrieve system information
 """
 def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique):
   injector = execution.select_injector(technique)
-  if settings.TARGET_OS == settings.OS.WINDOWS:
-    settings.RECOGNISE_OS = settings.WIN_RECOGNISE_OS
-  cmd = settings.RECOGNISE_OS
+  # Chosen for this target, not written over the constant: these are read again for the next one.
+  cmd = settings.WIN_RECOGNISE_OS if settings.TARGET_OS == settings.OS.WINDOWS else settings.RECOGNISE_OS
   if not settings.TIME_RELATED_ATTACK and settings.TARGET_OS == settings.OS.WINDOWS and interpreter:
     cmd = "cmd /c " + cmd
   execute_cmd = execution.make_execute_cmd(injector, separator, maxlen, TAG, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, interpreter, filename, url_time_response, technique, OUTPUT_TEXTFILE)
@@ -81,10 +80,10 @@ The current user enumeration
 """
 def current_user(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique):
   injector = execution.select_injector(technique)
-  if settings.TARGET_OS == settings.OS.WINDOWS:
-    settings.CURRENT_USER = settings.WIN_CURRENT_USER
+  # Chosen for this target, not written over the constant: it is read again for the next one.
+  cmd = settings.WIN_CURRENT_USER if settings.TARGET_OS == settings.OS.WINDOWS else settings.CURRENT_USER
   execute_cmd = execution.make_execute_cmd(injector, separator, maxlen, TAG, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, interpreter, filename, url_time_response, technique, OUTPUT_TEXTFILE)
-  cu_account, fresh = execute_cmd(settings.CURRENT_USER)
+  cu_account, fresh = execute_cmd(cmd)
   checks.print_current_user(cu_account, filename, settings.TIME_RELATED_ATTACK and fresh)
 
 """
@@ -98,7 +97,16 @@ def check_current_user_privs(separator, maxlen, TAG, cmd, prefix, suffix, whites
     cmd = settings.IS_ROOT
     if settings.USE_BACKTICKS:
       cmd = checks.remove_command_substitution(cmd)
-  trim_marker = lambda shell: shell.replace(settings.SINGLE_WHITESPACE, "", 1)[:-1]
+  """
+  Undo the padding the Windows interpreter payload writes around its output, and only that.
+
+  Nothing else pads, and taking a character off either end regardless turned a user id of '0' into
+  an empty string - root, reported as having no elevated privileges.
+  """
+  def trim_marker(shell):
+    if shell.startswith(settings.SINGLE_WHITESPACE) and shell.endswith(settings.SINGLE_WHITESPACE):
+      return shell.strip()
+    return shell
   execute_cmd = execution.make_execute_cmd(injector, separator, maxlen, TAG, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, interpreter, filename, url_time_response, technique, OUTPUT_TEXTFILE, postprocess=trim_marker)
   shell, fresh = execute_cmd(cmd)
   checks.print_current_user_privs(shell, filename, settings.TIME_RELATED_ATTACK and fresh)

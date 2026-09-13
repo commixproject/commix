@@ -177,7 +177,10 @@ def pseudo_terminal_shell_generic(url, filename, technique, no_result, execute_c
           if not settings.READLINE_ERROR:
             checks.tab_autocompleter()
           try:
-            cmd = common.safe_input(settings.OS_SHELL)
+            # Trimmed before anything else: the tab completer leaves a space behind the word it
+            # completed, and that space would travel all the way into the payloads as part of the
+            # command - visible there, and read back as output the command never produced.
+            cmd = common.safe_input(settings.OS_SHELL).strip()
             if len(cmd) == 0:
               cmd = "use os_shell"
             cmd = checks.escaped_cmd(cmd)
@@ -237,7 +240,9 @@ def pseudo_terminal_shell_generic(url, filename, technique, no_result, execute_c
 
 def pseudo_terminal_shell(injector, separator, maxlen, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, interpreter, filename, technique, no_result, timesec, payload, OUTPUT_TEXTFILE, url_time_response):
   def cleanup():
-    if menu.options.os_shell and (technique == settings.INJECTION_TECHNIQUE.FILE_BASED or technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED):
+    # The file is on the target because the technique put it there, whatever the run then did with
+    # it - so the offer to remove it does not wait on '--os-shell' having been the thing asked for.
+    if technique == settings.INJECTION_TECHNIQUE.FILE_BASED or technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
       # Registered here, actually asked/run later at quit().
       settings.PENDING_FILE_CLEANUPS[OUTPUT_TEXTFILE] = lambda: delete_previous_shell(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, technique)
 
@@ -279,9 +284,9 @@ def probe_skip_testable_value_post_detection(separator, timesec, http_request_me
   if settings.TESTABLE_VALUE_OPTIMIZED or not settings.TESTABLE_VALUE:
     return url, prefix
   if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
-    from src.core.injections.blind.techniques.time_based import tb_payloads as probe_payloads
+    probe_payloads = checks.time_based_payloads()
   else:
-    from src.core.injections.semiblind.techniques.tempfile_based import tfb_payloads as probe_payloads
+    probe_payloads = checks.tempfile_based_payloads()
   payload = probe_payloads.condition_check(separator, "1 -eq 1", timesec, http_request_method)
   if payload is None:
     return url, prefix
@@ -305,10 +310,20 @@ def probe_skip_testable_value_post_detection(separator, timesec, http_request_me
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Replaying the delay against the random value '" + placeholder + "', to check if the real one is needed."
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+  """
+  Sent inside the boundary the finding was made with, not bare.
+
+  A separator breaks out of a shell on its own, so an empty prefix and suffix cost the command sink
+  nothing - but for an evaluation sink the boundary is the prefix and suffix, and without them the
+  payload lands in the string as text that is never evaluated. The probe then always reads "no
+  delay", and the optimisation it exists to make is never taken.
+  """
+  confirmed = settings.CONFIRMED_BOUNDARY.get(settings.CHECKING_PARAMETER)
+  probe_prefix, probe_suffix = (confirmed[0], confirmed[1]) if confirmed else ("", "")
   try:
-    before = settings.TOTAL_OF_REQUESTS
-    exec_time, _, _, _, _ = requests.perform_injection("", "", whitespace, payload, vuln_parameter, http_request_method, url)
-    succeeded = not stability.request_was_retried(before) and checks.time_related_shell(url_time_response, exec_time, timesec)
+    before = stability.requests_sent()
+    exec_time, _, _, _, _ = requests.perform_injection(probe_prefix, probe_suffix, whitespace, payload, vuln_parameter, http_request_method, url)
+    succeeded = not stability.request_was_retried(before) and checks.time_related_shell(exec_time, timesec)
   except Exception:
     succeeded = False
 
@@ -687,17 +702,15 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
 
   if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
     from src.core.injections.blind.techniques.time_based import tb_injector as injector
-    from src.core.injections.blind.techniques.time_based import tb_payloads as payloads
+    payloads = checks.time_based_payloads()
   else:
     from src.core.injections.semiblind.techniques.tempfile_based import tfb_injector as injector
-    from src.core.injections.semiblind.techniques.tempfile_based import tfb_payloads as payloads
+    payloads = checks.tempfile_based_payloads()
 
   if not settings.LOAD_SESSION or technique not in settings.STORED_TECHNIQUES:
     _announce_technique(injection_type, technique)
 
-  prefixes = settings.PREFIXES
-  suffixes = settings.SUFFIXES
-  separators = settings.SEPARATORS
+  prefixes, suffixes, separators = checks.sink_boundaries()
   whitespaces = settings.WHITESPACES
 
   prefixes, suffixes, separators, whitespaces = _prioritize_confirmed_boundary(prefixes, suffixes, separators, whitespaces)
@@ -800,8 +813,11 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
 
             # Statistical analysis in time responses.
             exec_time_statistic.append(exec_time)
-            if not (num_of_chars >= total and no_result == True):
-              if checks.time_related_shell(url_time_response, exec_time, timesec):
+            # Every combination's timing is read, the later ones included: the attempt budget
+            # running low says nothing about whether this particular answer was delayed, and the
+            # combination that answers is often among the last to be tried.
+            if True:
+              if checks.time_related_shell(exec_time, timesec):
                 # Time related false positive fixation.
                 false_positive_fixation = False
                 if len(TAG) == output_length:
@@ -860,7 +876,7 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
                   else:
                     exec_time, output = injector.false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, interpreter, exec_time, url_time_response, false_positive_warning, technique, _false_positive_retry + 1, settings.FALSE_POSITIVE_RETRIES)
 
-                  if checks.time_related_shell(url_time_response, exec_time, timesec):
+                  if checks.time_related_shell(exec_time, timesec):
                     if str(output) == str(randvcalc) and len(TAG) == output_length:
                       possibly_vulnerable = True
                       exec_time_statistic = 0
@@ -905,7 +921,7 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
           break
     # Yaw, got shellz!
     # Do some magic tricks!
-    if checks.time_related_shell(url_time_response, exec_time, timesec):
+    if checks.time_related_shell(exec_time, timesec):
       if (len(TAG) == output_length) and (possibly_vulnerable == True or resumed and int(is_vulnerable) == settings.INJECTION_LEVEL):
         found = True
         no_result = False
@@ -965,20 +981,19 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
     from src.core.injections.results_based.techniques.eval import eb_payloads as payloads
   else:
     from src.core.injections.semiblind.techniques.file_based import fb_injector as injector
-    from src.core.injections.semiblind.techniques.file_based import fb_payloads as payloads
+    payloads = checks.file_based_payloads()
 
   # Calculate all possible combinations
   if technique == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
-    for item in range(0, len(settings.EXECUTION_FUNCTIONS)):
-      settings.EXECUTION_FUNCTIONS[item] = "${" + settings.EXECUTION_FUNCTIONS[item] + "("
-    settings.EVAL_PREFIXES = settings.EVAL_PREFIXES + settings.EXECUTION_FUNCTIONS
-    prefixes = settings.EVAL_PREFIXES
+    # Built fresh rather than wrapped in place: this runs once per parameter, and rewriting the
+    # lists themselves would wrap what the previous parameter already wrapped - '${${exec((' by the
+    # second one, and a prefix list growing without bound behind it. Both lists reach the other two
+    # evaluation-sink techniques through 'sink_boundaries()', so the damage would not stay here.
+    prefixes = checks.eval_prefixes()
     suffixes = settings.EVAL_SUFFIXES
     separators = settings.EVAL_SEPARATORS
   else:
-    prefixes = settings.PREFIXES
-    suffixes = settings.SUFFIXES
-    separators = settings.SEPARATORS
+    prefixes, suffixes, separators = checks.sink_boundaries()
     if settings.TARGET_OS == settings.OS.WINDOWS:
       # Dropped up front, so the attempt count reflects what cmd.exe can actually chain on.
       separators = [_separator for _separator in separators if checks.windows_separator(_separator) is not None]
@@ -996,10 +1011,20 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
   TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
   i = 0
   total = len(whitespaces) * len(prefixes) * len(suffixes) * len(separators)
-  if technique == settings.INJECTION_TECHNIQUE.FILE_BASED and int(menu.options.failed_tries) >= total:
-    # The temporary directory is offered after this many failed writes, so it has to be reachable
-    # however few boundary combinations there are to try - a Windows target leaves fewer.
-    menu.options.failed_tries = max(1, total - 1)
+  """
+  After this many failed writes the temporary directory is offered instead of the web root. A set
+  of boundaries small enough to get through is gone through in full first: the one that answers is
+  as likely to be the last of them as any other, and stopping one short of it is what makes a
+  perfectly writable web root look unwritable.
+
+  Worked out per technique and per target rather than written back to the option, whose value would
+  otherwise be the first boundary space to reach here - a Windows target leaves fewer combinations
+  than a Unix-like one, and the next target would be given up on before its own were exhausted.
+  """
+  if menu.options.failed_tries is None:
+    failed_tries = min(total, settings.MAX_FAILED_TRIES)
+  else:
+    failed_tries = int(menu.options.failed_tries)
   for whitespace, prefix, suffix, separator in _boundary_combinations(whitespaces, prefixes, suffixes, separators):
     bare_prefix = prefix
     bare_suffix = suffix
@@ -1110,15 +1135,18 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
                 raise
               # Show an error message, after N failed tries.
               # Use the "/tmp/" directory for tempfile-based technique.
-              elif (i == int(menu.options.failed_tries) and no_result == True) or (i == total):
+              elif (i == failed_tries and no_result == True) or (i == total):
+                # Offered before giving up rather than instead of the last combinations: where
+                # there are fewer of those than '--failed-tries' allows, every one of them is
+                # still tried, and the temporary directory is what follows them failing.
+                # Truthy means the tempfile-based fallback already handled it - stop here.
+                if checks.use_temp_folder(no_result, url, timesec, filename, http_request_method, url_time_response):
+                  return True
                 if i == total:
                   if checks.finalize(exit_loops, no_result, i, total, injection_type, technique, shell):
                     continue
                   else:
                     raise
-                # Truthy means the tempfile-based fallback already handled it - stop here.
-                if checks.use_temp_folder(no_result, url, timesec, filename, http_request_method, url_time_response):
-                  return True
               else:
                 if checks.finalize(exit_loops, no_result, i, total, injection_type, technique, shell):
                   continue

@@ -199,6 +199,7 @@ def http_auth_cracker(url, realm, http_request_method):
     except KeyboardInterrupt:
       raise
 
+    settings.PERFORM_CRACKING = False
     if found_pair:
       username, password = found_pair
       if not settings.LOAD_SESSION:

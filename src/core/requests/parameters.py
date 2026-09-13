@@ -685,7 +685,9 @@ def prefixes(payload, prefix):
     if not settings.LOAD_SESSION:
       parameter = menu.options.cookie
     specify_cookie_parameter(parameter)
-  if settings.CUSTOM_HEADER_INJECTION:
+  # One place is being tested at a time, and each of these settles the same values for the prefix
+  # below - so a second branch running would settle them again over the first one's answer.
+  elif settings.CUSTOM_HEADER_INJECTION:
     if not settings.LOAD_SESSION:
       parameter = settings.CUSTOM_HEADER_VALUE
     specify_custom_header_parameter(parameter)
@@ -805,6 +807,11 @@ def do_cookie_check(cookie):
           continue
         # Ignoring the Google analytics cookie parameter.
         if cookies.ignore_google_analytics_cookie(all_params[param]):
+          # The one before it still carries the tag this pass would have replaced. Skipped without
+          # taking it back, two cookies arrive tagged, the payload is written into both, and the
+          # finding is reported against whichever comes first rather than the one that answered.
+          if param > 0:
+            all_params[param - 1] = ''.join(all_params[param - 1]).replace(settings.INJECT_TAG, "")
           continue
         # Replace the value of parameter with INJECT tag
         if len(value) == 0:

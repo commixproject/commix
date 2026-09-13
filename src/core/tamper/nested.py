@@ -41,10 +41,20 @@ def nested():
   else:
     menu.options.suffix = "\""
 
-if settings.TARGET_OS != settings.OS.WINDOWS:
-  nested()
+"""
+Applied on the first payload rather than at import.
+
+Importing a tamper script is what lets its dependencies be checked, and those run afterwards - so a
+script rewriting the boundaries as it loaded had already done it by the time it was refused, and
+left every payload for the rest of the run carrying a quote it never asked for.
+"""
+_applied = False
 
 def tamper(payload):
+  global _applied
+  if not _applied and settings.TARGET_OS != settings.OS.WINDOWS:
+    _applied = True
+    nested()
   return payload
 
 # eof

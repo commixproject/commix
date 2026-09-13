@@ -516,7 +516,10 @@ The main function.
 """
 def main(filename, url, http_request_method):
   try:
+    # Both are per-target: what was enumerated on one target says nothing about the next, and file
+    # access is already taken back here. Left set, enumeration would run for the first target only.
     settings.FILE_ACCESS_DONE = False
+    settings.ENUMERATION_DONE = False
 
     if menu.options.alert:
       if menu.options.alert.startswith('-'):
@@ -570,13 +573,7 @@ def main(filename, url, http_request_method):
       settings.INJECTION_LEVEL = settings.USER_APPLIED_LEVEL = session_handler.applied_levels(url, http_request_method)
 
     # Define the level of tests to perform.
-    _level_suffix = {settings.DEFAULT_INJECTION_LEVEL: "LVL1", settings.COOKIE_INJECTION_LEVEL: "LVL2", settings.HTTP_HEADER_INJECTION_LEVEL: "LVL3"}.get(settings.INJECTION_LEVEL)
-    if _level_suffix:
-      for _name in ("SEPARATORS", "PREFIXES", "SUFFIXES", "EVAL_PREFIXES", "EVAL_SUFFIXES", "EVAL_SEPARATORS", "EXECUTION_FUNCTIONS"):
-        _source = getattr(settings, _name + "_" + _level_suffix)
-        setattr(settings, _name, sorted(set(_source), key=_source.index))
-
-    else:
+    if not settings.apply_injection_level():
       err_msg = "The value for option '--level' "
       err_msg += "must be an integer value from range [1, 3]."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))

@@ -70,8 +70,16 @@ def _dns_output(channel, token):
   # A lookup travels through the target's own resolver before it reaches the server, so the
   # chunks arrive later than a probe's single interaction does - and every one of them is needed.
   deadline = time.time() + settings.OOB_TIMEOUT * 2
+  """
+  Only a chain that a statement separator lets carry a loop can count its own chunks and say so in
+  every label. The chain built for the other separators numbers them without a total, so quiet time
+  stands in for one: once a poll brings nothing new, what arrived is what there is. Waiting on a
+  total that is never coming spent the whole timeout on every retrieval, however early it finished.
+  """
+  quiet_polls = 0
   channel.poll_now()
   while True:
+    seen_before = len(chunks)
     for interaction in channel.seen(token, protocol="dns"):
       labels = channel.data_of(interaction)
       if len(labels) < 2:
@@ -84,12 +92,20 @@ def _dns_output(channel, token):
       chunks[int(index)] = "".join(labels[1:])
     if total is not None and len(chunks) >= total:
       break
+    if total is None and chunks:
+      quiet_polls = quiet_polls + 1 if len(chunks) == seen_before else 0
+      if quiet_polls >= 2:
+        break
     if time.time() >= deadline:
       if total is not None and len(chunks) < total:
         settings.INCOMPLETE_OUTPUT = True
       break
     channel.poll_now()
     time.sleep(2)
+  # Numbered from one and unbroken, or some of what was sent never arrived. This is the only thing
+  # that can say so where no total came with the labels.
+  if chunks and sorted(chunks) != list(range(1, len(chunks) + 1)):
+    settings.INCOMPLETE_OUTPUT = True
   # The command's trailing newline came through the labels, dropped here as the HTTP branch does.
   return payloads.decode_dns_output(chunks).rstrip("\r\n")
 

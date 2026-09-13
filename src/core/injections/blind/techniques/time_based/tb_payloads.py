@@ -117,8 +117,7 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
     else:
       pass
 
-    if settings.CUSTOM_INJECTION_MARKER:
-      payload = checks.append_custom_marker(payload, separator)
+    payload = checks.append_custom_marker(payload, separator)
 
   return payload
 
@@ -168,8 +167,7 @@ def decision_alter_interpreter(separator, TAG, output_length, timesec, http_requ
     else:
       pass
 
-    if settings.CUSTOM_INJECTION_MARKER:
-      payload = checks.append_custom_marker(payload, separator)
+    payload = checks.append_custom_marker(payload, separator)
 
   payload = checks.sanitize_payload_newlines(payload)
 
@@ -207,8 +205,7 @@ def condition_check(separator, condition, timesec, http_request_method):
   else:
     return None
 
-  if settings.CUSTOM_INJECTION_MARKER:
-    payload = checks.append_custom_marker(payload, separator)
+  payload = checks.append_custom_marker(payload, separator)
 
   return checks.sanitize_payload_newlines(payload)
 
@@ -268,8 +265,7 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
     else:
       pass
 
-    if settings.CUSTOM_INJECTION_MARKER:
-      payload = checks.append_custom_marker(payload, separator)
+    payload = checks.append_custom_marker(payload, separator)
 
   return payload
 
@@ -319,8 +315,7 @@ def cmd_execution_alter_interpreter(separator, cmd, output_length, timesec, http
     else:
       pass
 
-    if settings.CUSTOM_INJECTION_MARKER:
-      payload = checks.append_custom_marker(payload, separator)
+    payload = checks.append_custom_marker(payload, separator)
 
   return checks.sanitize_payload_newlines(payload)
 
@@ -369,8 +364,7 @@ def get_length(separator, cmd, candidate_length, timesec, http_request_method):
     else:
       pass
 
-    if settings.CUSTOM_INJECTION_MARKER:
-      payload = checks.append_custom_marker(payload, separator)
+    payload = checks.append_custom_marker(payload, separator)
 
   return payload
 
@@ -413,8 +407,7 @@ def get_length_alter_interpreter(separator, cmd, candidate_length, timesec, http
     else:
       pass
 
-    if settings.CUSTOM_INJECTION_MARKER:
-      payload = checks.append_custom_marker(payload, separator)
+    payload = checks.append_custom_marker(payload, separator)
 
   return checks.sanitize_payload_newlines(payload)
 
@@ -481,8 +474,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
     else:
       pass
 
-    if settings.CUSTOM_INJECTION_MARKER:
-      payload = checks.append_custom_marker(payload, separator)
+    payload = checks.append_custom_marker(payload, separator)
 
   return payload
 
@@ -534,8 +526,7 @@ def get_char_alter_interpreter(separator, cmd, num_of_chars, ascii_char, timesec
     else:
       pass
 
-    if settings.CUSTOM_INJECTION_MARKER:
-      payload = checks.append_custom_marker(payload, separator)
+    payload = checks.append_custom_marker(payload, separator)
 
   payload = checks.sanitize_payload_newlines(payload)
 
@@ -583,8 +574,7 @@ def fp_result_alter_interpreter(separator, cmd, num_of_chars, ascii_char, timese
     else:
       pass
 
-    if settings.CUSTOM_INJECTION_MARKER:
-      payload = checks.append_custom_marker(payload, separator)
+    payload = checks.append_custom_marker(payload, separator)
 
   return checks.sanitize_payload_newlines(payload)
 

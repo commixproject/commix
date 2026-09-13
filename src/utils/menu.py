@@ -677,7 +677,10 @@ detection.add_option("--failed-tries",
                 action="store",
                 type="int",
                 dest="failed_tries",
-                default=len(settings.SEPARATORS_LVL1) - 1,
+                # Left unset, so the technique can count the boundaries it is actually going to
+                # try. A fixed number here is a count of command separators, which says nothing
+                # about how many combinations the sink in hand leaves to get through.
+                default=None,
                 help="Set a number of failed injection tries, in file-based technique.")
 
 detection.add_option("--smart",
@@ -801,6 +804,11 @@ settings.USER_APPLIED_COOKIE = options.cookie or ""
 settings.USER_APPLIED_DATA = options.data or ""
 settings.USER_APPLIED_AUTH_CRED = bool(options.auth_cred)
 settings.USER_APPLIED_AUTH_TYPE = bool(options.auth_type)
+
+# And the three a stored finding also carries, so resuming one can say when it disagrees
+settings.USER_APPLIED_INTERPRETER = bool(options.interpreter)
+settings.USER_APPLIED_TIMESEC = bool(options.timesec)
+settings.USER_APPLIED_TMP_PATH = bool(options.tmp_path)
 
 # Apply '--ignore-redirects' before the very first request is made
 settings.FOLLOW_REDIRECT = not options.ignore_redirects

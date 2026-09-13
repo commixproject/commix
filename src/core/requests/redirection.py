@@ -32,16 +32,29 @@ class RedirectHandler(_urllib.request.HTTPRedirectHandler, object):
   Request also on the redirected URL
   """
   def redirect_request(self, request, fp, code, msg, headers, newurl):
-    if code in (301, 302, 303, 307):
+    if code in (301, 302, 303, 307, 308):
       settings.REDIRECT_CODE = code
       if not settings.FOLLOW_REDIRECT:
         # Not following a redirect is our own decision to remember, not one the user asked for.
         settings.WARNED_HTTP_ERROR_CODES.add(int(code))
         return None
-      # Preserve the original method, not HEAD.
-      return Request(newurl.replace(' ', '%20'),
+      target = newurl.replace(' ', '%20')
+      carried = dict(request.headers)
+      """
+      Anything that authenticates the request to the host it was made to is dropped where the
+      redirect leaves that host. A redirect is the target's to choose, so following one with the
+      credentials still attached would hand them to whichever host it named.
+      """
+      if _urllib.parse.urlparse(target).netloc != _urllib.parse.urlparse(request.get_full_url()).netloc:
+        for header in list(carried):
+          if header.lower().replace("-", "") in ("authorization", "proxyauthorization", "cookie"):
+            del carried[header]
+      # Preserve the original method, not HEAD - except on 303, which asks for GET by definition.
+      if code == 303 and request.get_method() != "HEAD":
+        return Request(target, data=None, headers=carried, method="GET")
+      return Request(target,
                      data=request.data,
-                     headers=request.headers,
+                     headers=carried,
                      method=request.get_method()
                      )
     else:

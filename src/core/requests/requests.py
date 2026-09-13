@@ -15,6 +15,7 @@ For more see the file 'readme/COPYING' for copying permission.
 
 import re
 import time
+import threading
 import difflib
 import statistics
 from socket import error as SocketError
@@ -266,6 +267,11 @@ def _measure_response_time_with_auth_handling(url, http_request_method):
                   if do_update in settings.CHOICE_YES:
                     auth_creds = authentication.http_auth_cracker(url, realm, http_request_method)
                     if auth_creds != False:
+                      # Put to use, not only announced: what builds the Authorization header for
+                      # every request after this is the option, so a pair found and left there
+                      # would have the run carry on unauthenticated against a target that just
+                      # said it needs credentials.
+                      menu.options.auth_cred = auth_creds
                       settings.REQUIRED_AUTHENTICATION = True
                       break
                     else:
@@ -294,6 +300,11 @@ def _measure_response_time_with_auth_handling(url, http_request_method):
                   if do_update in settings.CHOICE_YES:
                     auth_creds = authentication.http_auth_cracker(url, realm, http_request_method)
                     if auth_creds != False:
+                      # Put to use, not only announced: what builds the Authorization header for
+                      # every request after this is the option, so a pair found and left there
+                      # would have the run carry on unauthenticated against a target that just
+                      # said it needs credentials.
+                      menu.options.auth_cred = auth_creds
                       settings.REQUIRED_AUTHENTICATION = True
                       break
                     else:
@@ -907,20 +918,38 @@ def url_reload(url, delay_seconds):
 """
 Calculate the time related execution time
 """
+_injection_lock = threading.Lock()
+_injections_in_flight = 0
+_transport_before_injection = None
+
 def perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url):
-  saved_timeout, saved_keep_alive = settings.TIMEOUT, settings.KEEP_ALIVE
+  global _injections_in_flight, _transport_before_injection
   # A time-related payload asks the target to sleep, so the answer is meant to be late. Waiting less
   # than the delay we asked for turns our own request into a connection error, which on a target
   # slow enough to need a raised delay would abort the scan.
   needed = injected_delay_allowance()
-  if needed > settings.TIMEOUT:
-    settings.TIMEOUT = needed
-    # A pooled connection keeps the timeout it was opened with, so a reused one would ignore this.
-    settings.KEEP_ALIVE = False
+  """
+  These two are read at the moment the socket is opened, and several workers can be here at once -
+  so what is saved and put back is the state before the first of them arrived, not before each. Any
+  other bookkeeping restores one worker's idea of the timeout while another's request is still in
+  flight, and that request times out on a delay it correctly asked for.
+  """
+  with _injection_lock:
+    if _injections_in_flight == 0:
+      _transport_before_injection = (settings.TIMEOUT, settings.KEEP_ALIVE)
+    _injections_in_flight += 1
+    if needed > settings.TIMEOUT:
+      settings.TIMEOUT = needed
+      # A pooled connection keeps the timeout it was opened with, so a reused one would ignore this.
+      settings.KEEP_ALIVE = False
   try:
     return _perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
   finally:
-    settings.TIMEOUT, settings.KEEP_ALIVE = saved_timeout, saved_keep_alive
+    with _injection_lock:
+      _injections_in_flight -= 1
+      if _injections_in_flight == 0 and _transport_before_injection is not None:
+        settings.TIMEOUT, settings.KEEP_ALIVE = _transport_before_injection
+        _transport_before_injection = None
 
 """
 Seconds a request needs to allow for, when the payload deliberately delays the answer.

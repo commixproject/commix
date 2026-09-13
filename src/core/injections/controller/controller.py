@@ -170,12 +170,14 @@ def heuristic_request(url, http_request_method, check_parameter, payload, whites
   return response, url
 
 """
-Announce what the heuristic found. One wording for every channel it can come back over - which one
-answered is the technique's business, not something to commit to while still guessing.
+Announce what the heuristic found. One wording for every channel it can come back over, and for
+either sink - which technique answered is the technique's business, not something to commit to
+while still guessing. All the heuristic is entitled to add is what it happened to learn on the way,
+which goes in the parenthesis its caller hands over.
 """
-def announce_heuristic_finding(possible_os):
+def announce_heuristic_finding(detail):
   info_msg = "Heuristic (basic) test shows that "
-  info_msg += settings.CHECKING_PARAMETER + " might be injectable (possible operating system: '" + possible_os + "')."
+  info_msg += settings.CHECKING_PARAMETER + " might be injectable (" + detail + ")."
   settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
 
 """
@@ -207,8 +209,13 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
               settings.IDENTIFIED_COMMAND_INJECTION = True
               possible_os = ('Unix-like shell', 'Windows')[_ != 1]
               checks.set_target_os(possible_os)
-              announce_heuristic_finding(possible_os)
-              settings.SKIP_CODE_INJECTIONS = True
+              announce_heuristic_finding("possible operating system: '" + possible_os + "'")
+              # A shell answering here says nothing about whether a string is also evaluated as
+              # code, so it settles the question only where the code injection sink was not asked
+              # for by name - otherwise every technique carrying it would skip itself, and the run
+              # would report "not injectable" without having sent one of their payloads.
+              if not menu.options.eval_sink:
+                settings.SKIP_CODE_INJECTIONS = True
               break
 
     settings.CLASSIC_STATE = False
@@ -299,7 +306,7 @@ def oob_heuristic_basic(url, http_request_method, check_parameter, place):
     return url
   if not menu.options.os:
     settings.TARGET_OS = target_os
-  announce_heuristic_finding("Windows" if settings.TARGET_OS == settings.OS.WINDOWS else "Unix-like shell")
+  announce_heuristic_finding("possible operating system: '" + ("Windows" if settings.TARGET_OS == settings.OS.WINDOWS else "Unix-like shell") + "'")
   return url
 
 """
@@ -307,9 +314,9 @@ Heuristic (basic) test for code injection warnings
 """
 def code_injections_heuristic_basic(url, http_request_method, check_parameter, place):
   check_parameter = check_parameter.lstrip().rstrip()
-  injection_type = settings.INJECTION_TYPE.RESULTS_BASED_CE
-  # Named the way a finding is, so the heuristic and what it leads to read as the one thing.
-  technique = checks.technique_label(injection_type, settings.INJECTION_TECHNIQUE.DYNAMIC_CODE)
+  # What the probe answered with, where it answered at all. A complaint from the interpreter says
+  # the string was evaluated without saying by which version, so the language is all there is.
+  detail = "possible evaluated language: '" + settings.EVAL_GRAMMAR.LABEL + "'"
   settings.EVAL_BASED_STATE = True
   try:
     whitespace = settings.SINGLE_WHITESPACE
@@ -320,7 +327,7 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, p
           html_data = checks.process_page_content(response, action="decode")
           match = re.search(settings.EVAL_PROBE_REGEX, html_data)
           if match:
-            technique = technique + " (possible PHP version: '" + match.group(1) + "')"
+            detail = "possible " + settings.EVAL_GRAMMAR.LABEL + " version: '" + match.group(1) + "'"
             settings.IDENTIFIED_EVAL_PROBE = True
           else:
             for warning in settings.EVAL_WARNINGS:
@@ -328,9 +335,7 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, p
                 settings.IDENTIFIED_WARNINGS = True
                 break
           if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_EVAL_PROBE:
-            info_msg = "Heuristic (basic) test shows that "
-            info_msg += settings.CHECKING_PARAMETER + " might be injectable via " + technique + "."
-            settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
+            announce_heuristic_finding(detail)
             # Code injection is tested only where it was asked for, so what the heuristic saw is
             # named, the switch that would act on it is named too, and the run carries on testing
             # for command injection either way.
@@ -354,11 +359,32 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, p
 """
 Run one technique via the given exploit() callable, updating its own state flag in settings - the shared skeleton behind the 4 functions below.
 """
+"""
+Run one attempt of an evaluation-sink technique per language.
+
+Nothing the target says identifies the language evaluating the string, so where '--eval' named none,
+each supported one is tried in turn until one answers. Where it named one, that is the only one
+tried. The grammar is left pointing at whichever language answered, so the exploitation that follows
+speaks the same one the detection did.
+"""
+def _run_over_languages(exploit):
+  if menu.options.eval_sink != settings.EVAL_ALL_LANGUAGES:
+    return exploit() != False
+  languages = settings.SUPPORTED_EVAL_LANGUAGES
+  for language in languages:
+    settings.set_eval_grammar(language)
+    if len(languages) > 1 and settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "Testing the '" + settings.EVAL_GRAMMAR.LABEL + "' language."
+      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+    if exploit() != False:
+      return True
+  return False
+
 def run_technique(injection_type, technique, state_name, skip_flag_name, tech_letter, exploit, eval_sink=False):
   setattr(settings, state_name, None)
   if not getattr(settings, skip_flag_name):
     if checks.technique_selected(tech_letter, eval_sink):
-      setattr(settings, state_name, exploit() != False)
+      setattr(settings, state_name, _run_over_languages(exploit) if eval_sink else exploit() != False)
   state = getattr(settings, state_name)
   if state == None or getattr(settings, skip_flag_name):
     checks.skipping_technique(technique, injection_type, state)
@@ -393,21 +419,30 @@ def dynamic_code_evaluation_technique(url, timesec, filename, http_request_metho
 """
 Check if it's exploitable via time-based command injection technique.
 """
-def timebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response):
-  injection_type = settings.INJECTION_TYPE.BLIND
+def timebased_technique(url, timesec, filename, http_request_method, url_time_response):
+  # The delay proves execution either way - what the sink changes is only whether the payload is
+  # written in the shell's language or in the one the target evaluates.
+  eval_sink = bool(menu.options.eval_sink)
+  injection_type = settings.INJECTION_TYPE.BLIND_CE if eval_sink else settings.INJECTION_TYPE.BLIND
   technique = settings.INJECTION_TECHNIQUE.TIME_BASED
   def exploit():
     result = tb_handler.exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique)
-    if result != False:
+    if result != False and not eval_sink:
       settings.IDENTIFIED_COMMAND_INJECTION = True
     return result
-  run_technique(injection_type, technique, "TIME_BASED_STATE", "SKIP_COMMAND_INJECTIONS", "t", exploit)
+  # Carrying the evaluation sink, this technique is skipped by whatever skips code injection - not
+  # by the flag that skips command injection, which the code injection heuristic sets on its way past.
+  skip_flag = "SKIP_CODE_INJECTIONS" if eval_sink else "SKIP_COMMAND_INJECTIONS"
+  run_technique(injection_type, technique, "TIME_BASED_STATE", skip_flag, "t", exploit, eval_sink=eval_sink)
 
 """
 Check if it's exploitable via file-based command injection technique.
 """
 def filebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response):
-  injection_type = settings.INJECTION_TYPE.SEMI_BLIND
+  # The file proves execution either way - what the sink changes is only whether the command that
+  # fills it is reached through a shell or through the string the target evaluates.
+  eval_sink = bool(menu.options.eval_sink)
+  injection_type = settings.INJECTION_TYPE.SEMI_BLIND_CE if eval_sink else settings.INJECTION_TYPE.SEMI_BLIND
   technique = settings.INJECTION_TECHNIQUE.FILE_BASED
   def exploit():
     if settings.LOAD_SESSION and settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED in settings.STORED_TECHNIQUES \
@@ -416,10 +451,13 @@ def filebased_command_injection_technique(url, timesec, filename, http_request_m
       result = tfb_handler.exploitation(url, timesec, filename, checks.default_tmp_path(), http_request_method, url_time_response)
     else:
       result = fb_handler.exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique)
-    if result != False:
+    if result != False and not eval_sink:
       settings.IDENTIFIED_COMMAND_INJECTION = True
     return result
-  run_technique(injection_type, technique, "FILE_BASED_STATE", "SKIP_COMMAND_INJECTIONS", "f", exploit)
+  # Carrying the evaluation sink, this technique is skipped by whatever skips code injection - not
+  # by the flag that skips command injection, which the code injection heuristic sets on its way past.
+  skip_flag = "SKIP_CODE_INJECTIONS" if eval_sink else "SKIP_COMMAND_INJECTIONS"
+  run_technique(injection_type, technique, "FILE_BASED_STATE", skip_flag, "f", exploit, eval_sink=eval_sink)
 
 """
 Check if it's exploitable via out-of-band technique.
@@ -610,13 +648,20 @@ Proceed to the injection process for the appropriate parameter.
 """
 def injection_process(url, check_parameter, http_request_method, filename, timesec, place):
   settings.NOT_TESTABLE_PARAMETERS = False
+  # Bound here rather than where the techniques run: the parameter may be skipped before reaching
+  # them, and the loop over operating systems below reads this either way.
+  end_detection = False
 
   check_parameter_dynamism(url, http_request_method, check_parameter)
   url = attempt_skip_testable_value(url, http_request_method, check_parameter)
 
-  os_targets = ([settings.TARGET_OS] if settings.TARGET_OS else
-                list(vars(settings.OS).values())[:settings.OS_CHECKS_NUM] if settings.CHECK_BOTH_OS else
-                [settings.TARGET_OS or list(vars(settings.OS).values())[0]])
+  # Both, where the target's own answer did not identify one - that being what the question asked.
+  # Taken by name: the class carries more attributes than the two, so slicing them handed back a
+  # module path as an operating system.
+  if settings.CHECK_BOTH_OS:
+    os_targets = [settings.OS.UNIX, settings.OS.WINDOWS][:settings.OS_CHECKS_NUM]
+  else:
+    os_targets = [settings.TARGET_OS or settings.OS.UNIX]
 
   # Loop over the selected OS targets
   for os_target in os_targets:
@@ -708,7 +753,10 @@ def injection_process(url, check_parameter, http_request_method, filename, times
           if menu.options.oob:
             url = oob_heuristic_basic(url, http_request_method, check_parameter, place)
 
-          if not settings.IDENTIFIED_COMMAND_INJECTION and checks.technique_selected("c", eval_sink=menu.options.eval_sink):
+          # What this looks for is the sink, not a technique, so which technique will carry it has no
+          # bearing on whether it is worth looking - and where the switch was not given at all, this
+          # is what offers it.
+          if not settings.IDENTIFIED_COMMAND_INJECTION:
             # Check for identified warnings
             url = code_injections_heuristic_basic(url, http_request_method, check_parameter, place)
         except KeyboardInterrupt:
@@ -733,8 +781,7 @@ def injection_process(url, check_parameter, http_request_method, filename, times
       settings.HEURISTIC_TEST.POSITIVE = True
     else:
       if menu.options.failed_tries and \
-         menu.options.tech and not "f" in menu.options.tech and not \
-         menu.options.failed_tries:
+         menu.options.tech and not "f" in menu.options.tech:
         warn_msg = "Due to the provided (unsuitable) injection technique"
         warn_msg += "s"[len(menu.options.tech) == 1:][::-1] + ", "
         warn_msg += "ignoring the option '--failed-tries'."
@@ -756,13 +803,13 @@ def injection_process(url, check_parameter, http_request_method, filename, times
       def _run_time_based():
         if _time_related_resume_redundant():
           return
-        if checks.technique_selected("t"):
+        if checks.technique_selected("t", eval_sink=bool(menu.options.eval_sink)):
           _ensure_time_warmup()
           # A resumed finding is re-verified against its own full delay, so the model can wait
           # until the first command actually needs it.
           if not (settings.LOAD_SESSION and settings.INJECTION_TECHNIQUE.TIME_BASED in settings.STORED_TECHNIQUES):
             checks.warm_up_response_baseline(url, http_request_method)
-        return timebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
+        return timebased_technique(url, timesec, filename, http_request_method, url_time_response)
 
       def _run_file_based():
         if _time_related_resume_redundant():

@@ -99,14 +99,29 @@ def restore_option(stored, applied, label):
   return stored
 
 """
+Say when a stored finding was made with something other than what this run was given.
+
+These are the values a replay cannot honour: the stored payload was built around them, so the one
+given now would only appear to be in use. Announced and then left alone, rather than applied.
+"""
+def announce_replay_conflict(stored, applied, label, switch):
+  if not applied or str(applied) == str(stored):
+    return
+  warn_msg = ("The stored session was found using the " + label + " '" + str(stored) + "', which "
+              "differs from the '" + switch + "' value provided now ('" + str(applied) + "'). "
+              "Using the stored value to replay this technique consistently.")
+  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
+"""
 How a stored technique is selected today: the technique letter it is reached by, and whether it
 reaches the evaluation sink. What was stored as its own technique letter is now a sink reached by
 one of the others, so a finding kept under the old spelling still resumes under the new one.
 """
-def technique_selection(technique_info):
+def technique_selection(technique_info, injection_type=None):
   if technique_info == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
     return settings.EVAL_CAPABLE_TECHNIQUES[0], True
-  return technique_letter(technique_info), False
+  # Which sink was found is the stored type's to say: every other technique reaches either one.
+  return technique_letter(technique_info), injection_type in settings.EVAL_INJECTION_TYPES
 
 """
 Map stored technique names to their "--technique" menu letters.
@@ -233,19 +248,19 @@ def import_injection_points(url, technique, injection_type, filename, separator,
                    "shell VARCHAR, vuln_parameter VARCHAR, prefix VARCHAR, suffix VARCHAR, "
                    "TAG VARCHAR, interpreter VARCHAR, payload VARCHAR, http_header VARCHAR, http_request_method VARCHAR, url_time_response INTEGER, "
                    "timesec INTEGER, exec_time INTEGER, output_length INTEGER, is_vulnerable VARCHAR, data VARCHAR, cookie VARCHAR, tamper VARCHAR, "
-                   "target_os VARCHAR, file_deleted VARCHAR DEFAULT '');")
+                   "target_os VARCHAR, file_deleted VARCHAR DEFAULT '', web_root VARCHAR DEFAULT '', tmp_path VARCHAR DEFAULT '');")
 
       # Check if an exact matching record already exists to avoid duplicates
       query_check = ("SELECT 1 FROM \"" + table + "\" WHERE url = ? AND technique = ? AND injection_type = ? AND separator = ? AND "
                      "shell = ? AND vuln_parameter = ? AND prefix = ? AND suffix = ? AND TAG = ? AND interpreter = ? AND payload = ? AND "
                      "http_header = ? AND http_request_method = ? AND url_time_response = ? AND timesec = ? AND exec_time = ? AND "
-                     "output_length = ? AND is_vulnerable = ? AND data = ? AND cookie = ? AND tamper = ? AND target_os = ? LIMIT 1;")
+                     "output_length = ? AND is_vulnerable = ? AND data = ? AND cookie = ? AND tamper = ? AND target_os = ? AND web_root = ? AND tmp_path = ? LIMIT 1;")
 
       params = (str(url), str(technique), str(injection_type), str(separator), str(shell), str(vuln_parameter or ""),
                 str(prefix), str(suffix), str(TAG), str(interpreter), str(payload), str(settings.HTTP_HEADER),
                 str(http_request_method), int(url_time_response), int(timesec), int(exec_time),
                 int(output_length), str(is_vulnerable), str(menu.options.data), str(menu.options.cookie),
-                str(menu.options.tamper or ""), str(settings.TARGET_OS))
+                str(menu.options.tamper or ""), str(settings.TARGET_OS), str(settings.WEB_ROOT or ""), str(menu.options.tmp_path or ""))
 
       if settings.BASE64_PADDING in params[0]:
         params = (params[0].replace(settings.BASE64_PADDING, _urllib.parse.quote(settings.BASE64_PADDING)),) + params[1:]
@@ -256,8 +271,8 @@ def import_injection_points(url, technique, injection_type, filename, separator,
       if cursor.fetchone() is None:
         conn.execute("INSERT INTO \"" + table + "\" (url, technique, injection_type, separator, "
                      "shell, vuln_parameter, prefix, suffix, TAG, interpreter, payload, http_header, http_request_method, "
-                     "url_time_response, timesec, exec_time, output_length, is_vulnerable, data, cookie, tamper, target_os) "
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", params)
+                     "url_time_response, timesec, exec_time, output_length, is_vulnerable, data, cookie, tamper, target_os, web_root, tmp_path) "
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", params)
         conn.commit()
 
     # Mark injection checker as True to indicate session contains injection data
@@ -322,8 +337,9 @@ def applied_techniques(url, http_request_method):
     with _session_connection() as conn:
       table = table_name(url) + "_ip"
       if table_exists(conn, table):
-        query = "SELECT technique FROM \"" + table + "\" WHERE " + clause + ";"
-        cursor = conn.execute(query, url_params).fetchall()
+        clause, url_params = url_match(url)
+        query = "SELECT technique FROM \"" + table + "\" WHERE " + clause + " AND http_request_method = ?;"
+        cursor = conn.execute(query, url_params + (http_request_method,)).fetchall()
         for session in cursor:
           technique_info = session[0]
           letter = technique_letter(technique_info)
@@ -347,8 +363,9 @@ def applied_levels(url, http_request_method):
     with _session_connection() as conn:
       table = table_name(url) + "_ip"
       if table_exists(conn, table):
-        query = "SELECT http_header, is_vulnerable FROM \"" + table + "\" WHERE " + clause + ";"
-        cursor = conn.execute(query, url_params).fetchall()
+        clause, url_params = url_match(url)
+        query = "SELECT http_header, is_vulnerable FROM \"" + table + "\" WHERE " + clause + " AND http_request_method = ?;"
+        cursor = conn.execute(query, url_params + (http_request_method,)).fetchall()
         for session in cursor:
           http_header = session[0]
           level = int(session[1])
@@ -389,9 +406,9 @@ def has_any_stored_technique(url, http_request_method):
         return False
       cursor = conn.cursor()
       clause, url_params = url_match(url)
-      query = "SELECT technique FROM \"" + table + "\" WHERE " + clause + " AND http_request_method = ?;"
+      query = "SELECT technique, injection_type FROM \"" + table + "\" WHERE " + clause + " AND http_request_method = ?;"
       cursor.execute(query, url_params + (http_request_method,))
-      return any(technique_selection(row[0])[0] and checks.technique_selected(*technique_selection(row[0])) for row in cursor.fetchall())
+      return any(technique_selection(*row)[0] and checks.technique_selected(*technique_selection(*row)) for row in cursor.fetchall())
   except (sqlite3.OperationalError, sqlite3.DatabaseError):
     return False
 
@@ -433,7 +450,7 @@ def check_stored_injection_points(url, check_parameter, http_request_method):
         if check_parameter not in (vuln_param, http_header) or stored_method != http_request_method:
           continue
 
-        technique, technique_is_eval = technique_selection(technique_info)
+        technique, technique_is_eval = technique_selection(technique_info, session[3])
 
         if technique and checks.technique_selected(technique, technique_is_eval):
           found = True
@@ -481,7 +498,7 @@ def load_stored_techniques(url, check_parameter, http_request_method):
       for session in cursor.fetchall():
         row = session[1:]
         technique, vuln_parameter, http_header = row[1], row[5], row[11]
-        letter, letter_is_eval = technique_selection(technique)
+        letter, letter_is_eval = technique_selection(technique, row[2])
         if check_parameter not in (vuln_parameter, http_header) or not letter:
           continue
         # A technique this run was not asked to test is not resumed, nor reported as resumed.
@@ -503,6 +520,10 @@ def apply_stored_technique(row):
   tamper = row[20] if len(row) > 20 else ""
   # Older sessions (pre-target_os-column) won't have this field either.
   target_os = row[21] if len(row) > 21 else None
+  # Nor will they have the document root the stored payload writes into, or the temporary
+  # directory a finding that fell back to one used.
+  web_root = row[23] if len(row) > 23 else None
+  tmp_path = row[24] if len(row) > 24 else None
 
   if http_header:
     settings.HTTP_HEADER = http_header
@@ -530,6 +551,24 @@ def apply_stored_technique(row):
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     # Stored as text, restored as one of the two values the rest of the code compares against.
     settings.TARGET_OS = settings.OS.WINDOWS if target_os.lower() == settings.OS.WINDOWS else settings.OS.UNIX
+  if web_root and web_root != "None":
+    # The stored payload writes to the document root it was found with, spelled out inside it.
+    if settings.USER_APPLIED_WEB_ROOT:
+      announce_replay_conflict(web_root, menu.options.web_root, "document root", "--web-root")
+    settings.WEB_ROOT = web_root
+  if tmp_path and tmp_path != "None":
+    # Likewise the temporary directory, for a finding that fell back to one.
+    if settings.USER_APPLIED_TMP_PATH:
+      announce_replay_conflict(tmp_path, menu.options.tmp_path, "temporary directory", "--tmp-path")
+    menu.options.tmp_path = tmp_path
+  """
+  The interpreter and the delay are stored as they were used, and the replay below is handed both.
+  Neither is taken from the command line again, so a run asking for something else is told so.
+  """
+  if settings.USER_APPLIED_INTERPRETER:
+    announce_replay_conflict(interpreter or "none", menu.options.interpreter, "interpreter", "--interpreter")
+  if settings.USER_APPLIED_TIMESEC and timesec:
+    announce_replay_conflict(timesec, int(menu.options.timesec), "delay", "--time-sec")
 
   return (url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix,
           TAG, interpreter, payload, http_request_method, url_time_response, timesec,
@@ -649,7 +688,10 @@ def check_stored_waf_status(url):
 Restore a WAF/IPS finding from a previous session, before testing starts.
 """
 def restore_waf_status(url):
-  if menu.options.skip_waf or menu.options.ignore_session or menu.options.flush_session:
+  # A run that asked for no heuristics gets none, cached or otherwise: what is restored here was
+  # learned by a heuristic probe, and it goes on to decide how the tamper scripts behave.
+  if menu.options.skip_waf or menu.options.ignore_session or menu.options.flush_session \
+     or menu.options.skip_heuristics:
     return
   if not settings.WAF_ENABLED and check_stored_waf_status(url):
     settings.WAF_ENABLED = True

@@ -39,12 +39,15 @@ def tamper(payload):
         _ = _[::-1] + "|rev"
       else:
         _ = "$(echo \"" + _[::-1]  + "\"|rev" + ")" 
-    if settings.USER_APPLIED_CMD in settings.RAW_PAYLOAD:
+    source = payload if settings.USER_APPLIED_CMD in payload else settings.RAW_PAYLOAD
+    if settings.USER_APPLIED_CMD in source:
       if settings.USE_BACKTICKS:
         random_case_cmd = "\\`echo " + _ + "|tr \"[A-Z]\" \"[a-z]\"\\`"
       else:
         random_case_cmd = "$(echo " + _ + "|tr \"[A-Z]\" \"[a-z]\")"
-      payload = settings.RAW_PAYLOAD.replace(settings.USER_APPLIED_CMD, random_case_cmd)
+      # Applied to the payload as handed over, not to the untouched original: the scripts run in
+      # order, and reaching back past the ones before would throw their work away.
+      payload = source.replace(settings.USER_APPLIED_CMD, random_case_cmd)
       if len(settings.WHITESPACES) != 0:
         payload = payload.replace(settings.SINGLE_WHITESPACE, settings.WHITESPACES[0])
   return payload

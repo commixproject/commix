@@ -407,6 +407,63 @@ def untested_techniques():
   return technique_names([_ for _ in ("c", "t", "f") if _ not in menu.options.tech])
 
 """
+The payload builder the time-based technique uses: the same technique reaches either sink, and what
+differs is only what the payload is written in - shell for a command, the language for an evaluation.
+"""
+def time_based_payloads():
+  if menu.options.eval_sink:
+    from src.core.injections.blind.techniques.eval import eb_payloads as payloads
+  else:
+    from src.core.injections.blind.techniques.time_based import tb_payloads as payloads
+  return payloads
+
+"""
+The payload builder the file-based technique uses, chosen the same way: the file it writes and reads
+back is the technique's, and the sink only decides how the command that fills it is reached.
+"""
+def file_based_payloads():
+  if menu.options.eval_sink:
+    from src.core.injections.semiblind.techniques.eval import fb_payloads as payloads
+  else:
+    from src.core.injections.semiblind.techniques.file_based import fb_payloads as payloads
+  return payloads
+
+"""
+The payload builder the tempfile-based technique uses, chosen the same way: the file it writes and
+then reads back a byte at a time is the technique's, and the sink only decides how the command that
+fills it is reached, and in whose language the reading is asked for.
+"""
+def tempfile_based_payloads():
+  if menu.options.eval_sink:
+    from src.core.injections.semiblind.techniques.eval import tfb_payloads as payloads
+  else:
+    from src.core.injections.semiblind.techniques.tempfile_based import tfb_payloads as payloads
+  return payloads
+
+"""
+The prefixes an evaluation sink is reached through, the language's own execution functions included.
+
+Built fresh every time rather than by rewriting the lists: this is asked for once per parameter, and
+wrapping in place would wrap what the last parameter already wrapped.
+"""
+def eval_prefixes():
+  prefixes = list(settings.EVAL_PREFIXES)
+  for function in settings.EXECUTION_FUNCTIONS:
+    candidate = function if function.startswith("${") else "${" + function + "("
+    if candidate not in prefixes:
+      prefixes.append(candidate)
+  return prefixes
+
+"""
+The boundaries a payload is wrapped in: what breaks into a shell command is not what breaks into a
+string the target evaluates, so the sink chooses them rather than the technique.
+"""
+def sink_boundaries():
+  if menu.options.eval_sink:
+    return settings.EVAL_PREFIXES, settings.EVAL_SUFFIXES, settings.EVAL_SEPARATORS
+  return settings.PREFIXES, settings.SUFFIXES, settings.SEPARATORS
+
+"""
 Whether a technique is one this run is testing. Two separate choices sit behind it: which sink is
 being tested, chosen with '--eval', and by which technique, chosen with '--technique'. A technique
 runs when its letter was asked for and it reaches the sink in hand, so the two compose - and the
@@ -919,6 +976,10 @@ def captcha_check(page):
 Checking the reliability of the used payload message.
 """
 def check_for_false_positive_result(false_positive_warning):
+  # The search that was counting itself off in dots has just found what it was looking for, so its
+  # line is finished - said so, rather than left hanging while the next line reports the finding.
+  if settings.PROGRESS_LINE_OPEN:
+    settings.print_data_to_stdout(" (done)")
   info_msg = "Identified a potential injection point on "
   info_msg += settings.CHECKING_PARAMETER + "."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
@@ -1600,9 +1661,17 @@ def ask_redo_stored_session(verb, redo_action):
     message = "Do you want to ignore stored session and " + verb + " again? [y/N] "
     again = common.read_input(message, default="N", check_batch=True)
     if again in settings.CHOICE_YES:
-      if not menu.options.ignore_session:
-        menu.options.ignore_session = True
-      redo_action()
+      """
+      Ignored for this one action, then put back. The answer was about redoing what was just asked
+      about, not about the rest of the run - left set, every stored result after it is re-fetched
+      from the target, including the ones a later prompt of its own would have offered to keep.
+      """
+      stored_choice = menu.options.ignore_session
+      menu.options.ignore_session = True
+      try:
+        redo_action()
+      finally:
+        menu.options.ignore_session = stored_choice
       return
     elif again in settings.CHOICE_NO:
       return
@@ -1653,16 +1722,24 @@ def usable_stored_cmd(stored_value):
 Drop high-latency spikes from a response-time sample via a median/MAD cutoff.
 """
 def strip_time_outliers(values):
-  if not values or len(values) < settings.MIN_TIME_RESPONSES // 2:
+  if not values or len(values) < settings.MIN_OUTLIER_SAMPLE:
     return values
   ordered = sorted(values)
   median = ordered[len(ordered) // 2]
   mad = sorted(abs(value - median) for value in values)[len(values) // 2]
-  if mad <= 0:
+  if mad > 0:
+    cutoff = median + settings.TIME_OUTLIER_MAD_COEFF * 1.4826 * mad
+  elif median > 0:
+    # A deviation of zero is what a steady target looks like, not a reason to keep a spike: with
+    # most samples identical the median is the target's own speed, and a multiple of it is the
+    # cutoff. This is the shape a small probe model usually has.
+    cutoff = median * (1 + settings.TIME_OUTLIER_MAD_COEFF)
+  else:
     return values
-  cutoff = median + settings.TIME_OUTLIER_MAD_COEFF * 1.4826 * mad
   result = [value for value in values if value <= cutoff]
-  return result if len(result) >= max(settings.MIN_TIME_RESPONSES // 2, len(values) // 2) else values
+  # Half the sample has to survive, and at least the two a deviation can be taken from. Holding out
+  # for the full minimum instead would mean a sample of exactly that size could never lose anything.
+  return result if len(result) >= max(2, len(values) // 2) else values
 
 """
 Feed a genuinely non-delayed response time into the rolling baseline model.
@@ -1681,13 +1758,21 @@ def record_baseline_response_time(exec_time):
     settings.RESPONSE_TIMES[:] = settings.RESPONSE_TIMES[-(settings.MAX_TIME_RESPONSES // 2):]
 
 """
-Blocking warm-up: fills the response-time model to MIN_TIME_RESPONSES before the first real timing comparison, instead of running that decision on a thin or empty model.
+Blocking warm-up: fills the response-time model to MIN_TIME_RESPONSES before the first real timing
+comparison, instead of running that decision on a thin or empty model.
+
+Says whether it announced itself, so a caller that goes on to fill a second model can carry on
+under the one line rather than printing the same warning over the top of it. Such a caller passes
+'close' as False and closes the line itself once its own dots are done.
 """
-def warm_up_response_baseline(url, http_request_method):
+def warm_up_response_baseline(url, http_request_method, close=True):
   if len(settings.RESPONSE_TIMES) >= settings.MIN_TIME_RESPONSES:
-    return
+    return False
   warn_msg = "Time-related response comparison requires a larger statistical model"
   warn_msg += "." if settings.VERBOSITY_LEVEL != 0 else ", please wait..."
+  # The open line says what is being tested, so it is closed rather than written over - and this
+  # one is left open in its turn, for the dots below to be counted off on it.
+  settings.close_progress_line()
   settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_warning_msg(warn_msg))
   # A target that has stopped answering returns nothing to record, and the model would never fill:
   # every sample is given a turn, and the ones that failed are not asked for again forever.
@@ -1700,7 +1785,7 @@ def warm_up_response_baseline(url, http_request_method):
       record_baseline_response_time(sample)
     if settings.VERBOSITY_LEVEL == 0:
       settings.print_data_to_stdout(".")
-  if settings.VERBOSITY_LEVEL == 0:
+  if close and settings.VERBOSITY_LEVEL == 0:
     settings.print_data_to_stdout(" (done)")
   if len(settings.RESPONSE_TIMES) < settings.MIN_TIME_RESPONSES:
     warn_msg = "The target answered " + str(len(settings.RESPONSE_TIMES)) + " of the "
@@ -1709,6 +1794,7 @@ def warm_up_response_baseline(url, http_request_method):
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     settings.close_progress_line()
   check_lagging()
+  return True
 
 """
 Warns once (whichever call site reaches it first) if the connection is already too jittery to trust automatically, and disables timesec auto-shrinking for the rest of the run. Returns True if lagging is (or was already found to be) detected.
@@ -1733,9 +1819,14 @@ def _delay_threshold_from(times):
   if len(sample) < 2:
     return None
   deviation = statistics.pstdev(sample)
-  if not deviation:
-    return None
   mean = statistics.mean(sample)
+  """
+  A sample that does not vary is a steady target, not an unusable one. Answering "no threshold"
+  there hands the decision to the model of plain requests, which are cheaper than these probes -
+  so an ordinary probe reads as delayed, and the check that proves a finding real by asking
+  something that cannot be true sees a delay and calls the finding a false positive. The relative
+  margin below covers the case on its own.
+  """
   margin = max(settings.TIME_STDEV_COEFF * deviation, mean * settings.MIN_RELATIVE_DELAY_MARGIN)
   return max(settings.MIN_VALID_DELAYED_RESPONSE, mean + margin)
 
@@ -1754,7 +1845,7 @@ def current_delay_threshold():
 """
 Time related shell condition. Uses the adaptive threshold once available, else a fixed one.
 """
-def time_related_shell(url_time_response, exec_time, timesec):
+def time_related_shell(exec_time, timesec):
   if settings.BASELINE_TARGET:
     warm_up_response_baseline(*settings.BASELINE_TARGET)
   lower_limit = current_delay_threshold()
@@ -2836,13 +2927,18 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
   # Windows users enumeration.
   if settings.TARGET_OS == settings.OS.WINDOWS:
     try:
-      if sys_users and any(account in sys_users for account in settings.DEFAULT_WIN_USERS):
+      denied = any(phrase.lower() in str(sys_users).lower() for phrase in settings.WIN_ACCESS_DENIED)
+      if sys_users and not denied:
         sys_users = "".join(str(p) for p in sys_users).strip()
         sys_users_list = re.findall(r"(.*)", sys_users)
         sys_users_list = "".join(str(p) for p in sys_users_list).strip()
         sys_users_list = ' '.join(sys_users_list.split())
         sys_users_list = sys_users_list.split()
-        if len(sys_users_list) != 0 :
+        # Output that parsed to nothing is not a list of users, and saying nothing at all about it
+        # reads as though the enumeration had simply found none.
+        if len(sys_users_list) == 0:
+          no_user_enumeration_permission()
+        else:
           if settings.VERBOSITY_LEVEL == 0 and _:
             settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
           info_msg = "Operating system"
@@ -2951,29 +3047,33 @@ def print_passes(sys_passes, filename, _, interpreter):
     if len(sys_passes) != 0 :
       if settings.VERBOSITY_LEVEL == 0 and _:
         settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+      """
+      Worked out before the count is announced. Most accounts carry no hash - a '*' or a '!' where
+      one would be - and those lines are not printed, so counting every line read gave a heading of
+      forty-five above a list of two.
+      """
+      usable = []
+      malformed = False
+      for line in sys_passes:
+        fields = line.split(":") if ":" in line else []
+        if len(fields) < 2:
+          malformed = malformed or bool(line)
+          continue
+        if "*" not in fields[1] and "!" not in fields[1] and fields[1] != "":
+          usable.append((fields[0], fields[1]))
+      if malformed:
+        warn_msg = "It seems '" + settings.SHADOW_FILE + "' file is not "
+        warn_msg += "in the appropriate format. Thus, exporting it as a text file."
+        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       info_msg = "Operating system"
-      info_msg += " user" + ('s', '')[len(sys_passes) == 1]
-      info_msg += " password hashes [" + str(len(sys_passes)) + "]:"
+      info_msg += " user" + ('s', '')[len(usable) == 1]
+      info_msg += " password hashes [" + str(len(usable)) + "]:"
       settings.print_data_to_stdout(info_msg)
       logs.add_line(filename, info_msg, group="passwords")
-      count = 0
-      for line in sys_passes:
-        count = count + 1
-        try:
-          if ":" in line:
-            fields = line.split(":")
-            if not "*" in fields[1] and not "!" in fields[1] and fields[1] != "":
-              settings.print_data_to_stdout("  " + settings.SUB_CONTENT_SIGN_TYPE + fields[0] + ":" + fields[1])
-              logs.add_line(filename, "  * " + fields[0] + ":" + fields[1], group="passwords")
-              logs.report_add_enumeration("passwords", {"username": fields[0], "hash": fields[1]})
-        # Check for appropriate '/etc/shadow' format.
-        except IndexError:
-          if count == 1 :
-            warn_msg = "It seems '" + settings.SHADOW_FILE + "' file is not "
-            warn_msg += "in the appropriate format. Thus, exporting it as a text file."
-            settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-          settings.print_data_to_stdout(fields[0])
-          logs.add_line(filename, "      " + fields[0], group="passwords")
+      for username, digest in usable:
+        settings.print_data_to_stdout("  " + settings.SUB_CONTENT_SIGN_TYPE + username + ":" + digest)
+        logs.add_line(filename, "  * " + username + ":" + digest, group="passwords")
+        logs.report_add_enumeration("passwords", {"username": username, "hash": digest})
     else:
       err_msg = "Unable to retrieve the password hashes for the operating system users."
       settings.print_data_to_stdout(settings.print_error_msg(err_msg))
@@ -3187,14 +3287,14 @@ def file_readable(separator, timesec, http_request_method, url, vuln_parameter, 
   if settings.TARGET_OS == settings.OS.WINDOWS:
     return True
   if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
-    from src.core.injections.blind.techniques.time_based import tb_payloads as payloads
+    payloads = time_based_payloads()
   else:
-    from src.core.injections.semiblind.techniques.tempfile_based import tfb_payloads as payloads
+    payloads = tempfile_based_payloads()
   payload = payloads.condition_check(separator, "-s " + file_to_read, timesec, http_request_method)
   if payload is None:
     return True
   exec_time, _, _, _, _ = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
-  return time_related_shell(url_time_response, exec_time, timesec)
+  return time_related_shell(exec_time, timesec)
 
 """
 File read status
@@ -3893,7 +3993,7 @@ Adjusts the timesec delay
 def min_safe_timesec():
   # Scale the floor by confirmed instability.
   if settings.UNSTABLE_REQUEST_CHOICE:
-    min_safe_delay = max(settings.MIN_SAFE_TIMESEC_UNSTABLE, settings.UNSTABLE_REQUEST_BUMPS)
+    min_safe_delay = settings.MIN_SAFE_TIMESEC_UNSTABLE + settings.UNSTABLE_REQUEST_BUMPS
   else:
     min_safe_delay = settings.MIN_SAFE_TIMESEC
   if settings.URL_TIME_RESPONSE:

@@ -90,8 +90,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
     else:
       pass
 
-    if settings.CUSTOM_INJECTION_MARKER:
-      payload = checks.append_custom_marker(payload, separator)
+    payload = checks.append_custom_marker(payload, separator)
 
   return payload
 
@@ -144,8 +143,7 @@ def decision_alter_interpreter(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http
     else:
       pass
 
-    if settings.CUSTOM_INJECTION_MARKER:
-      payload = checks.append_custom_marker(payload, separator)
+    payload = checks.append_custom_marker(payload, separator)
 
   return checks.sanitize_payload_newlines(payload)
 
@@ -181,8 +179,7 @@ def condition_check(separator, condition, timesec, http_request_method):
   else:
     return None
 
-  if settings.CUSTOM_INJECTION_MARKER:
-    payload = checks.append_custom_marker(payload, separator)
+  payload = checks.append_custom_marker(payload, separator)
 
   return checks.sanitize_payload_newlines(payload)
 
@@ -274,8 +271,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
     else:
       pass
 
-    if settings.CUSTOM_INJECTION_MARKER:
-      payload = checks.append_custom_marker(payload, separator)
+    payload = checks.append_custom_marker(payload, separator)
 
   return payload
 
@@ -328,8 +324,7 @@ def cmd_execution_alter_interpreter(separator, cmd, j, OUTPUT_TEXTFILE, timesec,
     else:
       pass
 
-    if settings.CUSTOM_INJECTION_MARKER:
-      payload = checks.append_custom_marker(payload, separator)
+    payload = checks.append_custom_marker(payload, separator)
 
   return checks.sanitize_payload_newlines(payload)
 
@@ -380,8 +375,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
     else:
       pass
 
-    if settings.CUSTOM_INJECTION_MARKER:
-      payload = checks.append_custom_marker(payload, separator)
+    payload = checks.append_custom_marker(payload, separator)
 
   return payload
 
@@ -428,8 +422,7 @@ def get_char_alter_interpreter(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_c
     else:
       pass
 
-    if settings.CUSTOM_INJECTION_MARKER:
-      payload = checks.append_custom_marker(payload, separator)
+    payload = checks.append_custom_marker(payload, separator)
 
   return checks.sanitize_payload_newlines(payload)
 
@@ -472,8 +465,7 @@ def fp_result_alter_interpreter(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_
     else:
       pass
 
-    if settings.CUSTOM_INJECTION_MARKER:
-      payload = checks.append_custom_marker(payload, separator)
+    payload = checks.append_custom_marker(payload, separator)
 
   return checks.sanitize_payload_newlines(payload)
 

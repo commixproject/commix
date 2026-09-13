@@ -13,6 +13,7 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import threading
 from src.utils import settings
 
 """
@@ -76,10 +77,25 @@ def retry_delay_seconds():
   return 0 if settings.TIME_RELATED_ATTACK else settings.DELAY_RETRY
 
 """
+Requests this thread has sent.
+
+Counted per thread rather than off the run-wide total: several workers share that total, so a
+thread asking whether its own request was retried would be answered with everyone else's traffic -
+under '--threads' always "yes", and every measurement taken the maximum number of times.
+"""
+_thread_state = threading.local()
+
+def note_request_sent():
+  _thread_state.sent = getattr(_thread_state, "sent", 0) + 1
+
+def requests_sent():
+  return getattr(_thread_state, "sent", 0)
+
+"""
 True if a transport-level retry happened mid-measurement, making exec_time untrustworthy.
 """
 def request_was_retried(requests_before):
-  return settings.TOTAL_OF_REQUESTS - requests_before > 1
+  return requests_sent() - requests_before > 1
 
 """
 True while the request loop should keep retrying: not succeeded, within budget, not unauthorized.
@@ -109,7 +125,9 @@ def disable_retries():
 True once a single-target scan has exhausted retries and the connection-error budget.
 """
 def should_abandon_target():
-  return settings.TOTAL_OF_REQUESTS == settings.MAX_RETRIES and not settings.MULTI_TARGETS and connection_error_budget_exhausted()
+  # At or past it: the counter is raised from several places, so it can step over the budget
+  # between two checks and an equality would never hold.
+  return settings.TOTAL_OF_REQUESTS >= settings.MAX_RETRIES and not settings.MULTI_TARGETS and connection_error_budget_exhausted()
 
 """
 Mark the target URL unreachable.

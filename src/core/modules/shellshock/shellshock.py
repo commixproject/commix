@@ -232,7 +232,9 @@ def shellshock_handler(url, http_request_method, filename):
         continue
 
       found_this_header = False
-      cve = shellshock_cves[0]
+      # The one that answered, kept as the loop moves on: what follows has to be sent the same way
+      # the finding was made, and the loop variable holds whichever was tried last.
+      working_cve = None
 
       for cve in shellshock_cves:
         # Check injection state
@@ -261,6 +263,7 @@ def shellshock_handler(url, http_request_method, filename):
 
         if found and not found_this_header:
           found_this_header = True
+          working_cve = cve
           # Check injection state
           settings.DETECTION_PHASE = False
           settings.EXPLOITATION_PHASE = True
@@ -275,7 +278,7 @@ def shellshock_handler(url, http_request_method, filename):
           session_handler.import_injection_points(url, technique, injection_type, filename, "", True, vuln_parameter, "", "", "", False, payload, http_request_method, 0, 0, 0, 0, settings.INJECTION_LEVEL)
 
       if found_this_header:
-        _post_exploitation(url, cve, check_header, filename, technique, no_result)
+        _post_exploitation(url, working_cve, check_header, filename, technique, no_result)
 
         # Asked once for the whole run, not once per header.
         if not asked_keep_testing:

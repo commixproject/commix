@@ -25,16 +25,18 @@ Write to a file on the target host.
 """
 def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique):
   fresh_time = False
+  results_based_injector = False
   file_to_write, dest_to_write, content = checks.check_file_to_write()
   if settings.TARGET_OS == settings.OS.WINDOWS:
     if technique == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
       injector = execution.select_injector(technique)
     else:
       injector = execution.select_injector(settings.INJECTION_TECHNIQUE.CLASSIC)
+      results_based_injector = True
       if settings.TIME_RELATED_ATTACK:
         whitespace = settings.WHITESPACES[0]
         fresh_time = True
-    fire = execution.make_simple_execute_cmd(injector, separator, maxlen, TAG, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, interpreter, filename, url_time_response, technique, OUTPUT_TEXTFILE)
+    fire = execution.make_simple_execute_cmd(injector, separator, maxlen, TAG, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, interpreter, filename, url_time_response, technique, OUTPUT_TEXTFILE, results_based_injector=results_based_injector)
     fname, tmp_fname, cmd = checks.find_filename(dest_to_write, content)
     fire(cmd)
     cmd = checks.win_decode_b64_enc(fname, tmp_fname)
@@ -52,9 +54,12 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
     shell = fire(cmd)
   cmd = checks.check_file(dest_to_write)
   if settings.TIME_RELATED_ATTACK:
+    # Whether the file arrived is asked either way. Verbosity decides whether a blank line is
+    # printed first, not whether the check runs - reported unverified, a write that succeeded was
+    # announced as missing, and one that failed as present.
     if settings.VERBOSITY_LEVEL == 0 and not fresh_time:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-      shell = fire(cmd)
+    shell = fire(cmd)
   else:
     if settings.USE_BACKTICKS:
       cmd = checks.remove_command_substitution(cmd)

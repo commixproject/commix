@@ -133,13 +133,18 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
     del settings.PROBE_RESPONSE_TIMES[:]
     # Each model is filled from its own kind of request: the probes below cannot stand in for plain
     # ones, and pooling them is what lifts the threshold above the delay it is meant to catch.
-    checks.warm_up_response_baseline(url, http_request_method)
+    # Left open, so that the dots below carry on under the same line rather than a second warning
+    # being written over the first and both of them claiming to be done.
+    announced = checks.warm_up_response_baseline(url, http_request_method, close=False)
     if len(settings.PROBE_RESPONSE_TIMES) < settings.MIN_PROBE_RESPONSES:
       # Silent where the caller has just said what it is taking the model again for: the dots
       # carry on under that line instead of repeating it.
-      if announce:
+      if announce and not announced:
         warn_msg = "Time-related response comparison requires a larger statistical model"
         warn_msg += "." if settings.VERBOSITY_LEVEL != 0 else ", please wait..."
+        # The open line says what is being tested, so it is closed rather than written over - and
+        # this one is left open in its turn, for the dots below to be counted off on it.
+        settings.close_progress_line()
         settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_warning_msg(warn_msg))
 
       def _probe():
@@ -154,17 +159,26 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
         if settings.VERBOSITY_LEVEL == 0:
           settings.print_data_to_stdout(".")
 
-      while len(settings.PROBE_RESPONSE_TIMES) < settings.MIN_PROBE_RESPONSES:
+      # Bounded, and the workers' own failures are re-raised: nothing waits on their results
+      # otherwise, so a probe that raises every time leaves this asking the target forever.
+      probe_rounds = 0
+      max_probe_rounds = settings.MIN_PROBE_RESPONSES * 2
+      while len(settings.PROBE_RESPONSE_TIMES) < settings.MIN_PROBE_RESPONSES and probe_rounds < max_probe_rounds:
+        probe_rounds += 1
         try:
           if fan_out > 1:
             with concurrent.futures.ThreadPoolExecutor(max_workers=fan_out) as executor:
-              concurrent.futures.wait([executor.submit(_probe) for _ in range(fan_out)])
+              for future in [executor.submit(_probe) for _ in range(fan_out)]:
+                future.result()
           else:
             _probe()
         except KeyboardInterrupt:
           checks.handle_exploitation_interrupt(filename, url)
       if settings.VERBOSITY_LEVEL == 0:
         settings.print_data_to_stdout(" (done)")
+    elif announced and settings.VERBOSITY_LEVEL == 0:
+      # Nothing more to sample, but the line the warm-up opened is still waiting to be closed.
+      settings.print_data_to_stdout(" (done)")
 
   def _check_lagging():
     nonlocal length_suspect, lagging_detected
@@ -269,13 +283,13 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
     exec_time = 0
     errors_before = settings.VISIBLE_CONNECTION_ERRORS
     for attempt in range(5):
-      before = settings.TOTAL_OF_REQUESTS
+      before = stability.requests_sent()
       exec_time, _, _, _, _ = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
       if not stability.request_was_retried(before):
         break
     if settings.VISIBLE_CONNECTION_ERRORS != errors_before:
       length_suspect = True
-    decision = checks.time_related_shell(url_time_response, exec_time, timesec)
+    decision = checks.time_related_shell(exec_time, timesec)
     if not decision:
       checks.record_probe_response_time(exec_time)
     else:
@@ -351,7 +365,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
           exec_time, _, _, _, _ = requests.perform_injection(prefix, suffix, whitespace, quick, vuln_parameter, http_request_method, url)
       except KeyboardInterrupt:
         checks.handle_exploitation_interrupt(filename, url)
-      if checks.time_related_shell(url_time_response, exec_time, timesec):
+      if checks.time_related_shell(exec_time, timesec):
         return exec_time
     return None
 
@@ -423,10 +437,17 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
           payload = payloads.cmd_execution(separator, cmd, candidate, OUTPUT_TEXTFILE, timesec, http_request_method)
         return _measure_length(payload)
 
-      # Every step is answered twice, and a third time to break a tie: one wrong answer sends the
-      # search into the wrong half, which costs the whole search rather than the one probe.
+      """
+      One wrong answer sends the search into the wrong half, so a step is worth confirming - but
+      only where a wrong answer is on the cards. Until the timing has actually been seen to wobble,
+      a second probe of a step costs another whole delay to be told what the first one said, and
+      the answer the search settles on is re-checked afterwards either way. Once jitter has been
+      seen, every step is answered twice, and a third time to break a tie.
+      """
       def _length_delayed_confirmed(candidate):
         first = _length_delayed(candidate)
+        if not settings.JITTER_SEEN:
+          return first
         if first == _length_delayed(candidate):
           return first
         return _length_delayed(candidate)
@@ -478,13 +499,17 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
           payload = payloads.cmd_execution(separator, cmd, candidate, OUTPUT_TEXTFILE, timesec, http_request_method, operator="-eq")
           return _measure_length(payload)
 
-        # Best-of-3 vote once jitter has been seen, for a stronger guarantee.
+        """
+        Best-of-3 vote once jitter has been seen, for a stronger guarantee. A single pass is enough
+        while the timing is clean: it already asks in both directions, and a wobble would have to
+        fall the right way twice over to be mistaken for an answer.
+        """
         def _validate_boundary(candidate):
           if settings.JITTER_SEEN:
             votes = [_boundary_holds(candidate) for _ in range(3)]
             same_mechanism_ok = votes.count(True) >= 2
           else:
-            same_mechanism_ok = _boundary_holds(candidate) and _boundary_holds(candidate)
+            same_mechanism_ok = _boundary_holds(candidate)
           return same_mechanism_ok and _exact_length_confirmed(candidate)
 
         revalidations = 0
@@ -663,13 +688,13 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
         exec_time = 0
         errors_before = settings.VISIBLE_CONNECTION_ERRORS
         for attempt in range(5):
-          before = settings.TOTAL_OF_REQUESTS
+          before = stability.requests_sent()
           exec_time, _, _, _, _ = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
           if not stability.request_was_retried(before):
             break
         if settings.VISIBLE_CONNECTION_ERRORS != errors_before:
           conn_error_flag = True
-        decision = checks.time_related_shell(url_time_response, exec_time, local_timesec)
+        decision = checks.time_related_shell(exec_time, local_timesec)
         if not decision:
           checks.record_probe_response_time(exec_time)
         else:
@@ -685,6 +710,14 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
         while True:
           try:
             if _char_delayed(hi) and _char_delayed(hi):
+              """
+              And ask something that cannot be true. A target answering late to everything agrees
+              to this shortcut for every position, and the equality check that follows agrees too,
+              being just as saturated - so the whole output resolves to the pool's last character.
+              A control that comes back delayed says the timing, not the byte, is doing the talking.
+              """
+              if _char_delayed(hi + 1):
+                return None, True
               return hi, True
             break
           except KeyboardInterrupt:
@@ -752,6 +785,36 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
 
       ascii_char, from_full_range = _bisect_chars()
 
+      """
+      A position that produced no delay anywhere is the case the escalation below exists for: the
+      delay may be too short for this target, or the threshold too high to notice it. Answered with
+      nothing and left out of that loop, it got no second chance at all, while a position that
+      answered wrongly got fifteen.
+      """
+      if ascii_char is None and settings.ADJUST_TIME_DELAY_CHOICE != False:
+        undelayed_retries = 0
+        before_escalation = timesec
+        while ascii_char is None and undelayed_retries < settings.MAX_LENGTH_REVALIDATIONS:
+          undelayed_retries += 1
+          settings.JITTER_SEEN = True
+          settings.ADJUST_TIME_DELAY_DISABLED = True
+          with timesec_lock:
+            timesec = settings.CALIBRATED_TIMESEC = _escalated_delay(timesec)
+            new_timesec = timesec
+          warn_msg = "No delayed answer for this character. Increasing time delay to "
+          warn_msg += str(new_timesec) + " second" + ("s" if new_timesec > 1 else "") + "."
+          settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+          try:
+            ascii_char, from_full_range = _bisect_chars(force_full=True)
+          except KeyboardInterrupt:
+            if threaded:
+              raise
+            checks.handle_exploitation_interrupt(filename, url)
+        if ascii_char is None:
+          conn_error_flag = True
+          with timesec_lock:
+            timesec = settings.CALIBRATED_TIMESEC = before_escalation
+
       if ascii_char is not None:
         # Re-probe with equality before accepting - one request when clean,
         # best-of-3 once jitter is seen.
@@ -762,7 +825,15 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
           return _char_delayed(candidate, operator="-eq")
 
         revalidations = 0
-        original_timesec = timesec
+        """
+        The delay is shared by every worker, so what one of them raised another must not quietly put
+        back: this remembers what this worker escalated to, and it only restores when that is still
+        the value in force. Restoring regardless undid another worker's escalation mid-search, and
+        with several workers the raise never stuck at all.
+        """
+        with timesec_lock:
+          original_timesec = timesec
+        my_escalation = None
         while True:
           try:
             validated = _validate_char_boundary(ascii_char)
@@ -787,14 +858,15 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
           if revalidations >= max_revalidations:
             conn_error_flag = True
             with timesec_lock:
-              timesec = settings.CALIBRATED_TIMESEC = original_timesec
+              if my_escalation is None or timesec == my_escalation:
+                timesec = settings.CALIBRATED_TIMESEC = original_timesec
             break
           revalidations += 1
           settings.print_data_to_stdout(settings.print_error_msg("Invalid character detected. Retrying."))
           if settings.ADJUST_TIME_DELAY_CHOICE != False:
             with timesec_lock:
               timesec = settings.CALIBRATED_TIMESEC = _escalated_delay(timesec)
-              new_timesec = timesec
+              new_timesec = my_escalation = timesec
             warn_msg = "Increasing time delay to " + str(new_timesec) + " second" + ("s" if new_timesec > 1 else "") + "."
             settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
           ascii_char, from_full_range = _bisect_chars(force_full=True)
@@ -822,7 +894,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
         def _delayed(candidate, operator, local_timesec):
           payload = payloads.get_char_alter_interpreter(separator, target, num_of_chars, candidate, local_timesec, http_request_method, operator=operator)
           exec_time, _, _, _, _ = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
-          return checks.time_related_shell(url_time_response, exec_time, local_timesec)
+          return checks.time_related_shell(exec_time, local_timesec)
 
         def _bisect(local_timesec):
           lo, hi = min(char_pool) - 1, max(char_pool)
@@ -982,7 +1054,7 @@ def results_based_injection(separator, TAG, cmd, prefix, suffix, whitespace, htt
     elif technique == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
       from src.core.injections.results_based.techniques.eval import eb_payloads as payloads
     else:
-      from src.core.injections.semiblind.techniques.file_based import fb_payloads as payloads
+      payloads = checks.file_based_payloads()
 
     if interpreter:
       if technique != settings.INJECTION_TECHNIQUE.FILE_BASED and technique != settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
@@ -1012,8 +1084,11 @@ def results_based_injection(separator, TAG, cmd, prefix, suffix, whitespace, htt
   
   if technique == settings.INJECTION_TECHNIQUE.CLASSIC or technique == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
     tries = 0
+    # A request that keeps failing outright is not the file-based technique's boundary budget, so
+    # it does not wait on '--failed-tries' being settled to know how many times to try again.
+    max_tries = int(menu.options.failed_tries or settings.MAX_RETRIES) / 2
     while not response:
-      if tries < (menu.options.failed_tries / 2):
+      if tries < max_tries:
         response = check_injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, interpreter, filename, technique)
         tries = tries + 1
       else:
@@ -1068,12 +1143,12 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
         break
       if not silent and settings.VERBOSITY_LEVEL == 0:
         settings.print_data_to_stdout(".")
-      before = settings.TOTAL_OF_REQUESTS
+      before = stability.requests_sent()
       exec_time, vuln_parameter, _, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
       if stability.request_was_retried(before):
         verified = False
         break
-      delayed = checks.time_related_shell(url_time_response, exec_time, timesec)
+      delayed = checks.time_related_shell(exec_time, timesec)
       if not delayed:
         checks.record_probe_response_time(exec_time)
       if expect is not None and delayed != expect:
@@ -1106,11 +1181,11 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
     nonlocal exec_time, vuln_parameter, prefix, suffix
     consecutive_hits = 0
     for attempt in range(settings.FALSE_POSITIVE_RETRIES):
-      before = settings.TOTAL_OF_REQUESTS
+      before = stability.requests_sent()
       exec_time, vuln_parameter, _, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
       if stability.request_was_retried(before):
         continue
-      if checks.time_related_shell(url_time_response, exec_time, timesec):
+      if checks.time_related_shell(exec_time, timesec):
         consecutive_hits += 1
         # Let the backend's own cooldown pass before trusting the next timing read.
         time.sleep(timesec)

@@ -26,20 +26,22 @@ You can visit the [collection of screenshots](https://github.com/commixproject/c
 > [changelog](https://github.com/commixproject/commix/blob/master/doc/CHANGELOG.md) before updating.
 >
 > Commix is primarily built to be used as a standalone CLI tool, and it executes operating system
-> commands on the targets it tests. **Running commix as a service may pose security risks.** It is
-> recommended to use it with caution, and only against systems you own or have explicit
+> commands on the targets it tests. **Running commix as a service may pose security risks.** 
+>
+> It is recommended to use it with caution, and only against systems you own or have explicit
 > authorisation to test.
 
 ## Features
 
-* **Five injection techniques** - classic, dynamic code evaluation, time-based, file-based (with a tempfile-based variant for write-restricted targets), and out-of-band (OAST) over HTTP/S and DNS.
+* **Four injection techniques** - classic (results-based), time-based (blind), file-based (semi-blind, with a tempfile-based variant for write-restricted targets), and out-of-band (OAST) over HTTP/S and DNS.
+* **Code injection** - `--eval` tests the string a target evaluates as code, over the same four techniques.
 * **Broad injection surface** - GET/POST parameters, HTTP headers, cookies, and JSON/XML request bodies, plus the `shellshock` module for CGI targets.
 * **Interactive shells** - an `os_shell` on the target, built-in `reverse_tcp` and `bind_tcp` modes, and file `download`/`upload` over the established shell.
 * **Enumeration and file access** - current user, hostname, privileges, system information, users and password hashes; read from and write to files on the target host.
 * **Filter and WAF evasion** - Multiple combinable tamper scripts, applied in a deterministic order.
 * **Flexible targeting** - a single URL, a crawl, HTML forms, a sitemap, a proxy log, a bulk file, a raw HTTP request file, or piped `stdin`.
 * **Resumable scans** - results are stored per target in a session file, and can be exported to JSON.
-* **Wide back-end support** - PHP, Python, Perl, Ruby and CGI, with experimental support for ASP.NET and JSP.
+* **Wide back-end support** - PHP, Python, Perl, Ruby, ASP.NET, JSP and CGI.
 
 ## Installation
 

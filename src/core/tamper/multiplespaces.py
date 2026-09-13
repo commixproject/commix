@@ -27,9 +27,18 @@ __priority__ = settings.PRIORITY.LOWER
 if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
+# What each whitespace was before this script first multiplied it. Kept because the list is shared
+# and this runs once per payload: multiplying what was already multiplied compounds, and by the
+# eighth payload the substitute is millions of characters long rather than a handful.
+_pristine = {}
+
 def tamper(payload):
-  for i in range(0, len(settings.WHITESPACES)):
-    settings.WHITESPACES[i] = settings.WHITESPACES[i] * random.randrange(3, 8)
+  for index, whitespace in enumerate(settings.WHITESPACES):
+    base = _pristine.setdefault(index, whitespace)
+    # A list rebuilt for another target, or one another script has changed, replaces what was kept.
+    if not whitespace.startswith(base):
+      base = _pristine[index] = whitespace
+    settings.WHITESPACES[index] = base * random.randrange(3, 8)
   return payload
 
 # eof

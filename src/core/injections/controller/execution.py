@@ -42,9 +42,9 @@ Select the payloads module for the given time-related technique.
 """
 def select_payloads_module(technique):
   if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
-    from src.core.injections.blind.techniques.time_based import tb_payloads as payloads
+    payloads = checks.time_based_payloads()
   else:
-    from src.core.injections.semiblind.techniques.tempfile_based import tfb_payloads as payloads
+    payloads = checks.tempfile_based_payloads()
   return payloads
 
 """
@@ -69,11 +69,16 @@ def windows_transform_cmd(cmd, technique, interpreter):
 """
 Build a cache-less execute_cmd(cmd) -> output callback around the injector model, for callers (e.g. file writes) where re-running the command every time is required, not an optimization to skip.
 """
-def make_simple_execute_cmd(injector, separator, maxlen, TAG, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, interpreter, filename, url_time_response, technique, OUTPUT_TEXTFILE, postprocess_time=lambda shell: shell, catch_time_error=False):
+def make_simple_execute_cmd(injector, separator, maxlen, TAG, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, interpreter, filename, url_time_response, technique, OUTPUT_TEXTFILE, postprocess_time=lambda shell: shell, catch_time_error=False, results_based_injector=False):
+  """
+  'results_based_injector' is for a caller that has swapped in the classic injector under a
+  time-related technique - the Windows file write does. How the command is sent is the injector's
+  to say, and calling a results-based one with the time-related argument list raises TypeError.
+  """
   def execute_cmd(cmd):
     if technique == settings.INJECTION_TECHNIQUE.OOB:
       return injector.injection(separator, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter)
-    if settings.TIME_RELATED_ATTACK:
+    if settings.TIME_RELATED_ATTACK and not results_based_injector:
       try:
         if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
           check_exec_time, shell = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, interpreter, filename, url_time_response, technique)
@@ -85,7 +90,7 @@ def make_simple_execute_cmd(injector, separator, maxlen, TAG, prefix, suffix, wh
         shell = ""
       return postprocess_time(shell)
     else:
-      if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
+      if technique == settings.INJECTION_TECHNIQUE.FILE_BASED and not results_based_injector:
         response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, technique)
       else:
         response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, interpreter, filename, technique)

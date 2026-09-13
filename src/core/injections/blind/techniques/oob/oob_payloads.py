@@ -143,12 +143,7 @@ def exfiltrate_eval(separator, transport, hostname, cmd):
 The prefixes an evaluation sink is reached through, execution functions included.
 """
 def eval_prefixes():
-  prefixes = list(settings.EVAL_PREFIXES)
-  for function in settings.EXECUTION_FUNCTIONS:
-    candidate = function if function.startswith("${") else "${" + function + "("
-    if candidate not in prefixes:
-      prefixes.append(candidate)
-  return prefixes
+  return checks.eval_prefixes()
 
 """
 Report whether a stored payload targets an evaluation sink.

@@ -252,7 +252,10 @@ def print_data_to_stdout(data):
 
     has_cr = END_LINE.CR in data
     has_lf = END_LINE.LF in data
-    is_spinner_style = has_cr or data == "." or data == " (done)"
+    # The marker that says a progress line is finished, which is exactly what closes it: without
+    # that, the next line written over the top of it inherits its tail and its "(done)" with it.
+    is_done_marker = data == " (done)"
+    is_spinner_style = has_cr or data == "." or is_done_marker
     is_established_closer = data == SINGLE_WHITESPACE
 
     if is_established_closer and not PROGRESS_LINE_OPEN:
@@ -263,12 +266,12 @@ def print_data_to_stdout(data):
       sys.stdout.write(END_LINE.LF)
 
     # Only spinner output stays unterminated; other messages always end with a newline.
-    if not is_spinner_style:
+    if not is_spinner_style or is_done_marker:
       data = data + END_LINE.LF
 
     _stdout_write(data)
     sys.stdout.flush()
-    PROGRESS_LINE_OPEN = is_spinner_style and not has_lf
+    PROGRESS_LINE_OPEN = is_spinner_style and not has_lf and not is_done_marker
 
 """
 Clear the current line before printing, without adding a blank line when already empty.
@@ -332,7 +335,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "127"
+REVISION = "128"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -710,6 +713,9 @@ CUSTOM_FILENAME = ""
 
 # Whether '--web-root' was explicitly supplied on the CLI
 USER_APPLIED_WEB_ROOT = False
+USER_APPLIED_INTERPRETER = False
+USER_APPLIED_TIMESEC = False
+USER_APPLIED_TMP_PATH = False
 
 # Whether '--auth-cred'/'--auth-type' were explicitly supplied on the CLI
 USER_APPLIED_COOKIE = ""
@@ -790,6 +796,11 @@ SYS_USERS = "awk -F ':' '{print $1}{print $3}{print $6}' " + PASSWD_FILE
 WIN_SYS_USERS = "powershell.exe -InputFormat none write-host (([string]$(net user)[4..($(net user).length-3)]))"
 DEFAULT_WIN_USERS = ["Administrator", "DefaultAccount", "Guest"]
 
+# What the target says instead of a list when the account running it may not ask for one. Seeing a
+# built-in name is not the test - they can be renamed or removed - so this is what tells a refusal
+# from a perfectly good enumeration of accounts we happen not to recognise.
+WIN_ACCESS_DENIED = ["Access is denied", "System error 5", "not have permission", "Logon failure"]
+
 # /etc/shadow
 SHADOW_FILE = "/etc/shadow"
 SYS_PASSES = FILE_READ + SHADOW_FILE
@@ -832,7 +843,7 @@ AVAILABLE_TECHNIQUES = ['c','t','f']
 # The letter that used to name the evaluation sink before '--eval' did, the technique that reaches
 # that sink today, and the one whose technique carries whichever sink it is given.
 EVAL_TECHNIQUE_LETTER = 'e'
-EVAL_CAPABLE_TECHNIQUES = ('c',)
+EVAL_CAPABLE_TECHNIQUES = ('c', 't', 'f')
 OOB_TECHNIQUE_LETTER = 'o'
 # The languages the evaluation sink knows how to reach, and the word standing for all of them.
 SUPPORTED_EVAL_LANGUAGES = _eval.supported()
@@ -841,6 +852,25 @@ SUPPORTED_EVAL_LANGUAGES = _eval.supported()
 Point the code injection grammar at one language, so that everything derived from it - the probe,
 the boundaries, the functions that run a command - is that language's rather than the default's.
 """
+LEVEL_SCOPED = ("SEPARATORS", "PREFIXES", "SUFFIXES", "EVAL_PREFIXES", "EVAL_SUFFIXES",
+                "EVAL_SEPARATORS", "EXECUTION_FUNCTIONS")
+
+"""
+Narrow the boundary lists to the level being tested, taking each from its own '_LVL<n>' source.
+
+Called again whenever those sources change - pointing the grammar at another language rewrites them,
+and the lists the payloads are actually built from are these, not the sources.
+"""
+def apply_injection_level(level=None):
+  suffix = {DEFAULT_INJECTION_LEVEL: "LVL1", COOKIE_INJECTION_LEVEL: "LVL2",
+            HTTP_HEADER_INJECTION_LEVEL: "LVL3"}.get(INJECTION_LEVEL if level is None else level)
+  if not suffix:
+    return False
+  for name in LEVEL_SCOPED:
+    source = globals()[name + "_" + suffix]
+    globals()[name] = sorted(set(source), key=source.index)
+  return True
+
 def set_eval_grammar(language):
   global EVAL_GRAMMAR, EVAL_PROBE_PAYLOADS, EVAL_PROBE_REGEX, EVAL_WARNINGS
   global EXECUTION_FUNCTIONS_LVL1, EXECUTION_FUNCTIONS_LVL2, EXECUTION_FUNCTIONS_LVL3
@@ -863,6 +893,9 @@ def set_eval_grammar(language):
   EVAL_SUFFIXES_LVL1 = EVAL_GRAMMAR.SUFFIXES_LVL1
   EVAL_SUFFIXES_LVL2 = EVAL_GRAMMAR.SUFFIXES_LVL2
   EVAL_SUFFIXES_LVL3 = EVAL_GRAMMAR.SUFFIXES_LVL3
+  # The lists the payloads are built from are narrowed from the sources just rewritten, so they are
+  # taken again - otherwise the language named on the command line never reaches a single payload.
+  apply_injection_level()
 EVAL_ALL_LANGUAGES = 'all'
 # Said once per run, however many parameters the heuristic sees an evaluation sink on.
 EVAL_SUGGESTED = False
@@ -874,6 +907,12 @@ class INJECTION_TYPE(object):
   BLIND = "blind command injection"
   BLIND_CE = "blind code injection"
   SEMI_BLIND = "semi-blind command injection"
+  SEMI_BLIND_CE = "semi-blind code injection"
+
+# The injection types that name a code-evaluation sink rather than a command one. What was found
+# is recorded as a type, so a stored finding is read back through this rather than through the
+# technique that found it - the same technique serves either sink.
+EVAL_INJECTION_TYPES = (INJECTION_TYPE.RESULTS_BASED_CE, INJECTION_TYPE.BLIND_CE, INJECTION_TYPE.SEMI_BLIND_CE)
 
 # Supported injection techniques
 class INJECTION_TECHNIQUE(object):
@@ -1600,6 +1639,10 @@ TIMEOUT = 30
 # Retries when the connection timeouts (Default: 3).
 MAX_RETRIES = 3
 
+# Failed writes to the web root, at most, before the temporary directory is offered instead. A
+# smaller set of boundaries than this is gone through in full first, rather than stopped one short.
+MAX_FAILED_TRIES = 50
+
 # Consecutive connection errors tolerated before giving up.
 CONNECTION_ERROR_RETRIES = 0
 MAX_CONNECTION_ERROR_RETRIES = 5
@@ -1627,6 +1670,11 @@ RESPONSE_TIMES = []
 # the plain requests the model is warmed up with: those two cost different amounts.
 PROBE_RESPONSE_TIMES = []
 MIN_PROBE_RESPONSES = 5
+
+# Samples needed before spikes are worth stripping from a response-time model. Tied to the smaller
+# of the two models rather than the larger: the probe model is read from five samples up, and left
+# unfiltered until fifteen a single slow probe sets the threshold above the delay it must detect.
+MIN_OUTLIER_SAMPLE = MIN_PROBE_RESPONSES
 # Set once a time-related payload's own cost has been sampled into the model above.
 PAYLOAD_BASELINE_SAMPLED = False
 # Whether the model above was sampled the way the payloads that follow are sent - concurrently,
@@ -1872,7 +1920,8 @@ RUN_WIDE_STATE = frozenset((
   "VERBOSITY_LEVEL", "WIN_PHP_DIR", "WIN_PYTHON_INTERPRETER",
   "USER_APPLIED_AUTH_CRED", "USER_APPLIED_AUTH_TYPE", "USER_APPLIED_CMD", "USER_APPLIED_COOKIE",
   "USER_APPLIED_DATA", "USER_APPLIED_LEVEL", "USER_APPLIED_RETRIES", "USER_APPLIED_TAMPER",
-  "USER_APPLIED_TECHNIQUE", "USER_APPLIED_WEB_ROOT",
+  "USER_APPLIED_TECHNIQUE", "USER_APPLIED_WEB_ROOT", "USER_APPLIED_INTERPRETER",
+  "USER_APPLIED_TIMESEC", "USER_APPLIED_TMP_PATH",
   # Answered once by the user, and not worth asking again for every target.
   "ADJUST_TIME_DELAY_CHOICE", "IGNORE_IDENTIFIED_TARGET_OS", "RECOGNISE_OS",
   "THREADED_TIME_RETRIEVAL_CHOICE", "USE_BIN_SUBDIR_CHOICE", "WAF_EVASION_CONSENT",
@@ -1882,7 +1931,7 @@ RUN_WIDE_STATE = frozenset((
   "HTTP_ERROR_CODES_SUM", "IDENTIFIED_WARNINGS", "INIT_TEST", "LAST_DOT_BUCKET", "LAST_LOG_GROUP",
   "LAST_LOGGED_PARAMETER", "LAST_SELECTED_MODULE", "LIKELY_RESUME", "LOGGED_FINDINGS_HEADER",
   "MULTI_REQUEST_TARGETS", "MULTI_TARGETS", "OS_CHECKS_NUM", "PROGRESS_LINE_OPEN", "READLINE_ERROR",
-  "SESSION_FILE", "SHOW_LOGS_MSG", "SITEMAP_CHECK", "SKIPPED_OUT_OF_SCOPE", "SKIP_VULNERABLE_HOST",
+  "SESSION_FILE", "SHOW_LOGS_MSG", "TAMPER_SCRIPTS", "SITEMAP_CHECK", "SKIPPED_OUT_OF_SCOPE", "SKIP_VULNERABLE_HOST",
   "STDIN_PARSING", "TAMPER_WARNING_SHOWN", "TIME_RELATED_ATTACK_WARNING", "TOTAL_OF_REQUESTS", "EVAL_SUGGESTED",
   "VALIDATION_RUN", "VISIBLE_CONNECTION_ERRORS", "WARNED_HTTP_ERROR_CODES",
   # Set by the connection to whichever target is in hand, before this reset can be reached.

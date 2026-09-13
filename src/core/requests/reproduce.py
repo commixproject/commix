@@ -16,6 +16,7 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 from src.utils import menu
 from src.utils import settings
+from src.core.injections.controller import checks
 from src.thirdparty.six.moves import urllib as _urllib
 
 """
@@ -75,8 +76,23 @@ def curl_command(url, http_request_method, vuln_parameter, payload):
     headers = []
 
     if header_name:
-      # The payload rode in a header, so every parameter stays as it was.
-      headers.append(header_name + ": " + payload)
+      """
+      The payload rode in a header, so every parameter stays as it was.
+
+      A cookie header carries more than the one cookie the payload went into, and the real request
+      sends all of them with only that one's value replaced - so the whole header is rebuilt the
+      same way. Sending the payload on its own would drop the session cookie beside it, and the
+      command would not reproduce the finding.
+      """
+      if header_name == settings.COOKIE and menu.options.cookie:
+        headers.append(header_name + ": " + _urllib.parse.unquote(checks.process_injectable_value(payload, menu.options.cookie)))
+      else:
+        headers.append(header_name + ": " + payload)
+    elif settings.USER_DEFINED_POST_DATA and (settings.IS_JSON or settings.IS_XML):
+      # A structured body is not a list of pairs: it goes over whole, with the payload written in.
+      body = _urllib.parse.unquote(checks.process_injectable_value(payload, settings.USER_DEFINED_POST_DATA))
+      parameters = ["--data-raw", _quote(body)]
+      headers.append("Content-Type: " + ("application/json" if settings.IS_JSON else "application/xml"))
     elif settings.USER_DEFINED_POST_DATA:
       parameters, _ = _parameter_arguments(settings.USER_DEFINED_POST_DATA, vuln_parameter, payload)
     else:

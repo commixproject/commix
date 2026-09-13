@@ -175,6 +175,7 @@ def check_http_traffic(request):
     def print_http_response(self):
       with settings.REQUESTS_LOCK:
         settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
+        stability.note_request_sent()
       if settings.VERBOSITY_LEVEL >= 2 or menu.options.traffic_file:
         if settings.VERBOSITY_LEVEL >= 2:
           req_msg = "HTTP request [" + settings.print_request_num(settings.TOTAL_OF_REQUESTS) + "]:"
@@ -278,6 +279,12 @@ def check_http_traffic(request):
         with settings.REQUESTS_LOCK:
           stability.expand_retry_budget()
       if [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(err_msg)]:
+        pending_error = err_msg
+        break
+      # A status the list does not name is still an answer rather than a transport failure, and
+      # retrying cannot change it. Left to the loop it would never stop: the budget is re-doubled
+      # on every attempt, so it outgrows the count of attempts made against it.
+      if isinstance(err_msg, _urllib.error.HTTPError):
         pending_error = err_msg
         break
 
