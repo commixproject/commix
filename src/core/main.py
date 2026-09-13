@@ -1179,7 +1179,7 @@ try:
     # Enable detection phase
     settings.DETECTION_PHASE = True
 
-    # Parse target and data from HTTP proxy logs (i.e Burp / WebScarab).
+    # Parse target and data from HTTP proxy logs (i.e. Burp / WebScarab).
     if menu.options.requestfile and menu.options.logfile:
       err_msg = "The '-r' option is unlikely to work combined with the '-l' option."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))

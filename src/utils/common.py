@@ -429,6 +429,24 @@ def unhandled_exception():
 """
 Load a list of non-empty lines from a text file.
 """
+"""
+Read the smartphone list: every line carries the device name, an optional '*' marking the default,
+and the User-Agent header itself, so a name can never end up against the wrong header.
+"""
+def load_mobile_user_agents():
+  devices, default_index = [], 0
+  for line in load_list_from_file(settings.MOBILE_USER_AGENT_LIST, "mobile user-agent list"):
+    if line.startswith("#"):
+      continue
+    fields = [field.strip() for field in line.split("\t") if field.strip()]
+    if len(fields) < 2:
+      continue
+    if len(fields) > 2 and fields[1] == "*":
+      default_index = len(devices)
+      fields = [fields[0], fields[-1]]
+    devices.append((fields[0], fields[-1]))
+  return devices, default_index
+
 def load_list_from_file(file_path, description="file"):
 
   if not os.path.isfile(file_path):

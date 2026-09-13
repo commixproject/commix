@@ -294,18 +294,16 @@ def skipping_technique(technique, injection_type, state):
 Prompt the user to select a mobile User-Agent string.
 """
 def mobile_user_agents():
-  menu.mobile_user_agents()
-
-  # Load the mobile user-agent list from file
-  mobile_agents = common.load_list_from_file(settings.MOBILE_USER_AGENT_LIST, "mobile user-agent list")
+  devices, default_index = common.load_mobile_user_agents()
+  menu.mobile_user_agents(devices, default_index)
 
   while True:
-    message = "Which smartphone do you want to imitate through HTTP User-Agent header? "
-    mobile_user_agent = common.read_input(message, default="1", check_batch=True)
+    message = "Which smartphone do you want commix to imitate through HTTP User-Agent header? "
+    mobile_user_agent = common.read_input(message, default=str(default_index + 1), check_batch=True)
     try:
       choice = int(mobile_user_agent)
-      if choice in range(1, len(mobile_agents) + 1):
-        return mobile_agents[choice - 1]
+      if choice in range(1, len(devices) + 1):
+        return devices[choice - 1][1]
       else:
         common.invalid_option(mobile_user_agent)
     except ValueError:
@@ -1252,7 +1250,7 @@ def no_readline_module():
   settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
 
 """
-Check for incompatible OS (i.e Unix).
+Check for incompatible OS (i.e. Unix).
 """
 def ps_incompatible_os():
   if not settings.TARGET_OS == settings.OS.WINDOWS:
@@ -1353,7 +1351,7 @@ def check_url(url):
     return _urllib.parse.urlsplit(url)
   except ValueError:
     err_msg = "Invalid target URL provided. "
-    err_msg += "Please ensure there are no leftover characters (e.g., '[' or ']') "
+    err_msg += "Please ensure there are no leftover characters (e.g. '[' or ']') "
     err_msg += "in the hostname part."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
@@ -1569,7 +1567,7 @@ Print the authentiation error message.
 """
 def http_auth_err_msg():
   err_msg = "Use the '--auth-cred' option to provide a valid pair of "
-  err_msg += "HTTP authentication credentials (e.g., --auth-cred=\"admin:admin\"), "
+  err_msg += "HTTP authentication credentials (e.g. '--auth-cred=admin:admin'), "
   err_msg += "or use the '--ignore-code=401' option to ignore HTTP error 401 (Unauthorized) "
   err_msg += "and continue tests without providing valid credentials."
   settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
@@ -2216,7 +2214,7 @@ def whitespace_check(payload):
       settings.WHITESPACES[0] = settings.WHITESPACES[0] * int(count_spaces / 2)
 
 """
-Check for symbols (i.e "`", "^", "$@" etc) between the characters of the generated payloads.
+Check for symbols (i.e. "`", "^", "$@" etc) between the characters of the generated payloads.
 """
 def other_symbols(payload):
   # Implemented check to replace each character in a user-supplied OS command with a random case.
@@ -4217,7 +4215,7 @@ def set_python_working_dir():
     if python_dir in settings.CHOICE_YES:
       break
     elif python_dir in settings.CHOICE_NO:
-      message = "Please specify the full path to the Python interpreter executable (e.g., '" + settings.WIN_CUSTOM_PYTHON_INTERPRETER  + "') "
+      message = "Please specify the full path to the Python interpreter executable (e.g. '" + settings.WIN_CUSTOM_PYTHON_INTERPRETER  + "') "
       settings.WIN_PYTHON_INTERPRETER = common.read_input(message, default=settings.WIN_CUSTOM_PYTHON_INTERPRETER, check_batch=True)
       settings.USER_DEFINED_PYTHON_DIR = True
       break

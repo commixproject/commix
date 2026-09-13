@@ -70,3 +70,5 @@ def print_statement(separator, commands, chain=None):
   if separator == "":
     return "print(" + ".".join("`" + command + "`" for command in commands) + ")"
   return "print(`" + (chain or separator).join(commands) + "`)%3B"
+
+# eof

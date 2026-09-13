@@ -437,7 +437,7 @@ def check_stored_injection_points(url, check_parameter, http_request_method):
 
         if technique and checks.technique_selected(technique, technique_is_eval):
           found = True
-          # Prefer more specific vulnerable parameter (e.g., HTTP header), if available
+          # Prefer more specific vulnerable parameter (e.g. HTTP header), if available
           vuln_parameter = vuln_param or http_header
           session_url = session[1]
 
@@ -712,7 +712,7 @@ def reapply_testable_value(url, vuln_parameter, http_request_method, prefix=None
   return (url, prefix) if prefix is not None else url
 
 """
-Save valid authentication credentials (e.g., username and password) discovered during testing into the session database.
+Save valid authentication credentials (e.g. username and password) discovered during testing into the session database.
 """
 def import_valid_credentials(url, authentication_type, admin_panel, username, password):
   try:

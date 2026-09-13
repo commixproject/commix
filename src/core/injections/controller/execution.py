@@ -113,3 +113,5 @@ def make_execute_cmd(injector, separator, maxlen, TAG, prefix, suffix, whitespac
       shell = stored
     return shell, fresh
   return execute_cmd
+
+# eof

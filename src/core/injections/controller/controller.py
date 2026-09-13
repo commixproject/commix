@@ -848,7 +848,7 @@ def http_headers_injection(url, http_request_method, filename, timesec):
     # Enable the corresponding injection flag
     setattr(settings, injection_flag_attr, True)
 
-    # Get the header name (e.g., "user-agent", "referer", "host")
+    # Get the header name (e.g. "user-agent", "referer", "host")
     header_name = getattr(settings, header_attr).lower()
     settings.HTTP_HEADER = check_parameter = header_name
 

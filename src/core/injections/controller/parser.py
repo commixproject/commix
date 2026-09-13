@@ -201,7 +201,7 @@ def _parse_request(request, request_file):
         elif target["auth_type"].lower() == settings.AUTH_TYPE.DIGEST:
           if not menu.options.auth_cred:
             err_msg = "Use the '--auth-cred' option to provide a valid pair of "
-            err_msg += "HTTP authentication credentials (i.e --auth-cred=\"admin:admin\") "
+            err_msg += "HTTP authentication credentials (i.e. '--auth-cred=admin:admin') "
             settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
             raise SystemExit()
 
@@ -304,7 +304,7 @@ def parse_requests(request_file):
   return targets
 
 """
-Parse target and data from http proxy logs (i.e Burp or WebScarab)
+Parse target and data from http proxy logs (i.e. Burp or WebScarab)
 """
 def logfile_parser():
   if menu.options.requestfile:

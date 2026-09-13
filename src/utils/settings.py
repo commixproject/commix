@@ -332,7 +332,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "126"
+REVISION = "127"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1849,7 +1849,6 @@ ALERT = False
 
 PCRE_MODIFIER = "/e"
 
-# eof
 
 """
 State that belongs to the run and not to any one target: what the user asked for on the command
@@ -1930,3 +1929,5 @@ def reset_target_state(options=None):
   if options is not None:
     for name, value in _OPTIONS_BASELINE.items():
       setattr(options, name, copy.deepcopy(value))
+
+# eof

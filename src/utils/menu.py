@@ -845,21 +845,6 @@ BIND_TCP_OPTIONS = COMMON_OPTIONS + (
 )
 
 
-MOBILE_USER_AGENTS = (
-    ("1", "BlackBerry Z10"),
-    ("2", "Samsung Galaxy S7"),
-    ("3", "HP iPAQ 6365"),
-    ("4", "HTC 10"),
-    ("5", "Huawei P8"),
-    ("6", "Apple iPhone 8"),
-    ("7", "Microsoft Lumia 950"),
-    ("8", "Google Nexus 7"),
-    ("9", "Nokia N97"),
-    ("10", "Google Pixel"),
-    ("11", "Xiaomi Mi 3"),
-)
-
-
 """
 Render a command reference table, msfconsole-style: a title/underline, then an
 aligned "Command  Description" table.
@@ -942,23 +927,18 @@ def print_options_table(title, rows):
     settings.print_data_to_stdout(message.rstrip() + "\n")
 
 
-def _print_mobile_user_agents():
-    message = (
-        Style.BRIGHT
-        + "Available smartphones HTTP User-Agent headers:"
-        + Style.RESET_ALL
-        + "\n"
-    )
-
-    for option, device in MOBILE_USER_AGENTS:
+def _print_mobile_user_agents(devices, default_index):
+    message = ""
+    for index, (device, _) in enumerate(devices):
         message += (
-            "Type '"
+            "["
             + Style.BRIGHT
-            + option
+            + str(index + 1)
             + Style.RESET_ALL
-            + "' for "
+            + "] "
             + device
-            + ".\n"
+            + (" (default)" if index == default_index else "")
+            + "\n"
         )
 
     settings.print_data_to_stdout(message.rstrip())
@@ -976,8 +956,8 @@ def bind_tcp_options():
     _print_options("bind_tcp", BIND_TCP_OPTIONS)
 
 
-def mobile_user_agents():
-    _print_mobile_user_agents()
+def mobile_user_agents(devices, default_index):
+    _print_mobile_user_agents(devices, default_index)
 
 """
 The tab compliter (shell options).

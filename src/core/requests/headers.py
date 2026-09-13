@@ -318,7 +318,7 @@ def check_http_traffic(request):
       stability.reset_connection_error_budget()
       return response
 
-    # This is useful when handling exotic HTTP errors (i.e requests for authentication).
+    # This is useful when handling exotic HTTP errors (i.e. requests for authentication).
     except _urllib.error.HTTPError as err:
       if not menu.options.drop_set_cookie:
         cookies.handle_server_cookies(err)
