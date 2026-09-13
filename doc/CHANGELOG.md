@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New `--eval` switch to test for code injection, optionally naming a language (e.g. `--eval="php"`), which combines with any technique given with `--technique`.
 * Fixed: The out-of-band (DNS) payloads chain their own commands with the separator being tested, instead of always with `||`.
 * Fixed: Several issues affecting the response-time model, the identification of the target's operating system, stored session data, and the files left on the target.
 * Fixed: Several issues affecting the parsing of the provided request data and the placement of the injection point.

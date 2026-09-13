@@ -22,15 +22,10 @@ The available "eval-based" payloads.
 """
 
 """
-Wrap the shell commands a payload runs in the evaluation sink's print statement.
-
-Every command has to leave its output on a line of its own: the results are read back as marker,
-output and marker separated by newlines, so anything printed without one runs into the next marker.
+Wrap the shell commands a payload runs in the print statement of the language being tested.
 """
 def _print_statement(separator, commands, chain=None):
-  if separator == "":
-    return "print(" + ".".join("`" + command + "`" for command in commands) + ")"
-  return "print(`" + (chain or separator).join(commands) + "`)%3B"
+  return settings.EVAL_GRAMMAR.print_statement(separator, commands, chain)
 
 """
 Read a value off a Windows command that prints no newline of its own, such as 'set /a'.

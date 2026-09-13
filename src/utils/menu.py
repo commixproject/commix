@@ -540,6 +540,13 @@ injection.add_option("--technique",
                 dest="tech",
                 help="Specify injection technique(s) to use.")
 
+injection.add_option("--eval",
+                action="store",
+                default=None,
+                dest="eval_sink",
+                metavar="LANG",
+                help="Test for code injection (e.g. 'php').")
+
 injection.add_option("--skip-technique",
                 action="store",
                 dest="skip_tech",
@@ -775,6 +782,12 @@ option = parser.get_option("-h")
 option.help = option.help.capitalize().replace("Show this help message and exit", "Show help and exit.")
 # Listed by its short form alone, the way every other switch is, while '--help' keeps working.
 option._long_opts = []
+# The language is optional: '--eval' on its own stands for every one that is supported, and the
+# parser needs a value either way.
+for _index, _argument in enumerate(sys.argv):
+  if _argument == "--eval":
+    sys.argv[_index] = "--eval=" + settings.EVAL_ALL_LANGUAGES
+
 (options, args) = parser.parse_args()
 
 # Remember whether '--web-root' was explicitly supplied on the CLI

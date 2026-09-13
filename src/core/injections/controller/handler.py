@@ -379,9 +379,10 @@ def do_oob_process(url, timesec, filename, http_request_method, injection_type, 
   _announce_technique(injection_type, technique)
 
   # A command sink first, then an evaluation sink - the channel proves either one.
-  sinks = [(False, injection_type, settings.PREFIXES, settings.SUFFIXES, settings.SEPARATORS)]
-  if len(menu.options.tech) == 0 or "e" in menu.options.tech or "o" in menu.options.tech:
-    sinks.append((True, settings.INJECTION_TYPE.BLIND_CE, payloads.eval_prefixes(), settings.EVAL_SUFFIXES, settings.EVAL_SEPARATORS))
+  if menu.options.eval_sink:
+    sinks = [(True, settings.INJECTION_TYPE.BLIND_CE, payloads.eval_prefixes(), settings.EVAL_SUFFIXES, settings.EVAL_SEPARATORS)]
+  else:
+    sinks = [(False, injection_type, settings.PREFIXES, settings.SUFFIXES, settings.SEPARATORS)]
 
   for is_eval, sink_type, sink_prefixes, sink_suffixes, sink_separators in sinks:
     settings.OOB_EVAL = is_eval
@@ -960,8 +961,8 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
     from src.core.injections.results_based.techniques.classic import cb_payloads as payloads
 
   elif technique == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
-    from src.core.injections.results_based.techniques.eval_based import eb_injector as injector
-    from src.core.injections.results_based.techniques.eval_based import eb_payloads as payloads
+    from src.core.injections.results_based.techniques.eval import eb_injector as injector
+    from src.core.injections.results_based.techniques.eval import eb_payloads as payloads
   else:
     from src.core.injections.semiblind.techniques.file_based import fb_injector as injector
     from src.core.injections.semiblind.techniques.file_based import fb_payloads as payloads

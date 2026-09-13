@@ -25,6 +25,10 @@ from datetime import date
 from datetime import datetime
 from src.core.compat import xrange
 from src.thirdparty.six.moves import urllib as _urllib
+from src.core import eval as _eval
+
+# The language whose code injection grammar is in use; '--eval' can name another one.
+EVAL_GRAMMAR = _eval.grammar()
 from src.thirdparty.six.moves import reload_module as _reload_module
 
 # argv checks
@@ -328,7 +332,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "125"
+REVISION = "126"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -429,32 +433,16 @@ ALTER_INTERPRETER_BASIC_COMMAND_INJECTION_PAYLOADS = []
 BASIC_COMMAND_INJECTION_RESULT = ""
 IDENTIFIED_COMMAND_INJECTION = False
 
-#Basic heuristic checks for code injection warnings or... phpinfo page ;)
-PHPINFO_PAYLOAD = "phpinfo()"
+# Basic heuristic checks for code injection: the probe that says code was evaluated, what its
+# answer looks like coming back, and the interpreter's own complaints that give the same away.
+# All of it belongs to the language, so it is read from its module under 'src/core/eval'.
+EVAL_PROBE_PAYLOADS = EVAL_GRAMMAR.PROBE_PAYLOADS
+EVAL_PROBE_REGEX = EVAL_GRAMMAR.PROBE_REGEX
+EVAL_WARNINGS = EVAL_GRAMMAR.WARNINGS
 
-PHP_EXEC_FUNCTIONS = [ "" + PHPINFO_PAYLOAD + "",
-  "exec(" + PHPINFO_PAYLOAD + ")",
-  "eval(" + PHPINFO_PAYLOAD + ")",
-  "system(" + PHPINFO_PAYLOAD + ")"
-]
-
-PHPINFO_CHECK_PAYLOADS = [
-  [".print(" + x + ")" for x in PHP_EXEC_FUNCTIONS],
-  [")'}" + x + "'#" for x in PHP_EXEC_FUNCTIONS],
-  ["'." + x + ".'" for x in PHP_EXEC_FUNCTIONS],
-  ["{${" + x + "}}" for x in PHP_EXEC_FUNCTIONS],
-  ["\\\\/{${" + x + "}}\\/\\" for x in PHP_EXEC_FUNCTIONS]
-]
-
-PHPINFO_CHECK_PAYLOADS = [x for payload in PHPINFO_CHECK_PAYLOADS for x in payload]
-
-# Executed phpinfo()
-IDENTIFIED_PHPINFO = False
-CODE_INJECTION_PHPINFO = r"PHP Version </td><td class=\"v\">(([\w\.]+))"
-
-# Code injection warnings
+# The probe answered, or the interpreter complained.
+IDENTIFIED_EVAL_PROBE = False
 IDENTIFIED_WARNINGS = False
-CODE_INJECTION_WARNINGS = ["eval()'d code", "runtime-created function", "usort()", "assert()", "preg_replace()"]
 
 SKIP_CODE_INJECTIONS = False
 SKIP_COMMAND_INJECTIONS = False
@@ -629,29 +617,30 @@ SUFFIXES_LVL3 = SUFFIXES_LVL2 + ["'", "\"", " #", "//", "\\\\"]
 # Bad combination of prefix and separator
 JUNK_COMBINATION = [SEPARATORS_LVL1[i] + SEPARATORS_LVL1[j] for i in range(len(SEPARATORS_LVL1)) for j in range(len(SEPARATORS_LVL1))]
 
-# Execution functions
+# Execution functions, and the boundaries that break into an evaluated string and close it again -
+# all of them the language's own, and so read from its module rather than written out here.
 EXECUTION_FUNCTIONS = []
-EXECUTION_FUNCTIONS_LVL1 = ["exec"]
-EXECUTION_FUNCTIONS_LVL2 = EXECUTION_FUNCTIONS_LVL1 + ["system", "shell_exec"]
-EXECUTION_FUNCTIONS_LVL3 = EXECUTION_FUNCTIONS_LVL2 + ["passthru", "proc_open", "popen"]
+EXECUTION_FUNCTIONS_LVL1 = EVAL_GRAMMAR.EXECUTION_FUNCTIONS_LVL1
+EXECUTION_FUNCTIONS_LVL2 = EVAL_GRAMMAR.EXECUTION_FUNCTIONS_LVL2
+EXECUTION_FUNCTIONS_LVL3 = EVAL_GRAMMAR.EXECUTION_FUNCTIONS_LVL3
 
 # The code injection separators.
 EVAL_SEPARATORS = []
-EVAL_SEPARATORS_LVL1 = [""]
-EVAL_SEPARATORS_LVL2 = EVAL_SEPARATORS_LVL1 + ["%0a"]
-EVAL_SEPARATORS_LVL3 = EVAL_SEPARATORS_LVL2 + ["%0d%0a"]
+EVAL_SEPARATORS_LVL1 = EVAL_GRAMMAR.SEPARATORS_LVL1
+EVAL_SEPARATORS_LVL2 = EVAL_GRAMMAR.SEPARATORS_LVL2
+EVAL_SEPARATORS_LVL3 = EVAL_GRAMMAR.SEPARATORS_LVL3
 
 # The code injection prefixes.
 EVAL_PREFIXES = []
-EVAL_PREFIXES_LVL1 = [".", "'.", "{${"]
-EVAL_PREFIXES_LVL2 = EVAL_PREFIXES_LVL1 + [")'}", "');}"]
-EVAL_PREFIXES_LVL3 = EVAL_PREFIXES_LVL2 + ["\".", "')", "\")", ");}", "\");}", ")", ";", "'", ""]
+EVAL_PREFIXES_LVL1 = EVAL_GRAMMAR.PREFIXES_LVL1
+EVAL_PREFIXES_LVL2 = EVAL_GRAMMAR.PREFIXES_LVL2
+EVAL_PREFIXES_LVL3 = EVAL_GRAMMAR.PREFIXES_LVL3
 
 # The code injection suffixes.
 EVAL_SUFFIXES = []
-EVAL_SUFFIXES_LVL1 = [ "",  ".'", "}}"]
-EVAL_SUFFIXES_LVL2 = EVAL_SUFFIXES_LVL1 + ["'#"]
-EVAL_SUFFIXES_LVL3 = EVAL_SUFFIXES_LVL2 + [".\"", "\\\\", "//", ")}", "#"]
+EVAL_SUFFIXES_LVL1 = EVAL_GRAMMAR.SUFFIXES_LVL1
+EVAL_SUFFIXES_LVL2 = EVAL_GRAMMAR.SUFFIXES_LVL2
+EVAL_SUFFIXES_LVL3 = EVAL_GRAMMAR.SUFFIXES_LVL3
 
 # Raw payload (without tampering)
 RAW_PAYLOAD = ""
@@ -839,14 +828,51 @@ AVAILABLE_INTERPRETERS = ["python"]
 
 # Available injection techniques. Out-of-band is not one of them - it is the '--oob' switch, so that
 # it can serve the modules too, which never go through '--technique'.
-AVAILABLE_TECHNIQUES = ['c','e','t','f']
+AVAILABLE_TECHNIQUES = ['c','t','f']
+# The letter that used to name the evaluation sink before '--eval' did, the technique that reaches
+# that sink today, and the one whose technique carries whichever sink it is given.
+EVAL_TECHNIQUE_LETTER = 'e'
+EVAL_CAPABLE_TECHNIQUES = ('c',)
+OOB_TECHNIQUE_LETTER = 'o'
+# The languages the evaluation sink knows how to reach, and the word standing for all of them.
+SUPPORTED_EVAL_LANGUAGES = _eval.supported()
+
+"""
+Point the code injection grammar at one language, so that everything derived from it - the probe,
+the boundaries, the functions that run a command - is that language's rather than the default's.
+"""
+def set_eval_grammar(language):
+  global EVAL_GRAMMAR, EVAL_PROBE_PAYLOADS, EVAL_PROBE_REGEX, EVAL_WARNINGS
+  global EXECUTION_FUNCTIONS_LVL1, EXECUTION_FUNCTIONS_LVL2, EXECUTION_FUNCTIONS_LVL3
+  global EVAL_SEPARATORS_LVL1, EVAL_SEPARATORS_LVL2, EVAL_SEPARATORS_LVL3
+  global EVAL_PREFIXES_LVL1, EVAL_PREFIXES_LVL2, EVAL_PREFIXES_LVL3
+  global EVAL_SUFFIXES_LVL1, EVAL_SUFFIXES_LVL2, EVAL_SUFFIXES_LVL3
+  EVAL_GRAMMAR = _eval.grammar(language)
+  EVAL_PROBE_PAYLOADS = EVAL_GRAMMAR.PROBE_PAYLOADS
+  EVAL_PROBE_REGEX = EVAL_GRAMMAR.PROBE_REGEX
+  EVAL_WARNINGS = EVAL_GRAMMAR.WARNINGS
+  EXECUTION_FUNCTIONS_LVL1 = EVAL_GRAMMAR.EXECUTION_FUNCTIONS_LVL1
+  EXECUTION_FUNCTIONS_LVL2 = EVAL_GRAMMAR.EXECUTION_FUNCTIONS_LVL2
+  EXECUTION_FUNCTIONS_LVL3 = EVAL_GRAMMAR.EXECUTION_FUNCTIONS_LVL3
+  EVAL_SEPARATORS_LVL1 = EVAL_GRAMMAR.SEPARATORS_LVL1
+  EVAL_SEPARATORS_LVL2 = EVAL_GRAMMAR.SEPARATORS_LVL2
+  EVAL_SEPARATORS_LVL3 = EVAL_GRAMMAR.SEPARATORS_LVL3
+  EVAL_PREFIXES_LVL1 = EVAL_GRAMMAR.PREFIXES_LVL1
+  EVAL_PREFIXES_LVL2 = EVAL_GRAMMAR.PREFIXES_LVL2
+  EVAL_PREFIXES_LVL3 = EVAL_GRAMMAR.PREFIXES_LVL3
+  EVAL_SUFFIXES_LVL1 = EVAL_GRAMMAR.SUFFIXES_LVL1
+  EVAL_SUFFIXES_LVL2 = EVAL_GRAMMAR.SUFFIXES_LVL2
+  EVAL_SUFFIXES_LVL3 = EVAL_GRAMMAR.SUFFIXES_LVL3
+EVAL_ALL_LANGUAGES = 'all'
+# Said once per run, however many parameters the heuristic sees an evaluation sink on.
+EVAL_SUGGESTED = False
 
 # Supported injection types
 class INJECTION_TYPE(object):
   RESULTS_BASED_CI = "results-based command injection"
-  RESULTS_BASED_CE = "results-based dynamic code evaluation"
+  RESULTS_BASED_CE = "results-based code injection"
   BLIND = "blind command injection"
-  BLIND_CE = "blind dynamic code evaluation"
+  BLIND_CE = "blind code injection"
   SEMI_BLIND = "semi-blind command injection"
 
 # Supported injection techniques
@@ -1858,7 +1884,7 @@ RUN_WIDE_STATE = frozenset((
   "LAST_LOGGED_PARAMETER", "LAST_SELECTED_MODULE", "LIKELY_RESUME", "LOGGED_FINDINGS_HEADER",
   "MULTI_REQUEST_TARGETS", "MULTI_TARGETS", "OS_CHECKS_NUM", "PROGRESS_LINE_OPEN", "READLINE_ERROR",
   "SESSION_FILE", "SHOW_LOGS_MSG", "SITEMAP_CHECK", "SKIPPED_OUT_OF_SCOPE", "SKIP_VULNERABLE_HOST",
-  "STDIN_PARSING", "TAMPER_WARNING_SHOWN", "TIME_RELATED_ATTACK_WARNING", "TOTAL_OF_REQUESTS",
+  "STDIN_PARSING", "TAMPER_WARNING_SHOWN", "TIME_RELATED_ATTACK_WARNING", "TOTAL_OF_REQUESTS", "EVAL_SUGGESTED",
   "VALIDATION_RUN", "VISIBLE_CONNECTION_ERRORS", "WARNED_HTTP_ERROR_CODES",
   # Set by the connection to whichever target is in hand, before this reset can be reached.
   "HOSTNAME", "SCHEME", "TARGET_NETLOC", "TARGET_URL",

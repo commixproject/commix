@@ -36,7 +36,7 @@ from src.core.injections.blind.techniques.oob import oob_handler
 from src.core.injections.semiblind.techniques.file_based import fb_handler
 from src.core.injections.semiblind.techniques.tempfile_based import tfb_handler
 from src.core.injections.results_based.techniques.classic import cb_handler
-from src.core.injections.results_based.techniques.eval_based import eb_handler
+from src.core.injections.results_based.techniques.eval import eb_handler
 
 """
 Command Injection and exploitation controller.
@@ -88,7 +88,7 @@ def basic_level_checks():
   settings.SKIP_COMMAND_INJECTIONS = None
   settings.IDENTIFIED_COMMAND_INJECTION = False
   settings.IDENTIFIED_WARNINGS = False
-  settings.IDENTIFIED_PHPINFO = False
+  settings.IDENTIFIED_EVAL_PROBE = False
 
 """
 Initializing HTTP Headers parameters injection status
@@ -308,30 +308,40 @@ Heuristic (basic) test for code injection warnings
 def code_injections_heuristic_basic(url, http_request_method, check_parameter, place):
   check_parameter = check_parameter.lstrip().rstrip()
   injection_type = settings.INJECTION_TYPE.RESULTS_BASED_CE
-  technique = settings.INJECTION_TECHNIQUE.DYNAMIC_CODE
-  technique = "(" + injection_type.split(settings.SINGLE_WHITESPACE)[0] + ") " + technique + ""
+  # Named the way a finding is, so the heuristic and what it leads to read as the one thing.
+  technique = checks.technique_label(injection_type, settings.INJECTION_TECHNIQUE.DYNAMIC_CODE)
   settings.EVAL_BASED_STATE = True
   try:
     whitespace = settings.SINGLE_WHITESPACE
-    if (not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO):
-      for payload in settings.PHPINFO_CHECK_PAYLOADS:
+    if (not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_EVAL_PROBE):
+      for payload in settings.EVAL_PROBE_PAYLOADS:
         response, url = heuristic_request(url, http_request_method, check_parameter, payload, whitespace, place)
         if type(response) is not bool and response is not None:
           html_data = checks.process_page_content(response, action="decode")
-          match = re.search(settings.CODE_INJECTION_PHPINFO, html_data)
+          match = re.search(settings.EVAL_PROBE_REGEX, html_data)
           if match:
             technique = technique + " (possible PHP version: '" + match.group(1) + "')"
-            settings.IDENTIFIED_PHPINFO = True
+            settings.IDENTIFIED_EVAL_PROBE = True
           else:
-            for warning in settings.CODE_INJECTION_WARNINGS:
+            for warning in settings.EVAL_WARNINGS:
               if warning in html_data:
                 settings.IDENTIFIED_WARNINGS = True
                 break
-          if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO:
+          if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_EVAL_PROBE:
             info_msg = "Heuristic (basic) test shows that "
             info_msg += settings.CHECKING_PARAMETER + " might be injectable via " + technique + "."
             settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
-            settings.SKIP_COMMAND_INJECTIONS = True
+            # Code injection is tested only where it was asked for, so what the heuristic saw is
+            # named, the switch that would act on it is named too, and the run carries on testing
+            # for command injection either way.
+            if menu.options.eval_sink:
+              settings.SKIP_COMMAND_INJECTIONS = True
+            elif not settings.EVAL_SUGGESTED:
+              settings.EVAL_SUGGESTED = True
+              message = "Do you want to test it for code injection (i.e. switch '--eval')? [Y/n] "
+              if common.read_input(message, default="Y", check_batch=True) in settings.CHOICE_YES:
+                menu.options.eval_sink = settings.EVAL_ALL_LANGUAGES
+                settings.SKIP_COMMAND_INJECTIONS = True
             break
 
     settings.EVAL_BASED_STATE = False
@@ -344,10 +354,10 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, p
 """
 Run one technique via the given exploit() callable, updating its own state flag in settings - the shared skeleton behind the 4 functions below.
 """
-def run_technique(injection_type, technique, state_name, skip_flag_name, tech_letter, exploit):
+def run_technique(injection_type, technique, state_name, skip_flag_name, tech_letter, exploit, eval_sink=False):
   setattr(settings, state_name, None)
   if not getattr(settings, skip_flag_name):
-    if len(menu.options.tech) == 0 or tech_letter in menu.options.tech:
+    if checks.technique_selected(tech_letter, eval_sink):
       setattr(settings, state_name, exploit() != False)
   state = getattr(settings, state_name)
   if state == None or getattr(settings, skip_flag_name):
@@ -378,7 +388,7 @@ def dynamic_code_evaluation_technique(url, timesec, filename, http_request_metho
     if result != False:
       settings.SKIP_COMMAND_INJECTIONS = True
     return result
-  run_technique(injection_type, technique, "EVAL_BASED_STATE", "SKIP_CODE_INJECTIONS", "e", exploit)
+  run_technique(injection_type, technique, "EVAL_BASED_STATE", "SKIP_CODE_INJECTIONS", "c", exploit, eval_sink=True)
 
 """
 Check if it's exploitable via time-based command injection technique.
@@ -637,11 +647,11 @@ def injection_process(url, check_parameter, http_request_method, filename, times
 
     # Nothing left to probe when all required time-related techniques were resumed.
     time_techniques_resumed = False
-    if not menu.options.tech or "t" in menu.options.tech or "f" in menu.options.tech:
+    if checks.technique_selected("t") or checks.technique_selected("f"):
       needed_time_techniques = set()
-      if not menu.options.tech or "t" in menu.options.tech:
+      if checks.technique_selected("t"):
         needed_time_techniques.add(settings.INJECTION_TECHNIQUE.TIME_BASED)
-      if not menu.options.tech or "f" in menu.options.tech:
+      if checks.technique_selected("f"):
         needed_time_techniques.add(settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED)
       time_techniques_resumed = settings.LOAD_SESSION and needed_time_techniques.issubset(settings.STORED_TECHNIQUES.keys())
 
@@ -698,7 +708,7 @@ def injection_process(url, check_parameter, http_request_method, filename, times
           if menu.options.oob:
             url = oob_heuristic_basic(url, http_request_method, check_parameter, place)
 
-          if not settings.IDENTIFIED_COMMAND_INJECTION and "e" in menu.options.tech:
+          if not settings.IDENTIFIED_COMMAND_INJECTION and checks.technique_selected("c", eval_sink=menu.options.eval_sink):
             # Check for identified warnings
             url = code_injections_heuristic_basic(url, http_request_method, check_parameter, place)
         except KeyboardInterrupt:
@@ -710,7 +720,7 @@ def injection_process(url, check_parameter, http_request_method, filename, times
           except settings.EndDetectionPhaseException:
             break
 
-        if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_PHPINFO:
+        if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_EVAL_PROBE:
           settings.HEURISTIC_TEST.POSITIVE = False
           warn_msg = "Heuristic (basic) test shows that "
           warn_msg += settings.CHECKING_PARAMETER + " might not be injectable."
@@ -746,7 +756,7 @@ def injection_process(url, check_parameter, http_request_method, filename, times
       def _run_time_based():
         if _time_related_resume_redundant():
           return
-        if len(menu.options.tech) == 0 or "t" in menu.options.tech:
+        if checks.technique_selected("t"):
           _ensure_time_warmup()
           # A resumed finding is re-verified against its own full delay, so the model can wait
           # until the first command actually needs it.
@@ -1264,7 +1274,7 @@ def do_check(url, http_request_method, filename):
 
     # Check for '--tor' option.
     if menu.options.tor:
-      if not menu.options.tech or "t" in menu.options.tech or "f" in menu.options.tech:
+      if checks.technique_selected("t") or checks.technique_selected("f"):
         warn_msg = "It is highly recommended to avoid usage of switch '--tor' for "
         warn_msg += "time-based injections because of inherent high latency time."
         settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
@@ -1290,6 +1300,11 @@ def do_check(url, http_request_method, filename):
             err_msg += "'--technique'."
           else:
             err_msg += "'--skip-technique'."
+          untested = checks.untested_techniques()
+          if untested:
+            err_msg += " That would also test the " + untested + "."
+        if not menu.options.eval_sink:
+          err_msg += " Code injection was not tested; the '--eval' switch tests for it."
         err_msg += " If you suspect that there is some kind of protection mechanism involved, maybe you could try to"
         if not menu.options.tamper:
           err_msg += " use option '--tamper'"

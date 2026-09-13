@@ -99,6 +99,16 @@ def restore_option(stored, applied, label):
   return stored
 
 """
+How a stored technique is selected today: the technique letter it is reached by, and whether it
+reaches the evaluation sink. What was stored as its own technique letter is now a sink reached by
+one of the others, so a finding kept under the old spelling still resumes under the new one.
+"""
+def technique_selection(technique_info):
+  if technique_info == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
+    return settings.EVAL_CAPABLE_TECHNIQUES[0], True
+  return technique_letter(technique_info), False
+
+"""
 Map stored technique names to their "--technique" menu letters.
 """
 def technique_letter(technique_info):
@@ -381,7 +391,7 @@ def has_any_stored_technique(url, http_request_method):
       clause, url_params = url_match(url)
       query = "SELECT technique FROM \"" + table + "\" WHERE " + clause + " AND http_request_method = ?;"
       cursor.execute(query, url_params + (http_request_method,))
-      return any(not menu.options.tech or (technique_letter(row[0]) and technique_letter(row[0]) in menu.options.tech) for row in cursor.fetchall())
+      return any(technique_selection(row[0])[0] and checks.technique_selected(*technique_selection(row[0])) for row in cursor.fetchall())
   except (sqlite3.OperationalError, sqlite3.DatabaseError):
     return False
 
@@ -423,9 +433,9 @@ def check_stored_injection_points(url, check_parameter, http_request_method):
         if check_parameter not in (vuln_param, http_header) or stored_method != http_request_method:
           continue
 
-        technique = technique_letter(technique_info)
+        technique, technique_is_eval = technique_selection(technique_info)
 
-        if len(menu.options.tech) == 0 or (technique and technique in menu.options.tech):
+        if technique and checks.technique_selected(technique, technique_is_eval):
           found = True
           # Prefer more specific vulnerable parameter (e.g., HTTP header), if available
           vuln_parameter = vuln_param or http_header
@@ -471,11 +481,11 @@ def load_stored_techniques(url, check_parameter, http_request_method):
       for session in cursor.fetchall():
         row = session[1:]
         technique, vuln_parameter, http_header = row[1], row[5], row[11]
-        letter = technique_letter(technique)
+        letter, letter_is_eval = technique_selection(technique)
         if check_parameter not in (vuln_parameter, http_header) or not letter:
           continue
         # A technique this run was not asked to test is not resumed, nor reported as resumed.
-        if len(menu.options.tech) != 0 and letter not in menu.options.tech:
+        if not checks.technique_selected(letter, letter_is_eval):
           continue
         stored[technique] = row
     return {_: stored[_] for _ in settings.TECHNIQUE_ORDER if _ in stored}

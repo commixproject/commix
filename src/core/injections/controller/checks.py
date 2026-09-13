@@ -392,6 +392,35 @@ def finish_target():
     del settings.LEFTOVER_FILES[:]
 
 """
+Technique letters written out, optionally saying how each one shows execution. Used to name what a
+run did not look at, and which techniques can reach a sink at all.
+"""
+def technique_names(letters, qualified=False):
+  plain = {"c": "classic", "t": "time-based", "f": "file-based"}
+  # How execution shows is worth spelling out where the point is which techniques exist at all.
+  shows = {"c": "results-based", "t": "blind", "f": "semi-blind"}
+  chosen = [plain[_] + (" (" + shows[_] + ")" if qualified else "") for _ in ("c", "t", "f") if _ in letters]
+  if not chosen:
+    return ""
+  name = chosen[0] if len(chosen) == 1 else ", ".join(chosen[:-1]) + " and " + chosen[-1]
+  return name + " technique" + "s"[len(chosen) == 1:]
+
+def untested_techniques():
+  return technique_names([_ for _ in ("c", "t", "f") if _ not in menu.options.tech])
+
+"""
+Whether a technique is one this run is testing. Two separate choices sit behind it: which sink is
+being tested, chosen with '--eval', and by which technique, chosen with '--technique'. A technique
+runs when its letter was asked for and it reaches the sink in hand, so the two compose - and the
+out-of-band technique answers to the letter alone, carrying whichever sink it is given.
+"""
+def technique_selected(tech_letter, eval_sink=False):
+  # The out-of-band technique carries whichever sink it is given, so it answers to the letter alone.
+  if tech_letter != settings.OOB_TECHNIQUE_LETTER and bool(menu.options.eval_sink) != bool(eval_sink):
+    return False
+  return len(menu.options.tech) == 0 or tech_letter in menu.options.tech
+
+"""
 Quit - hard_exit ends the process immediately (os._exit), otherwise SystemExit unwinds normally.
 """
 def quit(filename, url, hard_exit):
@@ -3642,7 +3671,7 @@ def short_technique_label(technique):
   return technique_display_name(technique).replace("command injection ", "").replace("injection ", "")
 
 """
-Full label of a technique, with its injection type - "classic results-based technique".
+Full label of a technique, with its injection type - "classic results-based command injection technique".
 """
 def technique_label(injection_type, technique):
   name = short_technique_label(technique)
@@ -3651,7 +3680,9 @@ def technique_label(injection_type, technique):
   # The channel belongs with the technique's own name, ahead of the injection type.
   if technique == settings.INJECTION_TECHNIQUE.OOB and oob_channel_label():
     name += " (" + oob_channel_label() + ")"
-  return name + settings.SINGLE_WHITESPACE + injection_type.split(settings.SINGLE_WHITESPACE)[0] + " technique"
+  # The injection type names the sink as well as how execution shows, and both sinks are reached by
+  # the same techniques - so it is given whole, rather than cut down to how execution shows.
+  return name + settings.SINGLE_WHITESPACE + injection_type + " technique"
 
 """
 Display name of a technique - a "/tmp/" output file is a file-based mechanism, not its own technique.
@@ -3659,6 +3690,10 @@ Display name of a technique - a "/tmp/" output file is a file-based mechanism, n
 def technique_display_name(technique):
   if technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
     return settings.INJECTION_TECHNIQUE.FILE_BASED
+  # Reaching an evaluation sink is not a technique of its own - it is the results-based one aimed
+  # at different code, and the injection type is what says which sink was reached.
+  if technique == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
+    return settings.INJECTION_TECHNIQUE.CLASSIC
   return technique
 
 """

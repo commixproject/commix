@@ -26,7 +26,7 @@ def select_injector(technique):
   if technique == settings.INJECTION_TECHNIQUE.CLASSIC:
     from src.core.injections.results_based.techniques.classic import cb_injector as injector
   elif technique == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
-    from src.core.injections.results_based.techniques.eval_based import eb_injector as injector
+    from src.core.injections.results_based.techniques.eval import eb_injector as injector
   elif technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
     from src.core.injections.blind.techniques.time_based import tb_injector as injector
   elif technique == settings.INJECTION_TECHNIQUE.FILE_BASED:

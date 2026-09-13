@@ -613,6 +613,26 @@ def main(filename, url, http_request_method):
         menu.options.tech = ''.join([str(x) for x in settings.AVAILABLE_TECHNIQUES])
 
     menu.options.tech = menu.options.tech.lower()
+    if menu.options.eval_sink:
+      menu.options.eval_sink = menu.options.eval_sink.lower()
+      if menu.options.eval_sink not in (settings.EVAL_ALL_LANGUAGES,) + settings.SUPPORTED_EVAL_LANGUAGES:
+        err_msg = "You defined an invalid language '" + menu.options.eval_sink + "' for '--eval'. "
+        err_msg += "Currently, the only supported " + ("one is ", "ones are ")[len(settings.SUPPORTED_EVAL_LANGUAGES) != 1]
+        err_msg += ", ".join("'" + _ + "'" for _ in settings.SUPPORTED_EVAL_LANGUAGES) + "."
+        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+        raise SystemExit()
+      # Everything the payloads are built from follows the language that was named.
+      if menu.options.eval_sink != settings.EVAL_ALL_LANGUAGES:
+        settings.set_eval_grammar(menu.options.eval_sink)
+    # The evaluation sink was named with '--technique=e' before '--eval' existed, and still is.
+    if settings.USER_APPLIED_TECHNIQUE and settings.EVAL_TECHNIQUE_LETTER in menu.options.tech:
+      menu.options.eval_sink = menu.options.eval_sink or settings.EVAL_ALL_LANGUAGES
+      remaining = menu.options.tech.replace(settings.EVAL_TECHNIQUE_LETTER, "")
+      if remaining:
+        warn_msg = "Code injection is selected with the '--eval' switch now, and the technique is "
+        warn_msg += "chosen separately with '--technique', so only code injection is tested."
+        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+      menu.options.tech = "".join(settings.EVAL_CAPABLE_TECHNIQUES)
     if menu.options.oob and settings.USER_APPLIED_TECHNIQUE:
       err_msg = "The switch '--oob' selects the out-of-band technique on its own, so it cannot be "
       err_msg += "combined with '--technique'."
@@ -637,6 +657,25 @@ def main(filename, url, http_request_method):
         err_msg = "Aborted the detection procedure due to skipping all injection techniques."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
         raise SystemExit()
+
+    # Whichever way the technique list was narrowed, the sink asked for has to be reachable by
+    # something still in it - otherwise the run would test nothing and say only that it found nothing.
+    if menu.options.eval_sink and not menu.options.oob and \
+       not any(_ in menu.options.tech for _ in settings.EVAL_CAPABLE_TECHNIQUES):
+      err_msg = "Code injection (i.e. '--eval') currently supports only the "
+      err_msg += checks.technique_names(settings.EVAL_CAPABLE_TECHNIQUES, qualified=True) + "."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit()
+
+    # Some of the techniques named do reach the sink and some do not: the run goes ahead on the ones
+    # that do, and says which of the others it is leaving out rather than dropping them in silence.
+    if menu.options.eval_sink and not menu.options.oob and settings.USER_APPLIED_TECHNIQUE:
+      ignored = [_ for _ in menu.options.tech if _ not in settings.EVAL_CAPABLE_TECHNIQUES]
+      if ignored:
+        warn_msg = "The " + checks.technique_names(ignored) + " given with '--technique' "
+        warn_msg += ("is", "are")[len(ignored) != 1] + " not supported for code injection, so "
+        warn_msg += ("it is", "they are")[len(ignored) != 1] + " ignored."
+        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
     # Check if specified wrong injection technique - only what the user actually typed, since a
     # resumed session hands back techniques that are not selectable on the command line.

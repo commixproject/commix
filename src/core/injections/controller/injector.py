@@ -980,7 +980,7 @@ def results_based_injection(separator, TAG, cmd, prefix, suffix, whitespace, htt
     if technique == settings.INJECTION_TECHNIQUE.CLASSIC or technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
       from src.core.injections.results_based.techniques.classic import cb_payloads as payloads
     elif technique == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
-      from src.core.injections.results_based.techniques.eval_based import eb_payloads as payloads
+      from src.core.injections.results_based.techniques.eval import eb_payloads as payloads
     else:
       from src.core.injections.semiblind.techniques.file_based import fb_payloads as payloads
 

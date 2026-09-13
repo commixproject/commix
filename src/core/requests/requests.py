@@ -504,7 +504,7 @@ def request_failed(err_msg):
     else:
       return False
 
-  elif settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_PHPINFO or settings.IDENTIFIED_COMMAND_INJECTION or \
+  elif settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_EVAL_PROBE or settings.IDENTIFIED_COMMAND_INJECTION or \
   any(checks.ignored_http_error_code(_) for _ in settings.HTTP_ERROR_CODES if _ in str(error_msg)):
     return False
 
