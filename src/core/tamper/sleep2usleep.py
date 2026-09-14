@@ -19,7 +19,7 @@ from src.core.injections.controller import checks
 
 """
 About: Replaces "sleep" with "usleep" command in a given payload.
-Notes: This tamper script works against Unix-like target(s).
+Notes: This tamper script works against target(s) with a POSIX shell.
 Reference: http://man7.org/linux/man-pages/man3/usleep.3.html
 """
 

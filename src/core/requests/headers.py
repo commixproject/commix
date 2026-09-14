@@ -34,6 +34,27 @@ from src.core.requests import stability
 from src.thirdparty.six.moves import urllib as _urllib
 
 """
+The query string, encoded - and shortened by giving characters back where it runs long.
+
+Only while it is over the limit, and only characters that are legal in a query unencoded, so what
+the target reads is unchanged and a query of ordinary length is encoded exactly as it would be.
+"""
+def encoded_query(query):
+  safe = settings.query_safe_chars() + settings.URL_PARAM_DELIMITER
+  given_back = 0
+  while True:
+    encoded = _urllib.parse.quote(query, safe=safe)
+    if len(encoded) <= settings.URLENCODE_CHAR_LIMIT or given_back >= len(settings.URLENCODE_FAILSAFE_CHARS):
+      return encoded
+    # One at a time, and only ones the query actually contains - handing back a character it does
+    # not have shortens nothing and widens the set for no reason.
+    while given_back < len(settings.URLENCODE_FAILSAFE_CHARS):
+      safe += settings.URLENCODE_FAILSAFE_CHARS[given_back]
+      given_back += 1
+      if safe[-1] in query:
+        break
+
+"""
 Encoding non-ASCII characters (in URL path and query).
 """
 def encode_non_ascii_url(request):
@@ -41,7 +62,7 @@ def encode_non_ascii_url(request):
   parts = _urllib.parse.urlsplit(url)
   path = _urllib.parse.quote(parts.path, safe=settings.SAFE_PATH)
   # Encode query string, preserving delimiters and the parameter delimiter
-  query = _urllib.parse.quote(parts.query, safe=settings.query_safe_chars() + settings.URL_PARAM_DELIMITER)
+  query = encoded_query(parts.query)
   # Reconstruct the full URL with encoded path and query
   request.full_url = _urllib.parse.urlunsplit((parts.scheme, parts.netloc, path, query, parts.fragment))
 

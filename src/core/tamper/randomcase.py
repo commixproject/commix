@@ -19,7 +19,9 @@ from src.core.injections.controller import checks
 
 """
 About: Replaces each character in a user-supplied OS command with a random case.
-Notes: This tamper script works against Unix-like target(s).
+Notes: This tamper script works against target(s) with a POSIX shell.
+       The character ranges are quoted with "'", which is the one quote neither an
+       evaluated string nor the shell inside it is already using.
 """
 
 __tamper__ = "randomcase"
@@ -42,9 +44,9 @@ def tamper(payload):
     source = payload if settings.USER_APPLIED_CMD in payload else settings.RAW_PAYLOAD
     if settings.USER_APPLIED_CMD in source:
       if settings.USE_BACKTICKS:
-        random_case_cmd = "\\`echo " + _ + "|tr \"[A-Z]\" \"[a-z]\"\\`"
+        random_case_cmd = "\\`echo " + _ + "|tr '[A-Z]' '[a-z]'\\`"
       else:
-        random_case_cmd = "$(echo " + _ + "|tr \"[A-Z]\" \"[a-z]\")"
+        random_case_cmd = "$(echo " + _ + "|tr '[A-Z]' '[a-z]')"
       # Applied to the payload as handed over, not to the untouched original: the scripts run in
       # order, and reaching back past the ones before would throw their work away.
       payload = source.replace(settings.USER_APPLIED_CMD, random_case_cmd)

@@ -611,7 +611,8 @@ def main(filename, url, http_request_method):
 
     menu.options.tech = menu.options.tech.lower()
     if menu.options.eval_sink:
-      menu.options.eval_sink = menu.options.eval_sink.lower()
+      # 'py' and 'python' name the same language, here as for '--interpreter'.
+      menu.options.eval_sink = settings.resolve_language(menu.options.eval_sink)
       if menu.options.eval_sink not in (settings.EVAL_ALL_LANGUAGES,) + settings.SUPPORTED_EVAL_LANGUAGES:
         err_msg = "You defined an invalid language '" + menu.options.eval_sink + "' for '--eval'. "
         err_msg += "Currently, the only supported " + ("one is ", "ones are ")[len(settings.SUPPORTED_EVAL_LANGUAGES) != 1]
@@ -655,24 +656,14 @@ def main(filename, url, http_request_method):
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
         raise SystemExit()
 
-    # Whichever way the technique list was narrowed, the sink asked for has to be reachable by
-    # something still in it - otherwise the run would test nothing and say only that it found nothing.
-    if menu.options.eval_sink and not menu.options.oob and \
-       not any(_ in menu.options.tech for _ in settings.EVAL_CAPABLE_TECHNIQUES):
-      err_msg = "Code injection (i.e. '--eval') currently supports only the "
-      err_msg += checks.technique_names(settings.EVAL_CAPABLE_TECHNIQUES, qualified=True) + "."
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+    """
+    Nothing is checked here about which techniques reach the evaluation sink.
 
-    # Some of the techniques named do reach the sink and some do not: the run goes ahead on the ones
-    # that do, and says which of the others it is leaving out rather than dropping them in silence.
-    if menu.options.eval_sink and not menu.options.oob and settings.USER_APPLIED_TECHNIQUE:
-      ignored = [_ for _ in menu.options.tech if _ not in settings.EVAL_CAPABLE_TECHNIQUES]
-      if ignored:
-        warn_msg = "The " + checks.technique_names(ignored) + " given with '--technique' "
-        warn_msg += ("is", "are")[len(ignored) != 1] + " not supported for code injection, so "
-        warn_msg += ("it is", "they are")[len(ignored) != 1] + " ignored."
-        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    Every technique '--technique' can name reaches it, and the out-of-band one carries whichever
+    sink it is given - so there is no unreachable combination left to refuse, and nothing to leave
+    out of a list the user narrowed. What stood here refused a run that named no technique at all,
+    which is the one that asks for all of them.
+    """
 
     # Check if specified wrong injection technique - only what the user actually typed, since a
     # resumed session hands back techniques that are not selectable on the command line.
@@ -840,7 +831,10 @@ try:
 
   # Check if specified wrong alternative interpreter
   if menu.options.interpreter:
-    if menu.options.interpreter.lower() not in settings.AVAILABLE_INTERPRETERS:
+    # Resolved before it is checked, and kept resolved - what reads it later compares against the
+    # name commix knows, so 'py' has to have become 'python' by now.
+    menu.options.interpreter = settings.resolve_language(menu.options.interpreter)
+    if menu.options.interpreter not in settings.AVAILABLE_INTERPRETERS:
       err_msg = "'" + menu.options.interpreter + "' interpreter is not supported!"
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()

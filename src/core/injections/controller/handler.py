@@ -446,8 +446,6 @@ def _oob_sweep(is_eval, injection_type, prefixes, suffixes, separators, url, tim
       bare_suffix = suffix
       probe_whitespace = whitespace
       probe_prefix = prefix
-      if probe_whitespace == settings.SINGLE_WHITESPACE:
-        probe_whitespace = _urllib.parse.quote(probe_whitespace)
       settings.DETECTION_PHASE = True
       settings.EXPLOITATION_PHASE = False
       i = i + 1
@@ -863,9 +861,9 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
                       cmd = "powershell.exe -InputFormat none write (" + str(rand_num) + ")"
                   else:
                     if technique == settings.INJECTION_TECHNIQUE.TIME_BASED or technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
-                      cmd = "expr " + str(randv1) + " %2B " + str(randv2) + ""
+                      cmd = "expr " + str(randv1) + " + " + str(randv2) + ""
                     else:
-                      cmd = "echo $((" + str(randv1) + " %2B " + str(randv2) + "))"
+                      cmd = "echo $((" + str(randv1) + " + " + str(randv2) + "))"
 
                   # Set the original delay time
                   original_exec_time = exec_time
@@ -1028,8 +1026,14 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
   for whitespace, prefix, suffix, separator in _boundary_combinations(whitespaces, prefixes, suffixes, separators):
     bare_prefix = prefix
     bare_suffix = suffix
-    if whitespace == settings.SINGLE_WHITESPACE:
-      whitespace = _urllib.parse.quote(whitespace)
+    """
+    The whitespace goes in as a space.
+
+    Encoding it here is the last of the pre-encoding the payloads used to do, and it survives only
+    where the carrier is URL-decoded by the target. A JSON or XML body is not - the target reads
+    '%20' as three characters, the command it is part of is not a command, and the technique looks
+    inapplicable. Encoded once at the end, with everything else, it is right for either.
+    """
     # Check injection state
     settings.DETECTION_PHASE = True
     settings.EXPLOITATION_PHASE = False

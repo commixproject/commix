@@ -23,14 +23,14 @@ Notes: This tamper script works against all targets.
 
 __tamper__ = "space2htab"
 __priority__ = settings.PRIORITY.LOWER
-space2htab = "%09"
+space2htab = "\t"
 
 if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
 def tamper(payload):
   if len(settings.WHITESPACES) != 0:
-    if settings.WHITESPACES[0] == _urllib.parse.quote(settings.SINGLE_WHITESPACE):
+    if settings.WHITESPACES[0] == settings.SINGLE_WHITESPACE:
       settings.WHITESPACES[0] = space2htab
     elif space2htab not in settings.WHITESPACES:
       settings.WHITESPACES.append(space2htab)

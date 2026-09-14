@@ -35,7 +35,7 @@ Vous pouvez consulter la [**collection de captures d'écran**](https://github.co
 ## Fonctionnalités
 
 * **Quatre techniques d'injection** - classic (basée sur les résultats), time-based (à l'aveugle), file-based (semi-aveugle, avec une variante tempfile-based pour les cibles à écriture restreinte) et out-of-band (OAST) via HTTP/S et DNS.
-* **Injection de code** - `--eval` teste la chaîne que la cible évalue comme du code, avec les quatre mêmes techniques.
+* **Injection de code** - `--eval` teste la chaîne que la cible évalue comme du code, en PHP ou Python, avec les quatre mêmes techniques.
 * **Large surface d'injection** - paramètres GET/POST, en-têtes HTTP, cookies et corps de requête JSON/XML, ainsi que le module `shellshock` pour les cibles CGI.
 * **Shells interactifs** - un `os_shell` sur la cible, les modes intégrés `reverse_tcp` et `bind_tcp`, et le transfert de fichiers (`download`/`upload`) via le shell établi.
 * **Énumération et accès aux fichiers** - utilisateur courant, nom d'hôte, privilèges, informations système, utilisateurs et empreintes de mots de passe ; lecture et écriture de fichiers sur la cible.

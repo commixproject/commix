@@ -21,8 +21,9 @@ to one - a module here is used by whichever technique carries it.
 """
 
 from src.core.eval import php
+from src.core.eval import python
 
-LANGUAGES = {php.NAME: php}
+LANGUAGES = {php.NAME: php, python.NAME: python}
 
 """
 The languages that can be named with '--eval'.

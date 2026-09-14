@@ -29,6 +29,13 @@ __priority__ = settings.PRIORITY.LOWEST
 if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
+"""
+What this produces is a blob, not an expression - so an evaluated string has nothing to
+evaluate, whichever language is doing the evaluating.
+"""
+def dependencies():
+  return checks.tamper_dep_eval_incompatible(__tamper__)
+
 def tamper(payload):
   checks.tamper_check_space2plus_conflict(__tamper__)
   payload = _urllib.parse.unquote(payload)

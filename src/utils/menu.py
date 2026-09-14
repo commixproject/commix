@@ -637,7 +637,7 @@ injection.add_option("--os",
                 action="store",
                 dest="os",
                 default=False,
-                help="Force back-end operating system (e.g. 'Windows' or 'Unix').")
+                help="Force back-end operating system (e.g. 'Windows' or 'Unix-like').")
 
 injection.add_option("--tamper",
                 action="store",

@@ -40,14 +40,14 @@ def decision(separator, TAG, randv1, randv2):
   if settings.TARGET_OS == settings.OS.WINDOWS:
     commands = ["echo " + TAG]
     if not settings.SKIP_CALC:
-      commands.append(_windows_line("set /a (" + str(randv1) + "%2B" + str(randv2) + ")"))
+      commands.append(_windows_line("set /a (" + str(randv1) + "+" + str(randv2) + ")"))
     commands = commands + ["echo " + TAG, "echo " + TAG]
     payload = _print_statement(separator, commands, chain=checks.WINDOWS_CHAIN)
 
   else:
     commands = ["echo " + TAG]
     if not settings.SKIP_CALC:
-      commands.append("echo $((" + str(randv1) + "%2B" + str(randv2) + "))")
+      commands.append("echo $((" + str(randv1) + "+" + str(randv2) + "))")
     commands = commands + ["echo " + TAG, "echo " + TAG]
     payload = _print_statement(separator, commands)
 
@@ -58,7 +58,7 @@ __Warning__: The alternative shells are still experimental.
 """
 def decision_alter_interpreter(separator, TAG, randv1, randv2):
   if settings.TARGET_OS == settings.OS.WINDOWS:
-    python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"print(str(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + ")))\""
+    python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"print(str(int(" + str(int(randv1)) + "+" + str(int(randv2)) + ")))\""
     commands = ["echo " + TAG]
     if not settings.SKIP_CALC:
       commands.append(python_payload)
@@ -66,7 +66,7 @@ def decision_alter_interpreter(separator, TAG, randv1, randv2):
     payload = _print_statement(separator, commands, chain=checks.WINDOWS_CHAIN)
 
   else:
-    python_payload = settings.LINUX_PYTHON_INTERPRETER + " -c \"print(str(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + ")))\""
+    python_payload = settings.LINUX_PYTHON_INTERPRETER + " -c \"print(str(int(" + str(int(randv1)) + "+" + str(int(randv2)) + ")))\""
     commands = ["echo " + TAG]
     if not settings.SKIP_CALC:
       # A leading space where nothing separates it from the marker before it.

@@ -18,7 +18,7 @@ from src.core.injections.controller import checks
 
 """
 About: Replaces the printf-based ASCII to Decimal `printf "%d" "'$char'"` with `echo -n $char | od -An -tuC | xargs`.
-Notes: This tamper script works against Unix-like target(s)
+Notes: This tamper script works against target(s) with a POSIX shell
 """
 
 __tamper__ = "printf2echo"

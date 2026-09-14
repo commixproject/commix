@@ -106,7 +106,9 @@ def check_waf(url, http_request_method):
   info_msg = "Checking whether some kind of WAF/IPS is protecting the target."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   if settings.VERBOSITY_LEVEL >= 1:
-    settings.print_data_to_stdout(settings.print_payload(payload))
+    # Shown the way it was written, as every other payload is - what goes on the wire is encoded,
+    # and that is what the traffic at '-v 2' shows.
+    settings.print_data_to_stdout(settings.print_payload(settings.WAF_CHECK_PAYLOAD))
   payload = "".join(random.sample(string.ascii_uppercase, k=4)) + "=" + payload
   if not "?" in url:
     payload = "?" + payload
@@ -449,7 +451,8 @@ wrapping in place would wrap what the last parameter already wrapped.
 def eval_prefixes():
   prefixes = list(settings.EVAL_PREFIXES)
   for function in settings.EXECUTION_FUNCTIONS:
-    candidate = function if function.startswith("${") else "${" + function + "("
+    # How a function is reached is the language's own spelling, not something to assume here.
+    candidate = settings.EVAL_GRAMMAR.execution_prefix(function)
     if candidate not in prefixes:
       prefixes.append(candidate)
   return prefixes
@@ -830,21 +833,28 @@ def sanitize_payload_newlines(payload):
   ):
     return payload.replace(settings.END_LINE.LF, ";")
 
-  if settings.TARGET_OS != settings.OS.WINDOWS:
-    return payload.replace(settings.END_LINE.LF, "%0d")
+  """
+  Nothing else is rewritten.
 
+  A newline inside a payload is written as the character it is meant to be - an interpreter's own
+  line break is a carriage return where it is one - so there is nothing left here to correct, and a
+  separator that is itself a newline must not be turned into something else.
+  """
   return payload
 
 """
 Normalize newline sequences (CRLF, CR, LF) into lowercase URL-encoded form.
 """
 def normalize_newlines(payload):
-  payload = _urllib.parse.unquote(payload)
+  """
+  A header value cannot carry a line break - one would end the header, or be refused outright - so
+  any that the payload holds are written out in their encoded form instead.
 
+  Only those. The payload used to be decoded whole first, which was needed while it arrived
+  part-encoded and is now only a way to damage a command that contains a per-cent sign.
+  """
   for seq in [settings.END_LINE.CRLF, settings.END_LINE.CR, settings.END_LINE.LF]:
-    encoded = _urllib.parse.quote(seq)
-    payload = payload.replace(seq, encoded.lower())
-    payload = payload.replace(encoded.upper(), encoded.lower())
+    payload = payload.replace(seq, _urllib.parse.quote(seq).lower())
 
   return payload
 
@@ -1493,11 +1503,13 @@ def user_defined_os():
     if menu.options.os.lower() == "windows":
       settings.TARGET_OS = settings.OS.WINDOWS
       return True
-    elif menu.options.os.lower() == "unix":
+    # Both spellings, since 'Unix-like' is what commix calls the family everywhere else and 'Unix'
+    # is what this switch has always taken.
+    elif menu.options.os.lower() in ("unix", "unix-like"):
       return True
     else:
       err_msg = "You defined an invalid value '" + menu.options.os + "' "
-      err_msg += "for the operating system. The value must be 'Windows' or 'Unix'."
+      err_msg += "for the operating system. The value must be 'Windows' or 'Unix-like'."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
@@ -1532,8 +1544,70 @@ def define_target_os():
 """
 The one name the target's operating system is given, wherever it is printed.
 """
+"""
+A payload, escaped to sit inside a JSON string.
+
+A JSON string may not hold a raw control character, and three of the separators are exactly that -
+a newline, a carriage return and a substitute character. Left as they were the body was not JSON at
+all, the parser refused it, and the technique looked inapplicable to every JSON endpoint for a
+reason that had nothing to do with the target. The backslash goes too, or one in the payload
+escapes whatever follows it.
+"""
+def escape_json_value(value):
+  escaped = ""
+  for char in value:
+    if char < " " or char in ("\"", "\\"):
+      escaped += json.dumps(char)[1:-1]
+    else:
+      escaped += char
+  return escaped
+
+"""
+A payload, with the characters XML cannot carry taken out.
+
+XML 1.0 admits no control character but tab, newline and carriage return - a substitute character
+in a document makes it unparseable wherever it appears, so the separator that is one cannot travel
+this way at all.
+"""
+def strip_xml_forbidden(value):
+  return "".join(char for char in value if char >= " " or char in "\t\n\r")
+
+def encode_payload(payload):
+  """
+  A payload, encoded for a carrier that is URL-encoded.
+
+  '%' is left alone, because the payloads write their own encoded sequences and re-encoding those
+  would send '%2520' where '%20' was meant. That leaves the corner case of a '%' that really is a
+  per-cent sign: it is not part of a '%XX', the target reads it as the start of one, and a strict
+  server answers 400 rather than running anything.
+
+  So a '%' with no two hex digits behind it is made '%25' first - unless a tamper script is in play,
+  since those write escapes of their own and this cannot tell theirs from a stray one.
+  """
+  if "%" in payload and not menu.options.tamper:
+    payload = re.sub(r"%(?![0-9a-fA-F]{2})", "%25", payload)
+  return _urllib.parse.quote(payload, safe=settings.payload_safe_chars())
+
+def target_shell_label():
+  """
+  What a payload that executed actually established: which shell understood it.
+
+  Not the operating system - a POSIX shell answers on Windows too, under WSL, Cygwin, Git Bash or
+  busybox, so 'a POSIX shell ran this' is no evidence of a Unix-like host. Which syntax works is
+  also the more useful half for whoever is reading, being the half they would act on.
+
+  The standard rather than a shell's name, because which one it is was never asked: 'sh', 'bash',
+  'dash' and 'zsh' all answer the same syntax, and only that syntax was shown to work.
+  """
+  return "cmd.exe" if settings.TARGET_OS == settings.OS.WINDOWS else "POSIX"
+
 def target_os_label():
-  return settings.OS.WINDOWS.title() if settings.TARGET_OS == settings.OS.WINDOWS else "Unix-like shell"
+  """
+  What is known is the family, not the distribution: which of the two payload shapes the target
+  answered. Windows names itself; everything else is Linux, macOS, a BSD or another Unix - so the
+  umbrella term for those is what is reported, rather than the shell that gave it away.
+  """
+  return settings.OS.WINDOWS.title() if settings.TARGET_OS == settings.OS.WINDOWS else "Unix-like"
 
 """
 Record an identified operating system. Every check that fingerprints one comes through here, so the
@@ -2034,17 +2108,29 @@ def list_tamper_scripts():
 Shared building blocks for tamper scripts' own dependencies() checks - each script decides which
 of these apply to it, instead of a central list here trying to track every script's constraints.
 """
+"""
+Both of these test the operating system, because that is what commix knows - but what they are
+really enforcing is the syntax a script is written in, so that is what they say. A shell is named
+rather than the host it usually comes with.
+"""
 def tamper_dep_windows_only(tamper_name):
   if settings.TARGET_OS != settings.OS.WINDOWS:
-    return "Unix-like targets do not support the usage of '" + tamper_name + ".py'. Skipping tamper script."
+    return "The '" + tamper_name + ".py' tamper script needs 'cmd.exe'. Skipping tamper script."
 
 def tamper_dep_unix_only(tamper_name):
   if settings.TARGET_OS == settings.OS.WINDOWS:
-    return "Windows targets do not support the usage of '" + tamper_name + ".py'. Skipping tamper script."
+    return "The '" + tamper_name + ".py' tamper script needs a POSIX shell. Skipping tamper script."
 
 def tamper_dep_eval_incompatible(tamper_name):
-  if settings.CURRENT_TECHNIQUE == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
-    return "The dynamic code evaluation technique does not support the usage of '" + tamper_name + ".py'. Skipping tamper script."
+  """
+  What these scripts cannot survive is the sink, not the technique that reaches it.
+
+  Asked of the classic technique alone, they were skipped there and applied everywhere else - and
+  code injection is now proven time-based and file-based as well, so the payloads they would have
+  corrupted were being sent by every technique but the one that refused them.
+  """
+  if menu.options.eval_sink:
+    return "Code injection (i.e. '--eval') does not support the usage of '" + tamper_name + ".py'. Skipping tamper script."
 
 def tamper_dep_time_related_only(tamper_name):
   time_related_in_scope = len(menu.options.tech) == 0 or "t" in menu.options.tech or "f" in menu.options.tech
@@ -2268,7 +2354,8 @@ Check for modified whitespaces.
 def whitespace_check(payload):
 
   _ = []
-  whitespaces = ["${IFS}", "+", "%09", "%0b", "%20"]
+  # As they appear in a payload now: written out, and encoded only on the way to the wire.
+  whitespaces = ["${IFS}", "+", "\t", "\v", " "]
   for whitespace in whitespaces:
     if whitespace in payload:
       _.append(whitespace)
@@ -3905,7 +3992,7 @@ def custom_web_root(url, timesec, filename, http_request_method, url_time_respon
 
 
 """
-TEMP path for win/*nix, without touching WEB_ROOT or prompting.
+TEMP path for a Windows or Unix-like target, without touching WEB_ROOT or prompting.
 """
 def default_tmp_path():
   if settings.TARGET_OS == settings.OS.WINDOWS:
@@ -3918,7 +4005,7 @@ def default_tmp_path():
   return normalize_target_dir(menu.options.tmp_path or settings.TMP_PATH)
 
 """
-Return TEMP path for win / *nix targets.
+Return TEMP path for a Windows or Unix-like target.
 """
 def check_tmp_path(url, timesec, filename, http_request_method, url_time_response):
   tmp_path = default_tmp_path()
@@ -4066,7 +4153,7 @@ def windows_only_attack_vector():
 The operator a Windows payload starts with, or None when the separator does not chain commands in
 cmd.exe at all - ';', a newline and Ctrl-Z do not, so there is no payload to build for those.
 """
-WINDOWS_SEPARATORS = ("%26", "%26%26", "|", "||", "")
+WINDOWS_SEPARATORS = ("&", "&&", "|", "||", "")
 
 def windows_separator(separator):
   return separator if separator in WINDOWS_SEPARATORS else None
@@ -4086,7 +4173,7 @@ def separator_chains(separator):
 The operator a payload chains its own commands with, once it has started with the separator under
 test. Unconditional, unlike '||' and '|', so every part runs no matter how the first one ended.
 """
-WINDOWS_CHAIN = "%26"
+WINDOWS_CHAIN = "&"
 
 """
 What a Windows payload ends with when its last token is a filename or a quoted literal. cmd.exe has
@@ -4205,7 +4292,7 @@ def fix_newlines_for_headers(payload, separator):
   if settings.USER_AGENT_INJECTION or settings.REFERER_INJECTION or settings.HOST_INJECTION or settings.CUSTOM_HEADER_INJECTION:
     return payload.replace(settings.END_LINE.LF, separator)
   if settings.TARGET_OS != settings.OS.WINDOWS:
-    return payload.replace(settings.END_LINE.LF, "%0d")
+    return payload.replace(settings.END_LINE.LF, settings.END_LINE.CR)
   return payload
 
 """

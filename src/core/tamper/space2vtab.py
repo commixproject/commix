@@ -24,7 +24,7 @@ Notes: This tamper script works against Windows targets.
 
 __tamper__ = "space2vtab"
 __priority__ = settings.PRIORITY.LOWER
-space2vtab = "%0b"
+space2vtab = "\v"
 
 def dependencies():
   return checks.tamper_dep_windows_only(__tamper__)
@@ -35,7 +35,7 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 def tamper(payload):
   if len(settings.WHITESPACES) != 0:
     if settings.TARGET_OS == settings.OS.WINDOWS:
-      if settings.WHITESPACES[0] == _urllib.parse.quote(settings.SINGLE_WHITESPACE):
+      if settings.WHITESPACES[0] == settings.SINGLE_WHITESPACE:
         settings.WHITESPACES[0] = space2vtab
       elif space2vtab not in settings.WHITESPACES:
         settings.WHITESPACES.append(space2vtab)

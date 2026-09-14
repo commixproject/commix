@@ -21,7 +21,7 @@ from src.core.injections.controller import checks
 
 """
 About: Adds (randomly generated) uninitialized bash variables between the characters of each command in a given payload.
-Notes: This tamper script works against Unix-like target(s).
+Notes: This tamper script works against target(s) with a POSIX shell.
 Reference: https://www.secjuice.com/web-application-firewall-waf-evasion/
 """
 

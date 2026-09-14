@@ -20,7 +20,7 @@ from src.core.injections.controller import checks
 
 """
 About: Uses backticks (`) instead of "$()" for command substitution in a given payload.
-Notes: This tamper script works against Unix-like target(s).
+Notes: This tamper script works against target(s) with a POSIX shell.
 """
 
 __tamper__ = "backticks"

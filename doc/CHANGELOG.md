@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: Code injection support for Python as well as PHP, across all techniques.
 * Added: The `--eval` switch now also reaches the time-based and file-based techniques, so code injection is proven blind and semi-blind as well as results-based.
 * Added: New `--eval` switch to test for code injection, optionally naming a language (e.g. `--eval="php"`), which combines with any technique given with `--technique`.
 * Fixed: The out-of-band (DNS) payloads chain their own commands with the separator being tested, instead of always with `||`.

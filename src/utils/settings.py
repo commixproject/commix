@@ -176,8 +176,23 @@ def print_info_msg(info_msg):
 def print_bold_info_msg(info_msg):
   return _format_msg(INFO_BOLD_SIGN, info_msg, bold=True)
 
+# How a line break is shown in a payload, so it does not split the line.
+ESCAPED_CR = "\\r"
+ESCAPED_CRLF = "\\r\\n"
+
 # Print payload (verbose mode)
 def print_payload(payload):
+  """
+  One rendering for every payload that is shown, so the same payload never reads two ways.
+
+  It is shown as it is built - real separators, real spaces - because that is the form worth
+  reading and pasting; the wire form, with everything escaped for the request, is what the traffic
+  at '-v 2' is for. The only thing changed is a line break, which would otherwise put half the
+  payload on a line of its own and make it look like two.
+  """
+  for sequence, shown in ((END_LINE.CRLF, ESCAPED_CRLF), (END_LINE.CR, ESCAPED_CR),
+                          (END_LINE.LF, END_LINE.ESCAPED_LF)):
+    payload = payload.replace(sequence, shown)
   return _format_msg(PAYLOAD_SIGN, payload)
 
 # Print HTTP traffic (verbose mode)
@@ -335,7 +350,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "128"
+REVISION = "129"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -399,12 +414,50 @@ SAFE_PATH = "*%/"
 SAFE_QUERY = SAFE_PATH + "=?&"
 
 """
-Safe query-string characters; allow '+' only when it is the active whitespace substitute.
+Characters left unescaped inside a payload.
+
+Only '%', so that the encoded sequences the payloads write for themselves survive - everything else
+is escaped, the '&' and '=' that would otherwise end the parameter the payload travels in included.
+The carrier is encoded separately, and keeps those two, being where they do the separating.
+"""
+SAFE_PAYLOAD = "%"
+
+"""
+A query string this long risks being cut off, so characters are given back to it one at a time.
+
+Servers and proxies put their own limit on a request line, and an encoded payload is several times
+the length of what it stands for. These four are legal in a query unencoded, so handing them back
+shortens it without changing what the target reads - taken in turn, and only while it is still
+over length, so a request that was never near the limit is encoded exactly as any other.
+"""
+URLENCODE_CHAR_LIMIT = 2000
+URLENCODE_FAILSAFE_CHARS = "()|,"
+
+"""
+Whether '+' is one of the whitespace substitutes this run may use.
+
+Asked of the whole list rather than its first entry: a tamper script can append a substitute rather
+than replace one, and 'multiplespaces' repeats whichever is there - so a run that really does send
+'+' for a space had its pluses escaped, and the target read them back as pluses rather than spaces.
+"""
+def plus_is_whitespace():
+  return any(substitute and set(substitute) == set("+") for substitute in WHITESPACES)
+
+"""
+Safe query-string characters; allow '+' only when it is a whitespace substitute in use.
 """
 def query_safe_chars():
-  if len(WHITESPACES) != 0 and WHITESPACES[0] == "+":
+  if plus_is_whitespace():
     return SAFE_QUERY + "+"
   return SAFE_QUERY
+
+"""
+Safe characters inside a payload, as above.
+"""
+def payload_safe_chars():
+  if plus_is_whitespace():
+    return SAFE_PAYLOAD + "+"
+  return SAFE_PAYLOAD
 
 # Default (windows) target host's python interpreter
 WIN_PYTHON_INTERPRETER = "python.exe"
@@ -598,10 +651,17 @@ CHAR_POOL_SINGLE = list(range(32, 127))
 # Newline and tab are part of real command output, so they have to be recoverable too.
 CHAR_POOL_MULTI = [9, 10] + list(range(32, 127))
 
-# The command injection separators.
+"""
+The command injection separators, as the shell reads them rather than as a URL spells them.
+
+Written out here and encoded once at the end, where a payload meets the thing that carries it -
+so what a payload is made of stays readable, nothing has to remember which half of it was already
+escaped, and a character that is not a separator at all can be escaped without disturbing one that
+is. It also means '%' is a per-cent sign here, not the start of an escape.
+"""
 SEPARATORS = []
-DEFAULT_SEPARATORS = [";", "%26", "|", ""]
-SPECIAL_SEPARATORS = ["%26%26", "||", "%0a", "%0d%0a", "%1a"]
+DEFAULT_SEPARATORS = [";", "&", "|", ""]
+SPECIAL_SEPARATORS = ["&&", "||", "\n", "\r\n", "\x1a"]
 SEPARATORS_LVL1 = DEFAULT_SEPARATORS + SPECIAL_SEPARATORS
 SEPARATORS_LVL3 = SEPARATORS_LVL2 = SEPARATORS_LVL1
 
@@ -651,8 +711,8 @@ RAW_PAYLOAD = ""
 # Single whitespace
 SINGLE_WHITESPACE = " "
 
-# The default (url-ecoded) white-space.
-WHITESPACES = [_urllib.parse.quote(SINGLE_WHITESPACE)]
+# The default whitespace, as a space - encoded with the rest of the payload at the end.
+WHITESPACES = [SINGLE_WHITESPACE]
 
 # Reference: http://www.w3.org/Protocols/HTTP/Object_Headers.html#uri
 URI_HTTP_HEADER = "URI"
@@ -836,6 +896,22 @@ MAX_UNSTABLE_TIMESEC_BUMP = 5
 
 # Available alternative shells
 AVAILABLE_INTERPRETERS = ["python"]
+
+"""
+The short names a language is just as often written as, and what each one means.
+
+'--eval' and '--interpreter' both take a language, so both read the same table - naming one of them
+'py' should not be an error where naming it 'python' is not.
+"""
+LANGUAGE_ALIASES = {"py": "python", "python2": "python", "python3": "python", "php7": "php",
+                    "php8": "php", "pl": "perl", "rb": "ruby"}
+
+# The name a language was given by, resolved to the one commix knows it as.
+def resolve_language(name):
+  if not name:
+    return name
+  name = str(name).strip().lower()
+  return LANGUAGE_ALIASES.get(name, name)
 
 # Available injection techniques. Out-of-band is not one of them - it is the '--oob' switch, so that
 # it can serve the modules too, which never go through '--technique'.

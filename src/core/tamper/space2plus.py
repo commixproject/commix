@@ -30,7 +30,7 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 
 def tamper(payload):
   if len(settings.WHITESPACES) != 0 and not settings.IS_JSON:
-    if settings.WHITESPACES[0] == _urllib.parse.quote(settings.SINGLE_WHITESPACE):
+    if settings.WHITESPACES[0] == settings.SINGLE_WHITESPACE:
       settings.WHITESPACES[0] = space2plus
     elif space2plus not in settings.WHITESPACES:
       settings.WHITESPACES.append(space2plus)

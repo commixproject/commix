@@ -568,10 +568,24 @@ def init_injection(payload, http_request_method, url):
     end = 0
     start = time.time()
 
+  """
+  Encoded as the last thing before it is spliced into a carrier that is URL-encoded.
+
+  A payload arrives with its boundaries, its whitespace and its tamper scripts already applied, and
+  it is full of characters that end a parameter where it is going: an '&' or an '=' out of the
+  user's own command split the query or the body in two and truncated the payload. What the payload
+  wrote for itself survives, '%' being the one character left alone - and the carrier is encoded
+  separately, keeping the '&' and '=' that do its own separating.
+
+  A JSON or XML body is not URL-encoded and the target never decodes one, so those carry the
+  payload as it is and do their own escaping below.
+  """
+  def encoded_for_url(value):
+    return checks.encode_payload(value)
+
   if settings.INJECT_TAG in url:
-    payload = payload.replace("#","%23")
     vuln_parameter = parameters.vuln_GET_param(url)
-    target = checks.process_injectable_value(payload, url)
+    target = checks.process_injectable_value(encoded_for_url(payload), url)
     if settings.USER_DEFINED_POST_DATA and not settings.IGNORE_USER_DEFINED_POST_DATA:
       request = _urllib.request.Request(target, settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC), method=http_request_method)
     else:
@@ -579,18 +593,23 @@ def init_injection(payload, http_request_method, url):
   else:
     parameter = menu.options.data
     parameter = parameters.do_POST_check(parameter, http_request_method)
-    parameter = ''.join(str(e) for e in parameter).replace("+","%2B")
+    # Joined only to find which parameter carries the tag, so nothing here is encoded for a
+    # wire it never reaches - the '+' this escaped was in a value being read for its name.
+    parameter = ''.join(str(e) for e in parameter)
     vuln_parameter = parameters.vuln_POST_param(parameter, url)
     if settings.IS_JSON:
-      data = checks.process_injectable_value(_urllib.parse.unquote(payload.replace("\"", "\\\"")), menu.options.data)
+      # Escaped for the string it is going into, not decoded: a payload is not URL-encoded by the
+      # time it gets here, so unquoting it only ever damaged one that held a per-cent sign.
+      data = checks.process_injectable_value(checks.escape_json_value(payload), menu.options.data)
       try:
         data = checks.json_data(data)
       except ValueError:
         pass
     elif settings.IS_XML:
-      data = checks.restore_xml_layout(checks.process_injectable_value(_urllib.parse.unquote(payload), menu.options.data))
+      # Likewise here: nothing to decode, and the characters XML cannot carry at all are dropped.
+      data = checks.restore_xml_layout(checks.process_injectable_value(checks.strip_xml_forbidden(payload), menu.options.data))
     else:
-      data = checks.process_injectable_value(payload, menu.options.data)
+      data = checks.process_injectable_value(encoded_for_url(payload), menu.options.data)
     request = _urllib.request.Request(url, data.encode(settings.DEFAULT_CODEC), method=http_request_method)
 
   headers.do_check(request)
@@ -657,7 +676,7 @@ Check if target host is vulnerable. (Cookie-based injection)
 def cookie_injection(url, payload, http_request_method):
   def set_cookie(request, payload):
     if settings.INJECT_TAG in menu.options.cookie:
-      encoded_payload = _urllib.parse.quote(payload, safe=settings.query_safe_chars())
+      encoded_payload = checks.encode_payload(payload)
       cookie = checks.process_injectable_value(encoded_payload, menu.options.cookie)
       request.add_header(settings.COOKIE, cookie)
   return header_injection(url, payload, http_request_method, set_cookie)
@@ -973,8 +992,7 @@ def _perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http
   
   # Check if defined "--verbose" option.
   if settings.VERBOSITY_LEVEL != 0:
-    payload_msg = payload.replace(settings.END_LINE.LF, settings.END_LINE.ESCAPED_LF)
-    settings.print_data_to_stdout(settings.print_payload(payload_msg))
+    settings.print_data_to_stdout(settings.print_payload(payload))
 
   # Check if defined cookie with "INJECT_HERE" tag
   if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie or settings.COOKIE_INJECTION:

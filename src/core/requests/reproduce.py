@@ -68,7 +68,8 @@ def curl_command(url, http_request_method, vuln_parameter, payload):
     if not url:
       return ""
 
-    payload = _urllib.parse.unquote(payload)
+    # Shown as it is built, not decoded: nothing here is URL-encoded until it meets the request,
+    # and decoding it turned a per-cent sign in the command into the start of an escape.
     header_name = _injected_header()
     parts = _urllib.parse.urlsplit(url)
     parameters = []
@@ -85,12 +86,12 @@ def curl_command(url, http_request_method, vuln_parameter, payload):
       command would not reproduce the finding.
       """
       if header_name == settings.COOKIE and menu.options.cookie:
-        headers.append(header_name + ": " + _urllib.parse.unquote(checks.process_injectable_value(payload, menu.options.cookie)))
+        headers.append(header_name + ": " + checks.process_injectable_value(payload, menu.options.cookie))
       else:
         headers.append(header_name + ": " + payload)
     elif settings.USER_DEFINED_POST_DATA and (settings.IS_JSON or settings.IS_XML):
       # A structured body is not a list of pairs: it goes over whole, with the payload written in.
-      body = _urllib.parse.unquote(checks.process_injectable_value(payload, settings.USER_DEFINED_POST_DATA))
+      body = checks.process_injectable_value(payload, settings.USER_DEFINED_POST_DATA)
       parameters = ["--data-raw", _quote(body)]
       headers.append("Content-Type: " + ("application/json" if settings.IS_JSON else "application/xml"))
     elif settings.USER_DEFINED_POST_DATA:

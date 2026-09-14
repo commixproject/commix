@@ -18,7 +18,7 @@ from src.core.injections.controller import checks
 
 """
 About: Replaces slashes (/) with environment variable value "${PATH%%u*}".
-Notes: This tamper script works against Unix-like target(s).
+Notes: This tamper script works against target(s) with a POSIX shell.
 Reference: https://www.secjuice.com/bypass-strict-input-validation-with-remove-suffix-and-prefix-pattern/
 """
 
