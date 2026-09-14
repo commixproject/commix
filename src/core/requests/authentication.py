@@ -20,13 +20,13 @@ try:
 except ImportError:
   # "concurrent.futures" needs Python 3.2+; fall back to serial on Python 2.
   _THREADS_SUPPORTED = False
-from src.utils import menu
+from src.core.parse import cmdline as menu
 from src.utils import settings
 from src.utils import session_handler
 from src.core.requests import headers
 from src.core.requests import redirection
 from src.utils import common
-from src.core.injections.controller import checks
+from src.core.controller import checks
 from src.thirdparty.colorama import Style
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.six.moves import http_cookiejar as _http_cookiejar
@@ -152,6 +152,7 @@ def http_auth_cracker(url, realm, http_request_method):
     last_bucket = -1
     found_pair = None
 
+    # Count one attempt off, and say how far the guessing has got.
     def report(username, password, succeeded):
       nonlocal completed, last_bucket
       completed += 1

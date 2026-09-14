@@ -30,6 +30,7 @@ An interactsh client, speaking the register / poll / deregister protocol.
 class Interactsh(OOBProvider):
   name = settings.OOB_PROVIDER_INTERACTSH
 
+  # A session with an interactsh server, keyed to the address it was opened against.
   def __init__(self):
     OOBProvider.__init__(self)
     self.server = settings.OOB_SERVER or ("https://" + settings.OOB_INTERACTSH_DOMAIN)

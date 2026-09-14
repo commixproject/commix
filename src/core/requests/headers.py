@@ -22,9 +22,9 @@ except ImportError:
 from socket import error as SocketError
 from src.thirdparty.six.moves import http_client as _http_client
 from src.utils import logs
-from src.utils import menu
+from src.core.parse import cmdline as menu
 from src.utils import settings
-from src.core.injections.controller import checks
+from src.core.controller import checks
 from src.core.requests import proxy
 from src.core.requests import cookies
 from src.core.requests import chunked
@@ -162,12 +162,14 @@ def check_http_traffic(request):
     _http_client.HTTPConnection._http_vsn_str = 'HTTP/1.0'
 
   class connection(http_client):
+    # Build the request, letting chunked bodies be framed by hand rather than by the client.
     def request(self, method, url, body=None, headers={}, **kwargs):
       # The body is framed as chunks already, so the client must not frame it a second time.
       if menu.options.chunked:
         kwargs["encode_chunked"] = False
       return http_client.request(self, method, url, body, headers, **kwargs)
 
+    # Write the request out, printing it first where the traffic is being shown.
     def send(self, req):
       # Decode request output safely, replacing non-UTF8 bytes instead of crashing.
       headers = req.decode(settings.DEFAULT_CODEC, errors="replace")
@@ -213,6 +215,7 @@ def check_http_traffic(request):
         return keepalive.do_open(self, http_class, req, **http_conn_args)
       return super(connection_handler, self).do_open(http_class, req, **http_conn_args)
 
+    # Open the connection, and show the response where the traffic is being shown.
     def http_open(self, req):
       try:
         self.print_http_response()
@@ -220,6 +223,7 @@ def check_http_traffic(request):
       except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.RemoteDisconnected, _http_client.IncompleteRead, _http_client.InvalidURL, Exception) as err_msg:
         checks.connection_exceptions(err_msg)
 
+    # Open the TLS connection, and show the response where the traffic is being shown.
     def https_open(self, req):
       try:
         self.print_http_response()
@@ -482,7 +486,7 @@ def do_check(request):
 
   # Appends a fake HTTP header 'X-Forwarded-For' (and similar)
   if settings.TAMPER_SCRIPTS["xforwardedfor"]:
-    from src.core.tamper import xforwardedfor
+    from src.tamper import xforwardedfor
     xforwardedfor.tamper(request)
 
   # Check if defined any HTTP Authentication credentials.

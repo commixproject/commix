@@ -46,6 +46,7 @@ The out-of-band (OAST) provider interface shared by every backend.
 """
 
 class Interaction(object):
+  # One interaction the out-of-band server saw.
   def __init__(self, protocol, identifier, raw_request):
     self.protocol = protocol
     self.identifier = identifier
@@ -54,6 +55,7 @@ class Interaction(object):
 class OOBProvider(object):
   name = ""
 
+  # A session with an out-of-band server, before it has been registered.
   def __init__(self):
     self.domain = ""
     self.scheme = "https"
@@ -162,18 +164,23 @@ class OOBProvider(object):
   def server_notice(self):
     return None
 
+  # Claim a hostname from the server, which the payloads will make the target reach.
   def _register(self):
     raise NotImplementedError
 
+  # Give the hostname back, where the server wants to know it is finished with.
   def _deregister(self):
     pass
 
+  # Ask the server what has reached it since last time.
   def _fetch(self):
     raise NotImplementedError
 
+  # The hostname a payload should reach, for this one probe.
   def _hostname(self, token):
     raise NotImplementedError
 
+  # Which probe an interaction belongs to.
   def _token_of(self, interaction):
     raise NotImplementedError
 

@@ -15,9 +15,8 @@ For more see the file 'readme/COPYING' for copying permission.
 
 import re
 import os
-import time
 import subprocess
-from src.utils import menu
+from src.core.parse import cmdline as menu
 from src.utils import settings
 from src.utils import requirements
 from src.utils import common
@@ -29,83 +28,104 @@ Check for updates (apply if any) and exit!
 """
 
 """
-Returns abbreviated commit hash number as retrieved with "git rev-parse --short HEAD"
+Where commix is installed, which is the repository to update.
+
+Taken from this file rather than from the working directory: run from inside some other checkout,
+a command that reaches for 'the' repository would otherwise reach for that one instead.
 """
-def revision_num():
+def _install_path():
+  return os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+"""
+The revision the install now sits at, shortened the way git itself shows it.
+"""
+def _revision_number(root):
   try:
-    start = 0
-    end = 0
-    start = time.time()
-    process = subprocess.Popen("git reset --hard HEAD && git clean -fd && git pull", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.Popen("git rev-parse --verify HEAD", shell=True, stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT, cwd=root)
     stdout, _ = process.communicate()
-    # communicate() returns bytes - decode before comparing/printing as text.
-    stdout = stdout.decode(settings.DEFAULT_CODEC, errors="replace")
-    if settings.VERBOSITY_LEVEL == 0:
-      info_msg = ('Updated to', 'Already at')["Already" in stdout]
-      process = subprocess.Popen("git rev-parse --verify HEAD", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    # Delete *.pyc files.
-    subprocess.Popen("find . -name \"*.pyc\" -delete", shell=True).wait()
-    # Delete empty directories and files.
-    subprocess.Popen("find . -empty -type d -delete", shell=True).wait()
-    if settings.VERBOSITY_LEVEL == 0:
-      stdout, _ = process.communicate()
-      stdout = stdout.decode(settings.DEFAULT_CODEC, errors="replace")
-      match = re.search(r"(?i)[0-9a-f]{32}", stdout or "")
-      rev_num = match.group(0) if match else None
-      info_msg += " the latest revision '" + str(rev_num[:7]) + "'."
-    else:
-      settings.print_data_to_stdout(Fore.MAGENTA + settings.END_LINE.LF + stdout + Style.RESET_ALL)
-      end  = time.time()
-      exec_time = int(end - start)
-      info_msg = "Finished in " + time.strftime('%H:%M:%S', time.gmtime(exec_time)) + "."
-    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-  except:
-    raise SystemExit()
+    match = re.search(r"(?i)[0-9a-f]{40}", stdout.decode(settings.DEFAULT_CODEC, errors="replace"))
+    return match.group(0)[:7] if match else None
+  except Exception:
+    return None
+
+"""
+Anything the pull leaves behind that is no longer part of the tree.
+"""
+def _clean_up(root):
+  for command in ("find . -name \"*.pyc\" -delete", "find . -empty -type d -delete"):
+    try:
+      subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=root).wait()
+    except Exception:
+      pass
 
 """
 The commix's updater.
 """
 def updater():
-  info_msg = "Checking requirements to update "
-  info_msg += settings.APPLICATION + " from GitHub repository. "
-  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   if menu.options.offline:
     err_msg = "You cannot update " + settings.APPLICATION + " via GitHub without access to the Internet."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
-  # Check if windows
-  if settings.IS_WINDOWS:
-    err_msg = "For updating purposes on the Windows platform, it's recommended "
-    err_msg += "to use a GitHub client for Windows (http://windows.github.com/)."
+
+  root = _install_path()
+  if not os.path.isdir(os.path.join(root, ".git")):
+    err_msg = "Not a valid git repository. Please clone the '" + settings.APPLICATION + "' repository "
+    err_msg += "from GitHub (e.g. 'git clone --depth 1 " + settings.GIT_URL + " " + settings.APPLICATION + "')."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
-  else:
-    try:
-      requirement = "git"
-      # Check if 'git' is installed.
-      if requirements.do_check(requirement) == True:
-        if settings.VERBOSITY_LEVEL != 0:
-          debug_msg = settings.APPLICATION.capitalize() + " will try to update itself using '" + requirement + "' command."
-          settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-        # Check if ".git" exists!
-        if os.path.isdir("./.git"):
-          info_msg = "Updating " + settings.APPLICATION + " to the latest (dev) version. "
-          settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-          revision_num()
-          os._exit(0)
-        else:
-          err_msg = "The '.git' directory was not found. Do it manually: "
-          err_msg += "'git clone " + settings.GIT_URL + " " + settings.APPLICATION + "' "
-          settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-          raise SystemExit()
-      else:
-          err_msg = requirement + " not found."
-          settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-          raise SystemExit()
 
-    except Exception as err_msg:
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+  if not requirements.do_check("git"):
+    err_msg = "The 'git' command was not found."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
+
+  info_msg = "Updating " + settings.APPLICATION + " to the latest development revision from the GitHub repository."
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = settings.APPLICATION.capitalize() + " will try to update itself using the 'git' command."
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+
+  output = ""
+  success = False
+  try:
+    # What the working tree holds is restored, not discarded: a pull needs the tracked files back as
+    # they were, and everything else in the directory is the user's own business.
+    process = subprocess.Popen("git checkout . && git pull " + settings.GIT_URL + " HEAD", shell=True,
+                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=root)
+    stdout, _ = process.communicate()
+    output = stdout.decode(settings.DEFAULT_CODEC, errors="replace")
+    success = not process.returncode
+  except Exception as err:
+    output = str(err)
+
+  if settings.VERBOSITY_LEVEL != 0 and output:
+    settings.print_data_to_stdout(Fore.MAGENTA + settings.END_LINE.LF + output + Style.RESET_ALL)
+
+  if success:
+    _clean_up(root)
+    revision = _revision_number(root)
+    info_msg = ("Already at" if "Already" in output else "Updated to") + " the latest revision"
+    info_msg += (" '" + revision + "'." if revision else ".")
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  else:
+    # Git says what went wrong on one line and then offers pages of advice about it - the line is
+    # what the reason is, so it is the line that is reported.
+    reason = ""
+    for line in output.splitlines():
+      if line.lower().startswith(("fatal:", "error:")):
+        reason = line.split(":", 1)[1].strip()
+        break
+    if not reason:
+      reason = re.sub(r"\s+", settings.SINGLE_WHITESPACE, output).strip()
+    err_msg = "The update could not be completed ('" + reason[:settings.MAX_UPDATE_REASON_LENGTH] + "')."
+    settings.print_data_to_stdout(settings.print_error_msg(err_msg))
+    if settings.IS_WINDOWS:
+      info_msg = "For updating purposes on the Windows platform, it is recommended to use a GitHub "
+      info_msg += "client for Windows (https://desktop.github.com/), or to download the latest "
+      info_msg += "snapshot from " + settings.GIT_URL.replace(".git", "") + "/releases."
+      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  raise SystemExit()
 
 """
 Check for new version of commix

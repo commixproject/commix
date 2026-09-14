@@ -16,7 +16,7 @@ For more see the file 'readme/COPYING' for copying permission.
 import os
 import re
 import time
-from src.utils import menu
+from src.core.parse import cmdline as menu
 from src.utils import common
 from src.utils import settings
 

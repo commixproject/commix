@@ -87,6 +87,7 @@ Encrypt a single 16-byte block with AES-256.
 """
 def _encrypt_block(block, words):
   state = [list(block[i::4]) for i in range(4)]
+  # Mix the round key into the state, one column at a time.
   def add_round_key(rnd):
     for c in range(4):
       for r in range(4):

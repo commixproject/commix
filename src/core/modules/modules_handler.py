@@ -13,7 +13,7 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
-from src.utils import menu
+from src.core.parse import cmdline as menu
 from src.utils import settings
 
 """
@@ -40,3 +40,5 @@ def load_modules(url, http_request_method, filename):
         settings.print_data_to_stdout(settings.END_LINE.LF + settings.print_critical_msg(err_msg))
         raise SystemExit()
       raise SystemExit()
+
+# eof

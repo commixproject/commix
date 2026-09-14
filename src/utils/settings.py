@@ -93,20 +93,23 @@ OS_SHELL_TITLE = Style.BRIGHT + "Command Shell (type '?' for help)" + Style.RESE
 RL_INVISIBLE_START = "\001"
 RL_INVISIBLE_END = "\002"
 
+# Colour codes wrapped so readline does not count them as characters on the line.
 def styled_prompt(codes, text):
   return RL_INVISIBLE_START + codes + RL_INVISIBLE_END + text
 
 OS_SHELL = "commix(os_shell) > "
 
+# The timestamp every message carries.
 def print_time():
   return "[" + Fore.LIGHTBLUE_EX  + datetime.now().strftime("%H:%M:%S") + Style.RESET_ALL + "] "
 
 """
 Shared tail for the timestamped print_*_msg wrappers below.
 """
-def _format_msg(sign, msg, bold=False):
+def _format_msg(sign, msg, bold=False, strip=True):
   prefix = Style.BRIGHT if bold else ""
-  return print_time() + sign + prefix + str(msg) + Style.RESET_ALL
+  msg = str(msg).rstrip() if strip else str(msg)
+  return print_time() + sign + prefix + msg + Style.RESET_ALL
 
 # Print execution status
 def execution(status):
@@ -180,6 +183,9 @@ def print_bold_info_msg(info_msg):
 ESCAPED_CR = "\\r"
 ESCAPED_CRLF = "\\r\\n"
 
+# The control characters a payload can be built from, and how each is written where it is shown.
+ESCAPED_CONTROLS = {"\t": "\\t", "\v": "\\v", "\x1a": "\\x1a"}
+
 # Print payload (verbose mode)
 def print_payload(payload):
   """
@@ -187,19 +193,23 @@ def print_payload(payload):
 
   It is shown as it is built - real separators, real spaces - because that is the form worth
   reading and pasting; the wire form, with everything escaped for the request, is what the traffic
-  at '-v 2' is for. The only thing changed is a line break, which would otherwise put half the
-  payload on a line of its own and make it look like two.
+  at '-v 2' is for. The only things changed are the characters a terminal does not draw, which
+  would otherwise split the line or leave two different payloads looking like the same one.
   """
   for sequence, shown in ((END_LINE.CRLF, ESCAPED_CRLF), (END_LINE.CR, ESCAPED_CR),
                           (END_LINE.LF, END_LINE.ESCAPED_LF)):
     payload = payload.replace(sequence, shown)
-  return _format_msg(PAYLOAD_SIGN, payload)
+  payload = re.sub(r"[\x00-\x1f\x7f]", lambda match: ESCAPED_CONTROLS.get(match.group(0),
+                   "\\x%02x" % ord(match.group(0))), payload)
+  # A payload is shown exactly as long as it is, a trailing space included.
+  return _format_msg(PAYLOAD_SIGN, payload, strip=False)
 
 # Print HTTP traffic (verbose mode)
 def print_traffic(traffic):
   result = TRAFFIC_SIGN + str(traffic) + Style.RESET_ALL
   return result
 
+# The request's number, as the traffic log refers to it.
 def print_request_num(number):
   result = TOTAL_OF_REQUESTS_COLOR + "#" + str(number) + Style.RESET_ALL
   return result
@@ -211,7 +221,7 @@ def print_http_response_content(content):
 
 # Print checking message (verbose mode)
 def print_checking_msg(payload):
-  return _format_msg(CHECK_SIGN, payload)
+  return _format_msg(CHECK_SIGN, payload, strip=False)
 
 # Print question message
 def print_message(message):
@@ -232,9 +242,29 @@ def reset_terminal_style():
   sys.stdout.flush()
 
 # Print sub content message
-def print_retrieved_data(cmd, retrieved):
-  result = print_time() + INFO_BOLD_SIGN + Style.BRIGHT + cmd + ": " + str(retrieved) + Style.RESET_ALL
-  return result
+"""
+Something read off the target, written the way the summary blocks already are.
+
+No timestamp and no sign: what was retrieved is the answer, not a step towards it, and it reads
+apart from the running log for that. Quoted, so a value that is empty or padded is still visible,
+and fenced where it runs to more than one line rather than trailing off the first.
+"""
+def print_retrieved_data(label, retrieved, quoted=True):
+  text = str(retrieved)
+  if text.endswith(END_LINE.CRLF):
+    text = text[:-2]
+  elif text.endswith(END_LINE.LF):
+    text = text[:-1]
+  if END_LINE.LF in text:
+    # Its own lines, so the fence is all the delimiting it needs.
+    body = END_LINE.LF + "---" + END_LINE.LF + text + END_LINE.LF + "---"
+  elif len(text) > MAX_INLINE_VALUE_LENGTH:
+    # One line, but longer than one: fenced so it starts where the eye is, rather than trailing off
+    # the end of the label - still quoted, since nothing else marks where it begins and ends.
+    body = END_LINE.LF + "---" + END_LINE.LF + ("'" + text + "'" if quoted else text) + END_LINE.LF + "---"
+  else:
+    body = SINGLE_WHITESPACE + ("'" + text + "'" if quoted else text)
+  return Style.BRIGHT + label + ":" + body + Style.RESET_ALL
 
 # Print output of command execution
 def command_execution_output(shell):
@@ -280,8 +310,11 @@ def print_data_to_stdout(data):
     if PROGRESS_LINE_OPEN and not is_spinner_style and not is_established_closer:
       sys.stdout.write(END_LINE.LF)
 
-    # Only spinner output stays unterminated; other messages always end with a newline.
-    if not is_spinner_style or is_done_marker:
+    # Only spinner output stays unterminated; other messages always end with a newline. The
+    # closer says nothing of its own, so it ends the line rather than leaving a space on it.
+    if is_established_closer:
+      data = END_LINE.LF
+    elif not is_spinner_style or is_done_marker:
       data = data + END_LINE.LF
 
     _stdout_write(data)
@@ -350,7 +383,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "129"
+REVISION = "130"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -475,8 +508,8 @@ CMD_NUL = "<nul"
 CMD_SUB_PREFIX = "$("
 CMD_SUB_SUFFIX = ")"
 
-# Maybe a WAF/IPS protection.
-WAF_CHECK_PAYLOAD = "cat /etc/passwd|uname&&ping -c3 localhost;ls ../"
+# Sent to be blocked, never to run: read-only and instant, in both shells, chained every way.
+WAF_CHECK_PAYLOAD = ";cat /etc/passwd|type C:\\Windows\\win.ini&&dir ../../||$(cat /etc/passwd)"
 WAF_ENABLED = False
 
 class HEURISTIC_TEST(object):
@@ -947,6 +980,7 @@ def apply_injection_level(level=None):
     globals()[name] = sorted(set(source), key=source.index)
   return True
 
+# Speak a different language: every payload is built from the grammar set here.
 def set_eval_grammar(language):
   global EVAL_GRAMMAR, EVAL_PROBE_PAYLOADS, EVAL_PROBE_REGEX, EVAL_WARNINGS
   global EXECUTION_FUNCTIONS_LVL1, EXECUTION_FUNCTIONS_LVL2, EXECUTION_FUNCTIONS_LVL3
@@ -1169,123 +1203,26 @@ try:
 except LookupError:
   DEFAULT_PAGE_ENCODING = DEFAULT_CODEC
 
-# Character Sets List.
-# A complete list of the standard encodings Python supports.
-ENCODING_LIST = [
-  "iso-8859-1",
-  "ascii",
-  "big5",
-  "big5hkscs",
-  "cp037",
-  "cp424",
-  "cp437",
-  "cp500",
-  "cp720",
-  "cp737",
-  "cp775",
-  "cp850",
-  "cp852",
-  "cp855",
-  "cp856",
-  "cp857",
-  "cp858",
-  "cp860",
-  "cp861",
-  "cp862",
-  "cp863",
-  "cp864",
-  "cp865",
-  "cp866",
-  "cp869",
-  "cp874",
-  "cp875",
-  "cp932",
-  "cp949",
-  "cp950",
-  "cp1006",
-  "cp1026",
-  "cp1140",
-  "cp1250",
-  "cp1251",
-  "cp1252",
-  "cp1253",
-  "cp1254",
-  "cp1255",
-  "cp1256",
-  "cp1257",
-  "cp1258",
-  "euc-jp",
-  "euc-jis-2004",
-  "euc-jisx0213",
-  "euc-kr",
-  "gb2312",
-  "gbk",
-  "gb18031",
-  "hz",
-  "iso2022-jp",
-  "iso2022-jp-1",
-  "iso2022-jp-2",
-  "iso2022-jp-2004",
-  "iso2022-jp-3",
-  "iso2022-jp-ext",
-  "iso2022-kr",
-  "latin-1",
-  "iso8859-2",
-  "iso8859-3",
-  "iso8859-4",
-  "iso8859-5",
-  "iso8859-6",
-  "iso8859-7",
-  "iso8859-8",
-  "iso8859-9",
-  "iso8859-10",
-  "iso8859-13",
-  "iso8859-14",
-  "iso8859-15",
-  "iso8859-16",
-  "johab",
-  "koi8-r",
-  "koi8-u",
-  "mac-cyrillic",
-  "mac-greek",
-  "mac-iceland",
-  "mac-latin2",
-  "mac-roman",
-  "mac-turkish",
-  "ptcp154",
-  "shift-jis",
-  "shift-jis-2004",
-  "shift-jisx0213",
-  "utf-32",
-  "utf-32-be",
-  "utf-32-le",
-  "utf-16",
-  "utf-16-be",
-  "utf-16-le",
-  "utf-7",
-  "utf-8",
-  "utf-8-sig"
- ]
+# Whether this platform can actually read a charset, which a hand-kept list of names cannot say.
+def known_encoding(name):
+  try:
+    return bool(name) and bool(codecs.lookup(str(name).strip()))
+  except (LookupError, TypeError, ValueError):
+    return False
 
-HTTP_ACCEPT_ENCODING_HEADER_VALUE = "gzip, deflate"
-HTTP_CONTENT_TYPE_JSON_HEADER_VALUE = "application/json"
-HTTP_CONTENT_TYPE_XML_HEADER_VALUE = "text/xml"
-DEFAULT_HTTP_CONTENT_TYPE_VALUE = "application/x-www-form-urlencoded"
+"""
+Whether a charset leaves plain ASCII alone.
 
-# Default server banner
-SERVER_BANNER = ""
-
-# Server banners list
-SERVER_BANNERS = [
-    "Microsoft-IIS",
-    "Apache",
-    r"Nginx/([\w\.]+)",
-    r"GWS/([\w\.]+)",
-    r"lighttpd/([\w\.]+)",
-    r"openresty/([\w\.]+)",
-    r"LiteSpeed/([\w\.]+)",
-    r"Sun-ONE-Web-Server/([\w\.]+)"
-]
+What a payload is found by is a marker of ASCII letters, and a page only claims its encoding - a
+page that claims one of the wide ones and serves something else is read as gibberish, the marker
+with it, and the parameter is reported as not injectable. The claim is only worth acting on where
+being wrong about it cannot cost that much: for these, being wrong costs the accented characters.
+"""
+def ascii_transparent_encoding(name):
+  try:
+    return "commix".encode(str(name).strip()) == b"commix"
+  except (LookupError, TypeError, ValueError, UnicodeEncodeError):
+    return False
 
 # Server banners list
 SERVER_OS_BANNERS = [
@@ -1375,7 +1312,7 @@ IGNORE_PARAMETERS = ("__VIEWSTATE", "__VIEWSTATEENCRYPTED", "__VIEWSTATEGENERATO
 # Infixes used for automatic recognition of parameters carrying anti-CSRF tokens
 CSRF_TOKEN_PARAMETER_INFIXES = ("csrf", "xsrf", "token", "nonce")
 
-# Largest chunk built by the '--chunked' option, small enough to break up what a filter looks for.
+# Largest chunk built by the '--chunked' switch, small enough to break up what a filter looks for.
 MAX_CHUNK_SIZE = 9
 # Tokens a chunk is not allowed to hold whole, so none of them is ever visible in a single chunk.
 CHUNKED_SPLIT_KEYWORDS = (
@@ -1433,6 +1370,7 @@ PS_ENABLED = None
 ANSI_COLOR_REMOVAL = r'\x1b[^m]*m'
 _ANSI_COLOR_REMOVAL_REGEX = re.compile(ANSI_COLOR_REMOVAL)
 
+# The text with its colour codes taken out, for anywhere they would be read literally.
 def strip_ansi_codes(text):
   return _ANSI_COLOR_REMOVAL_REGEX.sub("", text)
 
@@ -1793,6 +1731,25 @@ THREADED_TIME_RETRIEVAL_CHOICE = None
 # The (parameter, technique) last announced, so a re-announcement reads as "Continuing with".
 LAST_ANNOUNCED_TECHNIQUE = None
 
+# The output file last announced, so the same one is not announced again for every separator tried.
+LAST_ANNOUNCED_OUTPUT_FILE = None
+
+# The history file already reported as unwritable, so every path out of a run does not repeat it.
+FAILED_HISTORY_FILE = None
+
+# How much of git's own complaint is repeated when an update fails.
+MAX_UPDATE_REASON_LENGTH = 200
+
+# Longer than this and a retrieved value is shown fenced, rather than running off the label's line.
+MAX_INLINE_VALUE_LENGTH = 80
+
+# How many answers the concurrency probe times on each side, and the total below which it cannot say.
+CONCURRENCY_PROBE_REQUESTS = 16
+CONCURRENCY_PROBE_FLOOR = 0.05
+
+# Said while the target's own response times are still being sampled, so a delay can be told apart.
+TIMING_BASELINE_MSG = "Time-related response comparison requires a larger statistical model"
+
 # Retries for the false-positive/unexploitable-point re-verification during detection.
 FALSE_POSITIVE_RETRIES = 3
 
@@ -1820,8 +1777,18 @@ UNAUTHORIZED = False
 CHECK_BOTH_OS = False
 OS_CHECKS_NUM = 2
 
+# The banner did not name an operating system, and no heuristic has answered yet either. While this
+# stands, the question is still open - it is put to the user only once nothing else has settled it.
+OS_IDENTIFICATION_PENDING = False
+
+# A language the target named for itself, e.g. through 'X-Powered-By'. The sweep starts with it.
+IDENTIFIED_EVAL_LANGUAGE = None
+
 # Options to explicitly mask in anonymous (unhandled exception) reports.
-SENSITIVE_OPTIONS = ["--data", "-d", "--cookie", "-p", "--url", "-u", "-x", "--auth-cred", "-r", "-l"]
+# Everything that can carry a target's identity or a credential into a report meant for strangers.
+SENSITIVE_OPTIONS = ["--data", "-d", "--cookie", "-p", "--url", "-u", "-x", "--auth-cred", "-r", "-l",
+                     "--proxy", "--header", "-H", "--headers", "--load-cookies", "--live-cookies",
+                     "--csrf-token", "--host", "--referer"]
 
 CAPTCHA_DETECED = None
 
@@ -1836,10 +1803,10 @@ BLOCKED_IP_DETECTED = None
 GOOGLE_ANALYTICS_COOKIE_REGEX = r"(?i)\A(_ga|_gid|_gat|_gcl_au|__utm[abcz])"
 
 # Default path for tamper scripts
-TAMPER_SCRIPTS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../',"core/tamper/")) + "/"
+TAMPER_SCRIPTS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../',"tamper/")) + "/"
 
 # Default path for settings.py file
-SETTINGS_PATH = os.path.abspath("src/utils/settings.py")
+SETTINGS_PATH = os.path.abspath(__file__)
 
 # Period after last-update to start nagging (about the old revision).
 NAGGING_DAYS = 31
@@ -1871,8 +1838,31 @@ LINUX_DEFAULT_DOC_ROOTS = [
                   "/usr/local/www/data/",                                # BSD-style
                   "/var/apache2/htdocs/",                                # Older Apache distros
                   "/var/www/nginx-default/",                             # Nginx variation
-                  "/srv/www/htdocs/"                                     # SUSE/Fedora style
+                  "/srv/www/htdocs/",                                    # SUSE/Fedora style
+                  "/usr/local/lsws/DEFAULT/html/"                        # LiteSpeed default
 ]
+
+"""
+Where each web server commix recognises keeps its document root, per platform.
+
+Named rather than indexed, so the lists above can be reordered or added to without silently handing
+a target somebody else's directory. A server missing from a platform has no default worth guessing.
+"""
+SERVER_DOC_ROOTS = {
+  # Tomcat names itself "Apache Tomcat" or "Apache-Coyote", so it is looked for before Apache is.
+  "coyote":        {OS.WINDOWS: "C:\\Program Files\\Apache Software Foundation\\Tomcat\\webapps\\ROOT\\",
+                    OS.UNIX: "/var/lib/tomcat/webapps/ROOT/"},
+  "tomcat":        {OS.WINDOWS: "C:\\Program Files\\Apache Software Foundation\\Tomcat\\webapps\\ROOT\\",
+                    OS.UNIX: "/var/lib/tomcat/webapps/ROOT/"},
+  "microsoft-iis": {OS.WINDOWS: "C:\\Inetpub\\wwwroot\\"},
+  "apache":        {OS.WINDOWS: "C:\\xampp\\htdocs\\", OS.UNIX: "/var/www/html/"},
+  "openresty":     {OS.WINDOWS: "C:\\openresty\\html\\", OS.UNIX: "/usr/share/nginx/html/"},
+  "nginx":         {OS.WINDOWS: "C:\\nginx\\html\\", OS.UNIX: "/usr/share/nginx/html/"},
+  "litespeed":     {OS.UNIX: "/usr/local/lsws/DEFAULT/html/"},
+  "lighttpd":      {OS.UNIX: "/var/www/html/"},
+  "jetty":         {OS.UNIX: "/var/lib/jetty/webapps/ROOT/"},
+  "caddy":         {OS.UNIX: "/usr/share/caddy/"},
+}
 
 DEFINED_WEBROOT = RECHECK_FILE_FOR_EXTRACTION = False
 
@@ -1896,6 +1886,29 @@ SET_COOKIE = "Set-Cookie"
 X_POWERED_BY = "X-Powered-By"
 # HTTP Headers values
 ACCEPT_VALUE = "*/*"
+# What a body is sent as, unless it is recognised as one of the two below.
+DEFAULT_HTTP_CONTENT_TYPE_VALUE = "application/x-www-form-urlencoded"
+HTTP_CONTENT_TYPE_JSON_HEADER_VALUE = "application/json"
+HTTP_CONTENT_TYPE_XML_HEADER_VALUE = "application/xml"
+# Only what the response handling can actually decompress is asked for.
+HTTP_ACCEPT_ENCODING_HEADER_VALUE = "gzip,deflate"
+
+# The web server named by the 'Server' header, and the ones that are recognised.
+SERVER_BANNER = ""
+SERVER_BANNERS = [
+    "Microsoft-IIS",
+    # Ahead of the bare "Apache" below: Tomcat names itself with it, and keeps its own document root.
+    r"Apache[ -](?:Tomcat|Coyote)/?([\w\.]+)?",
+    "Apache",
+    r"Nginx/([\w\.]+)",
+    r"Jetty\(?([\w\.]+)?\)?",
+    r"Caddy",
+    r"GWS/([\w\.]+)",
+    r"lighttpd/([\w\.]+)",
+    r"openresty/([\w\.]+)",
+    r"LiteSpeed/([\w\.]+)",
+    r"Sun-ONE-Web-Server/([\w\.]+)"
+]
 
 # HTTP Headers
 HTTP_HEADERS = [ USER_AGENT.lower(), REFERER.lower(), HOST.lower() ]

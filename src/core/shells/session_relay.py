@@ -40,6 +40,7 @@ Bridges local stdin/stdout to a connected shell socket - line-buffered, not raw-
 def interactive_relay(sock, filename, url):
   remote_closed = threading.Event()
 
+  # Carry whatever the socket says back to the terminal, until it says nothing more.
   def _reader():
     try:
       while True:
@@ -61,7 +62,7 @@ def interactive_relay(sock, filename, url):
       try:
         line = common.safe_input("")
       except KeyboardInterrupt:
-        from src.core.injections.controller import shell_options
+        from src.core.controller import shell_options
         shell_options.back_or_quit_prompt("Session interrupted (Ctrl-C pressed). [(b)ack/(q)uit] ", filename, url)
         break
       except EOFError:

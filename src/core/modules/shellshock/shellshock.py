@@ -6,15 +6,15 @@ import string
 import random
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.six.moves import http_client as _http_client
-from src.utils import menu
+from src.core.parse import cmdline as menu
 from src.utils import logs
 from src.utils import settings
 from src.utils import session_handler
 from src.core.requests import requests
 from src.core.requests import headers as log_http_headers
-from src.core.injections.controller import checks
-from src.core.injections.controller import handler
-from src.core.injections.controller import controller
+from src.core.controller import checks
+from src.core.controller import handler
+from src.core.controller import controller
 
 default_user_agent = menu.options.agent
 default_cookie = ""
@@ -95,7 +95,7 @@ def _send_header_payload(url, check_header, payload):
 Probe every header and CVE through the out-of-band channel, then wait once for the whole sweep.
 """
 def _oob_probe(url, testable_headers):
-  from src.core.injections.blind.techniques.oob import oob_payloads as oob_payloads
+  from src.core.techniques.oob import oob_payloads as oob_payloads
 
   channel = checks.init_oob_channel()
   if channel is None:
@@ -131,7 +131,7 @@ def _oob_probe(url, testable_headers):
 Run a command through the out-of-band channel and read its output back.
 """
 def _oob_cmd_exec(url, cmd, cve, check_header):
-  from src.core.injections.blind.techniques.oob import oob_payloads as oob_payloads
+  from src.core.techniques.oob import oob_payloads as oob_payloads
 
   channel = settings.OOB_CHANNEL
   if channel is None:
@@ -156,6 +156,7 @@ def _oob_cmd_exec(url, cmd, cve, check_header):
 Build the shared execute_cmd(cmd) -> output callback, logging execution only when asked to.
 """
 def _command_executor(url, cve, check_header, filename, log_execution=False):
+  # Run one command through the shellshock injection point.
   def execute_cmd(cmd):
     shell = cmd_exec(url, cmd, cve, check_header, filename)
     if log_execution and shell:

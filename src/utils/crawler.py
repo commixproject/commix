@@ -16,15 +16,16 @@ import re
 import random
 import string
 import tempfile
-from src.utils import menu
+from src.core.parse import cmdline as menu
 from src.utils import settings
 from src.utils import common
-from src.core.injections.controller import checks
+from src.core.controller import checks
 from src.core.requests import requests
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.beautifulsoup.beautifulsoup import BeautifulSoup
 
 
+# Clear what the last crawl left behind, so this one starts from nothing.
 def init_global_vars():
   global crawled_hrefs
   crawled_hrefs = []
@@ -210,6 +211,7 @@ def extract_form_params(form):
 Fill blank fields with a random int for id-like names or a random string otherwise.
 """
 def random_fill_blank_fields(data):
+  # The field's value, as the form's own markup gives it.
   def replacement(match):
     item = match.group("result")
     field_name = item[:-1]

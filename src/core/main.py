@@ -24,7 +24,7 @@ from src.thirdparty.six.moves import http_client as _http_client
 _http_client._MAXLINE = 1 * 1024 * 1024
 from socket import error as SocketError
 from src.thirdparty.six.moves import urllib as _urllib
-from src.utils import menu
+from src.core.parse import cmdline as menu
 from src.utils import logs
 from src.utils import purge
 from src.utils import update
@@ -42,9 +42,9 @@ from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import cookies
 from src.core.requests import redirection
-from src.core.injections.controller import checks
-from src.core.injections.controller import parser
-from src.core.injections.controller import controller
+from src.core.controller import checks
+from src.core.parse import request as parser
+from src.core.controller import controller
 from src.thirdparty.six.moves import reload_module as _reload_module
 
 # Set default encoding
@@ -63,6 +63,7 @@ if settings.IS_WINDOWS:
 Define HTTP User-Agent header.
 """
 def defined_http_headers(url):
+  # Note that headers of the user's own are going onto every request.
   def extra_headers():
     if any((menu.options.header, menu.options.headers)):
       settings.EXTRA_HTTP_HEADERS = True
@@ -70,11 +71,13 @@ def defined_http_headers(url):
         debug_msg = "Setting extra HTTP headers."
         settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))  
 
+  # Say which cookie is being sent, where the run is verbose enough to care.
   def cookie():
     if menu.options.cookie and settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Setting the HTTP " + settings.COOKIE + " header."
       settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))  
 
+  # Settle what the 'Referer' header carries, asking for one where the level calls for it.
   def referer(url):
     if menu.options.referer is None:
       if menu.options.level and int(menu.options.level) == settings.HTTP_HEADER_INJECTION_LEVEL:
@@ -83,6 +86,7 @@ def defined_http_headers(url):
       debug_msg = "Setting the HTTP " + settings.REFERER + " header."
       settings.print_data_to_stdout(settings.print_debug_msg(debug_msg)) 
 
+  # Settle what the 'Host' header carries, defaulting to the target's own.
   def host(url):
     if menu.options.host is None:
       menu.options.host = _urllib.parse.urlparse(url).netloc
@@ -90,6 +94,7 @@ def defined_http_headers(url):
       debug_msg = "Setting the HTTP " + settings.HOST + " header."
       settings.print_data_to_stdout(settings.print_debug_msg(debug_msg)) 
 
+  # Settle what the 'User-Agent' header carries: the user's, a mobile one, or a random one.
   def user_agent():
     # Determine which option is enabled
     mobile_agent = menu.options.mobile
@@ -170,7 +175,8 @@ Check internet connection before assessing the target.
 """
 def check_internet(url):
   settings.CHECK_INTERNET = True
-  settings.CHECK_INTERNET_ADDRESS = checks.check_http_s(url)
+  # Asked of somewhere on the internet, not of the target: a target that answers says nothing about
+  # the connection, and one that does not is exactly the case this is meant to tell apart.
   info_msg = "Checking for internet connection."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   
@@ -178,8 +184,10 @@ def check_internet(url):
     settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
   try:
     request = _urllib.request.Request(settings.CHECK_INTERNET_ADDRESS, method=settings.HTTPMETHOD.GET)
-    headers.do_check(request)
-    examine_request(request, url)
+    # Carries nothing of the target's: its 'Host' header names a host this one does not serve, and
+    # the cookies and credentials that were given for it belong to it alone.
+    request.add_header(settings.USER_AGENT, settings.DEFAULT_USER_AGENT)
+    examine_request(request, settings.CHECK_INTERNET_ADDRESS)
   except (Exception, SystemExit):
     settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     error_msg = "No internet connection detected."
@@ -190,6 +198,7 @@ The init (URL) request.
 """
 def init_request(url, http_request_method):
 
+  # The first request to the target, built the way every later one will be.
   def perform_init_request(url, http_request_method):
     if settings.USER_DEFINED_POST_DATA:
       request = _urllib.request.Request(url, settings.USER_DEFINED_POST_DATA.encode(), method=http_request_method)
@@ -198,6 +207,7 @@ def init_request(url, http_request_method):
     headers.do_check(request)
     return request
 
+  # One request that does not follow redirects, to see where the target sends us.
   def redirect_probe_request(url, http_request_method):
     request = _urllib.request.Request(url, method=http_request_method)
     headers.do_check(request)
@@ -539,7 +549,7 @@ def main(filename, url, http_request_method):
     if menu.options.url_reload and menu.options.data:
       settings.URL_RELOAD = True
     elif menu.options.url_reload:
-      warn_msg = "The '--url-reload' option has no effect without '--data'."
+      warn_msg = "The '--url-reload' switch has no effect without the '--data' option."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
     if menu.options.flush_session:
@@ -627,7 +637,7 @@ def main(filename, url, http_request_method):
       menu.options.eval_sink = menu.options.eval_sink or settings.EVAL_ALL_LANGUAGES
       remaining = menu.options.tech.replace(settings.EVAL_TECHNIQUE_LETTER, "")
       if remaining:
-        warn_msg = "Code injection is selected with the '--eval' switch now, and the technique is "
+        warn_msg = "Code injection is selected with the '--eval' option now, and the technique is "
         warn_msg += "chosen separately with '--technique', so only code injection is tested."
         settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       menu.options.tech = "".join(settings.EVAL_CAPABLE_TECHNIQUES)
@@ -750,10 +760,10 @@ def main(filename, url, http_request_method):
             settings.print_data_to_stdout(settings.print_info_msg(info_msg))
           # Webpage encoding detection.
           requests.encoding_detection(response)
-          # Procedure for target server identification.
-          requests.server_identification(response)
           # Procedure for target application identification
           requests.application_identification(url, response)
+          # Procedure for target server identification.
+          requests.server_identification(response)
           # Specifies the technology supporting the web application
           requests.technology_identification(response)
           # Procedure for target server's operating system identification.
@@ -825,9 +835,8 @@ try:
   settings.print_data_to_stdout(settings.print_legal_disclaimer_msg(settings.LEGAL_DISCLAIMER_MSG))
 
   # Get total number of days from last update
-  if os.path.isfile(settings.SETTINGS_PATH):
-    if settings.STABLE_RELEASE == False:
-      common.days_from_last_update()
+  if settings.STABLE_RELEASE == False:
+    common.days_from_last_update()
 
   # Check if specified wrong alternative interpreter
   if menu.options.interpreter:
@@ -850,6 +859,7 @@ try:
 
   # Hard '--time-limit' cutoff - a signal, immune to exception handling elsewhere.
   if menu.options.time_limit and hasattr(signal, "alarm"):
+    # Stop the run where it has been going longer than '--time-limit' allows.
     def _time_limit_reached(signum, frame):
       err_msg = "Reached the specified time limit of " + str(menu.options.time_limit) + " second(s)."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
@@ -921,7 +931,7 @@ try:
     checks.set_optimize()
 
     if menu.options.codec:
-      if menu.options.codec.lower() not in settings.ENCODING_LIST:
+      if not settings.known_encoding(menu.options.codec):
         err_msg = "The provided charset '"  + menu.options.codec + "' is unknown. "
         err_msg += "Please visit 'http://docs.python.org/library/codecs.html#standard-encodings' "
         err_msg += "to get the full list of supported charsets."
@@ -973,7 +983,7 @@ try:
         tor.do_check()
 
     if menu.options.ignore_session and menu.options.flush_session:
-      err_msg = "The '--ignore-session' option is unlikely to work combined with the '--flush-session' option."
+      err_msg = "The '--ignore-session' switch is unlikely to work combined with the '--flush-session' switch."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
@@ -1160,6 +1170,18 @@ try:
       if inject_tag_regex_match:
         settings.INJECT_TAG = inject_tag_regex_match.group(0)
 
+    # What can be answered without the target is answered before it is contacted: a path that does
+    # not exist is no reason to have opened a connection, let alone to have sent it a payload.
+    if menu.options.file_write is not None:
+      if not os.path.exists(menu.options.file_write):
+        err_msg = "The specified local file '" + menu.options.file_write + "' does not exist."
+        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+        raise SystemExit()
+      if not os.path.isfile(menu.options.file_write):
+        err_msg = "The specified path '" + menu.options.file_write + "' is not a file."
+        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+        raise SystemExit()
+
     # Check provided parameters for tests
     checks.check_provided_parameters()
 
@@ -1281,6 +1303,7 @@ try:
 
       # Stream plain stdin targets as they arrive; total_href stays None until the stream ends.
       if settings.STDIN_PARSING and not settings.CRAWLING:
+        # The same items in the same order, with anything seen before left out.
         def _dedupe_lazy(iterable):
           seen = set()
           for x in iterable:

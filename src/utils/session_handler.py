@@ -20,9 +20,9 @@ import base64
 import sqlite3
 import hashlib
 import contextlib
-from src.utils import menu
+from src.core.parse import cmdline as menu
 from src.utils import settings
-from src.core.injections.controller import checks
+from src.core.controller import checks
 from src.thirdparty.six.moves import urllib as _urllib
 
 """
@@ -91,8 +91,10 @@ what the user asked for now outranks what a previous run happened to be using.
 def restore_option(stored, applied, label):
   if not stored or stored == "None":
     return None
-  if applied and applied != stored:
-    warn_msg = ("The stored session was found using the " + label + " '" + stored + "', which differs "
+  # What was stored carries the marker saying where the injection point is, and what is given now
+  # does not - so the two are compared by what they hold rather than by how they are written.
+  if applied and checks.remove_tags(applied) != checks.remove_tags(stored):
+    warn_msg = ("The stored session was found using the " + label + " '" + checks.remove_tags(stored) + "', which differs "
                 "from the one provided now ('" + applied + "'). Keeping the one provided now.")
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     return None
@@ -467,6 +469,10 @@ def check_stored_injection_points(url, check_parameter, http_request_method):
     if found:
       settings.LOAD_SESSION = True
       settings.INJECTION_CHECKER = True
+      # Said where it happens, as the '--ignore-session' switch says the opposite where it happens.
+      if settings.VERBOSITY_LEVEL != 0:
+        debug_msg = "Resuming the injection point for '" + str(vuln_parameter) + "' from the stored session."
+        settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
       if not settings.MULTI_TARGETS and vuln_parameter not in settings.TESTABLE_PARAMETERS_LIST:
         settings.TESTABLE_PARAMETERS_LIST.append(vuln_parameter)
       return session_url, vuln_parameter

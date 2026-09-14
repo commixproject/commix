@@ -19,7 +19,7 @@ import threading
 import difflib
 import statistics
 from socket import error as SocketError
-from src.utils import menu
+from src.core.parse import cmdline as menu
 from os.path import splitext
 from src.utils import settings
 from src.utils import session_handler
@@ -34,7 +34,7 @@ from src.core.requests import parameters
 from src.core.requests import redirection
 from src.core.requests import authentication
 from src.core.requests import stability
-from src.core.injections.controller import checks
+from src.core.controller import checks
 from src.thirdparty.six.moves import urllib as _urllib
 
 """
@@ -45,6 +45,7 @@ def is_url_content_stable(url, response=None, fetch_time=None, http_request_meth
   info_msg = "Checking if the target URL content is stable."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
+  # One request for the stability check, built the way the run's own requests are.
   def _build_request():
     method = http_request_method or settings.HTTPMETHOD.GET
     if settings.USER_DEFINED_POST_DATA:
@@ -411,7 +412,7 @@ def request_failed(err_msg):
 
   if any(x in str(error_msg).lower() for x in ["wrong version number", "ssl", "https"]):
     stability.disable_retries()
-    error_msg = "Can't establish SSL connection. "
+    error_msg = "Cannot establish SSL connection. "
     if settings.MULTI_TARGETS or settings.CRAWLING:
       error_msg = error_msg + "Skipping to the next target."
     settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
@@ -490,7 +491,7 @@ def request_failed(err_msg):
     elif [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]:
       status_code = [err_code for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]
       if not checks.ignored_http_error_code(status_code[0]) and int(status_code[0]) not in settings.WARNED_HTTP_ERROR_CODES:
-        warn_msg = "The web server responded with an HTTP error code '" + str(status_code[0])
+        warn_msg = "The web server responded with an HTTP error code '" + checks.http_error_code_label(status_code[0], err_msg)
         warn_msg += "' which could interfere with the results of the tests."
         settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
         settings.WARNED_HTTP_ERROR_CODES.add(int(status_code[0]))
@@ -530,9 +531,12 @@ def request_failed(err_msg):
 
   else:
     if settings.VERBOSITY_LEVEL >= 1:
-      if [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]:
-        debug_msg = "Got " + str(err_msg)
-        settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+      status_code = [err_code for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]
+      if status_code:
+        # The warning above already named the code; repeating it for every request that meets it does not.
+        if int(status_code[0]) not in settings.WARNED_HTTP_ERROR_CODES:
+          debug_msg = "Got " + str(err_msg)
+          settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
       else:
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     return False
@@ -631,6 +635,7 @@ Check if target host is vulnerable, injecting payload via the given set_header(r
 """
 def header_injection(url, payload, http_request_method, set_header):
 
+  # Send the payload in an HTTP header rather than in a parameter.
   def inject_header(url, payload, http_request_method):
     # Check if defined POST data
     if settings.USER_DEFINED_POST_DATA:
@@ -674,6 +679,7 @@ def header_injection(url, payload, http_request_method, set_header):
 Check if target host is vulnerable. (Cookie-based injection)
 """
 def cookie_injection(url, payload, http_request_method):
+  # Put the payload into the cookie, in place of the marker that says where it goes.
   def set_cookie(request, payload):
     if settings.INJECT_TAG in menu.options.cookie:
       encoded_payload = checks.encode_payload(payload)
@@ -709,12 +715,7 @@ def custom_header_injection(url, payload, http_request_method):
 Detect the character encoding of the target web page.
 """
 def encoding_detection(response):
-  charset_detected = False
   charset = None
-
-  if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Detecting the character encoding declared by the web page."
-    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
 
   try:
     # Read once
@@ -756,55 +757,41 @@ def encoding_detection(response):
     else:
       charset = None
 
-    # 3. If no charset yet, default to utf-8
+    # 3. Nothing declared, so what the pages are read with stays what it already was.
     if not charset:
-      charset = 'utf-8'
+      return
 
-    charset_detected = True
-    settings.DEFAULT_PAGE_ENCODING = charset
-
-    # 4. Logging
-    msg = "The web page declares the character encoding as '"
-
-    if charset in settings.ENCODING_LIST:
-      if settings.VERBOSITY_LEVEL != 0:
-        debug_msg = msg + charset + "'."
-        settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
+    # 4. Kept only where it can actually be decoded with, so a page is never read through an
+    # encoding the platform does not have.
+    if settings.known_encoding(charset) and settings.ascii_transparent_encoding(charset):
+      settings.DEFAULT_PAGE_ENCODING = charset
     else:
-      warn_msg = msg + charset + "', which is not recognized."
+      settings.DEFAULT_PAGE_ENCODING = settings.DEFAULT_CODEC
+      warn_msg = "The web page declares the character encoding as '" + charset + "', which is not recognized."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
   except Exception:
     pass
 
-  if not charset_detected and settings.VERBOSITY_LEVEL != 0:
-    warn_msg = "Failed to identify the web page charset."
-    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-
 """
 Identify the target application's type based on the URL extension.
 """
 def application_identification(url, response=None):
-  found_application_extension = False
-
-  if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Detecting the type of target application based on the URL extension."
-    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-
   root, application_extension = splitext(_urllib.parse.urlparse(url).path)
   settings.TARGET_APPLICATION = application_extension[1:].upper()
 
-  if not settings.TARGET_APPLICATION and response is not None:
-    x_powered_by = response.info().get(settings.X_POWERED_BY, "")
+  x_powered_by = response.info().get(settings.X_POWERED_BY, "") if response is not None else ""
+  if not settings.TARGET_APPLICATION and x_powered_by:
     match = re.search(r"PHP|ASP\.NET|JSP", x_powered_by, re.IGNORECASE)
     if match:
       settings.TARGET_APPLICATION = match.group(0).upper()
 
   if settings.TARGET_APPLICATION:
-    found_application_extension = True
-
+    # The application and the language an evaluated string is tried in are the same question, so
+    # they are answered once and said once, rather than naming the same language twice over.
+    checks.note_evaluated_language(settings.TARGET_APPLICATION, x_powered_by)
     if settings.VERBOSITY_LEVEL != 0:
-      debug_msg = "Target application identified as " + settings.TARGET_APPLICATION + "."
+      debug_msg = "The web application technology is '" + settings.TARGET_APPLICATION + "'."
       settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
 
     for unsupported in settings.UNSUPPORTED_TARGET_APPLICATION:
@@ -813,10 +800,6 @@ def application_identification(url, response=None):
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
         raise SystemExit()
 
-  if not found_application_extension and settings.VERBOSITY_LEVEL != 0:
-    warn_msg = "Failed to identify the target application's type from the URL."
-    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-
 """
 Detect the underlying operating system of the target server based on server headers.
 """
@@ -824,14 +807,13 @@ def check_os(server_header):
   if menu.options.os:
     checks.user_defined_os()
 
+  named = ""
   for banner in settings.SERVER_OS_BANNERS:
-    match = re.search(banner.lower(), server_header.lower())
+    match = re.search(banner, server_header, re.IGNORECASE)
     if match:
-      if settings.VERBOSITY_LEVEL != 0:
-        debug_msg = "Detecting the operating system hosting the target server."
-        settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-
-      checks.set_target_os(match.group(0))
+      # What the banner spells out, rather than the family it puts the target in.
+      named = match.group(0)
+      checks.set_target_os(named)
 
       if settings.TARGET_OS == settings.OS.WINDOWS and menu.options.shellshock:
         err_msg = "The shellshock module ('--shellshock') is not available for Windows targets."
@@ -839,10 +821,10 @@ def check_os(server_header):
         raise SystemExit()
       break
 
-  if settings.VERBOSITY_LEVEL != 0:
-    if settings.IDENTIFIED_TARGET_OS:
-      debug_msg = "Underlying operating system identified as " + checks.target_os_label() + "."
-      settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
+  if named and settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "The web server operating system is '" + named + "'"
+    debug_msg += " (" + checks.target_os_label() + ")."
+    settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
 
 
 """
@@ -852,58 +834,41 @@ def technology_identification(response):
   try:
     x_powered_by = response.info().get(settings.X_POWERED_BY, "").strip()
 
-    if settings.VERBOSITY_LEVEL != 0:
-      debug_msg = "Detecting the underlying technology or framework powering the target application."
-      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-
+    # Not reported on its own: what it settles - the operating system, and the language an
+    # evaluated string is tried in - is each said where it is settled.
     if x_powered_by:
-      if settings.VERBOSITY_LEVEL != 0:
-        debug_msg = "Target application technology detected as " + x_powered_by + "."
-        settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
       check_os(x_powered_by)
-    elif settings.VERBOSITY_LEVEL != 0:
-      warn_msg = "Failed to identify the technology supporting the target application."
-      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
   except Exception:
-    if settings.VERBOSITY_LEVEL != 0:
-      warn_msg = "Failed to identify the technology supporting the target application."
-      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    pass
 
 
 """
 Identify the software running on the target web server.
 """
 def server_identification(response):
-  if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Detecting the software running on the target web server."
-    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-
   server_banner = response.info().get(settings.SERVER, "").strip()
   for banner in settings.SERVER_BANNERS:
-    match = re.search(banner.lower(), server_banner.lower())
+    match = re.search(banner, server_banner, re.IGNORECASE)
     if match:
       settings.SERVER_BANNER = match.group(0)
 
-      # Set up default document root paths. This runs on the first connection, before the target's
+      # Which document root this server keeps. It runs on the first connection, before the target's
       # operating system has been worked out, so the banner itself has to answer for it - an Apache
-      # build reports "(Win32)" or "(Win64)" and would otherwise be handed a Linux path.
+      # build reports "(Win32)" or "(Win64)" and would otherwise be handed a Unix-like path.
       windows_banner = (settings.TARGET_OS == settings.OS.WINDOWS or
-                        re.search(r"\(Win(32|64)\)", server_banner, re.IGNORECASE) is not None)
-      if "apache" in settings.SERVER_BANNER.lower():
-        if windows_banner:
-          settings.WEB_ROOT = settings.WINDOWS_DEFAULT_DOC_ROOTS[1]
-        else:
-          settings.WEB_ROOT = settings.LINUX_DEFAULT_DOC_ROOTS[0].replace(
-            settings.DOC_ROOT_TARGET_MARK, settings.TARGET_URL)
-      elif "nginx" in settings.SERVER_BANNER.lower():
-        settings.WEB_ROOT = settings.LINUX_DEFAULT_DOC_ROOTS[3]
-      elif "microsoft-iis" in settings.SERVER_BANNER.lower():
-        settings.WEB_ROOT = settings.WINDOWS_DEFAULT_DOC_ROOTS[0]
+                        re.search(r"\(Win(32|64|dows)\)?", server_banner, re.IGNORECASE) is not None)
+      platform = settings.OS.WINDOWS if windows_banner else settings.OS.UNIX
+      for server, roots in settings.SERVER_DOC_ROOTS.items():
+        if server in settings.SERVER_BANNER.lower():
+          # A server that runs on one platform only says which platform this is, whatever the
+          # banner left out - IIS names no "(Win64)" and is no less Windows for it.
+          settings.WEB_ROOT = roots.get(platform) or (list(roots.values())[0] if len(roots) == 1 else "")
+          break
       break
 
   if server_banner and settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Target server software identified as " + server_banner + "."
+    debug_msg = "The web server is '" + server_banner + "'."
     settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
 
 
@@ -915,10 +880,15 @@ def os_identification(response):
     server_banner = response.info().get(settings.SERVER, "")
     check_os(server_banner)
 
+  """
+  Nothing is asked here, and nothing is said yet.
+
+  The banner is the weakest of the three things that can answer this: a heuristic payload that
+  executes settles it outright, and that runs in a moment. Asking first put the question before the
+  evidence - and then ignored the answer when the evidence contradicted it.
+  """
   if not settings.IDENTIFIED_TARGET_OS and not menu.options.os:
-    warn_msg = "Failed to identify the server's underlying operating system."
-    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-    checks.define_target_os()
+    settings.OS_IDENTIFICATION_PENDING = True
 
 
 """
@@ -941,6 +911,7 @@ _injection_lock = threading.Lock()
 _injections_in_flight = 0
 _transport_before_injection = None
 
+# Send one payload, with the timeout widened to allow for the delay it asks for.
 def perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url):
   global _injections_in_flight, _transport_before_injection
   # A time-related payload asks the target to sleep, so the answer is meant to be late. Waiting less
@@ -982,6 +953,7 @@ def injected_delay_allowance():
   # The false-positive round adds a few seconds of its own on top of the calibrated delay.
   return checks.injected_delay(delay) + settings.TIME_DELAY_STEP + 10
 
+# Send the payload wherever the injection point is, and time the answer.
 def _perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url):
   # Fix prefixes / suffixes
   payload, prefix = parameters.prefixes(payload, prefix)

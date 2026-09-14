@@ -19,7 +19,7 @@ import random
 import shutil
 import string
 import functools
-from src.utils import menu
+from src.core.parse import cmdline as menu
 from src.utils import settings
 from src.thirdparty.six.moves import urllib as _urllib
 
@@ -63,6 +63,7 @@ def _truncate_file(path):
   with open(path, 'w'):
     pass
 
+# Remove what this target's own output directory holds, and the directory with it.
 def purge():
   directory = settings.OUTPUT_DIR
   if menu.options.url:

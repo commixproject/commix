@@ -73,6 +73,7 @@ def adapt_delay(blocked):
       settings.ADAPTIVE_DELAY_STREAK = 0
       settings.ADAPTIVE_DELAY -= 1
 
+# How long to wait before trying again, which a timed payload cannot afford at all.
 def retry_delay_seconds():
   return 0 if settings.TIME_RELATED_ATTACK else settings.DELAY_RETRY
 
@@ -85,9 +86,11 @@ under '--threads' always "yes", and every measurement taken the maximum number o
 """
 _thread_state = threading.local()
 
+# Count one request against this thread's own tally.
 def note_request_sent():
   _thread_state.sent = getattr(_thread_state, "sent", 0) + 1
 
+# How many requests this thread has sent.
 def requests_sent():
   return getattr(_thread_state, "sent", 0)
 
@@ -142,3 +145,5 @@ def mark_url_valid():
   settings.VALID_URL = True
   # An answered request is the evidence that the backing off can start being given back.
   adapt_delay(blocked=False)
+
+# eof

@@ -14,10 +14,10 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import os
-from src.utils import menu
+from src.core.parse import cmdline as menu
 from src.utils import common
 from src.utils import settings
-from src.core.injections.controller import checks
+from src.core.controller import checks
 from src.core.shells import modes
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -205,6 +205,7 @@ BIND_TCP_MODE = modes.ShellMode(
   usage_hint="Use 'set rhost <ip>' and 'set lport <port>' to configure the bind TCP connection.",
 )
 
+# The options this mode offers, printed when the user asks for them.
 def bind_tcp_options(separator, filename, url):
   return modes.shell_mode_options(BIND_TCP_MODE, separator, filename, url)
 

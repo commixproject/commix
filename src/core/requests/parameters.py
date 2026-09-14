@@ -15,10 +15,10 @@ For more see the file 'readme/COPYING' for copying permission.
 
 import re
 import json
-from src.utils import menu
+from src.core.parse import cmdline as menu
 from src.utils import settings
 from src.core.requests import cookies
-from src.core.injections.controller import checks
+from src.core.controller import checks
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.flatten_json.flatten_json import flatten, unflatten_list
 from src.thirdparty.odict import OrderedDict
@@ -96,6 +96,7 @@ Shield each leaf element behind a placeholder so a line/element split can't frag
 """
 def shield_xml_leaves(text):
   shielded = []
+  # Set a matched span aside behind a placeholder, so nothing rewrites it.
   def _shield(m):
     shielded.append(m.group(0))
     return "<\x00SHIELD%d\x00>" % (len(shielded) - 1)
@@ -107,6 +108,7 @@ def shield_xml_leaves(text):
 Reverse shield_xml_leaves() on a string or a list of strings.
 """
 def restore_xml_shields(text_or_list, shielded):
+  # Put the set-aside spans back where their placeholders are.
   def _restore_one(s):
     for index, value in enumerate(shielded):
       s = s.replace("<\x00SHIELD%d\x00>" % index, value)

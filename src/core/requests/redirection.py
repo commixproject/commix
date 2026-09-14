@@ -15,14 +15,16 @@ For more see the file 'readme/COPYING' for copying permission.
 
 from src.utils import settings
 from src.utils import common
-from src.core.injections.controller import checks
+from src.core.controller import checks
 from src.thirdparty.six.moves import urllib as _urllib
 
 class Request(_urllib.request.Request):
+  # A request that keeps the method it was made with, whatever a redirect asks for.
   def __init__(self, *args, method=None, **kwargs):
     self._method = method
     _urllib.request.Request.__init__(self, *args, **kwargs)
 
+  # The method this request was made with.
   def get_method(self):
     return self._method or _urllib.request.Request.get_method(self)
 

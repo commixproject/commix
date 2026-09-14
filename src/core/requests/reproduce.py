@@ -14,9 +14,9 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import re
-from src.utils import menu
+from src.core.parse import cmdline as menu
 from src.utils import settings
-from src.core.injections.controller import checks
+from src.core.controller import checks
 from src.thirdparty.six.moves import urllib as _urllib
 
 """

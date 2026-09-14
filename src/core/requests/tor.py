@@ -15,7 +15,7 @@ For more see the file 'readme/COPYING' for copying permission.
 
 import re
 from src.thirdparty.six.moves import urllib as _urllib
-from src.utils import menu
+from src.core.parse import cmdline as menu
 from src.utils import settings
 from src.core.requests import proxy
 
@@ -31,6 +31,7 @@ def tor_connection_error():
   raise SystemExit()
 
 
+# Check that the Tor network is reachable and that traffic is really going through it.
 def do_check():
   info_msg = "Testing connection to the Tor network."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))

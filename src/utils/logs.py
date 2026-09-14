@@ -20,12 +20,12 @@ import shlex
 import tempfile
 from datetime import date
 from datetime import datetime
-from src.utils import menu
+from src.core.parse import cmdline as menu
 from src.utils import common
 from src.utils import settings
 from src.core.requests import reproduce
 from src.utils import session_handler
-from src.core.injections.controller import checks
+from src.core.controller import checks
 from src.thirdparty.six.moves import urllib as _urllib
 
 """
@@ -93,10 +93,8 @@ def create_log_file(url, output_dir):
 
   path_creation(logs_path)
 
-  # Create cli history file if does not exist.
+  # Where the command history is kept. Saving it is what creates the file.
   settings.CLI_HISTORY = logs_path + "cli_history"
-  if not os.path.exists(settings.CLI_HISTORY):
-    open(settings.CLI_HISTORY,'a').close()
 
   if menu.options.session_file is not None:
     if os.path.exists(menu.options.session_file):
@@ -108,8 +106,7 @@ def create_log_file(url, output_dir):
   else:
     settings.SESSION_FILE = logs_path + "session.db"
 
-  if os.path.exists(settings.CLI_HISTORY):
-    checks.load_cmd_history()
+  checks.load_cmd_history()
 
   # The logs filename construction.
   filename = logs_path + settings.OUTPUT_FILE
@@ -292,8 +289,7 @@ Print logs notification.
 def print_logs_notification(filename, url):
   from src.core.requests import keepalive
   keepalive.close_all()
-  if os.path.exists(settings.CLI_HISTORY):
-    checks.save_cmd_history()
+  checks.save_cmd_history()
   add_footer(filename)
   write_report()
   if settings.SHOW_LOGS_MSG == True and not menu.options.no_logging:

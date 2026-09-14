@@ -20,8 +20,8 @@ run a command. It is the technique that decides how execution is proven, so none
 to one - a module here is used by whichever technique carries it.
 """
 
-from src.core.eval import php
-from src.core.eval import python
+from src.core.eval.grammars import php
+from src.core.eval.grammars import python
 
 LANGUAGES = {php.NAME: php, python.NAME: python}
 
@@ -36,3 +36,5 @@ The grammar for one language, or the only one there is where none was named.
 """
 def grammar(language=None):
   return LANGUAGES.get(language) or LANGUAGES[php.NAME]
+
+# eof

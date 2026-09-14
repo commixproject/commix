@@ -13,10 +13,10 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
-from src.utils import menu
+from src.core.parse import cmdline as menu
 from src.utils import common
 from src.utils import settings
-from src.core.injections.controller import checks
+from src.core.controller import checks
 
 """
 The shared "use -> set -> run" loop behind the 'reverse_tcp' and 'bind_tcp' modes.
@@ -34,6 +34,7 @@ MODE_FLAGS = {
 Everything the shared loop needs that differs between the two modes.
 """
 class ShellMode(object):
+  # One shell mode, and the payload modules it can carry.
   def __init__(self, name, modules, help_menu, option_rows, required, required_hint, set_options, unsupported, build, usage_hint):
     self.name = name
     self.modules = modules
@@ -47,9 +48,11 @@ class ShellMode(object):
     self.usage_hint = usage_hint
     self.flag, self.other = MODE_FLAGS[name]
 
+  # The module's full name, as the mode refers to it.
   def qualified(self, module_path):
     return self.name + "/" + module_path
 
+  # Why a module cannot be used here, naming what this mode supports instead.
   def unsupported_msg(self):
     unsupported, supported = self.unsupported
     return "The '" + unsupported.upper() + "' option is not usable for '" + self.name + "' mode. Use the '" + supported.upper() + "' option."

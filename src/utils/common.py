@@ -16,11 +16,12 @@ For more see the file 'readme/COPYING' for copying permission.
 import re
 import os
 import sys
+import platform
 import json
 import time
 import hashlib
 import traceback
-from src.utils import menu
+from src.core.parse import cmdline as menu
 from src.utils import settings
 from src.thirdparty import six
 from src.thirdparty.six.moves import input as _input
@@ -89,6 +90,7 @@ def read_input(message, default=None, check_batch=True):
   # Close the spinner line before prompting unless the message is empty.
   if message:
     settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+  # Read one answer, falling back to the default where the line was left empty.
   def is_empty():
     value = safe_input(settings.input_message(message))
     if len(value) == 0:
@@ -168,7 +170,10 @@ def running_as_admin():
 Get total number of days from last update
 """
 def days_from_last_update():
-  days_from_last_update = int(time.time() - os.path.getmtime(settings.SETTINGS_PATH)) // (3600 * 24)
+  try:
+    days_from_last_update = int(time.time() - os.path.getmtime(settings.SETTINGS_PATH)) // (3600 * 24)
+  except OSError:
+    return
   if days_from_last_update > settings.NAGGING_DAYS:
     warn_msg = "Last update " + str(days_from_last_update) + " days ago. Consider checking for updates."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
@@ -198,9 +203,15 @@ Masks sensitive data in the supplied message.
 """
 def mask_sensitive_data(err_msg):
   for item in settings.SENSITIVE_OPTIONS:
-    match = re.search(r"(?i)commix.+(" + str(item) + r")(\s+|=)([^-]+)", err_msg)
-    if match:
-      err_msg = err_msg.replace(match.group(3), '<sanitized>' + settings.SINGLE_WHITESPACE)
+    """
+    The whole value goes, not the part of it before a hyphen.
+
+    A value was matched with '[^-]+', so 'p-ssw0rd' was masked as far as its first hyphen and the
+    rest of it was reported verbatim. The option's own name is escaped for the same reason: it is a
+    literal here, and its hyphens are not a range. Quoted values are taken whole, spaces and all.
+    """
+    pattern = r"(?i)(?<![\w-])(" + re.escape(str(item)) + r")(\s+|=)(\"[^\"]*\"|'[^']*'|\S+)"
+    err_msg = re.sub(pattern, lambda match: match.group(1) + match.group(2) + "<sanitized>", err_msg)
   return err_msg
 
 """
@@ -239,12 +250,37 @@ def create_github_issue(err_msg, exc_msg):
     + "\" (#" + key + ")"
   )
 
+  """
+  Nothing leaves the machine until the user has said it may.
+
+  Asking GitHub whether this crash is already known is itself a request to a third party, and the
+  question used to carry the exception's own last line - which is where a path, a target or a
+  credential ends up. So consent comes first, and the question is asked with the fingerprint alone.
+  """
+  while True:
+    try:
+      message = "Do you want to generate a sanitized GitHub issue report? [Y/n] "
+      choise = read_input(message, default="Y", check_batch=True)
+      if choise in settings.CHOICE_YES:
+        # Mask any potentially sensitive data before submission
+        err_msg = mask_sensitive_data(err_msg)
+        exc_msg = mask_sensitive_data(exc_msg)
+        break
+      elif choise in settings.CHOICE_NO:
+        print_report_issue(settings.ISSUES_PAGE, prepared=False)
+        return
+      else:
+        invalid_option(choise)
+    except (KeyboardInterrupt, EOFError):
+      settings.print_data_to_stdout("")
+      raise SystemExit()
+
   request = _urllib.request.Request(
     url="https://api.github.com/search/issues?q=" +
     _urllib.parse.quote(
       "repo:commixproject/commix"
       + settings.SINGLE_WHITESPACE
-      + str(bug_report)
+      + "Unhandled exception (#" + key + ")"
     )
   )
 
@@ -266,26 +302,11 @@ def create_github_issue(err_msg, exc_msg):
       info_msg += "."
       settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
       return
-  except:
-    # Ignore GitHub API errors and continue normally
+  except (KeyboardInterrupt, SystemExit):
+    raise
+  except Exception:
+    # A GitHub that cannot be reached is no reason not to prepare the report.
     pass
-
-  while True:
-    try:
-      message = "Do you want to generate a sanitized GitHub issue report? [Y/n] "
-      choise = read_input(message, default="Y", check_batch=True)
-      if choise in settings.CHOICE_YES:
-        # Mask any potentially sensitive data before submission
-        err_msg = mask_sensitive_data(err_msg)
-        break
-      elif choise in settings.CHOICE_NO:
-        print_report_issue(settings.ISSUES_PAGE, prepared=False)
-        return
-      else:
-        invalid_option(choise)
-    except:
-      settings.print_data_to_stdout("")
-      raise SystemExit()
 
   # Trim banner/output lines before the actual error content
   err_msg = err_msg[err_msg.find(settings.END_LINE.LF):]
@@ -418,7 +439,7 @@ def unhandled_exception():
     err_msg += "If the issue still occurs, you can report it on GitHub by generating a sanitized report that removes sensitive data, or by submitting the details manually." + settings.END_LINE.LF
     err_msg += settings.SUB_CONTENT_SIGN_TYPE + " " + settings.APPLICATION.capitalize() + " version: " + settings.VERSION[1:] + settings.END_LINE.LF
     err_msg += settings.SUB_CONTENT_SIGN_TYPE + " Python version: " + settings.PYTHON_VERSION + settings.END_LINE.LF
-    err_msg += settings.SUB_CONTENT_SIGN_TYPE + " Operating system: " + os.name + settings.END_LINE.LF
+    err_msg += settings.SUB_CONTENT_SIGN_TYPE + " Operating system: " + platform.platform() + settings.END_LINE.LF
     err_msg += settings.SUB_CONTENT_SIGN_TYPE + " Command summary: " + re.sub(r".+?\bcommix\.py\b", "commix.py", " ".join(sys.argv)) + settings.END_LINE.LF
     exc_msg = settings.TRACEBACK + re.sub(r'".+?[/\\](\w+\.py)', r"\"\g<1>", exc_msg)
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg + exc_msg.rstrip()))
@@ -447,6 +468,7 @@ def load_mobile_user_agents():
     devices.append((fields[0], fields[-1]))
   return devices, default_index
 
+# Every non-empty line of a list file, or a stop where the file cannot be read.
 def load_list_from_file(file_path, description="file"):
 
   if not os.path.isfile(file_path):
@@ -468,7 +490,8 @@ def load_list_from_file(file_path, description="file"):
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
 
-  if settings.VERBOSITY_LEVEL > 0:
+  # Bookkeeping behind whatever the list is being loaded for, so it does not break up that check.
+  if settings.VERBOSITY_LEVEL > 1:
     debug_msg = "Loaded " + str(len(items)) + " entries from " + description + " '" + file_path + "'."
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
 

@@ -18,10 +18,10 @@ import random
 import string
 import subprocess
 from src.utils import common
-from src.utils import menu
+from src.core.parse import cmdline as menu
 from src.utils import settings
 from src.core.compat import xrange
-from src.core.injections.controller import checks
+from src.core.controller import checks
 from src.core.shells import modes
 from src.thirdparty.colorama import Fore, Back, Style, init
 
@@ -37,6 +37,7 @@ def _needs_literal_encoding():
     or settings.CUSTOM_HEADER_INJECTION
   )
 
+# The literal spelling where the carrier can hold it, and the encoded one where it cannot.
 def _lit(encoded, literal):
   return literal if _needs_literal_encoding() else encoded
 
@@ -373,6 +374,7 @@ REVERSE_TCP_MODE = modes.ShellMode(
   usage_hint="Use 'set lhost <ip>' and 'set lport <port>' to configure the reverse TCP connection.",
 )
 
+# The options this mode offers, printed when the user asks for them.
 def reverse_tcp_options(separator, filename, url):
   return modes.shell_mode_options(REVERSE_TCP_MODE, separator, filename, url)
 
