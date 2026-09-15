@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New tamper script `cmd2loop.py`, which wraps a payload's command in a single-iteration "for" loop, so that it follows a shell keyword rather than a separator.
 * Added: Code injection support for Python as well as PHP, across all techniques.
 * Added: The `--eval` switch now also reaches the time-based and file-based techniques, so code injection is proven blind and semi-blind as well as results-based.
 * Added: New `--eval` switch to test for code injection, optionally naming a language (e.g. `--eval="php"`), which combines with any technique given with `--technique`.

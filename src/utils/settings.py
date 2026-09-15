@@ -383,7 +383,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "130"
+REVISION = "131"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1489,7 +1489,8 @@ TAMPER_SCRIPTS = {
                   "slash2env": False,
                   "backticks": False,
                   "randomcase": False,
-                  "rev": False
+                  "rev": False,
+                  "cmd2loop": False
                  }
 
 # Execution priority for tamper scripts; each script defines its own __priority__.
@@ -1564,7 +1565,8 @@ IGNORE_TAMPER_TRANSFORMATION = [
                   "PATH%%u*",
                   RANDOM_VAR_GENERATOR,
                   RANDOM_VAR_GENERATOR + "1",
-                  RANDOM_VAR_GENERATOR + "2"
+                  RANDOM_VAR_GENERATOR + "2",
+                  RANDOM_VAR_GENERATOR + "3"
 ]
 
 # HTTP Errors
