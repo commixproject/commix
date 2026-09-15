@@ -16,7 +16,7 @@ For more see the file 'readme/COPYING' for copying permission.
 from src.utils import settings
 from src.core.controller import checks
 
-"""
+r"""
 About: Adds back slashes (\) between the characters in a given payload.
 Notes: This tamper script works against target(s) with a POSIX shell.
 """
@@ -28,8 +28,9 @@ __priority__ = settings.PRIORITY.LOW
 def dependencies():
   return checks.tamper_dep_eval_incompatible(__tamper__) or checks.tamper_dep_unix_only(__tamper__)
 
+obf_char = "\\"
+
 if not settings.TAMPER_SCRIPTS[__tamper__]:
-  obf_char = "\\"
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
 # Put a back slash between the characters, which the shell reads straight through.

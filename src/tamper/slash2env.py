@@ -34,13 +34,10 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 
 # Say with an environment variable what the payload said with a slash.
 def tamper(payload):
-  # The substitution itself, over the slashes outside quoted words.
-  def add_slash2env(payload): 
-    payload = payload.replace("/", "${PATH%%u*}")
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     return payload
-  if settings.TARGET_OS != settings.OS.WINDOWS:
-    return add_slash2env(payload)
-  else:
-    return payload
+  # Outside single quotes only: the shell leaves a quoted "${PATH%%u*}" as those literal
+  # characters rather than expanding it, so a slash replaced in there stops being a slash.
+  return checks.tamper_outside_single_quotes(payload, lambda part: part.replace("/", "${PATH%%u*}"))
 
 # eof

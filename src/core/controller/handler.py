@@ -156,7 +156,7 @@ def pseudo_terminal_shell_generic(url, filename, technique, no_result, execute_c
     go_back = False
     go_back_again = False
     while True:
-      if go_back == True:
+      if go_back is True:
         break
       # --os-shell opens later, at quit().
       if force_enter:
@@ -192,7 +192,7 @@ def pseudo_terminal_shell_generic(url, filename, technique, no_result, execute_c
               if cmd.lower() == "quit" or cmd.lower() == "exit":
                 cleanup()
               go_back, go_back_again = shell_options.check_option_generic(execute_cmd, cmd, go_back, go_back_again, filename, url, separator)
-              if go_back and go_back_again == False:
+              if go_back and go_back_again is False:
                 break
               if go_back and go_back_again:
                 return True
@@ -703,11 +703,11 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
   exec_time = 0
   timesec = checks.time_related_timesec()
 
-  if settings.TIME_RELATED_ATTACK == False:
+  if settings.TIME_RELATED_ATTACK is False:
     settings.TIME_RELATED_ATTACK = None
 
   # Check if defined "--url-reload" option.
-  if menu.options.url_reload == True:
+  if menu.options.url_reload is True:
     checks.reload_url_msg(technique)
 
   # Check if defined "--maxlen" option.
@@ -925,7 +925,7 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
 
           except Exception:
             if num_of_chars >= total:
-              if no_result == True:
+              if no_result is True:
                 checks.injection_process(injection_type, technique, done=True)
               else:
                 settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
@@ -936,7 +936,7 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
     # Yaw, got shellz!
     # Do some magic tricks!
     if checks.time_related_shell(exec_time, timesec):
-      if (len(TAG) == output_length) and (possibly_vulnerable == True or resumed and int(is_vulnerable) == settings.INJECTION_LEVEL):
+      if (len(TAG) == output_length) and (possibly_vulnerable is True or resumed and int(is_vulnerable) == settings.INJECTION_LEVEL):
         found = True
         no_result = False
         # Export session
@@ -989,7 +989,7 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
     try:
       import html
       unescape = html.unescape
-    except:  # Python 2
+    except ImportError:  # Python 2
       unescape = _html_parser.HTMLParser().unescape
     from src.core.techniques.classic import cb_injector as injector
     from src.core.techniques.classic import cb_payloads as payloads
@@ -1151,7 +1151,7 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
 
           except _urllib.error.HTTPError as e:
             if str(e.getcode()) == settings.NOT_FOUND_ERROR:
-              if settings.CALL_TMP_BASED == True:
+              if settings.CALL_TMP_BASED is True:
                 exit_loops = True
                 dest_dir = os.path.dirname(menu.options.file_dest.replace("\\", "/"))
                 tmp_path = checks.normalize_target_dir(dest_dir)
@@ -1159,7 +1159,7 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
                 raise
               # Show an error message, after N failed tries.
               # Use the "/tmp/" directory for tempfile-based technique.
-              elif (i == failed_tries and no_result == True) or (i == total):
+              elif (i == failed_tries and no_result is True) or (i == total):
                 # Offered before giving up rather than instead of the last combinations: where
                 # there are fewer of those than '--failed-tries' allows, every one of them is
                 # still tried, and the temporary directory is what follows them failing.

@@ -38,7 +38,7 @@ def _purge_stage(debug_msg, paths, action):
   for path in paths:
     try:
       action(path)
-    except:
+    except OSError:
       failed = True
   return failed
 

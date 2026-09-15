@@ -422,7 +422,7 @@ speaks the same one the detection did.
 """
 def _run_over_languages(exploit):
   if menu.options.eval_sink != settings.EVAL_ALL_LANGUAGES:
-    return exploit() != False
+    return exploit() is not False
   """
   A language the heuristic already recognised is the only one tried.
 
@@ -430,7 +430,7 @@ def _run_over_languages(exploit):
   establish - and every language tried and rejected costs a full delay on the time-based technique.
   """
   if settings.IDENTIFIED_EVAL_PROBE:
-    return exploit() != False
+    return exploit() is not False
   languages = settings.SUPPORTED_EVAL_LANGUAGES
   # Whichever the target named for itself goes first - the others still follow, since a header
   # says what runs the page, not what evaluates a string inside it.
@@ -441,7 +441,7 @@ def _run_over_languages(exploit):
     if len(languages) > 1 and settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Testing the '" + settings.EVAL_GRAMMAR.LABEL + "' language."
       settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-    if exploit() != False:
+    if exploit() is not False:
       return True
   return False
 
@@ -450,7 +450,7 @@ def run_technique(injection_type, technique, state_name, skip_flag_name, tech_le
   setattr(settings, state_name, None)
   if not getattr(settings, skip_flag_name):
     if checks.technique_selected(tech_letter, eval_sink):
-      setattr(settings, state_name, _run_over_languages(exploit) if eval_sink else exploit() != False)
+      setattr(settings, state_name, _run_over_languages(exploit) if eval_sink else exploit() is not False)
   state = getattr(settings, state_name)
   if state == None or getattr(settings, skip_flag_name):
     checks.skipping_technique(technique, injection_type, state)
@@ -464,7 +464,7 @@ def classic_command_injection_technique(url, timesec, filename, http_request_met
   # Prove the injection by what the response carries back.
   def exploit():
     result = cb_handler.exploitation(url, timesec, filename, http_request_method, injection_type, technique)
-    if result != False:
+    if result is not False:
       settings.IDENTIFIED_COMMAND_INJECTION = True
       settings.SKIP_CODE_INJECTIONS = True
     return result
@@ -479,7 +479,7 @@ def dynamic_code_evaluation_technique(url, timesec, filename, http_request_metho
   # Prove the code injection by what the response carries back.
   def exploit():
     result = eb_handler.exploitation(url, timesec, filename, http_request_method, injection_type, technique)
-    if result != False:
+    if result is not False:
       settings.SKIP_COMMAND_INJECTIONS = True
     return result
   run_technique(injection_type, technique, "EVAL_BASED_STATE", "SKIP_CODE_INJECTIONS", "c", exploit, eval_sink=True)
@@ -496,7 +496,7 @@ def timebased_technique(url, timesec, filename, http_request_method, url_time_re
   # Prove the injection by how long the target takes to answer.
   def exploit():
     result = tb_handler.exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique)
-    if result != False and not eval_sink:
+    if result is not False and not eval_sink:
       settings.IDENTIFIED_COMMAND_INJECTION = True
     return result
   # Carrying the evaluation sink, this technique is skipped by whatever skips code injection - not
@@ -521,7 +521,7 @@ def filebased_command_injection_technique(url, timesec, filename, http_request_m
       result = tfb_handler.exploitation(url, timesec, filename, checks.default_tmp_path(), http_request_method, url_time_response)
     else:
       result = fb_handler.exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique)
-    if result != False and not eval_sink:
+    if result is not False and not eval_sink:
       settings.IDENTIFIED_COMMAND_INJECTION = True
     return result
   # Carrying the evaluation sink, this technique is skipped by whatever skips code injection - not
@@ -538,7 +538,7 @@ def oob_command_injection_technique(url, timesec, filename, http_request_method)
   # Prove the injection by the target reaching out to somewhere else.
   def exploit():
     result = oob_handler.exploitation(url, timesec, filename, http_request_method, injection_type, technique)
-    if result != False:
+    if result is not False:
       settings.IDENTIFIED_COMMAND_INJECTION = True
     return result
   run_technique(injection_type, technique, "OOB_STATE", "SKIP_OOB_INJECTIONS", "o", exploit)
@@ -940,13 +940,13 @@ def injection_process(url, check_parameter, http_request_method, filename, times
       end_detection = _run_techniques()
       # Nothing got through while a protection is in the way, so reach for a heavier evasion and
       # give the techniques another go - being blocked throughout is the answer this waits for.
-      while not end_detection and checks.injection_techniques_status() == False and \
+      while not end_detection and checks.injection_techniques_status() is False and \
             settings.WAF_ENABLED and checks.escalate_waf_evasion(on_block=False):
         settings.WAF_EVASION_ESCALATED = False
         end_detection = _run_techniques()
 
       # All injection techniques seems to be failed!
-      if checks.injection_techniques_status() == False:
+      if checks.injection_techniques_status() is False:
         warn_msg = settings.CHECKING_PARAMETER
         warn_msg += " does not seem to be injectable."
         settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
@@ -1193,7 +1193,7 @@ Check if HTTP Method is GET.
 def get_request(url, http_request_method, filename, timesec):
   found_url = parameters.do_GET_check(url, http_request_method)
 
-  if found_url != False:
+  if found_url is not False:
     do_injection(found_url, settings.HTTPMETHOD.GET, url, http_request_method, filename, timesec)
 
 """

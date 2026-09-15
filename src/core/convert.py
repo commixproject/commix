@@ -27,16 +27,14 @@ def hexdecode(value):
   try:
     value = codecs.decode(''.join(value.split()), "hex")
   except binascii.Error:
-    _ = False
-    return value, _
+    return value, False
   except LookupError:
     value = binascii.unhexlify(value)
+  # Not every sequence of bytes is text, so whether it decoded is the caller's to check.
   try:
-    value = value.decode(settings.DEFAULT_CODEC)
-    _ = True
-  except:
-    _ = False
-  return value, _
+    return value.decode(settings.DEFAULT_CODEC), True
+  except UnicodeDecodeError:
+    return value, False
 
 """
 Encode string to hex
@@ -48,8 +46,7 @@ def hexencode(value):
     value = codecs.encode(value, "hex")
   except LookupError:
     value = binascii.hexlify(value)
-  value = value.decode(settings.DEFAULT_CODEC)
-  _ = True
-  return value, _
+  # Every byte has a hex form, so unlike 'hexdecode' there is no outcome to report back.
+  return value.decode(settings.DEFAULT_CODEC)
 
 # eof

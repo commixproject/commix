@@ -158,7 +158,7 @@ def _handle_run(mode, selected_module, separator):
   if result is None:
     return None
 
-  if settings.EVAL_BASED_STATE != False:
+  if settings.EVAL_BASED_STATE is not False:
     result = checks.escape_unquoted_dollars(result)
 
   settings.LAST_SELECTED_MODULE = selected_module

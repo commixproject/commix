@@ -56,11 +56,11 @@ try:
   else:
     import readline
     from readline import *
-except:
+except ImportError:
   try:
     import pyreadline as readline
     from pyreadline import *
-  except:
+  except ImportError:
     settings.READLINE_ERROR = True
 
 """
@@ -126,12 +126,12 @@ def check_waf(url, http_request_method):
 Check injection technique(s) status.
 """
 def injection_techniques_status():
-  if settings.CLASSIC_STATE != True and \
-     settings.EVAL_BASED_STATE != True and \
-     settings.TIME_BASED_STATE != True and \
-     settings.FILE_BASED_STATE != True and \
-     settings.TEMPFILE_BASED_STATE != True and \
-     settings.OOB_STATE != True :
+  if settings.CLASSIC_STATE is not True and \
+     settings.EVAL_BASED_STATE is not True and \
+     settings.TIME_BASED_STATE is not True and \
+     settings.FILE_BASED_STATE is not True and \
+     settings.TEMPFILE_BASED_STATE is not True and \
+     settings.OOB_STATE is not True :
     return False
   else:
     return True
@@ -199,11 +199,11 @@ def process_injectable_value(payload, data):
   random_tag = settings.RANDOM_TAG
   while random_tag in settings.TESTABLE_VALUE or settings.TESTABLE_VALUE in random_tag:
     random_tag = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(10))
-  _ = data.replace(settings.TESTABLE_VALUE, random_tag)
-  if settings.TESTABLE_VALUE in _.replace(settings.INJECT_TAG, ""):
-    return _.replace(settings.INJECT_TAG, "").replace(settings.TESTABLE_VALUE, payload).replace(random_tag, settings.TESTABLE_VALUE)
+  masked = data.replace(settings.TESTABLE_VALUE, random_tag)
+  if settings.TESTABLE_VALUE in masked.replace(settings.INJECT_TAG, ""):
+    return masked.replace(settings.INJECT_TAG, "").replace(settings.TESTABLE_VALUE, payload).replace(random_tag, settings.TESTABLE_VALUE)
   else:
-    return _.replace(random_tag + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).replace(random_tag, settings.TESTABLE_VALUE)
+    return masked.replace(random_tag + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).replace(random_tag, settings.TESTABLE_VALUE)
 
 """
 Remove all injection tags from provided data
@@ -239,16 +239,16 @@ def process_custom_injection_data(data):
 Check for custom injection marker character ('*').
 """
 def custom_injection_marker_character(url, http_request_method):
-  _ = settings.CUSTOM_INJECTION_MARKER = False
+  found = settings.CUSTOM_INJECTION_MARKER = False
   settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST = []
   
   if url and settings.CUSTOM_INJECTION_MARKER_CHAR in url:
     option = "'-u'"
-    _ = settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.URL = True
+    found = settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.URL = True
   if menu.options.data and settings.CUSTOM_INJECTION_MARKER_CHAR in menu.options.data:
     option = str(http_request_method) + " body"
-    _ = settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.DATA = True
-  if not _:
+    found = settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.DATA = True
+  if not found:
     option = "option '--header(s)/--user-agent/--referer/--cookie'"
   # Whether the value carries the marker that says where a payload goes.
   def has_marker(value):
@@ -289,7 +289,7 @@ def custom_injection_marker_character(url, http_request_method):
 Logging a debug message when a specific injection technique is being skipped.
 """
 def skipping_technique(technique, injection_type, state):
-  if settings.VERBOSITY_LEVEL != 0 and state != True:
+  if settings.VERBOSITY_LEVEL != 0 and state is not True:
     debug_msg = "Skipping the " + technique_label(injection_type, technique) + "."
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
 
@@ -954,9 +954,9 @@ Returns header value ignoring the letter case
 """
 def get_header(headers, key):
   value = None
-  for _ in (headers or {}):
-    if _.upper() == key.upper():
-      value = headers[_]
+  for name in (headers or {}):
+    if name.upper() == key.upper():
+      value = headers[name]
       break
   return value
 
@@ -1257,7 +1257,7 @@ def procced_with_file_based_technique():
 Map a TCP mode's returned option to an action: 0 stay, 1 back, 2 os_shell, 3 the other mode.
 """
 def check_tcp_mode_result(option, other_mode):
-  if option == False:
+  if option is False:
     return 0
   elif option == "back":
     return 1
@@ -1410,7 +1410,7 @@ def check_CGI_scripts(url):
 
   CGI_SCRIPTS = common.load_list_from_file(settings.CGI_SCRIPTS, "CGI scripts list")
 
-  _ = False
+  script_found = False
   for cgi_script in CGI_SCRIPTS:
     if cgi_script in url:
       from src.utils import session_handler
@@ -1421,7 +1421,7 @@ def check_CGI_scripts(url):
 
       info_msg = "Heuristic (basic) test shows that target URL might be vulnerable to Shellshock "
       info_msg += "(detected script: '" + cgi_script + "')."
-      _ = True
+      script_found = True
       settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
 
       while True:
@@ -1439,7 +1439,7 @@ def check_CGI_scripts(url):
           common.invalid_option(shellshock_check)
           pass
 
-  if not _:
+  if not script_found:
     if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "No known CGI script found, skipping the '--shellshock' module."
       settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
@@ -2209,6 +2209,17 @@ def tamper_dep_interpreter_incompatible(tamper_name):
     return "Option '--interpreter' does not support the usage of '" + tamper_name + ".py'. Skipping tamper script."
 
 """
+What separates the payload's words at this point in the run.
+
+The list is shared and the scripts that substitute whitespace rewrite it as they go, so one of them
+undoing its own entry can leave it empty - and a script reading the first entry outright then
+raises, which is turned into a critical error and ends the run. Where there is nothing in it, a
+plain space is what the payload was built with in the first place.
+"""
+def current_whitespace():
+  return settings.WHITESPACES[0] if len(settings.WHITESPACES) != 0 else settings.SINGLE_WHITESPACE
+
+"""
 Undo a per-character obfuscation (obf_char inserted before each letter) on any whole word that settings.IGNORE_TAMPER_TRANSFORMATION says must survive intact (e.g. shell keywords like 'if'/'then').
 """
 def tamper_restore_ignored_words(payload, obf_char):
@@ -2216,7 +2227,7 @@ def tamper_restore_ignored_words(payload, obf_char):
     obf_word = "".join(obf_char + char if re.match(settings.TAMPER_MODIFICATION_LETTERS, char) else char for char in word)
     if obf_word != word and obf_word in payload:
       payload = payload.replace(obf_word, word)
-  whitespace = settings.WHITESPACES[0] if len(settings.WHITESPACES) != 0 else settings.SINGLE_WHITESPACE
+  whitespace = current_whitespace()
   pattern = r"\b(for|read)" + re.escape(whitespace) + r"((?:" + re.escape(obf_char) + r")?\w(?:(?:" + re.escape(obf_char) + r")?\w)*)"
   return re.sub(pattern, lambda x: x.group(1) + whitespace + x.group(2).replace(obf_char, ""), payload)
 
@@ -2393,14 +2404,14 @@ def tamper_scripts(stored_tamper_scripts):
         settings.MULTI_ENCODED_PAYLOAD = sorted_order + [script for script in settings.MULTI_ENCODED_PAYLOAD if script not in priorities]
 
     # Using too many tamper scripts is usually not a good idea. :P
-    _ = False
+    warn_needed = False
     if len(provided_scripts) >= 3 and not settings.LOAD_SESSION:
       warn_msg = "Using too many tamper scripts "
-      _ = True
+      warn_needed = True
     elif len([x for x in provided_scripts if any(y in x for y in ["nested", "doublequotes"])]) == 2 and not settings.LOAD_SESSION:
-      _ = True
+      warn_needed = True
       warn_msg = "The combination of the provided tamper scripts "
-    if _ and not settings.TAMPER_WARNING_SHOWN:
+    if warn_needed and not settings.TAMPER_WARNING_SHOWN:
       settings.TAMPER_WARNING_SHOWN = True
       warn_msg += "is not a good idea (may cause false positive / negative results)."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
@@ -2421,32 +2432,32 @@ Check for modified whitespaces.
 """
 def whitespace_check(payload):
 
-  _ = []
+  present = []
   # As they appear in a payload now: written out, and encoded only on the way to the wire.
   whitespaces = ["${IFS}", "+", "\t", "\v", " "]
   for whitespace in whitespaces:
     if whitespace in payload:
-      _.append(whitespace)
+      present.append(whitespace)
 
   # Enable the "space2ifs" tamper script.
-  if "${IFS}" in _:
+  if "${IFS}" in present:
     _enable_tamper_script('space2ifs')
     settings.WHITESPACES[0] = "${IFS}"
 
   # Enable the "space2plus" tamper script.
-  elif "+" in _ and payload.count("+") >= 2:
+  elif "+" in present and payload.count("+") >= 2:
     _enable_tamper_script('space2plus')
     settings.WHITESPACES[0] = "+"
 
   # Enable the "space2htab" tamper script.
-  elif "%09" in _:
+  elif "\t" in present:
     _enable_tamper_script('space2htab')
-    settings.WHITESPACES[0] = "%09"
+    settings.WHITESPACES[0] = "\t"
 
   # Enable the "space2vtab" tamper script.
-  elif "%0b" in _:
+  elif "\v" in present:
     _enable_tamper_script('space2vtab')
-    settings.WHITESPACES[0] = "%0b"
+    settings.WHITESPACES[0] = "\v"
 
   # Default whitespace
   else :
@@ -2565,16 +2576,16 @@ def check_encoders(payload):
           decoded_payload = _payload
           encoded_with = "base64"
           if re.match(settings.HEX_RECOGNITION_REGEX, check_value):
-            decoded_payload, _ = hexdecode(decoded_payload)
-            if _:
+            decoded_payload, decoded = hexdecode(decoded_payload)
+            if decoded:
               settings.MULTI_ENCODED_PAYLOAD.append("hexencode")
               encoded_with = "hex"
       except Exception:
         pass
 
   elif long_enough and re.match(settings.HEX_RECOGNITION_REGEX, check_value):
-    decoded_payload, _ = hexdecode(check_value)
-    if _ and decoded_text_is_plausible(decoded_payload):
+    decoded_payload, decoded = hexdecode(check_value)
+    if decoded and decoded_text_is_plausible(decoded_payload):
       settings.MULTI_ENCODED_PAYLOAD.append("hexencode")
       encoded_with = "hex"
       if (len(check_value.strip()) % 4 == 0) and \
@@ -2889,7 +2900,7 @@ Check for similarity in provided parameter name and value.
 def check_similarities(all_params):
   if settings.IS_JSON:
     try:
-      _ = "".join(random.sample(string.ascii_uppercase, k=6))
+      placeholder = "".join(random.sample(string.ascii_uppercase, k=6))
       flat = flatten(json.loads(','.join(all_params), object_pairs_hook=OrderedDict))
       modified = False
       for param in flat:
@@ -2898,10 +2909,10 @@ def check_similarities(all_params):
             flat[param] = flat[param] + settings.RANDOM_TAG
             modified = True
           if settings.SINGLE_WHITESPACE in flat[param]:
-            flat[param] = flat[param].replace(settings.SINGLE_WHITESPACE, _)
+            flat[param] = flat[param].replace(settings.SINGLE_WHITESPACE, placeholder)
             modified = True
       if modified:
-        all_params = [x.replace(settings.SINGLE_WHITESPACE, "").replace(_, settings.SINGLE_WHITESPACE) for x in json.dumps(flat).split(", ")]
+        all_params = [x.replace(settings.SINGLE_WHITESPACE, "").replace(placeholder, settings.SINGLE_WHITESPACE) for x in json.dumps(flat).split(", ")]
     except Exception:
       pass
   else:
@@ -2940,9 +2951,9 @@ def generate_char_pool(num_of_chars):
 """
 Print powershell version
 """
-def print_ps_version(ps_version, filename, _):
+def print_ps_version(ps_version, filename, newline_first):
   ps_version = "".join(str(p) for p in ps_version).strip()
-  if settings.VERBOSITY_LEVEL == 0 and _:
+  if settings.VERBOSITY_LEVEL == 0 and newline_first:
     settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
   # A version has a number in it, so an answer without one means the command never ran. Taken as a
   # version it leaves PowerShell marked as available, and every payload needing it quietly weakens.
@@ -2963,9 +2974,9 @@ def print_ps_version(ps_version, filename, _):
 """
 Print hostname
 """
-def print_hostname(shell, filename, _):
+def print_hostname(shell, filename, newline_first):
   if shell:
-    if settings.VERBOSITY_LEVEL == 0 and _:
+    if settings.VERBOSITY_LEVEL == 0 and newline_first:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     info_msg = "Hostname: " +  str(shell)
     settings.print_data_to_stdout(settings.print_retrieved_data("hostname", shell))
@@ -2978,9 +2989,9 @@ def print_hostname(shell, filename, _):
 """
 Print current user info
 """
-def print_current_user(cu_account, filename, _):
+def print_current_user(cu_account, filename, newline_first):
   if cu_account:
-    if settings.VERBOSITY_LEVEL == 0 and _:
+    if settings.VERBOSITY_LEVEL == 0 and newline_first:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     info_msg = "Current user: " +  str(cu_account)
     settings.print_data_to_stdout(settings.print_retrieved_data("current user", cu_account))
@@ -2993,13 +3004,13 @@ def print_current_user(cu_account, filename, _):
 """
 Print current user privs
 """
-def print_current_user_privs(shell, filename, _):
+def print_current_user_privs(shell, filename, newline_first):
   priv = "True"
   if (settings.TARGET_OS == settings.OS.WINDOWS and not "Admin" in shell) or \
      (settings.TARGET_OS != settings.OS.WINDOWS and shell != "0"):
     priv = "False"
 
-  if settings.VERBOSITY_LEVEL == 0 and _:
+  if settings.VERBOSITY_LEVEL == 0 and newline_first:
     settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
 
   info_msg = "Current user has elevated privileges: " +  str(priv)
@@ -3009,9 +3020,9 @@ def print_current_user_privs(shell, filename, _):
 """
 Print OS info
 """
-def print_os_info(target_os, target_arch, filename, _):
+def print_os_info(target_os, target_arch, filename, newline_first):
   if target_os and target_arch:
-    if settings.VERBOSITY_LEVEL == 0 and _:
+    if settings.VERBOSITY_LEVEL == 0 and newline_first:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     info_msg = "Operating system: " +  str(target_os) + settings.SINGLE_WHITESPACE + str(target_arch)
     settings.print_data_to_stdout(settings.print_retrieved_data("operating system", str(target_os) + settings.SINGLE_WHITESPACE + str(target_arch)))
@@ -3083,7 +3094,7 @@ def classify_uid(uid):
 """
 Print users enumeration: a bare '* name' list, plus a per-user privileges section when requested.
 """
-def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, interpreter):
+def print_users(sys_users, filename, newline_first, separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, interpreter):
 
   # Windows users enumeration.
   if settings.TARGET_OS == settings.OS.WINDOWS:
@@ -3100,7 +3111,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
         if len(sys_users_list) == 0:
           no_user_enumeration_permission()
         else:
-          if settings.VERBOSITY_LEVEL == 0 and _:
+          if settings.VERBOSITY_LEVEL == 0 and newline_first:
             settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
           info_msg = "operating system"
           info_msg += " user" + ('s', '')[len(sys_users_list) == 1]
@@ -3141,7 +3152,7 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
           for user in range(0, len(sys_users), 3):
              sys_users_list.append(sys_users[user : user + 3])
           if len(sys_users_list) != 0 :
-            if settings.VERBOSITY_LEVEL == 0 and _:
+            if settings.VERBOSITY_LEVEL == 0 and newline_first:
               settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
             info_msg = "operating system"
             info_msg += " user" + ('s', '')[len(sys_users_list) == 1]
@@ -3201,12 +3212,12 @@ def print_users(sys_users, filename, _, separator, TAG, cmd, prefix, suffix, whi
 """
 Print users enumeration.
 """
-def print_passes(sys_passes, filename, _, interpreter):
+def print_passes(sys_passes, filename, newline_first, interpreter):
   if sys_passes:
     sys_passes = "".join(str(p) for p in sys_passes).strip()
     sys_passes = sys_passes.replace(settings.SINGLE_WHITESPACE, settings.END_LINE.LF).split()
     if len(sys_passes) != 0 :
-      if settings.VERBOSITY_LEVEL == 0 and _:
+      if settings.VERBOSITY_LEVEL == 0 and newline_first:
         settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
       """
       Worked out before the count is announced. Most accounts carry no hash - a '*' or a '!' where
@@ -3463,8 +3474,8 @@ File read status
 """
 def file_read_status(shell, file_to_read, filename):
   if shell:
-    _ = "file contents"
-    settings.print_data_to_stdout(settings.print_retrieved_data(_, shell))
+    label = "file contents"
+    settings.print_data_to_stdout(settings.print_retrieved_data(label, shell))
     logs.add_line(filename, "Extracted content of the file '" + file_to_read + "': " + shell, group="file:" + file_to_read)
     logs.report_add_file(file_to_read, shell)
   else:
@@ -3481,10 +3492,10 @@ def check_destination(destination, where=None):
   normalized = destination.replace("\\", "/")
   # A destination with no trailing filename is a directory, so append the local filename.
   if os.path.split(normalized)[1] == "":
-    _ = os.path.split(normalized)[0].rstrip("/") + "/" + os.path.split(where)[1]
+    resolved = os.path.split(normalized)[0].rstrip("/") + "/" + os.path.split(where)[1]
   else:
-    _ = destination
-  return _
+    resolved = destination
+  return resolved
 
 """
 Write the content of a local file to a remote destination.
@@ -3822,7 +3833,7 @@ Tear the out-of-band channel down.
 """
 def close_oob_channel():
   if settings.OOB_CHANNEL is not None:
-    if not settings.OOB_CHANNEL.seen_any and settings.OOB_STATE != True:
+    if not settings.OOB_CHANNEL.seen_any and settings.OOB_STATE is not True:
       warn_msg = "No interaction of any kind reached the out-of-band server, so the channel itself "
       warn_msg += "was never proven to work. Check the target's egress and the channel's settings."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
@@ -3899,27 +3910,27 @@ def identified_vulnerable_param(url, technique, injection_type, vuln_parameter, 
   # Check injection state
   settings.DETECTION_PHASE = False
   settings.EXPLOITATION_PHASE = True
-  if settings.COOKIE_INJECTION == True:
+  if settings.COOKIE_INJECTION is True:
     header_name = settings.SINGLE_WHITESPACE + settings.COOKIE
     found_vuln_parameter = vuln_parameter
     the_type = " parameter"
 
-  elif settings.USER_AGENT_INJECTION == True:
+  elif settings.USER_AGENT_INJECTION is True:
     header_name = settings.SINGLE_WHITESPACE + settings.USER_AGENT
     found_vuln_parameter = ""
     the_type = " HTTP header"
 
-  elif settings.REFERER_INJECTION == True:
+  elif settings.REFERER_INJECTION is True:
     header_name = settings.SINGLE_WHITESPACE + settings.REFERER
     found_vuln_parameter = ""
     the_type = " HTTP header"
 
-  elif settings.HOST_INJECTION == True:
+  elif settings.HOST_INJECTION is True:
     header_name = settings.SINGLE_WHITESPACE + settings.HOST
     found_vuln_parameter = ""
     the_type = " HTTP header"
 
-  elif settings.CUSTOM_HEADER_INJECTION == True:
+  elif settings.CUSTOM_HEADER_INJECTION is True:
     header_name = settings.SINGLE_WHITESPACE + settings.CUSTOM_HEADER_NAME
     found_vuln_parameter = ""
     the_type = " HTTP header"
@@ -4020,7 +4031,7 @@ def announce_leftover_file(technique):
 Finalize injection process
 """
 def finalize(exit_loops, no_result, i, total, injection_type, technique, shell):
-  if exit_loops == False:
+  if exit_loops is False:
     if settings.VERBOSITY_LEVEL == 0:
       # Finished means a shell was found, or every combination was tried without one.
       done = bool(shell) or (no_result and total and i >= total)
@@ -4123,12 +4134,12 @@ Check if file-based technique has failed,
 then use the "/tmp/" directory for tempfile-based technique.
 """
 def tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_method, url_time_response):
-  if no_result == True:
+  if no_result is True:
     from src.core.techniques.tempfile_based import tfb_handler
     path = tmp_path
     setting_writable_dir(path)
     call_tfb = tfb_handler.exploitation(url, timesec, filename, tmp_path, http_request_method, url_time_response)
-    if call_tfb == False:
+    if call_tfb is False:
       info_msg = "Resuming the " + settings.INJECTION_TECHNIQUE.FILE_BASED + " tests."
       settings.print_data_to_stdout(settings.print_info_msg(info_msg))
     return call_tfb
@@ -4147,10 +4158,10 @@ def use_temp_folder(no_result, url, timesec, filename, http_request_method, url_
     if tmp_upload in settings.CHOICE_YES:
       settings.TEMPFILE_BASED_STATE = True
       call_tfb = tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_method, url_time_response)
-      if call_tfb != False:
+      if call_tfb is not False:
         return True
       else:
-        if no_result == True:
+        if no_result is True:
           return False
         else:
           return True
@@ -4206,7 +4217,7 @@ def time_related_export_injection_results(cmd, separator, output, check_exec_tim
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   else:
     # Could be separator filtration on target host, or simply an invalid/wrong command.
-    if output != False :
+    if output is not False :
       err_msg = "The '" + cmd + "' command did not return any output. This could be due to "
       err_msg += "'" + separator + "' filtration on the target host, or the command itself "
       err_msg += "being invalid."

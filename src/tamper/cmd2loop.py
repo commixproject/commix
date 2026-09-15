@@ -72,7 +72,7 @@ def _split_comment(body):
     return body, ""
   body = body[:len(body) - len(settings.COMMENT)]
   # Whitespace substitution has already run, so the space before it is whatever is now in use.
-  space = settings.WHITESPACES[0] if settings.WHITESPACES else settings.SINGLE_WHITESPACE
+  space = checks.current_whitespace()
   if body.endswith(space):
     body = body[:len(body) - len(space)]
   # It goes back after a tab: "done" must remain a separate keyword for the loop to parse correctly.

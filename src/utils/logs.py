@@ -122,7 +122,7 @@ def create_log_file(url, output_dir):
   except IOError as err_msg:
     try:
       error_msg = str(err_msg.args[0]).split("] ")[1] + "."
-    except:
+    except IndexError:
       error_msg = str(err_msg.args[0]) + "."
     settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
     raise SystemExit()
@@ -152,7 +152,7 @@ def add_line(filename, text, group=""):
         output_file.write(settings.END_LINE.LF)
         settings.LAST_LOG_GROUP = group
       output_file.write(text + settings.END_LINE.LF)
-  except:
+  except OSError:
     pass
 
 """
@@ -249,7 +249,7 @@ def log_traffic(header):
   try:
     with open(menu.options.traffic_file, "a", encoding=settings.DEFAULT_CODEC) as output_file:
       output_file.write(header)
-  except:
+  except OSError:
     pass
 
 """
@@ -292,7 +292,7 @@ def print_logs_notification(filename, url):
   checks.save_cmd_history()
   add_footer(filename)
   write_report()
-  if settings.SHOW_LOGS_MSG == True and not menu.options.no_logging:
+  if settings.SHOW_LOGS_MSG is True and not menu.options.no_logging:
     if not settings.LOAD_SESSION:
       logs_notification(filename)
   # Also where the line above is not printed at all ('--no-logging'), so the suggestion is not lost.

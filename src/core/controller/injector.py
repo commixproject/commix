@@ -50,7 +50,7 @@ The main time-realative command injection exploitation.
 How many output positions a time-related retrieval resolves at once.
 """
 def retrieval_concurrency():
-  if settings.THREADS > 1 and _THREADS_SUPPORTED and settings.THREADED_TIME_RETRIEVAL_CHOICE != False:
+  if settings.THREADS > 1 and _THREADS_SUPPORTED and settings.THREADED_TIME_RETRIEVAL_CHOICE is not False:
     return settings.THREADS
   return 1
 
@@ -253,7 +253,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
     # strength of the quick answers, the delay stops standing out from the slow ones at all.
     if settings.THREADS > 1:
       return
-    if settings.ADJUST_TIME_DELAY_DISABLED or settings.ADJUST_TIME_DELAY_CHOICE == False:
+    if settings.ADJUST_TIME_DELAY_DISABLED or settings.ADJUST_TIME_DELAY_CHOICE is False:
       return
     # Never below the floor 'time_related_timesec()' holds every other caller to, or the
     # delay is shortened past the point the payload's own cost can be told apart from it.
@@ -568,7 +568,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
             break
           revalidations += 1
           settings.print_data_to_stdout(settings.print_error_msg("Invalid length detected. Retrying.."))
-          if settings.ADJUST_TIME_DELAY_CHOICE != False:
+          if settings.ADJUST_TIME_DELAY_CHOICE is not False:
             timesec = settings.CALIBRATED_TIMESEC = _escalated_delay(timesec)
             warn_msg = "Increasing time delay to " + str(timesec) + " second" + ("s" if timesec > 1 else "") + "."
             settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
@@ -598,12 +598,12 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
     warn_msg = "The detected output length may be unreliable due to connection instability. Consider re-running to confirm it."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
-  if _cached_length is None and found_chars == True and output_length > 1:
+  if _cached_length is None and found_chars is True and output_length > 1:
     info_msg = "Retrieved length: " + str(output_length)
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
   # Every character costs its own requests, so a long output is worth confirming first.
-  if found_chars == True and output_length > settings.LARGE_OUTPUT_THRESHOLD:
+  if found_chars is True and output_length > settings.LARGE_OUTPUT_THRESHOLD:
     workers = retrieval_concurrency()
     message = "The output is " + str(output_length) + " characters long and is recovered "
     message += "one character at a time" if workers == 1 else str(workers) + " characters at a time"
@@ -614,7 +614,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
       return 0, ""
 
   # Proceed with the next (injection) step!
-  if found_chars == True :
+  if found_chars is True :
     if settings.TARGET_OS == settings.OS.WINDOWS:
       cmd = previous_cmd
     num_of_chars = output_length + 1
@@ -831,7 +831,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
       nothing and left out of that loop, it got no second chance at all, while a position that
       answered wrongly got fifteen.
       """
-      if ascii_char is None and settings.ADJUST_TIME_DELAY_CHOICE != False:
+      if ascii_char is None and settings.ADJUST_TIME_DELAY_CHOICE is not False:
         undelayed_retries = 0
         before_escalation = timesec
         while ascii_char is None and undelayed_retries < settings.MAX_LENGTH_REVALIDATIONS:
@@ -903,7 +903,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
             break
           revalidations += 1
           settings.print_data_to_stdout(settings.print_error_msg("Invalid character detected. Retrying."))
-          if settings.ADJUST_TIME_DELAY_CHOICE != False:
+          if settings.ADJUST_TIME_DELAY_CHOICE is not False:
             with timesec_lock:
               timesec = settings.CALIBRATED_TIMESEC = _escalated_delay(timesec)
               new_timesec = my_escalation = timesec
@@ -987,7 +987,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
             return num_of_chars, None, True
           revalidations += 1
           settings.print_data_to_stdout(settings.print_error_msg("Invalid character detected. Retrying."))
-          if settings.ADJUST_TIME_DELAY_CHOICE != False:
+          if settings.ADJUST_TIME_DELAY_CHOICE is not False:
             with timesec_lock:
               timesec = settings.CALIBRATED_TIMESEC = _escalated_delay(timesec)
           candidate = _bisect(timesec)
@@ -1113,18 +1113,18 @@ def results_based_injection(separator, TAG, cmd, prefix, suffix, whitespace, htt
       else:
         payload = payloads.cmd_execution(separator, cmd, OUTPUT_TEXTFILE)
     if settings.VERBOSITY_LEVEL != 0:
-      _ = cmd
+      shown_cmd = cmd
       if technique == settings.INJECTION_TECHNIQUE.FILE_BASED or technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
         payload_msg = payload
         if settings.COMMENT in payload_msg:
           payload = payload.split(settings.COMMENT)[0].strip()
           payload_msg = payload_msg.split(settings.COMMENT)[0].strip()
         if settings.COMMENT in cmd:  
-          _ = cmd.split(settings.COMMENT)[0].strip()
+          shown_cmd = cmd.split(settings.COMMENT)[0].strip()
       # The trace of what is actually being run, which for an internal command is the only word of
       # it - but a command the user asked for on the command line has just been named already.
-      if _ != menu.options.os_cmd:
-        debug_msg = "Executing the '" + _ + "' command."
+      if shown_cmd != menu.options.os_cmd:
+        debug_msg = "Executing the '" + shown_cmd + "' command."
         settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
     response, vuln_parameter, payload, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
     return response
@@ -1418,14 +1418,14 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec, technique):
 Evaluate test results.
 """
 def injection_test_results(response, TAG, randvcalc, technique, payload=None):
-  if type(response) is bool and response != True or response is None:
+  if type(response) is bool and response is not True or response is None:
     return False
 
   if technique == settings.INJECTION_TECHNIQUE.CLASSIC:
     try:
       import html
       unescape = html.unescape
-    except:  # Python 2
+    except ImportError:  # Python 2
       unescape = _html_parser.HTMLParser().unescape
     # Check the execution results
     html_data = checks.process_page_content(response, action="decode")
@@ -1464,7 +1464,7 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
     try:
       import html
       unescape = html.unescape
-    except:  # Python 2
+    except ImportError:  # Python 2
       unescape = _html_parser.HTMLParser().unescape
     false_result = False
     try:
@@ -1535,7 +1535,7 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
     output = injection_output(url, OUTPUT_TEXTFILE, timesec, technique)
     try:
       response = checks.get_response(output)
-      if type(response) is bool and response != True or response is None:
+      if type(response) is bool and response is not True or response is None:
         shell = ""
       else:
         shell = checks.process_page_content(response, action="encode").rstrip().lstrip()

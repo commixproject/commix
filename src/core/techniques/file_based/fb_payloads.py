@@ -104,7 +104,7 @@ def decision_combined_alter_interpreter(separator, tags, OUTPUT_TEXTFILE):
 Execute shell commands on vulnerable host.
 """
 def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
-  if settings.TFB_DECIMAL == True:
+  if settings.TFB_DECIMAL is True:
     payload = (separator + cmd)
 
   elif settings.TARGET_OS == settings.OS.WINDOWS:

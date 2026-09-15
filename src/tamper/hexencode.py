@@ -40,9 +40,6 @@ def dependencies():
 def tamper(payload):
   checks.tamper_check_space2plus_conflict(__tamper__)
   payload = _urllib.parse.unquote(payload)
-  encoded_payload, _ = hexencode(payload)
-  if _:
-    payload = encoded_payload
-  return payload
+  return hexencode(payload)
 
 # eof

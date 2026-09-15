@@ -37,9 +37,9 @@ def _extract_header_value(header_name, line):
 Error message for invalid data.
 """
 def _invalid_data(request_file):
-  err_msg = "Specified file "
-  err_msg += "'" + os.path.split(request_file)[1] + "'"
-  err_msg += " does not contain a valid HTTP request."
+  err_msg = "It seems the "
+  err_msg += "'" + request_file + "'"
+  err_msg += " file does not contain a valid HTTP request."
   settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
   raise SystemExit()
 

@@ -41,7 +41,6 @@ def banner():
 Copyright © """ + settings.YEAR + """ """ + settings.AUTHOR + Style.RESET_ALL + """ (""" + Fore.LIGHTRED_EX  + settings.AUTHOR_X_ACCOUNT + Style.RESET_ALL + """)
 """)
 
-_ = os.path.normpath(sys.argv[0])
 
 usage = "python %prog [option(s)]"
 
@@ -772,14 +771,14 @@ parser.add_option_group(misc)
 """
 Truncate long option strings so they don't wrap onto a second line.
 """
-def _(self, *args):
-    _ = parser.formatter._format_option_strings(*args)
-    if len(_) > settings.MAX_OPTION_LENGTH:
-        _ = ("%%.%ds.." % (settings.MAX_OPTION_LENGTH - parser.formatter.indent_increment)) % _
-    return _
+def truncate_option_strings(self, *args):
+    formatted = parser.formatter._format_option_strings(*args)
+    if len(formatted) > settings.MAX_OPTION_LENGTH:
+        formatted = ("%%.%ds.." % (settings.MAX_OPTION_LENGTH - parser.formatter.indent_increment)) % formatted
+    return formatted
 
 parser.formatter._format_option_strings = parser.formatter.format_option_strings
-parser.formatter.format_option_strings = type(parser.formatter.format_option_strings)(_, parser)
+parser.formatter.format_option_strings = type(parser.formatter.format_option_strings)(truncate_option_strings, parser)
 
 option = parser.get_option("-h")
 option.help = option.help.capitalize().replace("Show this help message and exit", "Show help and exit.")

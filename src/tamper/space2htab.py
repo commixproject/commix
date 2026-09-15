@@ -14,7 +14,6 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 from src.utils import settings
-from src.thirdparty.six.moves import urllib as _urllib
 
 """
 About: Replaces space character (%20) with horizontal tab (%09) in a given payload.

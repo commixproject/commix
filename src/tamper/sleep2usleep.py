@@ -37,17 +37,16 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 def tamper(payload):
   # The rewrite itself, the delay restated in microseconds.
   def sleep_to_usleep(payload):
-    whitespace = settings.WHITESPACES[0]
+    whitespace = checks.current_whitespace()
     # Arithmetic-gated delay ("sleep $((5*(cond)))") - scale its leading factor to microseconds.
     payload = re.sub(r"sleep" + re.escape(whitespace) + r"\$\(\((\d+)\*",
                      lambda x: "usleep" + whitespace + "$((" + x.group(1) + "000000*", payload)
+    # A plain delay, taken from the match itself rather than split back out of it.
     for match in re.finditer(r"sleep" + re.escape(whitespace) + r"([1-9]\d+|[0-9])", payload):
-      sleep_to_usleep = "u" + match.group(0).split(settings.WHITESPACES[0])[0]
-      if match.group(0).split(settings.WHITESPACES[0])[1] != "0":
-        usleep_delay = match.group(0).split(settings.WHITESPACES[0])[1] + "0" * 6
-      else:
-        usleep_delay = match.group(0).split(settings.WHITESPACES[0])[1]
-      payload = payload.replace(match.group(0), sleep_to_usleep + settings.WHITESPACES[0] + usleep_delay)
+      seconds = match.group(1)
+      # Seconds become microseconds, except a zero, which has nothing to scale.
+      delay = seconds + "0" * 6 if seconds != "0" else seconds
+      payload = payload.replace(match.group(0), "usleep" + whitespace + delay)
     return payload
   if settings.TARGET_OS != settings.OS.WINDOWS and settings.TIME_RELATED_ATTACK:
     return sleep_to_usleep(payload)

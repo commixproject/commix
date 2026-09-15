@@ -149,14 +149,14 @@ Returns True if the current process is run under admin privileges
 def running_as_admin():
   is_admin = False
   if settings.PLATFORM in ("posix", "mac"):
-    _ = os.geteuid()
-    if isinstance(_, (float, six.integer_types)) and _ == 0:
+    euid = os.geteuid()
+    if isinstance(euid, (float, six.integer_types)) and euid == 0:
       is_admin = True
 
   elif settings.IS_WINDOWS:
     import ctypes
-    _ = ctypes.windll.shell32.IsUserAnAdmin()
-    if isinstance(_, (float, six.integer_types)) and _ == 1:
+    elevated = ctypes.windll.shell32.IsUserAnAdmin()
+    if isinstance(elevated, (float, six.integer_types)) and elevated == 1:
       is_admin = True
   else:
     err_msg = settings.APPLICATION + " is not able to check if you are running it "
@@ -189,7 +189,7 @@ def show_http_error_codes():
     counted[str(code)] = counted.get(str(code), 0) + 1
   described = []
   # Most frequent first, so the one that shaped the run is read first.
-  for code in sorted(counted, key=lambda _: (-counted[_], _)):
+  for code in sorted(counted, key=lambda item: (-counted[item], item)):
     reason = _http_client.responses.get(int(code)) if code.isdigit() else None
     times = counted[code]
     described.append(code + (" (" + reason + ")" if reason else "") +
@@ -232,16 +232,16 @@ PS: Greetz @ sqlmap dev team for that great idea! :)
 def create_github_issue(err_msg, exc_msg):
 
   # Normalize exception message to generate a stable fingerprint
-  _ = re.sub(r"'[^']+'", "''", exc_msg)
-  _ = re.sub(r"\s+line \d+", "", _)
-  _ = re.sub(r'File ".+?/(\w+\.py)', r"\g<1>", _)
-  _ = re.sub(r".+\Z", "", _)
-  _ = re.sub(r"(Unicode[^:]*Error:).+", r"\g<1>", _)
-  _ = re.sub(r"= _", "= ", _)
-  _ = _.encode(settings.DEFAULT_CODEC)
+  fingerprint = re.sub(r"'[^']+'", "''", exc_msg)
+  fingerprint = re.sub(r"\s+line \d+", "", fingerprint)
+  fingerprint = re.sub(r'File ".+?/(\w+\.py)', r"\g<1>", fingerprint)
+  fingerprint = re.sub(r".+\Z", "", fingerprint)
+  fingerprint = re.sub(r"(Unicode[^:]*Error:).+", r"\g<1>", fingerprint)
+  fingerprint = re.sub(r"= _", "= ", fingerprint)
+  fingerprint = fingerprint.encode(settings.DEFAULT_CODEC)
 
   # Generate short hash used as issue identifier
-  key = hashlib.md5(_).hexdigest()[:8]
+  key = hashlib.md5(fingerprint).hexdigest()[:8]
 
   # Build GitHub issue title using the last non-empty exception line
   bug_report = (
@@ -288,10 +288,10 @@ def create_github_issue(err_msg, exc_msg):
     response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT, context=settings.verified_context())
     content = response.read()
     response.close()
-    _ = json.loads(content)
+    results = json.loads(content)
 
-    duplicate = _["total_count"] > 0
-    closed = duplicate and _["items"][0]["state"] == "closed"
+    duplicate = results["total_count"] > 0
+    closed = duplicate and results["items"][0]["state"] == "closed"
 
     if duplicate:
       info_msg = "That issue seems to be already reported"

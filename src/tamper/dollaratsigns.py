@@ -28,8 +28,9 @@ __priority__ = settings.PRIORITY.LOW
 def dependencies():
   return checks.tamper_dep_eval_incompatible(__tamper__) or checks.tamper_dep_unix_only(__tamper__)
 
+obf_char = "$@"
+
 if not settings.TAMPER_SCRIPTS[__tamper__]:
-  obf_char = "$@"
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
 # Put an empty '$@' between the characters, which the shell expands to nothing.

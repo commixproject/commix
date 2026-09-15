@@ -158,7 +158,7 @@ def check_for_update():
           pass
   except KeyboardInterrupt:
     raise
-  except:
+  except Exception:
     pass
 
 # eof

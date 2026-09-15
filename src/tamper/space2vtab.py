@@ -14,7 +14,6 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 from src.utils import settings
-from src.thirdparty.six.moves import urllib as _urllib
 from src.core.controller import checks
 
 """
@@ -41,9 +40,13 @@ def tamper(payload):
         settings.WHITESPACES[0] = space2vtab
       elif space2vtab not in settings.WHITESPACES:
         settings.WHITESPACES.append(space2vtab)
+    # The mirror of the above: a target settled as POSIX after this script was accepted, where
+    # taking back the only entry would leave nothing separating the payload's words.
     else:
       if space2vtab in settings.WHITESPACES:
         settings.WHITESPACES.remove(space2vtab)
+        if len(settings.WHITESPACES) == 0:
+          settings.WHITESPACES.append(settings.SINGLE_WHITESPACE)
   return payload
 
 # eof

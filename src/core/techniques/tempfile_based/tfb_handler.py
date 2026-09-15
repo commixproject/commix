@@ -50,7 +50,7 @@ def exploitation(url, timesec, filename, tmp_path, http_request_method, url_time
   # is what the first timing is read against, so filling it belongs with settling into '/tmp/'.
   checks.warm_up_response_baseline(url, http_request_method)
 
-  if tfb_injection_handler(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path) == False:
+  if tfb_injection_handler(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path) is False:
     settings.TIME_RELATED_ATTACK = settings.TEMPFILE_BASED_STATE = False
     return False
 

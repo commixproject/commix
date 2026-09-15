@@ -32,9 +32,10 @@ __priority__ = settings.PRIORITY.LOW
 def dependencies():
   return checks.tamper_dep_eval_incompatible(__tamper__) or checks.tamper_dep_unix_only(__tamper__)
 
+# The variable is named once for the whole run, so every payload carries the same one.
+obf_char = "${" + ''.join(random.choice(string.ascii_uppercase) for _ in range(2)) + "}"
+
 if not settings.TAMPER_SCRIPTS[__tamper__]:
-  num = 2
-  obf_char = "${" + ''.join(random.choice(string.ascii_uppercase) for _ in range(num)) + "}"
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
 

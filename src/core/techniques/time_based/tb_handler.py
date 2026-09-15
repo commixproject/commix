@@ -41,7 +41,7 @@ def exploitation(url, timesec, filename, http_request_method, url_time_response,
     settings.RESPONSE_DELAYS = True
     go_back = False
     while True:
-      if go_back == True:
+      if go_back is True:
         return False
       message = "High response delays make time-related techniques unreliable. "
       message += "How do you want to proceed? [(C)ontinue/(s)kip] "
@@ -49,7 +49,7 @@ def exploitation(url, timesec, filename, http_request_method, url_time_response,
       if proceed_option.lower() in settings.CHOICE_PROCEED :
         if proceed_option.lower() == "c":
           result = tb_injection_handler(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path)
-          if result == False:
+          if result is False:
             return False
           # Return when a technique was resumed or found; only False should continue prompting.
           return result
@@ -63,7 +63,7 @@ def exploitation(url, timesec, filename, http_request_method, url_time_response,
         common.invalid_option(proceed_option)
         pass
   else:
-    if tb_injection_handler(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path) == False:
+    if tb_injection_handler(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path) is False:
       settings.TIME_RELATED_ATTACK = False
       return False
 # eof

@@ -36,7 +36,8 @@ def tamper(payload):
     elif space2plus not in settings.WHITESPACES:
       settings.WHITESPACES.append(space2plus)
 
-  else:
+  # Said only where it is true: an empty list is another reason to do nothing, and not this one.
+  elif settings.IS_JSON:
     warn_msg = "The tamper script '" + __tamper__ + "' is ineffective for JSON payloads. "
     warn_msg += "Skipping tamper script."
     settings.print_once(warn_msg)

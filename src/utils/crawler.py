@@ -126,7 +126,7 @@ def store_crawling(output_href):
       else:
         common.invalid_option(message)
         pass
-  except:
+  except Exception:
     pass
     
 """
@@ -163,7 +163,7 @@ def sitemap(url, http_request_method):
             pass
     no_usable_links(sitemap_loc)
     return sitemap_loc
-  except:
+  except Exception:
     if not menu.options.crawldepth:
       raise SystemExit()
     pass
@@ -346,9 +346,9 @@ The main crawler.
 def crawler(url, url_num, crawling_list, http_request_method):
   init_global_vars()
   if crawling_list > 1:
-    _ = " (" + str(url_num) + "/" + str(crawling_list) + ")"
+    counter = " (" + str(url_num) + "/" + str(crawling_list) + ")"
   else:
-    _ = ""
+    counter = ""
   response = request(url, http_request_method)
   if type(response) is not bool and response is not None:
     if settings.SITEMAP_CHECK:
@@ -358,7 +358,7 @@ def crawler(url, url_num, crawling_list, http_request_method):
     if settings.SITEMAP_CHECK:
       output_href = sitemap(url, http_request_method)
     if not settings.SITEMAP_CHECK or (settings.SITEMAP_CHECK and output_href is None):
-      info_msg = "Starting crawler for target URL '" + url + "'" + _ + "."
+      info_msg = "Starting crawler for target URL '" + url + "'" + counter + "."
       settings.print_data_to_stdout(settings.print_info_msg(info_msg))
       output_href = do_process(url, http_request_method)
       if settings.MULTI_TARGETS and settings.DEFAULT_CRAWLING_DEPTH != 1:

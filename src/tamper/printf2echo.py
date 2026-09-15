@@ -36,8 +36,9 @@ def tamper(payload):
   # The rewrite itself, for the one shape this project's payloads use printf in.
   def printf_to_echo(payload):
     if "printf" in payload:
-      payload = payload.replace(settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "printf" + settings.WHITESPACES[0] + "'%d'" + settings.WHITESPACES[0] + "\"'$" + settings.RANDOM_VAR_GENERATOR + "2'\"" + settings.CMD_SUB_SUFFIX, 
-                                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo" + settings.WHITESPACES[0] + "-n" + settings.WHITESPACES[0] + "$" + settings.RANDOM_VAR_GENERATOR + "2" + settings.WHITESPACES[0] + "|" + settings.WHITESPACES[0] + "od" + settings.WHITESPACES[0] + "-An" + settings.WHITESPACES[0] + "-tuC" + settings.WHITESPACES[0] + "|" + settings.WHITESPACES[0] + "xargs" + settings.CMD_SUB_SUFFIX
+      space = checks.current_whitespace()
+      payload = payload.replace(settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "printf" + space + "'%d'" + space + "\"'$" + settings.RANDOM_VAR_GENERATOR + "2'\"" + settings.CMD_SUB_SUFFIX,
+                                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo" + space + "-n" + space + "$" + settings.RANDOM_VAR_GENERATOR + "2" + space + "|" + space + "od" + space + "-An" + space + "-tuC" + space + "|" + space + "xargs" + settings.CMD_SUB_SUFFIX
                                )
     return payload
   if settings.TARGET_OS != settings.OS.WINDOWS:

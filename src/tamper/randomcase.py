@@ -36,19 +36,19 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 
 # Vary the case of the payload's letters, where the shell does not care about it.
 def tamper(payload):
-  _ = (''.join(choice((str.upper, str.lower))(c) for c in settings.USER_APPLIED_CMD))
+  mixed_case = ''.join(choice((str.upper, str.lower))(char) for char in settings.USER_APPLIED_CMD)
   if settings.EXPLOITATION_PHASE:
     if settings.TAMPER_SCRIPTS["rev"]:
       if settings.USE_BACKTICKS:
-        _ = _[::-1] + "|rev"
+        mixed_case = mixed_case[::-1] + "|rev"
       else:
-        _ = "$(echo \"" + _[::-1]  + "\"|rev" + ")" 
+        mixed_case = "$(echo \"" + mixed_case[::-1] + "\"|rev)"
     source = payload if settings.USER_APPLIED_CMD in payload else settings.RAW_PAYLOAD
     if settings.USER_APPLIED_CMD in source:
       if settings.USE_BACKTICKS:
-        random_case_cmd = "\\`echo " + _ + "|tr '[A-Z]' '[a-z]'\\`"
+        random_case_cmd = "\\`echo " + mixed_case + "|tr '[A-Z]' '[a-z]'\\`"
       else:
-        random_case_cmd = "$(echo " + _ + "|tr '[A-Z]' '[a-z]')"
+        random_case_cmd = "$(echo " + mixed_case + "|tr '[A-Z]' '[a-z]')"
       # Applied to the payload as handed over, not to the untouched original: the scripts run in
       # order, and reaching back past the ones before would throw their work away.
       payload = source.replace(settings.USER_APPLIED_CMD, random_case_cmd)

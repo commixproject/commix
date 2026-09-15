@@ -135,7 +135,7 @@ System passwords enumeration
 def system_passwords(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique):
   injector = execution.select_injector(technique)
   cmd = settings.SYS_PASSES
-  drop_false = lambda sys_passes: "" if sys_passes == False else sys_passes
+  drop_false = lambda sys_passes: "" if sys_passes is False else sys_passes
   execute_cmd = execution.make_execute_cmd(injector, separator, maxlen, TAG, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, interpreter, filename, url_time_response, technique, OUTPUT_TEXTFILE, postprocess_time=drop_false)
   sys_passes, fresh = execute_cmd(cmd)
   checks.print_passes(sys_passes, filename, settings.TIME_RELATED_ATTACK and fresh, interpreter)

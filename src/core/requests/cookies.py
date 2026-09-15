@@ -109,9 +109,9 @@ def handle_server_cookies(response):
     added_cookies = set()
     for header, value in response.getheaders():
       if header.lower() == settings.SET_COOKIE.lower():
-        _ = re.search(r'^\s*([^=;\s]+=[^;]*)', value)
-        if _:
-          name_value = _.group(1)
+        first_pair = re.search(r'^\s*([^=;\s]+=[^;]*)', value)
+        if first_pair:
+          name_value = first_pair.group(1)
           cookie_name = name_value.split("=")[0]
           if cookie_name not in declared_cookies and cookie_name not in added_cookies:
             set_cookie_header.append(name_value)

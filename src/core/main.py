@@ -226,7 +226,7 @@ def init_request(url, http_request_method):
     debug_msg = "Setting the HTTP authentication type and credentials."
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
 
-  _ = None
+  from_http_error = None
   response = None
   redirect_url = None
 
@@ -258,7 +258,7 @@ def init_request(url, http_request_method):
       redirect_url = response.geturl()
 
   except _urllib.error.HTTPError as e:
-    _ = True
+    from_http_error = True
     redirect_url = e.geturl()
 
   except Exception as err_msg:
@@ -267,7 +267,7 @@ def init_request(url, http_request_method):
   if redirect_url and redirect_url != url and settings.FOLLOW_REDIRECT:
     redirect_url = redirection.do_check(url, redirect_url)
     if redirect_url is not None and settings.FOLLOW_REDIRECT:
-      if _:
+      if from_http_error:
         url = redirect_url
 
   # Build the real request (full data) now that the final URL is known.
@@ -290,7 +290,7 @@ Get the URL response.
 def url_response(url, http_request_method):
   if settings.CHECK_INTERNET:
     settings.CHECK_INTERNET = False
-  if settings.INIT_TEST == True:
+  if settings.INIT_TEST is True:
     info_msg = "Testing connection to the target URL. "
     settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
 
@@ -454,10 +454,7 @@ def with_is_last(iterable):
 Check if an injection point has already been detected against target.
 """
 def check_for_injected_url(url):
-  _ = True
-  if _urllib.parse.urlparse(url).netloc not in settings.CRAWLED_URLS_INJECTED:
-    _ = False
-  return _
+  return _urllib.parse.urlparse(url).netloc in settings.CRAWLED_URLS_INJECTED
 
 """
 Ask whether to skip further tests against a host where an injection point was already found.
@@ -501,7 +498,7 @@ def scan_parsed_targets(os_checks_num):
     init_injection(url)
     try:
       response, url = url_response(url, http_request_method)
-      if response != False:
+      if response is not False:
         filename = logs.logs_filename_creation(url)
         session_handler.restore_waf_status(url)
         main(filename, url, http_request_method)
@@ -695,7 +692,7 @@ def main(filename, url, http_request_method):
                 found_tech = False
 
       if split_techniques_names[i].replace(' ', '') not in settings.AVAILABLE_TECHNIQUES and \
-         found_tech == False:
+         found_tech is False:
         err_msg = "You specified wrong value '" + split_techniques_names[i]
         err_msg += "' as injection technique. "
         err_msg += "The value for option '"
@@ -835,7 +832,7 @@ try:
   settings.print_data_to_stdout(settings.print_legal_disclaimer_msg(settings.LEGAL_DISCLAIMER_MSG))
 
   # Get total number of days from last update
-  if settings.STABLE_RELEASE == False:
+  if settings.STABLE_RELEASE is False:
     common.days_from_last_update()
 
   # Check if specified wrong alternative interpreter
@@ -1233,7 +1230,7 @@ try:
       # Skip upfront detection-only probes below when a stored technique already exists.
       settings.LIKELY_RESUME = session_handler.has_any_stored_technique(url, http_request_method)
       response, url = url_response(url, http_request_method)
-      if response != False:
+      if response is not False:
         filename = logs.logs_filename_creation(url)
         session_handler.restore_waf_status(url)
         main(filename, url, http_request_method)
@@ -1252,12 +1249,12 @@ try:
           settings.print_data_to_stdout(settings.print_info_msg(info_msg))
           
         if not os.path.exists(bulkfile):
-          err_msg = "It seems the '" + os.path.split(bulkfile)[1] + "' file does not exist."
+          err_msg = "It seems the '" + bulkfile + "' file does not exist."
           settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
           raise SystemExit()
 
         elif os.stat(bulkfile).st_size == 0:
-          err_msg = "It seems the '" + os.path.split(bulkfile)[1] + "' file is empty."
+          err_msg = "It seems the '" + bulkfile + "' file is empty."
           settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
           raise SystemExit()
 
@@ -1265,7 +1262,15 @@ try:
           settings.MULTI_TARGETS = True
           menu.options.batch = True
           with open(menu.options.bulkfile, encoding="utf-8-sig") as f:
-            bulkfile = [x for x in (parse_target_line(url) for url in f) if x]
+            lines = [line for line in f if line.strip() and not line.lstrip().startswith("#")]
+          bulkfile = [x for x in (parse_target_line(line) for line in lines) if x]
+          # A line that names no usable target is dropped, and a list is long enough that dropping
+          # one quietly would never be noticed - so how many went is said before the run starts.
+          skipped = len(lines) - len(bulkfile)
+          if skipped:
+            warn_msg = "Skipped " + str(skipped) + " line" + ("s" if skipped > 1 else "")
+            warn_msg += " that named no target within scope."
+            settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
       # Check if option "--crawl" is enabled.
       if settings.CRAWLING:
@@ -1420,7 +1425,7 @@ try:
           init_injection(form_url)
           try:
             response, form_url = url_response(form_url, settings.HTTPMETHOD.POST)
-            if response != False:
+            if response is not False:
               filename = logs.logs_filename_creation(form_url)
               session_handler.restore_waf_status(form_url)
               main(filename, form_url, settings.HTTPMETHOD.POST)
@@ -1489,7 +1494,7 @@ try:
               init_injection(url)
               try:
                 response, url = url_response(url, http_request_method)
-                if response != False:
+                if response is not False:
                   filename = logs.logs_filename_creation(url)
                   session_handler.restore_waf_status(url)
                   main(filename, url, http_request_method)

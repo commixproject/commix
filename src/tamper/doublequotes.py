@@ -29,8 +29,9 @@ __priority__ = settings.PRIORITY.BELOW_NORMAL
 def dependencies():
   return checks.tamper_dep_eval_incompatible(__tamper__)
 
+obf_char = '""'
+
 if not settings.TAMPER_SCRIPTS[__tamper__]:
-  obf_char = '""'
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
 """

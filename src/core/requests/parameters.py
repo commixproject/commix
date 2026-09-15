@@ -173,9 +173,9 @@ def do_GET_check(url, http_request_method):
       if checks.is_empty(multi_parameters, http_request_method):
         return urls_list
       # Grab the value of parameter.
-      _ = []
-      _.append(parameters)
-      parameters = ''.join(checks.check_similarities(_))
+      single = []
+      single.append(parameters)
+      parameters = ''.join(checks.check_similarities(single))
       value = multi_params_get_value(parameters)
       # Check if single parameter is supplied.
       if len(multi_parameters) == 1:
@@ -374,17 +374,17 @@ def json_int_check(parameter, value):
       # Fall back to the raw value if JSON formatting fails.
       return parameter
 
-  _ = True
+  tag_free_keys = True
   if isinstance(parameter, list):
     parameter = parameter[(len(parameter) - 1)]
 
   if isinstance(parameter, OrderedDict):
     for keys,values in parameter.items():
       if settings.INJECT_TAG in keys:
-        _ = False
+        tag_free_keys = False
         break
 
-  if _ and isinstance(parameter, OrderedDict):
+  if tag_free_keys and isinstance(parameter, OrderedDict):
     parameter = unflatten_list(parameter)
 
   parameter = checks.format_json(parameter)
@@ -445,12 +445,12 @@ def split_post_parameters(parameter):
     # Shield leaf elements before the ">"/"<" split below.
     parameter, _shielded = shield_xml_leaves(parameter)
     parameter = re.sub(r">\s*<", ">" + settings.POST_DATA_PARAM_DELIMITER + "<", parameter)
-    _ = []
+    kept = []
     parameters = re.findall(r'(.*)', parameter)
     parameters = [param for param in parameters if param]
     for value in range(0,len(parameters)):
-      _.append(parameters[value])
-    multi_parameters = _
+      kept.append(parameters[value])
+    multi_parameters = kept
     # Restore per entry (elements may contain newlines).
     if _shielded:
       multi_parameters = restore_xml_shields(multi_parameters, _shielded)
@@ -605,9 +605,9 @@ def do_POST_check(parameter, http_request_method):
 
   multi_parameters, parameter = split_post_parameters(parameter)
 
-  _ = []
-  _.append(parameter)
-  parameter = ''.join(checks.check_similarities(_))
+  single = []
+  single.append(parameter)
+  parameter = ''.join(checks.check_similarities(single))
   # Check if single parameter is supplied.
   if len(multi_parameters) == 1:
     return handle_single_post_parameter(parameter, multi_parameters, http_request_method)
@@ -658,10 +658,10 @@ def vuln_POST_param(parameter, url):
         if not settings.CUSTOM_INJECTION_MARKER and settings.CUSTOM_INJECTION_MARKER_CHAR in item:
           item = item.replace(settings.CUSTOM_INJECTION_MARKER_CHAR,"")
         # Match tag name (tolerating attributes) against its closing tag.
-        _ = re.search(r'<([^\s>/]+)[^>]*>(.*)</([^\s>]+)>', item, re.S)
-        if _ and (_.groups()[0]) == (_.groups()[2]):
-          vuln_parameter = ''.join(_.groups()[0])
-          result = unwrap_cdata(_.groups()[1])
+        element = re.search(r'<([^\s>/]+)[^>]*>(.*)</([^\s>]+)>', item, re.S)
+        if element and (element.groups()[0]) == (element.groups()[2]):
+          vuln_parameter = ''.join(element.groups()[0])
+          result = unwrap_cdata(element.groups()[1])
           if settings.CUSTOM_INJECTION_MARKER:
             register_custom_injection_marker(vuln_parameter, result)
           settings.TESTABLE_VALUE = result.split(settings.INJECT_TAG)[0]
@@ -762,9 +762,9 @@ def do_cookie_check(cookie):
   if len([s for s in multi_parameters if "=" in s]) == 0 and not menu.options.shellshock:
     checks.no_parameters_found()
 
-  _ = []
-  _.append(cookie)
-  cookie = ''.join(checks.check_similarities(_))
+  single = []
+  single.append(cookie)
+  cookie = ''.join(checks.check_similarities(single))
   # Grab the value of parameter.
   value = multi_params_get_value(cookie)
   # Replace the value of parameter with INJECT tag

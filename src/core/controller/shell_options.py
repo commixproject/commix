@@ -302,9 +302,9 @@ Check commix shell options, dispatching command execution through the given exec
 def check_option_generic(execute_cmd, cmd, go_back, go_back_again, filename, url, separator=""):
   os_shell_option = checks.check_os_shell_options(cmd.lower(), filename, url)
 
-  if os_shell_option == "back" or os_shell_option == True or os_shell_option == False:
+  if os_shell_option == "back" or os_shell_option is True or os_shell_option is False:
     go_back = True
-    if os_shell_option == False:
+    if os_shell_option is False:
       go_back_again = True
     return go_back, go_back_again
 

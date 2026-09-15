@@ -14,7 +14,6 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 from src.utils import settings
-from src.thirdparty.six.moves import urllib as _urllib
 from src.core.controller import checks
 
 """
@@ -38,16 +37,23 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 # Separate the payload's words with '${IFS}' instead of a space.
 def tamper(payload):
   if len(settings.WHITESPACES) != 0:
-    if space2ifs in settings.WHITESPACES[0] and settings.EVAL_BASED_STATE != False:
+    # Three states, not two: the technique is None until it has run, and that counts as not
+    # having been refused - so this asks whether it failed, rather than whether it succeeded.
+    if space2ifs in settings.WHITESPACES[0] and settings.EVAL_BASED_STATE is not False:
       settings.WHITESPACES[0] = space2ifs
     if settings.TARGET_OS != settings.OS.WINDOWS: 
       if settings.WHITESPACES[0] == settings.SINGLE_WHITESPACE:
         settings.WHITESPACES[0] = space2ifs
       elif space2ifs not in settings.WHITESPACES:
         settings.WHITESPACES.append(space2ifs)
+    # A target settled as Windows after this script was accepted: '${IFS}' means nothing to
+    # cmd.exe, and taking back the only entry would leave the payload's words with nothing at all
+    # between them - so the plain space it was built with goes back in its place.
     else:
       if space2ifs in settings.WHITESPACES:
         settings.WHITESPACES.remove(space2ifs)
+        if len(settings.WHITESPACES) == 0:
+          settings.WHITESPACES.append(settings.SINGLE_WHITESPACE)
   return payload
 
 # eof

@@ -23,7 +23,7 @@ def smoke_test():
     info_msg = "Executing smoke test."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
-    _ = True
+    passed = True
     file_paths = []
     for root, directories, filenames in os.walk(settings.COMMIX_ROOT_PATH):
         file_paths.extend([os.path.abspath(os.path.join(root, i)) for i in filenames])
@@ -42,10 +42,10 @@ def smoke_test():
           except Exception as e:
             error_msg = "Failed importing '" + path + "' module due to '" + str(e) + "'."
             settings.print_data_to_stdout(settings.print_error_msg(error_msg))
-            _ = False
+            passed = False
 
     result = "Smoke test "
-    if _:
+    if passed:
       result = result + "passed."
       settings.print_data_to_stdout(settings.print_bold_info_msg(result))
     else:

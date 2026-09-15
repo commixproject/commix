@@ -171,7 +171,6 @@ Sends one clean request and times it, with full auth-error handling - the author
 """
 def _measure_response_time_with_auth_handling(url, http_request_method):
   stored_auth_creds = False
-  _ = False
 
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Estimating the target URL response time. "
@@ -190,7 +189,6 @@ def _measure_response_time_with_auth_handling(url, http_request_method):
     response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
     response.read(1)
     response.close()
-    _ = True
   except _http_client.InvalidURL as err_msg:
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit()
@@ -267,7 +265,7 @@ def _measure_response_time_with_auth_handling(url, http_request_method):
                   do_update = common.read_input(message, default="Y", check_batch=True)
                   if do_update in settings.CHOICE_YES:
                     auth_creds = authentication.http_auth_cracker(url, realm, http_request_method)
-                    if auth_creds != False:
+                    if auth_creds is not False:
                       # Put to use, not only announced: what builds the Authorization header for
                       # every request after this is the option, so a pair found and left there
                       # would have the run carry on unauthenticated against a target that just
@@ -300,7 +298,7 @@ def _measure_response_time_with_auth_handling(url, http_request_method):
                   do_update = common.read_input(message, default="Y", check_batch=True)
                   if do_update in settings.CHOICE_YES:
                     auth_creds = authentication.http_auth_cracker(url, realm, http_request_method)
-                    if auth_creds != False:
+                    if auth_creds is not False:
                       # Put to use, not only announced: what builds the Authorization header for
                       # every request after this is the option, so a pair found and left there
                       # would have the run carry on unauthenticated against a target that just
@@ -520,7 +518,7 @@ def request_failed(err_msg):
   any(checks.ignored_http_error_code(_) for _ in settings.HTTP_ERROR_CODES if _ in str(error_msg)):
     return False
 
-  elif settings.IGNORE_ERR_MSG == False:
+  elif settings.IGNORE_ERR_MSG is False:
     continue_tests = checks.continue_tests(err_msg)
     if continue_tests:
       settings.IGNORE_ERR_MSG = True

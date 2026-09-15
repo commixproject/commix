@@ -185,7 +185,7 @@ def _post_exploitation(url, cve, check_header, filename, technique, no_result):
   else:
     enumeration(url, cve, check_header, filename)
 
-  if settings.FILE_ACCESS_DONE == True:
+  if settings.FILE_ACCESS_DONE is True:
     checks.ask_redo_stored_session("access files", lambda: file_access(url, cve, check_header, filename))
   else:
     file_access(url, cve, check_header, filename)
@@ -304,7 +304,7 @@ def shellshock_handler(url, http_request_method, filename):
 
     if settings.CONFIRMED_INJECTION_POINTS:
       checks.quit(filename, url, hard_exit=False)
-    elif no_result == True:
+    elif no_result is True:
       if settings.VERBOSITY_LEVEL == 0:
         settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
       err_msg = "All tested HTTP headers appear to be not injectable."

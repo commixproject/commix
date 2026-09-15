@@ -135,7 +135,7 @@ def gen_php_meterpreter_bind():
       other_shell = "php -r \"" + data + "\""
     checks.msf_launch_msg(output)
     return other_shell
-  except:
+  except Exception:
     settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     return None
 
@@ -163,7 +163,7 @@ def gen_python_meterpreter_bind():
       other_shell = settings.LINUX_PYTHON_INTERPRETER + " -c " + "\"" + data + "\""
     checks.msf_launch_msg(output)
     return other_shell
-  except:
+  except Exception:
     settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     return None
 

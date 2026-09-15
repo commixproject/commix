@@ -257,26 +257,26 @@ def check_http_traffic(request):
   if menu.options.time_limit and (time.time() - settings.START_TIME > menu.options.time_limit):
     raise SystemExit()
 
-  _ = False
+  succeeded = False
   response = False
   unauthorized = False
   pending_error = None
-  while stability.should_keep_retrying(_, unauthorized):
+  while stability.should_keep_retrying(succeeded, unauthorized):
     if any((settings.REVERSE_TCP, settings.BIND_TCP)):
-      _ = True
+      succeeded = True
     if settings.MULTI_TARGETS or settings.CRAWLING:
-      if settings.INIT_TEST == True and len(settings.MULTI_ENCODED_PAYLOAD) != 0:
+      if settings.INIT_TEST is True and len(settings.MULTI_ENCODED_PAYLOAD) != 0:
         # A per-parameter auto-detected tamper (e.g. hexencode from check_encoders()) must not
         # leak into the next target/form - reset back to only what the user actually gave.
         settings.MULTI_ENCODED_PAYLOAD = []
         menu.options.tamper = settings.USER_APPLIED_TAMPER
     try:
       response = opener.open(request, timeout=settings.TIMEOUT)
-      _ = True
+      succeeded = True
       with settings.REQUESTS_LOCK:
         stability.expand_retry_budget()
-      if (settings.INIT_TEST == True and not settings.UNAUTHORIZED) or \
-         (settings.INIT_TEST == True and settings.MULTI_TARGETS):
+      if (settings.INIT_TEST is True and not settings.UNAUTHORIZED) or \
+         (settings.INIT_TEST is True and settings.MULTI_TARGETS):
         if not settings.VALID_URL:
           stability.mark_url_valid()
         if not settings.CHECK_INTERNET:
@@ -530,8 +530,8 @@ def do_check(request):
       extra_headers = tmp_extra_header
 
     # Remove empty strings and/or duplicates
-    _ = [x for x in extra_headers if x]
-    extra_headers = (list(dict.fromkeys(_)))
+    non_empty = [x for x in extra_headers if x]
+    extra_headers = (list(dict.fromkeys(non_empty)))
 
     if menu.options.data:
       # The MIME media type for JSON.
@@ -591,7 +591,7 @@ def do_check(request):
           normalized_name = '-'.join([part.capitalize() for part in http_header_name.split('-')])
           request.add_header(normalized_name, http_header_value)
 
-      except:
+      except Exception:
         pass
 
 # eof

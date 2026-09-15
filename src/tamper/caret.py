@@ -32,6 +32,16 @@ def dependencies():
 if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
+"""
+The length beyond which a single word is handed over as it was written.
+
+A caret before every letter is one more character per letter, so the word it is applied to arrives
+at roughly twice the length. cmd.exe stops reading a command line at 8191 characters, and a word
+this long is already close enough that doubling it would take the payload past that, losing the
+end of it - which costs more than the obfuscation of one word is worth.
+"""
+MAX_CARET_WORD_LENGTH = 5000
+
 # Put a caret between the characters, which cmd.exe reads straight through.
 def tamper(payload):
   # The carets themselves, kept out of the quoted words that must survive whole.
@@ -39,7 +49,7 @@ def tamper(payload):
     words = re.findall(r"\w+", payload)
     if words:
       longest_word = max(words, key=len)
-      long_string = longest_word if len(longest_word) >= 5000 else ""
+      long_string = longest_word if len(longest_word) >= MAX_CARET_WORD_LENGTH else ""
       rep = {
               "^^": "^",
               '"^t""^o""^k""^e""^n""^s"': '"t"^"o"^"k"^"e"^"n"^"s"',
