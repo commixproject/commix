@@ -2260,6 +2260,76 @@ def interleave_char_tamper(payload, obf_char):
   payload = tamper_outside_single_quotes(payload, lambda part: re.sub(settings.TAMPER_MODIFICATION_LETTERS, lambda x: obf_char + x[0], part))
   return tamper_restore_ignored_words(payload, obf_char)
 
+# Spans a shell-span transformation must not reach into, held aside while the payload is rewritten.
+SHELL_SPAN_HELD = "\x00%d\x00"
+SHELL_SPAN_HELD_REGEX = r"\x00(\d+)\x00"
+
+def tamper_shell_spans(payload, transform, nested=False, literal=False):
+  """
+  Hand each span of the payload that the shell reads as code to "transform", innermost first.
+
+  A script rewriting shell syntax has to know which parts of a payload are shell syntax. Single
+  quotes suppress everything inside them; double quotes suppress all but a substitution, which is
+  a payload of its own and is walked by the same rules before being held aside as one word.
+  Arithmetic and parameter expansions are held aside whole - they carry no command, but they do
+  carry the brackets and comparisons a transformation is apt to mistake for punctuation of its own.
+
+  "transform" is called as transform(text, nested), where "nested" says whether the start of the
+  text is a command position - true inside a substitution, false at the top level, where what
+  comes first is the parameter's own value rather than a command.
+  """
+  parts, held, index = [], [], 0
+  while index < len(payload):
+    if payload.startswith("$((", index) or payload.startswith("${", index):
+      opening, closing = ("(", ")") if payload[index + 1] == "(" else ("{", "}")
+      # Counted rather than searched for: one expansion nests inside another in the payloads that
+      # take a string apart a character at a time, and the first close there ends the inner one.
+      depth, end = 0, index + 1
+      while end < len(payload):
+        if payload[end] == opening:
+          depth += 1
+        elif payload[end] == closing:
+          depth -= 1
+          if depth == 0:
+            break
+        end += 1
+      end = min(end, len(payload) - 1)
+      parts.append(SHELL_SPAN_HELD % len(held))
+      held.append(payload[index:end + 1])
+      index = end + 1
+    elif payload.startswith("$(", index):
+      depth, end = 1, index + 2
+      while end < len(payload) and depth:
+        if payload[end] == "(":
+          depth += 1
+        elif payload[end] == ")":
+          depth -= 1
+        end += 1
+      parts.append(SHELL_SPAN_HELD % len(held))
+      held.append("$(" + tamper_shell_spans(payload[index + 2:end - 1], transform, nested=True) + ")")
+      index = end
+    elif payload[index] in ("`", "'", "\""):
+      quote = payload[index]
+      end = payload.find(quote, index + 1)
+      end = len(payload) if end == -1 else end
+      inner = payload[index + 1:end]
+      # Double quotes do not stop a substitution being code of its own, so the walk goes on inside
+      # them - but the text around it is a literal, and is left to itself. Single quotes stop both.
+      if quote == "`":
+        inner = tamper_shell_spans(inner, transform, nested=True)
+      elif quote == "\"":
+        inner = tamper_shell_spans(inner, transform, nested=True, literal=True)
+      parts.append(SHELL_SPAN_HELD % len(held))
+      held.append(quote + inner + quote)
+      index = end + 1
+    else:
+      parts.append(payload[index])
+      index += 1
+  walked = "".join(parts)
+  if not literal:
+    walked = transform(walked, nested)
+  return re.sub(SHELL_SPAN_HELD_REGEX, lambda x: held[int(x.group(1))], walked)
+
 """
 base64encode/hexencode consume the whole payload as one blob, so they can't coexist with
 space2plus rewriting whitespace inside it first - fatal (not a skippable warning like the rest).

@@ -53,10 +53,6 @@ BRACE_RUN = r"(?P<lead>%s[ ]*)(?P<run>[^\s;&|`\n<>]+(?:[ ][^\s;&|`\n<>]+)+)(?P<g
 BRACE_RUN_LEAD = r"[;&|`\n]"
 BRACE_RUN_LEAD_NESTED = r"(?:^|[;&|`\n])"
 
-# Spans the transformation must not reach into, held aside by index while the payload is rewritten.
-OPAQUE_SPAN = "\x00%d\x00"
-OPAQUE_SPAN_REGEX = r"\x00(\d+)\x00"
-
 if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
@@ -76,90 +72,15 @@ def _brace_run(match):
     return match.group(0)
   return match.group("lead") + "{" + ",".join(words) + "}"
 
-def _brace_commands(payload, nested=False, runs=True):
-  """
-  Every command in the payload written as a brace expansion, innermost first.
-
-  A quoted span is held aside because the shell gives what is inside it no meaning, and a command
-  substitution because it is a payload of its own - rewritten by the same rules, then held aside
-  as one word so the command around it can be rewritten in turn.
-
-  Arithmetic and a parameter expansion are held aside for a third reason: they carry no command,
-  but they do carry the very characters this reads as punctuation. A '<' of an arithmetic
-  comparison would end a run halfway through, and the '}' closing '${#VAR}' would close a brace
-  list that was never opened there.
-  """
-  parts, held, index = [], [], 0
-  while index < len(payload):
-    if payload.startswith("$((", index):
-      depth, end = 0, index + 1
-      while end < len(payload):
-        if payload[end] == "(":
-          depth += 1
-        elif payload[end] == ")":
-          depth -= 1
-          if depth == 0:
-            break
-        end += 1
-      parts.append(OPAQUE_SPAN % len(held))
-      held.append(payload[index:end + 1])
-      index = end + 1
-    elif payload.startswith("${", index):
-      # Counted rather than searched for: one expansion nests inside another in the payloads that
-      # take a string apart a character at a time, and the first '}' there closes the inner one.
-      depth, end = 0, index + 1
-      while end < len(payload):
-        if payload[end] == "{":
-          depth += 1
-        elif payload[end] == "}":
-          depth -= 1
-          if depth == 0:
-            break
-        end += 1
-      end = min(end, len(payload) - 1)
-      parts.append(OPAQUE_SPAN % len(held))
-      held.append(payload[index:end + 1])
-      index = end + 1
-    elif payload.startswith("$(", index):
-      depth, end = 1, index + 2
-      while end < len(payload) and depth:
-        if payload[end] == "(":
-          depth += 1
-        elif payload[end] == ")":
-          depth -= 1
-        end += 1
-      parts.append(OPAQUE_SPAN % len(held))
-      held.append("$(" + _brace_commands(payload[index + 2:end - 1], nested=True) + ")")
-      index = end
-    elif payload[index] in ("`", "'", "\""):
-      quote = payload[index]
-      end = payload.find(quote, index + 1)
-      end = len(payload) if end == -1 else end
-      inner = payload[index + 1:end]
-      # Double quotes do not stop a substitution being a command of its own, so the search goes on
-      # inside them - but only into the substitutions, since a brace list written directly in
-      # double quotes is read as the literal it looks like. Single quotes stop everything.
-      if quote == "`":
-        inner = _brace_commands(inner, nested=True)
-      elif quote == "\"":
-        inner = _brace_commands(inner, nested=True, runs=False)
-      parts.append(OPAQUE_SPAN % len(held))
-      held.append(quote + inner + quote)
-      index = end + 1
-    else:
-      parts.append(payload[index])
-      index += 1
-  braced = "".join(parts)
-  if runs:
-    lead = BRACE_RUN_LEAD_NESTED if nested else BRACE_RUN_LEAD
-    braced = re.sub(BRACE_RUN % lead, _brace_run, braced)
-  return re.sub(OPAQUE_SPAN_REGEX, lambda x: held[int(x.group(1))], braced)
+# Every command in one span of shell code, written as a brace expansion.
+def _brace_runs(text, nested):
+  return re.sub(BRACE_RUN % (BRACE_RUN_LEAD_NESTED if nested else BRACE_RUN_LEAD), _brace_run, text)
 
 # Hand each command over as a brace expansion, for the target's shell to split back on the commas.
 def tamper(payload):
   # A target settled as Windows after this script was accepted: 'cmd.exe' has no brace expansion.
   if settings.TARGET_OS == settings.OS.WINDOWS:
     return payload
-  return _brace_commands(payload)
+  return checks.tamper_shell_spans(payload, _brace_runs)
 
 # eof

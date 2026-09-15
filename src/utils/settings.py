@@ -383,7 +383,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "133"
+REVISION = "134"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1475,6 +1475,7 @@ TAMPER_SCRIPTS = {
                   "space2htab": False,
                   "space2vtab": False,
                   "space2brace": False,
+                  "ansiquote": False,
                   "doublequotes": False,
                   "singlequotes": False,
                   "caret": False,
@@ -1546,6 +1547,13 @@ INCOMPATIBLE_TAMPER_SCRIPTS = [
                   ("dollarstars", "uninitializedvariable"),
                   # Both interleave the same characters, so together they say everything twice.
                   ("dollaratsigns", "dollarstars"),
+                  # Each of these writes between the characters of a word that is now hex escapes,
+                  # so what the shell reads back is no longer the word that was encoded.
+                  ("ansiquote", "backslashes"),
+                  ("ansiquote", "dollaratsigns"),
+                  ("ansiquote", "dollarstars"),
+                  ("ansiquote", "singlequotes"),
+                  ("ansiquote", "uninitializedvariable"),
                   # "''" is literal inside the double-quoted "tr" ranges that "randomcase" builds.
                   ("randomcase", "singlequotes")
 ]
