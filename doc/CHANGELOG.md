@@ -1,4 +1,6 @@
 ## Version 4.2 (TBA)
+* Added: New tamper script `space2brace`, which replaces the space character (%20) with a brace expansion ({a,b}) in a given payload.
+* Added: New tamper script `dollarstars.py`, which adds dollar sign followed by an asterisk ($*) between the characters in a given payload.
 * Added: New tamper script `cmd2loop.py`, which wraps a payload's command in a single-iteration "for" loop, so that it follows a shell keyword rather than a separator.
 * Added: Code injection support for Python as well as PHP, across all techniques.
 * Added: The `--eval` switch now also reaches the time-based and file-based techniques, so code injection is proven blind and semi-blind as well as results-based.

@@ -383,7 +383,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "132"
+REVISION = "133"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1474,6 +1474,7 @@ TAMPER_SCRIPTS = {
                   "space2plus": False,
                   "space2htab": False,
                   "space2vtab": False,
+                  "space2brace": False,
                   "doublequotes": False,
                   "singlequotes": False,
                   "caret": False,
@@ -1484,6 +1485,7 @@ TAMPER_SCRIPTS = {
                   "sleep2timeout": False,
                   "xforwardedfor": False,
                   "dollaratsigns": False,
+                  "dollarstars": False,
                   "printf2echo": False,
                   "uninitializedvariable": False,
                   "slash2env": False,
@@ -1539,6 +1541,11 @@ INCOMPATIBLE_TAMPER_SCRIPTS = [
                   ("backslashes", "uninitializedvariable"),
                   # "$@" lands inside "${XX}", corrupting the variable name.
                   ("dollaratsigns", "uninitializedvariable"),
+                  # "$*" is the same emptiness said differently, so it breaks in the same places.
+                  ("backslashes", "dollarstars"),
+                  ("dollarstars", "uninitializedvariable"),
+                  # Both interleave the same characters, so together they say everything twice.
+                  ("dollaratsigns", "dollarstars"),
                   # "''" is literal inside the double-quoted "tr" ranges that "randomcase" builds.
                   ("randomcase", "singlequotes")
 ]
