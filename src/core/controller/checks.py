@@ -2283,6 +2283,45 @@ SHELL_SPAN_HELD_REGEX = r"\x00(\d+)\x00"
 # separator is whatever the payload was built with, a held-aside '${IFS}' among it.
 TAMPER_ASSIGNED_NAME = r"\b(?:for|read)(?:\s|" + SHELL_SPAN_HELD_REGEX + r")*$"
 
+def tamper_shell_feature_note():
+  """
+  What a run that found nothing was asking of the target's shell, where it asked for more than a
+  plain one has. Such a target answers exactly as an unaffected one does, so nothing else in the
+  run distinguishes "not injectable" from "not injectable the way this script needs".
+  """
+  applied = sorted(name for name in settings.SHELL_FEATURE_TAMPERS if settings.TAMPER_SCRIPTS.get(name))
+  if not applied:
+    return ""
+  needs = " and ".join("'" + name + "' needs " + settings.SHELL_FEATURE_TAMPERS[name] for name in applied)
+  plural = len(applied) > 1
+  return (" The tamper script" + ("s in use ask" if plural else " in use asks") + " more of the shell than a "
+          "strict POSIX one has (" + needs + "), and a target without it answers as if nothing were injectable.")
+
+def tamper_rewrite_user_command(payload, tamper_name):
+  """
+  The user's command as every script that rewrites it leaves it, written into the payload once.
+
+  Each of these used to reach back to the untouched payload when it could not find the command
+  where it expected it, which is what happens the moment another one has already rewritten it -
+  so whichever ran second threw the first one's work away and they could not be combined. The
+  chain is built here instead, in the order the scripts are listed, and only the first of them
+  still running writes it in; the rest find their own work already done.
+  """
+  rewriters = [name for name in settings.COMMAND_REWRITERS if settings.TAMPER_SCRIPTS.get(name)]
+  if not rewriters or rewriters[0] != tamper_name:
+    return payload
+  command = settings.USER_APPLIED_CMD
+  for name in rewriters:
+    command = importlib.import_module("src.tamper." + name).rewrite_command(command)
+  if command == settings.USER_APPLIED_CMD:
+    return payload
+  source = payload if settings.USER_APPLIED_CMD in payload else settings.RAW_PAYLOAD
+  if settings.USER_APPLIED_CMD in source:
+    payload = source.replace(settings.USER_APPLIED_CMD, command)
+    if len(settings.WHITESPACES) != 0:
+      payload = payload.replace(settings.SINGLE_WHITESPACE, settings.WHITESPACES[0])
+  return payload
+
 def tamper_word_kept(word, preceding=""):
   """
   Whether a word has to reach the target spelled exactly the way the payload wrote it.

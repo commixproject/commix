@@ -56,27 +56,22 @@ def _wildcard_path(match):
   parts = path.split("/")
   return "/".join(part if not part[:1].isalnum() else "[" + part[0] + "]" + part[1:] for part in parts)
 
-# Hand the command over with its paths spelled as globs, for the target to match back to the file.
+# The command with its paths spelled as globs, for the target to match back to the file.
+def rewrite_command(command):
+  wildcard_cmd = re.sub(WILDCARD_PATH, _wildcard_path, command)
+  # A command naming no path of its own has nothing here that a glob could stand in for, and
+  # saying so once is worth more than leaving the script looking like it did something.
+  if wildcard_cmd == command:
+    warn_msg = "The '" + __tamper__ + ".py' tamper script found no path to hide in the '"
+    warn_msg += command + "' command. Skipping tamper script."
+    settings.print_once(warn_msg)
+  return wildcard_cmd
+
+# Hand the command over with its paths spelled as globs, alongside whatever else rewrites it.
 def tamper(payload):
-  # A command of the user's own is what this script rewrites, and the exploitation phase reaches
-  # here before there is one - replaying a delay against a random value, say. There is nothing to
-  # say about a command that has not been asked for yet.
+  # The exploitation phase reaches here before there is a command of the user's own to rewrite.
   if settings.EXPLOITATION_PHASE and settings.USER_APPLIED_CMD:
-    wildcard_cmd = re.sub(WILDCARD_PATH, _wildcard_path, settings.USER_APPLIED_CMD)
-    # A command naming no path of its own has nothing here that a glob could stand in for, and
-    # saying so once is worth more than leaving the script looking like it did something.
-    if wildcard_cmd == settings.USER_APPLIED_CMD:
-      warn_msg = "The '" + __tamper__ + ".py' tamper script found no path to hide in the '"
-      warn_msg += settings.USER_APPLIED_CMD + "' command. Skipping tamper script."
-      settings.print_once(warn_msg)
-      return payload
-    source = payload if settings.USER_APPLIED_CMD in payload else settings.RAW_PAYLOAD
-    if settings.USER_APPLIED_CMD in source:
-      # Applied to the payload as handed over, not to the untouched original: the scripts run in
-      # order, and reaching back past the ones before would throw their work away.
-      payload = source.replace(settings.USER_APPLIED_CMD, wildcard_cmd)
-      if len(settings.WHITESPACES) != 0:
-        payload = payload.replace(settings.SINGLE_WHITESPACE, settings.WHITESPACES[0])
+    return checks.tamper_rewrite_user_command(payload, __tamper__)
   return payload
 
 # eof

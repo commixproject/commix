@@ -14,6 +14,7 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import random
+import re
 import string
 from src.utils import settings
 from src.core.controller import checks
@@ -52,26 +53,26 @@ def _split_name(name):
   at = random.randint(1, len(name) - 1)
   return "${" + _variable_name() + ":-" + name[:at] + "}${" + _variable_name() + ":-" + name[at:] + "}"
 
-# Hand the command's name over in pieces, for the target's shell to fall back on and put together.
+# A name already carrying a glob is left whole - splitting it would cut a bracket in two.
+GLOBBED_NAME = r"[*?\[\]]"
+
+# The command with its name carried in pieces, for the target's shell to put back together.
+def rewrite_command(command):
+  name = command.split(settings.SINGLE_WHITESPACE)[0]
+  # A name of one character cannot be split, a keyword stops being one once it is written any
+  # other way, and a glob has already hidden the name it was made from.
+  if len(name) < 2 or checks.tamper_word_kept(name) or re.search(GLOBBED_NAME, name):
+    warn_msg = "The '" + __tamper__ + ".py' tamper script cannot split the name of the '"
+    warn_msg += command + "' command. Skipping tamper script."
+    settings.print_once(warn_msg)
+    return command
+  return _split_name(name) + command[len(name):]
+
+# Hand the command's name over in pieces, alongside whatever else rewrites the command.
 def tamper(payload):
   # The exploitation phase reaches here before there is a command of the user's own to rewrite.
   if settings.EXPLOITATION_PHASE and settings.USER_APPLIED_CMD:
-    name = settings.USER_APPLIED_CMD.split(settings.SINGLE_WHITESPACE)[0]
-    # A name of one character cannot be split, and a keyword stops being one once it is written
-    # any other way - either leaves the command as it was rather than breaking it.
-    if len(name) < 2 or checks.tamper_word_kept(name):
-      warn_msg = "The '" + __tamper__ + ".py' tamper script cannot split the name of the '"
-      warn_msg += settings.USER_APPLIED_CMD + "' command. Skipping tamper script."
-      settings.print_once(warn_msg)
-      return payload
-    var_cmd = _split_name(name) + settings.USER_APPLIED_CMD[len(name):]
-    source = payload if settings.USER_APPLIED_CMD in payload else settings.RAW_PAYLOAD
-    if settings.USER_APPLIED_CMD in source:
-      # Applied to the payload as handed over, not to the untouched original: the scripts run in
-      # order, and reaching back past the ones before would throw their work away.
-      payload = source.replace(settings.USER_APPLIED_CMD, var_cmd)
-      if len(settings.WHITESPACES) != 0:
-        payload = payload.replace(settings.SINGLE_WHITESPACE, settings.WHITESPACES[0])
+    return checks.tamper_rewrite_user_command(payload, __tamper__)
   return payload
 
 # eof

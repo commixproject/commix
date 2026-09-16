@@ -1470,6 +1470,7 @@ def do_check(url, http_request_method, filename):
             err_msg += " and/or"
           err_msg += " switch '--random-agent'"
         err_msg += "."
+        err_msg += checks.tamper_shell_feature_note()
         if settings.MULTI_TARGETS:
           err_msg += " Skipping to the next target."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))

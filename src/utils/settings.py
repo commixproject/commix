@@ -383,7 +383,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "140"
+REVISION = "141"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1547,6 +1547,17 @@ WAF_ESCALATION_THRESHOLD = 1
 # Set when the evasion was just stepped up, so the technique that was blocked is tried again.
 WAF_EVASION_ESCALATED = False
 
+# Scripts that rewrite the user's command in place, in the order their rewrites are applied. The
+# paths go first, so that what the name-splitting script is handed is a name and not a glob.
+COMMAND_REWRITERS = ("cmd2wildcard", "cmd2var")
+
+# Scripts asking more of the target's shell than POSIX gives, and what each one asks for. A run
+# carrying one of these and finding nothing may have found nothing because the shell is a plain one.
+SHELL_FEATURE_TAMPERS = {
+                  "space2brace": "brace expansion",
+                  "ansiquote": "ANSI-C quoting"
+}
+
 INCOMPATIBLE_TAMPER_SCRIPTS = [
                   # "\$" is a literal "$", so the escape kills the other script's "$@" / "${XX}".
                   ("backslashes", "dollaratsigns"),
@@ -1571,8 +1582,7 @@ INCOMPATIBLE_TAMPER_SCRIPTS = [
                   ("cmd2wildcard", "rev"),
                   ("cmd2wildcard", "randomcase"),
                   ("cmd2var", "rev"),
-                  ("cmd2var", "randomcase"),
-                  ("cmd2var", "cmd2wildcard")
+                  ("cmd2var", "randomcase")
 ]
 
 # Words that must survive per-character obfuscation - shell keywords stop being keywords once
