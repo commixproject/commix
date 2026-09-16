@@ -230,6 +230,21 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
               # would report "not injectable" without having sent one of their payloads.
               if not menu.options.eval_sink:
                 settings.SKIP_CODE_INJECTIONS = True
+              elif not settings.COMMAND_SUGGESTED:
+                settings.COMMAND_SUGGESTED = True
+                """
+                '--eval' names code injection, and naming it is what stops command injection from
+                being tested at all - so a shell answering here would otherwise be found, reported
+                and then left behind, with the run going on to look only for what it was told to.
+
+                The option the user gave still wins by default: what is offered is dropping it,
+                and a run that is not being watched keeps the option it was started with.
+                """
+                message = "The target answers as a command shell, so it is open to command injection as well. "
+                message += "Do you want to test for that instead (i.e. without the '--eval' option)? [y/N] "
+                if common.read_input(message, default="N", check_batch=True) in settings.CHOICE_YES:
+                  menu.options.eval_sink = False
+                  settings.SKIP_CODE_INJECTIONS = True
               break
 
     settings.CLASSIC_STATE = False

@@ -40,10 +40,6 @@ def dependencies():
 # A word worth hiding: a command name or a path, which is what a signature is written against.
 ANSI_QUOTE_WORD = r"(?<![\w$'\"\\{#=/.-])(/?[A-Za-z][\w.-]*(?:/[\w.-]+)*|/[\w.-]+(?:/[\w.-]+)*)(?![\w=.'\"-])"
 
-# A name the shell assigns to rather than reads: it is spelled out or it is not a name at all. The
-# separator is whatever the payload was built with, a held-aside '${IFS}' among it.
-ANSI_QUOTE_ASSIGNED_NAME = r"\b(?:for|read)(?:\s|" + checks.SHELL_SPAN_HELD_REGEX + r")*$"
-
 if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
@@ -51,15 +47,12 @@ def _ansi_quote(match):
   """
   One word written as the hex the shell reads back as that word, or left as it was.
 
-  A shell keyword is left alone for the reason 'IGNORE_TAMPER_TRANSFORMATION' exists: it stops
-  being a keyword once it is quoted, and the payload loses the loop or the branch it was built
-  around. Nothing else here needs to survive being spelled differently, because the shell spends
-  the quoting before anything reads the word.
+  A word the shell has to read exactly as it was written is left alone, for the reason
+  'tamper_word_kept' gives. Nothing else here needs to survive being spelled differently, because
+  the shell spends the quoting before anything reads the word.
   """
   word = match.group(0)
-  if word in settings.IGNORE_TAMPER_TRANSFORMATION:
-    return word
-  if re.search(ANSI_QUOTE_ASSIGNED_NAME, match.string[:match.start()]):
+  if checks.tamper_word_kept(word, match.string[:match.start()]):
     return word
   return "$'" + "".join("\\x%02x" % ord(char) for char in word) + "'"
 

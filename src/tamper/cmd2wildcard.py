@@ -58,7 +58,10 @@ def _wildcard_path(match):
 
 # Hand the command over with its paths spelled as globs, for the target to match back to the file.
 def tamper(payload):
-  if settings.EXPLOITATION_PHASE:
+  # A command of the user's own is what this script rewrites, and the exploitation phase reaches
+  # here before there is one - replaying a delay against a random value, say. There is nothing to
+  # say about a command that has not been asked for yet.
+  if settings.EXPLOITATION_PHASE and settings.USER_APPLIED_CMD:
     wildcard_cmd = re.sub(WILDCARD_PATH, _wildcard_path, settings.USER_APPLIED_CMD)
     # A command naming no path of its own has nothing here that a glob could stand in for, and
     # saying so once is worth more than leaving the script looking like it did something.

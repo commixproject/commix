@@ -61,14 +61,13 @@ def _brace_run(match):
   One command written as a brace expansion, or left as it was where it cannot be.
 
   The shell splits '{a,b,c}' on the commas and on nothing else, so every word has to already be
-  one word, and a single word would not expand at all. A shell keyword is left alone for the
-  reason 'IGNORE_TAMPER_TRANSFORMATION' exists: 'for' stops being 'for' once it is quoted into a
-  brace list, and the payload loses the loop it was built around.
+  one word, and a single word would not expand at all. A word the shell has to read exactly as it
+  was written is left alone, for the reason 'tamper_word_kept' gives.
   """
   words = match.group("run").split(settings.SINGLE_WHITESPACE)
   if len(words) < 2 or not all(re.match(BRACE_SAFE_WORD, word) for word in words):
     return match.group(0)
-  if any(word in settings.IGNORE_TAMPER_TRANSFORMATION for word in words):
+  if any(checks.tamper_word_kept(word) for word in words):
     return match.group(0)
   return match.group("lead") + "{" + ",".join(words) + "}"
 

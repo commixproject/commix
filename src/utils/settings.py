@@ -383,7 +383,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "135"
+REVISION = "136"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1009,6 +1009,9 @@ def set_eval_grammar(language):
 EVAL_ALL_LANGUAGES = 'all'
 # Said once per run, however many parameters the heuristic sees an evaluation sink on.
 EVAL_SUGGESTED = False
+# The same, the other way round: said once however many parameters answer as a command shell
+# while '--eval' has code injection named on the command line.
+COMMAND_SUGGESTED = False
 
 # Supported injection types
 class INJECTION_TYPE(object):
@@ -2042,7 +2045,7 @@ RUN_WIDE_STATE = frozenset((
   "LAST_LOGGED_PARAMETER", "LAST_SELECTED_MODULE", "LIKELY_RESUME", "LOGGED_FINDINGS_HEADER",
   "MULTI_REQUEST_TARGETS", "MULTI_TARGETS", "OS_CHECKS_NUM", "PROGRESS_LINE_OPEN", "READLINE_ERROR",
   "SESSION_FILE", "SHOW_LOGS_MSG", "TAMPER_SCRIPTS", "SITEMAP_CHECK", "SKIPPED_OUT_OF_SCOPE", "SKIP_VULNERABLE_HOST",
-  "STDIN_PARSING", "TAMPER_WARNING_SHOWN", "TIME_RELATED_ATTACK_WARNING", "TOTAL_OF_REQUESTS", "EVAL_SUGGESTED",
+  "STDIN_PARSING", "TAMPER_WARNING_SHOWN", "TIME_RELATED_ATTACK_WARNING", "TOTAL_OF_REQUESTS", "EVAL_SUGGESTED", "COMMAND_SUGGESTED",
   "VALIDATION_RUN", "VISIBLE_CONNECTION_ERRORS", "WARNED_HTTP_ERROR_CODES",
   # Set by the connection to whichever target is in hand, before this reset can be reached.
   "HOSTNAME", "SCHEME", "TARGET_NETLOC", "TARGET_URL",

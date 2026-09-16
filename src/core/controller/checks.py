@@ -2264,6 +2264,24 @@ def interleave_char_tamper(payload, obf_char):
 SHELL_SPAN_HELD = "\x00%d\x00"
 SHELL_SPAN_HELD_REGEX = r"\x00(\d+)\x00"
 
+# A name the shell assigns to rather than reads: it is spelled out or it is not a name at all. The
+# separator is whatever the payload was built with, a held-aside '${IFS}' among it.
+TAMPER_ASSIGNED_NAME = r"\b(?:for|read)(?:\s|" + SHELL_SPAN_HELD_REGEX + r")*$"
+
+def tamper_word_kept(word, preceding=""):
+  """
+  Whether a word has to reach the target spelled exactly the way the payload wrote it.
+
+  A POSIX shell decides what is a keyword before it takes any quoting off, so a keyword spelled
+  any other way arrives as a plain word and the payload loses the loop or the branch it was built
+  around. The same goes for a name being assigned to, which is why what comes before the word is
+  worth passing in. Windows needs none of this - cmd.exe takes its carets off first, and reads
+  what is left as the keyword it is - which is why every caller here is a Unix-only script.
+  """
+  if word in settings.IGNORE_TAMPER_TRANSFORMATION:
+    return True
+  return bool(re.search(TAMPER_ASSIGNED_NAME, preceding))
+
 def tamper_shell_spans(payload, transform, nested=False, literal=False):
   """
   Hand each span of the payload that the shell reads as code to "transform", innermost first.
