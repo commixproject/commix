@@ -2186,6 +2186,21 @@ def tamper_dep_unix_only(tamper_name):
   if settings.TARGET_OS == settings.OS.WINDOWS:
     return "The '" + tamper_name + ".py' tamper script needs a POSIX shell. Skipping tamper script."
 
+def tamper_dep_command_incompatible(tamper_name):
+  """
+  Why this script cannot be applied where the payload is a command rather than evaluated code.
+
+  The mirror of 'tamper_dep_eval_incompatible': what these scripts rewrite is the syntax of the
+  language doing the evaluating, which a payload going straight to a shell never carries.
+  """
+  if not menu.options.eval_sink:
+    return "The '" + tamper_name + ".py' tamper script needs code injection (i.e. '--eval'). Skipping tamper script."
+
+# Why this script cannot be applied to an evaluated language other than the one it is written for.
+def tamper_dep_grammar_only(tamper_name, language):
+  if settings.EVAL_GRAMMAR.NAME != language:
+    return "The '" + tamper_name + ".py' tamper script needs '" + language + "' code injection. Skipping tamper script."
+
 def tamper_dep_eval_incompatible(tamper_name):
   """
   What these scripts cannot survive is the sink, not the technique that reaches it.

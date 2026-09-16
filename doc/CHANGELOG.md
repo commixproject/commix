@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New tamper script `phphexname.py`, that runs the command through a PHP function named in hex.
 * Added: New tamper script `sleep2ping.py`, that replaces `sleep` with the wait between `ping` packets in a given payload.
 * Added: New tamper script `cmd2var.py`, that splits the name of the user-supplied operating system command across unset shell variables.
 * Added: New tamper script `cmd2wildcard.py`, that replaces the paths in the user-supplied operating system command with wildcards.
