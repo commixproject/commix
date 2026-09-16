@@ -383,7 +383,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "137"
+REVISION = "138"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1489,6 +1489,7 @@ TAMPER_SCRIPTS = {
                   "nested": False,
                   "sleep2usleep": False,
                   "sleep2timeout": False,
+                  "sleep2ping": False,
                   "xforwardedfor": False,
                   "dollaratsigns": False,
                   "dollarstars": False,
