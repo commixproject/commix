@@ -123,7 +123,14 @@ def technique_selection(technique_info, injection_type=None):
   if technique_info == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
     return settings.EVAL_CAPABLE_TECHNIQUES[0], True
   # Which sink was found is the stored type's to say: every other technique reaches either one.
-  return technique_letter(technique_info), injection_type in settings.EVAL_INJECTION_TYPES
+  return technique_letter(technique_info), stored_injection_type(injection_type) in settings.EVAL_INJECTION_TYPES
+
+"""
+The type a stored finding is read back as: a spelling this version no longer writes is mapped to
+the one that replaced it, so an older session reports what this run would have reported itself.
+"""
+def stored_injection_type(injection_type):
+  return settings.LEGACY_INJECTION_TYPES.get(injection_type, injection_type)
 
 """
 Map stored technique names to their "--technique" menu letters.
@@ -522,6 +529,7 @@ def apply_stored_technique(row):
   (url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix,
    TAG, interpreter, payload, http_header, http_request_method, url_time_response,
    timesec, exec_time, output_length, is_vulnerable, data, cookie) = row[:20]
+  injection_type = stored_injection_type(injection_type)
   # Older sessions (pre-tamper-column) won't have this field - default to "".
   tamper = row[20] if len(row) > 20 else ""
   # Older sessions (pre-target_os-column) won't have this field either.

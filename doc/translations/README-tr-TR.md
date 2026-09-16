@@ -34,12 +34,12 @@ Wiki'deki bazı özellikleri gösteren [ekran görüntüleri koleksiyonunu](http
 
 ## Özellikler
 
-* **Dört enjeksiyon tekniği** - classic (sonuç tabanlı), time-based (kör), file-based (yarı kör, yazma kısıtlı hedefler için tempfile-based varyantıyla birlikte) ve HTTP/S ile DNS üzerinden out-of-band (OAST).
+* **Dört enjeksiyon tekniği** - classic (sonuç tabanlı), time-based (kör), file-based (kör, yazma kısıtlı hedefler için tempfile-based varyantıyla birlikte) ve HTTP/S ile DNS üzerinden out-of-band (OAST).
 * **Kod enjeksiyonu** - `--eval`, hedefin kod olarak değerlendirdiği dizgeyi PHP veya Python olarak, aynı dört teknikle sınar.
 * **Geniş enjeksiyon yüzeyi** - GET/POST parametreleri, HTTP başlıkları, çerezler ve JSON/XML istek gövdeleri; ayrıca CGI hedefleri için `shellshock` modülü.
 * **Etkileşimli kabuklar** - hedef üzerinde `os_shell`, yerleşik `reverse_tcp` ve `bind_tcp` modları ve kurulan kabuk üzerinden dosya aktarımı (`download`/`upload`).
 * **Numaralandırma ve dosya erişimi** - geçerli kullanıcı, makine adı, yetkiler, sistem bilgileri, kullanıcılar ve parola özetleri; hedefte dosya okuma ve yazma.
-* **Filtre ve WAF atlatma** - kabuk ve değerlendirilen kod için birlikte kullanılabilen çok sayıda tamper betiği, belirlenimci bir sırayla uygulanır.
+* **Filtre ve WAF atlatma** - birlikte kullanılabilen çok sayıda tamper betiği, belirlenimci bir sırayla uygulanır.
 * **Esnek hedefleme** - tek bir URL, site taraması, HTML formları, sitemap, proxy günlüğü, çoklu hedef dosyası, ham HTTP istek dosyası veya `stdin` girdisi.
 * **Kaldığı yerden devam eden taramalar** - sonuçlar hedef bazında bir oturum dosyasında saklanır ve JSON olarak dışa aktarılabilir.
 * **Geniş arka uç desteği** - PHP, Python, Perl, Ruby, ASP.NET, JSP ve CGI.

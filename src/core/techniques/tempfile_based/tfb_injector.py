@@ -16,7 +16,7 @@ For more see the file 'readme/COPYING' for copying permission.
 from src.core.controller import injector
 
 """
-The "tempfile-based" injection technique on semiblind OS command injection.
+The "tempfile-based" injection technique on blind OS command injection.
 __Warning:__ This technique is still experimental, is not yet fully functional and may leads to false-positive resutls.
 """
 

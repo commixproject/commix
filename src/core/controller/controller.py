@@ -526,7 +526,7 @@ def filebased_command_injection_technique(url, timesec, filename, http_request_m
   # The file proves execution either way - what the sink changes is only whether the command that
   # fills it is reached through a shell or through the string the target evaluates.
   eval_sink = bool(menu.options.eval_sink)
-  injection_type = settings.INJECTION_TYPE.SEMI_BLIND_CE if eval_sink else settings.INJECTION_TYPE.SEMI_BLIND
+  injection_type = settings.INJECTION_TYPE.BLIND_CE if eval_sink else settings.INJECTION_TYPE.BLIND
   technique = settings.INJECTION_TECHNIQUE.FILE_BASED
   # Prove the injection by a file the target writes and then serves back.
   def exploit():
@@ -891,7 +891,7 @@ def injection_process(url, check_parameter, http_request_method, filename, times
         warn_msg += "ignoring the option '--failed-tries'."
         settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
-      # Procced with file-based semiblind command injection technique,
+      # Procced with file-based blind command injection technique,
       # once the user provides the path of web server's root directory.
       if menu.options.web_root and settings.USER_APPLIED_TECHNIQUE and not "f" in menu.options.tech:
         menu.options.web_root = checks.normalize_target_dir(menu.options.web_root)

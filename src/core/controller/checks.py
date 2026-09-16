@@ -399,7 +399,7 @@ run did not look at, and which techniques can reach a sink at all.
 def technique_names(letters, qualified=False):
   plain = {"c": "classic", "t": "time-based", "f": "file-based"}
   # How execution shows is worth spelling out where the point is which techniques exist at all.
-  shows = {"c": "results-based", "t": "blind", "f": "semi-blind"}
+  shows = {"c": "results-based", "t": "blind", "f": "blind"}
   chosen = [plain[_] + (" (" + shows[_] + ")" if qualified else "") for _ in ("c", "t", "f") if _ in letters]
   if not chosen:
     return ""
@@ -1234,13 +1234,13 @@ def check_os_shell_options(cmd, filename, url):
       return cmd
 
 """
-Procced with file-based semiblind command injection technique,
+Procced with file-based blind command injection technique,
 once the user provides the path of web server's root directory.
 """
 def procced_with_file_based_technique():
   while True:
     message = "Due to the provided '--web-root' option, "
-    message += "do you want to proceed with the (semi-blind) "
+    message += "do you want to proceed with the (blind) "
     message += "file-based injection technique? [y/N] "
     enable_fb = common.read_input(message, default="N", check_batch=True)
     if enable_fb in settings.CHOICE_YES:

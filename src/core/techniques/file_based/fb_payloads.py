@@ -14,7 +14,7 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 """
-The "file-based" technique on semiblind OS command injection.
+The "file-based" technique on blind OS command injection.
 The available "file-based" payloads.
 """
 

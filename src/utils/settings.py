@@ -383,7 +383,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "139"
+REVISION = "140"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1019,13 +1019,17 @@ class INJECTION_TYPE(object):
   RESULTS_BASED_CE = "results-based code injection"
   BLIND = "blind command injection"
   BLIND_CE = "blind code injection"
-  SEMI_BLIND = "semi-blind command injection"
-  SEMI_BLIND_CE = "semi-blind code injection"
 
 # The injection types that name a code-evaluation sink rather than a command one. What was found
 # is recorded as a type, so a stored finding is read back through this rather than through the
 # technique that found it - the same technique serves either sink.
-EVAL_INJECTION_TYPES = (INJECTION_TYPE.RESULTS_BASED_CE, INJECTION_TYPE.BLIND_CE, INJECTION_TYPE.SEMI_BLIND_CE)
+EVAL_INJECTION_TYPES = (INJECTION_TYPE.RESULTS_BASED_CE, INJECTION_TYPE.BLIND_CE)
+
+# Spellings that older sessions hold, before the file-based technique was reported as blind.
+LEGACY_INJECTION_TYPES = {
+  "semi-blind command injection" : INJECTION_TYPE.BLIND,
+  "semi-blind code injection" : INJECTION_TYPE.BLIND_CE
+}
 
 # Supported injection techniques
 class INJECTION_TECHNIQUE(object):

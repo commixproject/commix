@@ -19,7 +19,7 @@ from src.core.controller import handler
 from src.core.controller import checks
 
 """
-The "tempfile-based" injection technique on semiblind OS command injection.
+The "tempfile-based" injection technique on blind OS command injection.
 __Warning:__ This technique is still experimental, is not yet fully functional and may leads to false-positive results.
 """
 
@@ -41,9 +41,9 @@ def exploitation(url, timesec, filename, tmp_path, http_request_method, url_time
 
   # The temporary file proves execution either way - which sink filled it is what the type names.
   if menu.options.eval_sink:
-    injection_type = settings.INJECTION_TYPE.SEMI_BLIND_CE
+    injection_type = settings.INJECTION_TYPE.BLIND_CE
   else:
-    injection_type = settings.INJECTION_TYPE.SEMI_BLIND
+    injection_type = settings.INJECTION_TYPE.BLIND
   technique = settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED
   settings.BASELINE_TARGET = (url, http_request_method)
   # Taken before the technique says what it is testing, rather than in the middle of it: the model
