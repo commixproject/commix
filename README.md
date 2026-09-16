@@ -38,7 +38,7 @@ You can visit the [collection of screenshots](https://github.com/commixproject/c
 * **Broad injection surface** - GET/POST parameters, HTTP headers, cookies, and JSON/XML request bodies, plus the `shellshock` module for CGI targets.
 * **Interactive shells** - an `os_shell` on the target, built-in `reverse_tcp` and `bind_tcp` modes, and file `download`/`upload` over the established shell.
 * **Enumeration and file access** - current user, hostname, privileges, system information, users and password hashes; read from and write to files on the target host.
-* **Filter and WAF evasion** - Multiple combinable tamper scripts, applied in a deterministic order.
+* **Filter and WAF evasion** - Multiple combinable tamper scripts for the shell and for evaluated code, applied in a deterministic order.
 * **Flexible targeting** - a single URL, a crawl, HTML forms, a sitemap, a proxy log, a bulk file, a raw HTTP request file, or piped `stdin`.
 * **Resumable scans** - results are stored per target in a session file, and can be exported to JSON.
 * **Wide back-end support** - PHP, Python, Perl, Ruby, ASP.NET, JSP and CGI.

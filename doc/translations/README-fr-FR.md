@@ -39,7 +39,7 @@ Vous pouvez consulter la [**collection de captures d'écran**](https://github.co
 * **Large surface d'injection** - paramètres GET/POST, en-têtes HTTP, cookies et corps de requête JSON/XML, ainsi que le module `shellshock` pour les cibles CGI.
 * **Shells interactifs** - un `os_shell` sur la cible, les modes intégrés `reverse_tcp` et `bind_tcp`, et le transfert de fichiers (`download`/`upload`) via le shell établi.
 * **Énumération et accès aux fichiers** - utilisateur courant, nom d'hôte, privilèges, informations système, utilisateurs et empreintes de mots de passe ; lecture et écriture de fichiers sur la cible.
-* **Contournement des filtres et des WAF** - Plusieurs scripts de falsification (tamper) combinables, appliqués dans un ordre déterministe.
+* **Contournement des filtres et des WAF** - Plusieurs scripts de falsification (tamper) combinables pour le shell et pour le code évalué, appliqués dans un ordre déterministe.
 * **Ciblage flexible** - une URL unique, une exploration du site, des formulaires HTML, un sitemap, un journal de proxy, un fichier de cibles multiples, un fichier de requête HTTP brute ou une entrée `stdin`.
 * **Analyses reprenables** - les résultats sont stockés par cible dans un fichier de session et peuvent être exportés en JSON.
 * **Large prise en charge des back-ends** - PHP, Python, Perl, Ruby, ASP.NET, JSP et CGI.

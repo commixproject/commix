@@ -39,7 +39,7 @@ Wiki'deki bazı özellikleri gösteren [ekran görüntüleri koleksiyonunu](http
 * **Geniş enjeksiyon yüzeyi** - GET/POST parametreleri, HTTP başlıkları, çerezler ve JSON/XML istek gövdeleri; ayrıca CGI hedefleri için `shellshock` modülü.
 * **Etkileşimli kabuklar** - hedef üzerinde `os_shell`, yerleşik `reverse_tcp` ve `bind_tcp` modları ve kurulan kabuk üzerinden dosya aktarımı (`download`/`upload`).
 * **Numaralandırma ve dosya erişimi** - geçerli kullanıcı, makine adı, yetkiler, sistem bilgileri, kullanıcılar ve parola özetleri; hedefte dosya okuma ve yazma.
-* **Filtre ve WAF atlatma** - birlikte kullanılabilen çok sayıda tamper betiği, belirlenimci bir sırayla uygulanır.
+* **Filtre ve WAF atlatma** - kabuk ve değerlendirilen kod için birlikte kullanılabilen çok sayıda tamper betiği, belirlenimci bir sırayla uygulanır.
 * **Esnek hedefleme** - tek bir URL, site taraması, HTML formları, sitemap, proxy günlüğü, çoklu hedef dosyası, ham HTTP istek dosyası veya `stdin` girdisi.
 * **Kaldığı yerden devam eden taramalar** - sonuçlar hedef bazında bir oturum dosyasında saklanır ve JSON olarak dışa aktarılabilir.
 * **Geniş arka uç desteği** - PHP, Python, Perl, Ruby, ASP.NET, JSP ve CGI.

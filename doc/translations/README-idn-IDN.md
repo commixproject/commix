@@ -39,7 +39,7 @@ Anda dapat mengunjungi [koleksi dari tangkapan layar](https://github.com/commixp
 * **Permukaan injeksi yang luas** - parameter GET/POST, header HTTP, cookie, dan body permintaan JSON/XML, serta modul `shellshock` untuk target CGI.
 * **Shell interaktif** - `os_shell` pada target, mode bawaan `reverse_tcp` dan `bind_tcp`, serta transfer berkas (`download`/`upload`) melalui shell yang telah terbentuk.
 * **Enumerasi dan akses berkas** - pengguna saat ini, nama host, hak akses, informasi sistem, daftar pengguna dan hash kata sandi; membaca dan menulis berkas pada target.
-* **Pengelakan filter dan WAF** - Beberapa skrip tamper yang dapat dikombinasikan, diterapkan dalam urutan yang deterministik.
+* **Pengelakan filter dan WAF** - Beberapa skrip tamper yang dapat dikombinasikan untuk shell maupun untuk kode yang dievaluasi, diterapkan dalam urutan yang deterministik.
 * **Penentuan target yang fleksibel** - satu URL, penelusuran situs, formulir HTML, sitemap, log proxy, berkas berisi banyak target, berkas permintaan HTTP mentah, atau masukan `stdin`.
 * **Pemindaian yang dapat dilanjutkan** - hasil disimpan per target dalam berkas sesi dan dapat diekspor ke JSON.
 * **Dukungan back-end yang luas** - PHP, Python, Perl, Ruby, ASP.NET, JSP dan CGI.
