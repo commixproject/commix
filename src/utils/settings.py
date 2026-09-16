@@ -383,7 +383,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "136"
+REVISION = "137"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1480,6 +1480,7 @@ TAMPER_SCRIPTS = {
                   "space2brace": False,
                   "ansiquote": False,
                   "cmd2wildcard": False,
+                  "cmd2var": False,
                   "doublequotes": False,
                   "singlequotes": False,
                   "caret": False,
@@ -1562,7 +1563,10 @@ INCOMPATIBLE_TAMPER_SCRIPTS = [
                   ("randomcase", "singlequotes"),
                   # All three replace the user's command outright, so only one of them can have it.
                   ("cmd2wildcard", "rev"),
-                  ("cmd2wildcard", "randomcase")
+                  ("cmd2wildcard", "randomcase"),
+                  ("cmd2var", "rev"),
+                  ("cmd2var", "randomcase"),
+                  ("cmd2var", "cmd2wildcard")
 ]
 
 # Words that must survive per-character obfuscation - shell keywords stop being keywords once

@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New tamper script `cmd2var.py`, that splits the name of the user-supplied operating system command across unset shell variables.
 * Added: New tamper script `cmd2wildcard.py`, that replaces the paths in the user-supplied operating system command with wildcards.
 * Added: New tamper script `ansiquote.py`, that rewrites the command names and paths in a given payload as ANSI-C quoted hex.
 * Added: New tamper script `space2brace`, which replaces the space character (%20) with a brace expansion ({a,b}) in a given payload.
