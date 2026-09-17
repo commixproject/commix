@@ -42,7 +42,7 @@ You can visit the [collection of screenshots](https://github.com/commixproject/c
 * **Flexible targeting** - a single URL, a crawl, HTML forms, a sitemap, a proxy log, a bulk file, a raw HTTP request file, or piped `stdin`.
 * **Resumable scans** - results are stored per target in a session file, and can be exported to JSON.
 * **Wide back-end support** - PHP, Python, Perl, Ruby, ASP.NET, JSP and CGI, and works against both Unix-like and Windows targets - see
-[Windows and Unix-like targets at a glance](Techniques#windows-and-unix-like-targets-at-a-glance)
+[Windows and Unix-like targets at a glance](https://github.com/commixproject/commix/wiki/Techniques#windows-and-unix-like-targets-at-a-glance)
 for how the payloads differ.
 
 ## Installation
