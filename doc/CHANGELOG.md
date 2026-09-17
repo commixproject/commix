@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New tamper script `pyhexname.py`, that runs the command through a Python module and function named in hex.
 * Added: New tamper script `phpconcat.py`, that runs the command through a PHP function named in concatenated pieces.
 * Added: New option `--type` to select injection techniques by the injection type they report (i.e. `c` for classic, `b` for blind).
 * Revised: Renamed the "classic" technique to "results-based", after how its result comes back, so `--technique` now takes the letters `r`, `t` and `f` (e.g. `--technique="rtf"`).
