@@ -159,11 +159,7 @@ def get_response(output):
   headers.do_check(request)
   response = headers.check_http_traffic(request)
   if response is None:
-    # Check if defined any HTTP Proxy (--proxy option).
-    if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor:
-      response = proxy.use_proxy(request)
-    else:
-      response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+    response = headers.resend(request)
   return response
 
 """
@@ -397,10 +393,10 @@ Technique letters written out, optionally saying how each one shows execution. U
 run did not look at, and which techniques can reach a sink at all.
 """
 def technique_names(letters, qualified=False):
-  plain = {"c": "classic", "t": "time-based", "f": "file-based"}
-  # How execution shows is worth spelling out where the point is which techniques exist at all.
-  shows = {"c": "results-based", "t": "blind", "f": "blind"}
-  chosen = [plain[_] + (" (" + shows[_] + ")" if qualified else "") for _ in ("c", "t", "f") if _ in letters]
+  plain = {"r": "results-based", "t": "time-based", "f": "file-based"}
+  # The sink is worth spelling out where the point is which techniques exist at all.
+  shows = {"r": "results-based", "t": "blind", "f": "blind"}
+  chosen = [plain[_] + (" (" + shows[_] + ")" if qualified else "") for _ in ("r", "t", "f") if _ in letters]
   if not chosen:
     return ""
   name = chosen[0] if len(chosen) == 1 else ", ".join(chosen[:-1]) + " and " + chosen[-1]
@@ -408,7 +404,7 @@ def technique_names(letters, qualified=False):
 
 # The techniques this run was told to leave out, named for the message that says so.
 def untested_techniques():
-  return technique_names([_ for _ in ("c", "t", "f") if _ not in menu.options.tech])
+  return technique_names([_ for _ in ("r", "t", "f") if _ not in menu.options.tech])
 
 """
 The payload builder the time-based technique uses: the same technique reaches either sink, and what
@@ -1724,6 +1720,132 @@ def identified_os():
         raise SystemExit()
 
 """
+The tamper scripts the user named, rejected here if any of them names nothing.
+
+Run before the target is touched: an option that cannot be acted on is the user's to correct, and
+leaving it until the payloads are built costs a connection test and a WAF probe to find out.
+"""
+def validate_tamper_scripts():
+  if not menu.options.tamper:
+    return []
+  raw_scripts = re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower())
+  provided_scripts = list(dict.fromkeys(script.strip() for script in raw_scripts if script.strip()))
+  available_scripts = [os.path.basename(script.split(".py")[0])
+                       for script in sorted(glob(os.path.join(settings.TAMPER_SCRIPTS_PATH, "*.py")))]
+  for script in provided_scripts:
+    if script not in available_scripts:
+      err_msg = "The '" + script + "' tamper script does not exist. "
+      err_msg += "Use the '--list-tampers' switch for listing available tamper scripts."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit()
+  for first, second in settings.INCOMPATIBLE_TAMPER_SCRIPTS:
+    if first in provided_scripts and second in provided_scripts:
+      err_msg = "Tamper script '" + first + "' is unlikely to work in combination with the tamper script '" + second + "'."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit()
+  return provided_scripts
+
+"""
+Resolve '--type' into the techniques that show a result that way.
+
+The type is what a finding is reported as, so asking for one is a fair way to ask for the
+techniques behind it - and shorter than naming each of them.
+"""
+def apply_injection_type():
+  if not menu.options.type:
+    return
+  # Asked of the options themselves: this runs before the run has settled which of the two it is on.
+  if menu.options.tech or menu.options.skip_tech:
+    err_msg = "The options '--type' and '"
+    err_msg += "--skip-technique" if menu.options.skip_tech else "--technique"
+    err_msg += "' cannot be used simultaneously."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+  # A string of letters, the way '--technique' is given - a separator between them is allowed too.
+  ignored = settings.PARAMETER_SPLITTING_REGEX + settings.SINGLE_WHITESPACE
+  letters = ""
+  for given in menu.options.type.lower():
+    if given in ignored:
+      continue
+    if given not in settings.AVAILABLE_TYPES:
+      err_msg = "You specified wrong value '" + given + "' as injection type. "
+      err_msg += "The value for option '--type' must be a string composed by the letters "
+      err_msg += ", ".join(settings.AVAILABLE_TYPES).upper()
+      err_msg += ". Refer to the official wiki for details."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit()
+    letters += settings.AVAILABLE_TYPES[given]
+  menu.options.tech = "".join(sorted(set(letters), key=settings.AVAILABLE_TECHNIQUES.index))
+  settings.USER_APPLIED_TECHNIQUE = True
+
+"""
+The techniques the user named, rejected here on the same ground as the tamper scripts above.
+"""
+def validate_techniques():
+  if not menu.options.tech:
+    return
+  letters = menu.options.tech.lower()
+  for legacy, current in settings.LEGACY_TECHNIQUE_LETTERS.items():
+    letters = letters.replace(legacy, current)
+  selectable = list(settings.AVAILABLE_TECHNIQUES)
+  ignored = settings.PARAMETER_SPLITTING_REGEX + settings.SINGLE_WHITESPACE
+  unknown = [letter for letter in letters if letter not in selectable and letter not in ignored]
+  if unknown:
+    err_msg = "You specified wrong value '" + unknown[0] + "' as injection technique. "
+    err_msg += "The value for option '"
+    err_msg += "--skip-technique" if settings.SKIP_TECHNIQUES else "--technique"
+    err_msg += "' must be a string composed by the letters "
+    err_msg += ", ".join(settings.AVAILABLE_TECHNIQUES).upper()
+    err_msg += ". Refer to the official wiki for details."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
+"""
+The remaining options whose value can be judged on its own, on the same ground as the two above.
+"""
+def validate_options():
+  if menu.options.level not in (None, False):
+    try:
+      level = int(menu.options.level)
+    except (TypeError, ValueError):
+      level = None
+    if level not in (settings.DEFAULT_INJECTION_LEVEL, settings.COOKIE_INJECTION_LEVEL, settings.HTTP_HEADER_INJECTION_LEVEL):
+      err_msg = "The value for option '--level' must be an integer value from range [1, 3]."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit()
+
+  if menu.options.eval_sink:
+    # 'py' and 'python' name the same language, here as for '--interpreter'.
+    if settings.resolve_language(menu.options.eval_sink) not in (settings.EVAL_ALL_LANGUAGES,) + settings.SUPPORTED_EVAL_LANGUAGES:
+      err_msg = "You defined an invalid language '" + menu.options.eval_sink + "' for '--eval'. "
+      err_msg += "Supported languages are: " + ", ".join(settings.SUPPORTED_EVAL_LANGUAGES) + "."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit()
+
+  if menu.options.file_write is not None and not menu.options.file_dest:
+    err_msg = "You must specify the host's absolute filepath to write (i.e. '--file-dest')."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
+  if menu.options.file_dest and menu.options.file_write is None:
+    err_msg = "You must enter the '--file-write' parameter."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
+  # The remote destination must be an absolute filepath (Unix-style, Windows drive-letter, or UNC).
+  if menu.options.file_dest and not (menu.options.file_dest.startswith(("/", "\\")) or \
+     re.match(r"^[A-Za-z]:[\\/]", menu.options.file_dest)):
+    err_msg = "The value for option '--file-dest' must be an absolute filepath "
+    err_msg += "(e.g. '/tmp/file' or 'C:\\Windows\\Temp\\file')."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
+  if menu.options.file_write is not None and not os.path.exists(menu.options.file_write):
+    err_msg = "The specified local file '" + menu.options.file_write + "' does not exist."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
+"""
 Checking for all required third-party library dependencies.
 """
 def third_party_dependencies():
@@ -2493,25 +2615,7 @@ Tamper script checker
 """
 def tamper_scripts(stored_tamper_scripts):
   if menu.options.tamper:
-    # Check the provided tamper script(s)
-    available_scripts = []
-    raw_scripts = re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower())
-    provided_scripts = list(dict.fromkeys(script.strip() for script in raw_scripts if script.strip()))
-    for script in sorted(glob(os.path.join(settings.TAMPER_SCRIPTS_PATH, "*.py"))):
-      available_scripts.append(os.path.basename(script.split(".py")[0]))
-    for script in provided_scripts:
-      if script in available_scripts:
-        pass
-      else:
-        err_msg = "The '" + script + "' tamper script does not exist. "
-        err_msg += "Use the '--list-tampers' switch for listing available tamper scripts."
-        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
-    for first, second in settings.INCOMPATIBLE_TAMPER_SCRIPTS:
-      if first in provided_scripts and second in provided_scripts:
-        err_msg = "Tamper script '" + first + "' is unlikely to work in combination with the tamper script '" + second + "'."
-        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
+    provided_scripts = validate_tamper_scripts()
     priorities = {}
     for script in provided_scripts:
       if script not in settings.MULTI_ENCODED_PAYLOAD:
@@ -4099,7 +4203,7 @@ def short_technique_label(technique):
   return technique_display_name(technique).replace("command injection ", "").replace("injection ", "")
 
 """
-Full label of a technique, with its injection type - "classic results-based command injection technique".
+Full label of a technique, with the sink it reached - "results-based classic command injection technique".
 """
 def technique_label(injection_type, technique):
   name = short_technique_label(technique)
@@ -4108,8 +4212,7 @@ def technique_label(injection_type, technique):
   # The channel belongs with the technique's own name, ahead of the injection type.
   if technique == settings.INJECTION_TECHNIQUE.OOB and oob_channel_label():
     name += " (" + oob_channel_label() + ")"
-  # The injection type names the sink as well as how execution shows, and both sinks are reached by
-  # the same techniques - so it is given whole, rather than cut down to how execution shows.
+  # The technique leads, because it says how the result came back; the type names only the sink.
   return name + settings.SINGLE_WHITESPACE + injection_type + " technique"
 
 """
@@ -4165,7 +4268,8 @@ written there to carry the command output and is not removed on its own.
 def announce_leftover_file(technique):
   if technique != settings.INJECTION_TECHNIQUE.FILE_BASED or not settings.DEFINED_WEBROOT:
     return
-  written = settings.WEB_ROOT + settings.DEFINED_WEBROOT.split("/")[-1]
+  # The name it was written under, which a URL serving it through a script does not carry.
+  written = settings.WEB_ROOT + (settings.CUSTOM_FILENAME or settings.DEFINED_WEBROOT.split("/")[-1])
   if written not in settings.LEFTOVER_FILES:
     settings.LEFTOVER_FILES.append(written)
 
@@ -4407,15 +4511,34 @@ def windows_separator(separator):
   return separator if separator in WINDOWS_SEPARATORS else None
 
 """
+The same for a POSIX shell.
+
+Ctrl-Z is cmd.exe's end-of-file and here an ordinary byte: 'xxx\x1aecho foo' is one word, so
+nothing follows it to run. CRLF leaves its carriage return on the end of the line before it, where
+only a command that takes the byte as data survives it - 'sleep 5\r' is an invalid interval and
+'>/tmp/f\r' writes a different file - so what it reaches is a subset of what a bare newline does.
+"""
+def unix_separator(separator):
+  return None if separator in (settings.CTRL_Z, settings.END_LINE.CRLF) else separator
+
+# The separator as the target's shell reads it, and nothing where it reads it as no separator at all.
+def shell_separator(separator):
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    return windows_separator(separator)
+  return unix_separator(separator)
+
+# Only those, so the attempt count reflects what the target's shell can actually chain on.
+def chainable_separators(separators):
+  return [separator for separator in separators if shell_separator(separator) is not None]
+
+"""
 Report whether the target's shell runs a second command after this separator at all. A name lookup
 can still betray an injection point through one that does not - cmd.exe reads ';' as an argument
 separator, so the payload lands as another argument of the target's own command - but nothing can
 be run through it afterwards.
 """
 def separator_chains(separator):
-  if settings.TARGET_OS == settings.OS.WINDOWS:
-    return windows_separator(separator) is not None
-  return True
+  return shell_separator(separator) is not None
 
 """
 The operator a payload chains its own commands with, once it has started with the separator under
@@ -4450,6 +4573,18 @@ End a payload so that whatever the target's own command line carries after it is
 """
 def shell_tail():
   return WINDOWS_TAIL if settings.TARGET_OS == settings.OS.WINDOWS else UNIX_TAIL
+
+"""
+End an out-of-band payload on the separator it chains on, not on a comment character the sink has
+to pass as well - one that filters it reads every separator as not injectable. cmd.exe has none, so
+'rem' stands in on that same separator. With no separator to close on, the tail is all there is.
+"""
+def terminate_oob_payload(payload, separator, target_os=None):
+  if not separator:
+    return payload + shell_tail()
+  if (target_os or settings.TARGET_OS) == settings.OS.WINDOWS:
+    return payload + windows_tail(separator)
+  return terminate_payload(payload, separator)
 
 """
 Hold the answer back for a number of seconds, without starting a PowerShell process.
@@ -4528,6 +4663,36 @@ def oob_request_body(raw_request):
 """
 Append the separator once more if a custom injection marker changed where the payload lands - the shared tail repeated across every payloads.py.
 """
+def terminate_payload(payload, separator, keep_output=False):
+  """
+  End a payload so the target's own command line cannot run into it.
+
+  What follows the injection point is the rest of the application's command, and a payload ending
+  in a redirection hands it straight to the command as further arguments - which 'echo' accepts
+  and writes, while most other commands refuse outright and give nothing back.
+
+  Closed with the separator the payload is already chaining on, so what follows runs as a command
+  of its own rather than as arguments to this one. Nothing new is introduced to be filtered: the
+  payload ends with the one separator it is testing.
+
+  What that takes differs by separator. ";", a newline and "&" end a command on their own, so the
+  remainder simply becomes the next one. "&&", "||" and "|" are binary and need something on their
+  right: the remainder usually provides it, but where the payload is the last thing in the value
+  there is nothing to provide, and the shell is handed an unfinished line. A ":" closes those -
+  it does nothing, and reads whatever follows as arguments it ignores.
+  """
+  # Nothing to terminate: a separator this technique has no payload for is left empty, and the
+  # callers read that emptiness as "not supported" - a lone separator would read as a payload.
+  if not payload:
+    return payload
+  if settings.CUSTOM_INJECTION_MARKER:
+    return payload + separator
+  # A pipe hands this payload's own output to whatever comes next, and a technique that reads its
+  # result out of the response needs that output to reach the response instead.
+  if keep_output and separator == settings.PIPE_SEPARATOR:
+    return payload
+  return payload + separator + (settings.NO_OPERATION if separator in settings.BINARY_SEPARATORS else "")
+
 def append_custom_marker(payload, separator):
   if settings.CUSTOM_INJECTION_MARKER:
     return payload + separator

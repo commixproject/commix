@@ -44,11 +44,38 @@ def _prioritize(candidates, confirmed_value):
 """
 Every (whitespace, prefix, suffix, separator) combination to try, in order.
 """
-def _boundary_combinations(whitespaces, prefixes, suffixes, separators):
+def _boundary_combinations(whitespaces, prefixes, suffixes, separators, keep_output=False, grammar_separators=None):
+  """
+  Each boundary worth sending, once.
+
+  A prefix that is itself a separator is dropped where it meets one, which every separator does -
+  so from the second level up, every one of them arrives at the payload as the empty prefix that
+  was already tried. Raising the level then buys re-sending what has been sent rather than asking
+  anything new: at level three that is most of the combinations, over every technique alike.
+
+  The suffix goes the same way. Against a payload that already closed itself, a separator suffix
+  reads as ';;' or '&|' - no shell parses either - and a quote suffix balances only its own prefix.
+  """
+  # What the grammar calls a separator, which is not the same as what this target can chain on -
+  # a suffix is dead against a closed payload either way.
+  grammar_separators = separators if grammar_separators is None else grammar_separators
+  # Asked of the function that puts the terminator there, so the two cannot drift apart.
+  self_terminated = dict((separator, checks.terminate_payload("x", separator, keep_output) != "x") for separator in separators)
+  tried = set()
   for whitespace in whitespaces:
     for prefix in prefixes:
       for suffix in suffixes:
         for separator in separators:
+          if suffix and self_terminated[separator] and suffix in grammar_separators:
+            continue
+          if suffix in settings.QUOTES and suffix != prefix:
+            continue
+          # The same rule the payload is built under, so what is compared is what would be sent.
+          effective = "" if (prefix + separator) in settings.JUNK_COMBINATION else prefix
+          boundary = (whitespace, effective, suffix, separator)
+          if boundary in tried:
+            continue
+          tried.add(boundary)
           yield whitespace, prefix, suffix, separator
 
 """
@@ -412,7 +439,7 @@ def do_oob_process(url, timesec, filename, http_request_method, injection_type, 
   if menu.options.eval_sink:
     sinks = [(True, settings.INJECTION_TYPE.BLIND_CE, payloads.eval_prefixes(), settings.EVAL_SUFFIXES, settings.EVAL_SEPARATORS)]
   else:
-    sinks = [(False, injection_type, settings.PREFIXES, settings.SUFFIXES, settings.SEPARATORS)]
+    sinks = [(False, injection_type, settings.PREFIXES, settings.SUFFIXES, checks.chainable_separators(settings.SEPARATORS))]
 
   for is_eval, sink_type, sink_prefixes, sink_suffixes, sink_separators in sinks:
     settings.OOB_EVAL = is_eval
@@ -433,8 +460,12 @@ def _oob_sweep(is_eval, injection_type, prefixes, suffixes, separators, url, tim
 
   transports = payloads.transports()
 
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Testing for out-of-band interactions on a unique hostname per payload."
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+
   TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
-  combinations = list(_boundary_combinations(whitespaces, prefixes, suffixes, separators))
+  combinations = list(_boundary_combinations(whitespaces, prefixes, suffixes, separators, grammar_separators=settings.SEPARATORS))
   total = len(combinations) * len(transports)
   i = 0
 
@@ -538,6 +569,9 @@ def _oob_sweep(is_eval, injection_type, prefixes, suffixes, separators, url, tim
       settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
 
   # Re-confirm with a fresh token, against a stray interaction.
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Re-confirming the injection point on a fresh hostname."
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
   for _ in range(settings.RESULTS_BASED_VERIFY_ROUNDS):
     verify_token, verify_hostname = channel.new_payload()
     verify_expression, verify_expected, verify_prologue = payloads.proof(transport)
@@ -598,6 +632,9 @@ whole instead of a label at a time - one request each, and a short wait for all 
 def _oob_http_upgrade(is_eval, separator, prefix, suffix, whitespace, vuln_parameter, url, http_request_method, filename, channel, payloads):
   if menu.options.oob_transport or not settings.OOB_HEURISTIC_HTTP_SILENT:
     return None
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Checking which HTTP client can carry back the command output."
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
   fired = []
   for candidate in payloads.upgrade_candidates():
     token, hostname = channel.new_payload()
@@ -725,13 +762,15 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
     _announce_technique(injection_type, technique)
 
   prefixes, suffixes, separators = checks.sink_boundaries()
+  separators = checks.chainable_separators(separators)
   whitespaces = settings.WHITESPACES
 
   prefixes, suffixes, separators, whitespaces = _prioritize_confirmed_boundary(prefixes, suffixes, separators, whitespaces)
 
+  combinations = list(_boundary_combinations(whitespaces, prefixes, suffixes, separators, grammar_separators=settings.SEPARATORS))
   i = 0
-  total = len(whitespaces) * len(prefixes) * len(suffixes) * len(separators)
-  for whitespace, prefix, suffix, separator in _boundary_combinations(whitespaces, prefixes, suffixes, separators):
+  total = len(combinations)
+  for whitespace, prefix, suffix, separator in combinations:
     bare_prefix = prefix
     bare_suffix = suffix
     settings.DETECTION_PHASE = True
@@ -773,6 +812,11 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
           prefix = ""
         # Change TAG on every request to prevent false-positive resutls.
         TAG = ''.join(random.choice(string.ascii_uppercase) for num_of_chars in range(6))
+        # Whether anything in this pass answered late, which is what a further pass could re-judge.
+        answered_late = False
+        # Per pass: the anomaly below reads the sample by position, so one pass's timings appended
+        # to the last one's put the peak it looks for at an index that means nothing.
+        exec_time_statistic = []
         # The output file for file-based injection technique.
         interpreter = menu.options.interpreter
         tag_length = len(TAG) + 4
@@ -832,6 +876,7 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
             # combination that answers is often among the last to be tried.
             if True:
               if checks.time_related_shell(exec_time, timesec):
+                answered_late = True
                 # Time related false positive fixation.
                 false_positive_fixation = False
                 if len(TAG) == output_length:
@@ -933,6 +978,11 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
 
         if possibly_vulnerable:
           break
+        # A further pass is for judging again what was answered late once already - a fresh tag
+        # cannot make a target delay that never did, and asking every length again over a
+        # technique this slow is the most expensive way there is to learn the same thing twice.
+        if not answered_late:
+          break
     # Yaw, got shellz!
     # Do some magic tricks!
     if checks.time_related_shell(exec_time, timesec):
@@ -1012,9 +1062,7 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
     separators = settings.EVAL_SEPARATORS
   else:
     prefixes, suffixes, separators = checks.sink_boundaries()
-    if settings.TARGET_OS == settings.OS.WINDOWS:
-      # Dropped up front, so the attempt count reflects what cmd.exe can actually chain on.
-      separators = [_separator for _separator in separators if checks.windows_separator(_separator) is not None]
+    separators = checks.chainable_separators(separators)
 
   if not settings.LOAD_SESSION or technique not in settings.STORED_TECHNIQUES:
     _announce_technique(injection_type, technique)
@@ -1027,8 +1075,10 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
   prefixes, suffixes, separators, whitespaces = _prioritize_confirmed_boundary(prefixes, suffixes, separators, whitespaces)
 
   TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
+  # Only the classic technique leaves its pipe payloads open, to read the result off the response.
+  combinations = list(_boundary_combinations(whitespaces, prefixes, suffixes, separators, keep_output=technique == settings.INJECTION_TECHNIQUE.CLASSIC, grammar_separators=settings.SEPARATORS))
   i = 0
-  total = len(whitespaces) * len(prefixes) * len(suffixes) * len(separators)
+  total = len(combinations)
   """
   After this many failed writes the temporary directory is offered instead of the web root. A set
   of boundaries small enough to get through is gone through in full first: the one that answers is
@@ -1043,7 +1093,7 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
     failed_tries = min(total, settings.MAX_FAILED_TRIES)
   else:
     failed_tries = int(menu.options.failed_tries)
-  for whitespace, prefix, suffix, separator in _boundary_combinations(whitespaces, prefixes, suffixes, separators):
+  for whitespace, prefix, suffix, separator in combinations:
     bare_prefix = prefix
     bare_suffix = suffix
     """
@@ -1245,9 +1295,8 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
           verify_payload = payloads.decision_combined(separator, verify_tags, OUTPUT_TEXTFILE)
         requests.perform_injection(prefix, suffix, whitespace, verify_payload, "", http_request_method, url)
         time.sleep(timesec)
-        verify_output = injector.injection_output(url, OUTPUT_TEXTFILE, timesec, technique)
-        verify_response = checks.get_response(verify_output)
-        verify_html_data = "" if type(verify_response) is bool else checks.process_page_content(verify_response, action="decode")
+        verify_response = injector.fetch_output_response(url, OUTPUT_TEXTFILE, timesec, technique)
+        verify_html_data = "" if verify_response is None or type(verify_response) is bool else checks.process_page_content(verify_response, action="decode")
         # Tags must appear in order - rules out a stale/cached file.
         verified = re.search(r"" + r".*?".join(verify_tags) + r"", str(verify_html_data), re.DOTALL) is not None
       else:
@@ -1260,9 +1309,8 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
               verify_payload = payloads.decision(separator, verify_tag, OUTPUT_TEXTFILE)
             requests.perform_injection(prefix, suffix, whitespace, verify_payload, "", http_request_method, url)
             time.sleep(timesec)
-            verify_output = injector.injection_output(url, OUTPUT_TEXTFILE, timesec, technique)
-            verify_response = checks.get_response(verify_output)
-            verify_html_data = "" if type(verify_response) is bool else checks.process_page_content(verify_response, action="decode")
+            verify_response = injector.fetch_output_response(url, OUTPUT_TEXTFILE, timesec, technique)
+            verify_html_data = "" if verify_response is None or type(verify_response) is bool else checks.process_page_content(verify_response, action="decode")
             verify_shell = re.findall(r"" + verify_tag + "", str(verify_html_data))
             verified = bool(verify_shell) and verify_shell[0] == verify_tag
           else:

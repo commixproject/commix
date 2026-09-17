@@ -136,6 +136,7 @@ def stored_injection_type(injection_type):
 Map stored technique names to their "--technique" menu letters.
 """
 def technique_letter(technique_info):
+  technique_info = settings.LEGACY_TECHNIQUE_NAMES.get(technique_info, technique_info)
   if technique_info == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
     return technique_info.split()[2][0]
   if technique_info == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:

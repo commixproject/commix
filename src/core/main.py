@@ -148,13 +148,9 @@ def examine_request(request, url):
     response = headers.check_http_traffic(request)
     if response is not None:
       return response
-    # Check if defined any HTTP Proxy (--proxy option).
-    if menu.options.proxy or menu.options.ignore_proxy:
-      return proxy.use_proxy(request)
     else:
       try:
-        response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
-        return response
+        return headers.resend(request)
 
       except ValueError:
         # Invalid format for the '--header' option.
@@ -617,6 +613,9 @@ def main(filename, url, http_request_method):
         menu.options.tech = ''.join([str(x) for x in settings.AVAILABLE_TECHNIQUES])
 
     menu.options.tech = menu.options.tech.lower()
+    # The classic technique is named for how its result comes back now, so its letter moved with it.
+    for legacy, current in settings.LEGACY_TECHNIQUE_LETTERS.items():
+      menu.options.tech = menu.options.tech.replace(legacy, current)
     if menu.options.eval_sink:
       # 'py' and 'python' name the same language, here as for '--interpreter'.
       menu.options.eval_sink = settings.resolve_language(menu.options.eval_sink)
@@ -672,40 +671,6 @@ def main(filename, url, http_request_method):
     which is the one that asks for all of them.
     """
 
-    # Check if specified wrong injection technique - only what the user actually typed, since a
-    # resumed session hands back techniques that are not selectable on the command line.
-    if settings.USER_APPLIED_TECHNIQUE and menu.options.tech and menu.options.tech not in settings.AVAILABLE_TECHNIQUES:
-      found_tech = False
-      # Check if used the ',' separator
-      if settings.PARAMETER_SPLITTING_REGEX in menu.options.tech:
-        split_techniques_names = menu.options.tech.split(settings.PARAMETER_SPLITTING_REGEX)
-      else:
-        split_techniques_names = menu.options.tech.split()
-      if split_techniques_names:
-        for i in range(0,len(split_techniques_names)):
-          if len(menu.options.tech) <= len(settings.AVAILABLE_TECHNIQUES):
-            split_first_letter = list(menu.options.tech)
-            for j in range(0,len(split_first_letter)):
-              if split_first_letter[j] in settings.AVAILABLE_TECHNIQUES:
-                found_tech = True
-              else:
-                found_tech = False
-
-      if split_techniques_names[i].replace(' ', '') not in settings.AVAILABLE_TECHNIQUES and \
-         found_tech is False:
-        err_msg = "You specified wrong value '" + split_techniques_names[i]
-        err_msg += "' as injection technique. "
-        err_msg += "The value for option '"
-        if not settings.SKIP_TECHNIQUES :
-          err_msg += "--technique"
-        else:
-          err_msg += "--skip-technique"
-        err_msg += "' must be a string composed by the letters "
-        err_msg += ', '.join(settings.AVAILABLE_TECHNIQUES).upper()
-        err_msg += ". Refer to the official wiki for details."
-        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
-
     if menu.options.oob:
       menu.options.tech = 'o'
 
@@ -750,8 +715,8 @@ def main(filename, url, http_request_method):
                                                    )
       try:
         try:
-          # Skip stability probing on resume unless content-reflection techniques ('c'/'e') are in scope.
-          if not settings.LIKELY_RESUME and (not menu.options.tech or "c" in menu.options.tech or "e" in menu.options.tech):
+          # Skip stability probing on resume unless content-reflection techniques ('r'/'e') are in scope.
+          if not settings.LIKELY_RESUME and (not menu.options.tech or "r" in menu.options.tech or "e" in menu.options.tech):
             requests.is_url_content_stable(settings.INIT_CONNECTION_URL or url, response, settings.INIT_CONNECTION_FETCH_TIME, http_request_method)
             info_msg = "Performing heuristic (passive) test on the target URL."
             settings.print_data_to_stdout(settings.print_info_msg(info_msg))
@@ -896,6 +861,13 @@ try:
     # Check if defined "--ignore-dependencies" option.
     if not menu.options.ignore_dependencies:
       checks.third_party_dependencies()
+
+    # Before the target is touched: a mistyped option is the user's to correct, not the target's
+    # to be probed over.
+    checks.validate_tamper_scripts()
+    checks.apply_injection_type()
+    checks.validate_techniques()
+    checks.validate_options()
 
     # Check if defined "--update" option.
     if menu.options.update:

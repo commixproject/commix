@@ -108,8 +108,10 @@ def read_input(message, default=None, check_batch=True):
         return is_empty()
       else:
         for item in settings.ANSWERS.split(','):
-          question = item.split('=')[0].strip()
-          answer = item.split('=')[1] if len(item.split('=')) > 1 else None
+          # Split once: an answer is free to hold "=" of its own, a URL with a query string most
+          # of all, and splitting on every one of them handed back the answer cut at the first.
+          question = item.split('=', 1)[0].strip()
+          answer = item.split('=', 1)[1] if '=' in item else None
           if answer and question.lower() in message.lower():
             value = answer
             settings.print_data_to_stdout(settings.print_message(message + str(value)))

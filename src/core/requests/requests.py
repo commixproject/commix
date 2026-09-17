@@ -112,10 +112,7 @@ def crawler_request(url, http_request_method):
     headers.do_check(request)
     response = headers.check_http_traffic(request)
     if response is None:
-      if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor:
-        response = proxy.use_proxy(request)
-      else:
-        response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+      response = headers.resend(request)
     if type(response) is not bool and settings.FOLLOW_REDIRECT and response is not None:
       if response.geturl() != url:
         href = redirection.do_check(url, response.geturl())
@@ -548,16 +545,10 @@ def get_request_response(request):
   if response is not None:
     return response
 
-  if menu.options.proxy or menu.options.ignore_proxy or menu.options.tor:
-    try:
-      response = proxy.use_proxy(request)
-    except Exception as err_msg:
-      response = request_failed(err_msg)
-  else:
-    try:
-      response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
-    except Exception as err_msg:
-      response = request_failed(err_msg)
+  try:
+    response = headers.resend(request)
+  except Exception as err_msg:
+    response = request_failed(err_msg)
 
   return response
 
@@ -619,7 +610,8 @@ def init_injection(payload, http_request_method, url):
 
   if settings.TIME_RELATED_ATTACK:
     failed_attempts = 0
-    while response is False and failed_attempts < settings.TIME_RELATED_ATTACK_RETRIES:
+    # Only a request that never reached the target is worth sending again: an error status is still an answer, and asking for it again both pays the delay a second time and reads as a retried measurement, which discards the finding.
+    while response is False and not stability.answered_with_http_error() and failed_attempts < settings.TIME_RELATED_ATTACK_RETRIES:
       failed_attempts += 1
       start = time.time()
       response = get_request_response(request)
@@ -660,7 +652,7 @@ def header_injection(url, payload, http_request_method, set_header):
 
   if settings.TIME_RELATED_ATTACK :
     failed_attempts = 0
-    while response is False and failed_attempts < settings.TIME_RELATED_ATTACK_RETRIES:
+    while response is False and not stability.answered_with_http_error() and failed_attempts < settings.TIME_RELATED_ATTACK_RETRIES:
       failed_attempts += 1
       start = time.time()
       try:

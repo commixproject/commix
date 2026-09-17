@@ -101,6 +101,12 @@ def request_was_retried(requests_before):
   return requests_sent() - requests_before > 1
 
 """
+True when the last request reached the target and was answered - with an error status, but answered, so its elapsed time is as good a measurement as a 200's.
+"""
+def answered_with_http_error():
+  return settings.LAST_HTTP_ERROR is not None
+
+"""
 True while the request loop should keep retrying: not succeeded, within budget, not unauthorized.
 """
 def should_keep_retrying(succeeded, unauthorized):

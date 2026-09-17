@@ -274,6 +274,12 @@ def oob_heuristic_basic(url, http_request_method, check_parameter, place):
   if settings.IDENTIFIED_COMMAND_INJECTION or menu.options.os:
     target_systems = (settings.TARGET_OS,)
 
+  # Said once, because these payloads break the rule the tested ones keep to: they chain several
+  # separators and clients into one request, to spend one request rather than six on a yes/no.
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Chaining all separators and clients into a single heuristic request."
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+
   attempts = []
   for target_os in target_systems:
     payload, probes = oob_payloads.heuristic_payload(channel, target_os)
@@ -452,6 +458,7 @@ def _run_over_languages(exploit):
   if settings.IDENTIFIED_EVAL_LANGUAGE in languages:
     languages = (settings.IDENTIFIED_EVAL_LANGUAGE,) + tuple(
       _ for _ in languages if _ != settings.IDENTIFIED_EVAL_LANGUAGE)
+  for language in languages:
     settings.set_eval_grammar(language)
     if len(languages) > 1 and settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Testing the '" + settings.EVAL_GRAMMAR.LABEL + "' language."
@@ -483,7 +490,7 @@ def classic_command_injection_technique(url, timesec, filename, http_request_met
       settings.IDENTIFIED_COMMAND_INJECTION = True
       settings.SKIP_CODE_INJECTIONS = True
     return result
-  run_technique(injection_type, technique, "CLASSIC_STATE", "SKIP_COMMAND_INJECTIONS", "c", exploit)
+  run_technique(injection_type, technique, "CLASSIC_STATE", "SKIP_COMMAND_INJECTIONS", "r", exploit)
 
 """
 Check if it's exploitable via dynamic code evaluation technique.
@@ -497,7 +504,7 @@ def dynamic_code_evaluation_technique(url, timesec, filename, http_request_metho
     if result is not False:
       settings.SKIP_COMMAND_INJECTIONS = True
     return result
-  run_technique(injection_type, technique, "EVAL_BASED_STATE", "SKIP_CODE_INJECTIONS", "c", exploit, eval_sink=True)
+  run_technique(injection_type, technique, "EVAL_BASED_STATE", "SKIP_CODE_INJECTIONS", "r", exploit, eval_sink=True)
 
 """
 Check if it's exploitable via time-based command injection technique.
@@ -578,7 +585,7 @@ Warn if changing the parameter never changes the response; classic/dynamic_code 
 def check_parameter_dynamism(url, http_request_method, check_parameter):
   if settings.LOAD_SESSION or not settings.TESTABLE_VALUE:
     return
-  if menu.options.tech and "c" not in menu.options.tech and "e" not in menu.options.tech:
+  if menu.options.tech and "r" not in menu.options.tech and "e" not in menu.options.tech:
     return
 
   marker = settings.TESTABLE_VALUE + settings.INJECT_TAG

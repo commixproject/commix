@@ -383,7 +383,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "141"
+REVISION = "142"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -694,7 +694,9 @@ is. It also means '%' is a per-cent sign here, not the start of an escape.
 """
 SEPARATORS = []
 DEFAULT_SEPARATORS = [";", "&", "|", ""]
-SPECIAL_SEPARATORS = ["&&", "||", "\n", "\r\n", "\x1a"]
+# cmd.exe's end-of-file. A separator only there, but a suffix on either target.
+CTRL_Z = "\x1a"
+SPECIAL_SEPARATORS = ["&&", "||", "\n", "\r\n", CTRL_Z]
 SEPARATORS_LVL1 = DEFAULT_SEPARATORS + SPECIAL_SEPARATORS
 SEPARATORS_LVL3 = SEPARATORS_LVL2 = SEPARATORS_LVL1
 
@@ -709,6 +711,9 @@ SUFFIXES = []
 SUFFIXES_LVL1 = [""]
 SUFFIXES_LVL2 = SUFFIXES_LVL1 + SEPARATORS_LVL1
 SUFFIXES_LVL3 = SUFFIXES_LVL2 + ["'", "\"", " #", "//", "\\\\"]
+
+# A quote closes only its own kind.
+QUOTES = ("'", "\"")
 
 # Bad combination of prefix and separator
 JUNK_COMBINATION = [SEPARATORS_LVL1[i] + SEPARATORS_LVL1[j] for i in range(len(SEPARATORS_LVL1)) for j in range(len(SEPARATORS_LVL1))]
@@ -948,11 +953,11 @@ def resolve_language(name):
 
 # Available injection techniques. Out-of-band is not one of them - it is the '--oob' switch, so that
 # it can serve the modules too, which never go through '--technique'.
-AVAILABLE_TECHNIQUES = ['c','t','f']
+AVAILABLE_TECHNIQUES = ['r','t','f']
 # The letter that used to name the evaluation sink before '--eval' did, the technique that reaches
 # that sink today, and the one whose technique carries whichever sink it is given.
 EVAL_TECHNIQUE_LETTER = 'e'
-EVAL_CAPABLE_TECHNIQUES = ('c', 't', 'f')
+EVAL_CAPABLE_TECHNIQUES = ('r', 't', 'f')
 OOB_TECHNIQUE_LETTER = 'o'
 # The languages the evaluation sink knows how to reach, and the word standing for all of them.
 SUPPORTED_EVAL_LANGUAGES = _eval.supported()
@@ -1015,8 +1020,8 @@ COMMAND_SUGGESTED = False
 
 # Supported injection types
 class INJECTION_TYPE(object):
-  RESULTS_BASED_CI = "results-based command injection"
-  RESULTS_BASED_CE = "results-based code injection"
+  RESULTS_BASED_CI = "classic command injection"
+  RESULTS_BASED_CE = "classic code injection"
   BLIND = "blind command injection"
   BLIND_CE = "blind code injection"
 
@@ -1028,12 +1033,14 @@ EVAL_INJECTION_TYPES = (INJECTION_TYPE.RESULTS_BASED_CE, INJECTION_TYPE.BLIND_CE
 # Spellings that older sessions hold, before the file-based technique was reported as blind.
 LEGACY_INJECTION_TYPES = {
   "semi-blind command injection" : INJECTION_TYPE.BLIND,
-  "semi-blind code injection" : INJECTION_TYPE.BLIND_CE
+  "semi-blind code injection" : INJECTION_TYPE.BLIND_CE,
+  "results-based command injection" : INJECTION_TYPE.RESULTS_BASED_CI,
+  "results-based code injection" : INJECTION_TYPE.RESULTS_BASED_CE
 }
 
 # Supported injection techniques
 class INJECTION_TECHNIQUE(object):
-  CLASSIC = "classic command injection technique"
+  CLASSIC = "results-based command injection technique"
   DYNAMIC_CODE = "dynamic code evaluation technique"
   TIME_BASED = "time-based command injection technique"
   FILE_BASED = "file-based injection technique"
@@ -1042,6 +1049,17 @@ class INJECTION_TECHNIQUE(object):
 
 # Canonical order techniques are tested and reported in.
 TECHNIQUE_ORDER = [INJECTION_TECHNIQUE.CLASSIC, INJECTION_TECHNIQUE.DYNAMIC_CODE, INJECTION_TECHNIQUE.TIME_BASED, INJECTION_TECHNIQUE.FILE_BASED, INJECTION_TECHNIQUE.TEMP_FILE_BASED, INJECTION_TECHNIQUE.OOB]
+
+# The techniques each injection type is reached by - '--type' names the type, and the run tests
+# every technique that shows a result that way.
+AVAILABLE_TYPES = {"c" : "r", "b" : "tf"}
+
+# The technique letter follows the first letter of its name, so a renamed technique renames its
+# letter with it - and a session written before the rename still has to find its way to the same one.
+LEGACY_TECHNIQUE_NAMES = {
+  "classic command injection technique" : INJECTION_TECHNIQUE.CLASSIC
+}
+LEGACY_TECHNIQUE_LETTERS = {"c" : "r"}
 
 USER_APPLIED_TECHNIQUE = False
 SKIP_TECHNIQUES = False
@@ -1407,6 +1425,19 @@ PENDING_FILE_CLEANUPS = {}
 
 # Output files written on the target, listed once per target when it is done with.
 LEFTOVER_FILES = []
+# Separators that join two commands and so cannot be the last thing on the line.
+BINARY_SEPARATORS = ("&&", "||", "|")
+# The shell's own do-nothing command, which also ignores every argument handed to it.
+NO_OPERATION = ":"
+# The separator that carries one command's output into the next.
+PIPE_SEPARATOR = "|"
+# Writing the output and reading it back are two requests, and the read can reach the target
+# before the write has landed - so it is tried again while it still holds what it held before.
+MAX_OUTPUT_FILE_READS = 3
+OUTPUT_FILE_READ_DELAY = 1
+LAST_OUTPUT_FILE_CONTENT = None
+# How many times an unusable URL is asked for again before the run gives up on being answered.
+MAX_INVALID_URL_ANSWERS = 3
 # Findings confirmed this run, for the end-of-run summary.
 CONFIRMED_INJECTION_POINTS = []
 # (prefix, suffix, separator, whitespace) confirmed by one technique, tried first by the others.
@@ -1660,6 +1691,13 @@ WAF_BLOCK_HTTP_CODES = [ FORBIDDEN_ERROR,
                        ]
 
 HTTP_ERROR_CODES_SUM = []
+
+# Statuses a gateway gives about itself rather than about the request, so the same request put to
+# it again may well be answered - unlike a 4xx, which is the target's answer and will not change.
+TRANSIENT_HTTP_ERROR_CODES = (INTERNAL_SERVER_ERROR, BAD_GATEWAY, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT)
+
+# The status the last request came back with, where that status was an error - see headers.resend().
+LAST_HTTP_ERROR = None
 
 # End line
 class END_LINE:

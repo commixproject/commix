@@ -1,5 +1,7 @@
 ## Version 4.2 (TBA)
-* Revised: The file-based technique is now reported as a "blind" injection type.
+* Added: New option `--type` to select injection techniques by the injection type they report (i.e. `c` for classic, `b` for blind).
+* Revised: Renamed the "classic" technique to "results-based", after how its result comes back, so `--technique` now takes the letters `r`, `t` and `f` (e.g. `--technique="rtf"`).
+* Revised: The "file-based" technique is now reported as a "blind" injection type.
 * Added: New tamper script `phphexname.py`, that runs the command through a PHP function named in hex.
 * Added: New tamper script `sleep2ping.py`, that replaces `sleep` with the wait between `ping` packets in a given payload.
 * Added: New tamper script `cmd2var.py`, that splits the name of the user-supplied operating system command across unset shell variables.
@@ -8,7 +10,7 @@
 * Added: New tamper script `space2brace`, which replaces the space character (%20) with a brace expansion ({a,b}) in a given payload.
 * Added: New tamper script `dollarstars.py`, which adds dollar sign followed by an asterisk ($*) between the characters in a given payload.
 * Added: New tamper script `cmd2loop.py`, which wraps a payload's command in a single-iteration "for" loop, so that it follows a shell keyword rather than a separator.
-* Added: Code injection support for Python as well as PHP, across all techniques.
+* Added: Code injection now supports Python as well as PHP, over every technique.
 * Added: The `--eval` switch now also reaches the time-based and file-based techniques, so code injection is proven blind and semi-blind as well as results-based.
 * Added: New `--eval` switch to test for code injection, optionally naming a language (e.g. `--eval="php"`), which combines with any technique given with `--technique`.
 * Fixed: The out-of-band (DNS) payloads chain their own commands with the separator being tested, instead of always with `||`.

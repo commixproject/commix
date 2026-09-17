@@ -32,6 +32,12 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec, technique):
   return injector.injection_output(url, OUTPUT_TEXTFILE, timesec, technique)
 
 """
+The response holding the written file, from whichever URL it turns out to be reachable at.
+"""
+def fetch_output_response(url, OUTPUT_TEXTFILE, timesec, technique):
+  return injector.fetch_output_response(url, OUTPUT_TEXTFILE, timesec, technique)
+
+"""
 """
 def select_output_filename(technique, tmp_path, TAG, prompt=True):
   return injector.select_output_filename(technique, tmp_path, TAG, prompt=prompt)

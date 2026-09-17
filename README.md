@@ -33,7 +33,7 @@ You can visit the [collection of screenshots](https://github.com/commixproject/c
 
 ## Features
 
-* **Four injection techniques** - classic (results-based), time-based (blind), file-based (blind, with a tempfile-based variant for write-restricted targets), and out-of-band (OAST) over HTTP/S and DNS.
+* **Four injection techniques** - results-based (classic), time-based (blind), file-based (blind, with a tempfile-based variant for write-restricted targets), and out-of-band (OAST) over HTTP/S and DNS. Selected with `--technique`, or by the type they report with `--type`.
 * **Code injection** - `--eval` tests the string a target evaluates as code, in PHP or Python, over the same four techniques.
 * **Broad injection surface** - GET/POST parameters, HTTP headers, cookies, and JSON/XML request bodies, plus the `shellshock` module for CGI targets.
 * **Interactive shells** - an `os_shell` on the target, built-in `reverse_tcp` and `bind_tcp` modes, and file `download`/`upload` over the established shell.

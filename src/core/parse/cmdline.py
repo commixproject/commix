@@ -539,6 +539,12 @@ injection.add_option("--technique",
                 dest="tech",
                 help="Specify injection technique(s) to use.")
 
+injection.add_option("--type",
+                action="store",
+                default="",
+                dest="type",
+                help="Specify injection type(s) to use.")
+
 injection.add_option("--eval",
                 action="store",
                 default=None,
