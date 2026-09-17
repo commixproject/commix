@@ -383,7 +383,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "142"
+REVISION = "143"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1526,6 +1526,7 @@ TAMPER_SCRIPTS = {
                   "sleep2timeout": False,
                   "sleep2ping": False,
                   "phphexname": False,
+                  "phpconcat": False,
                   "xforwardedfor": False,
                   "dollaratsigns": False,
                   "dollarstars": False,
@@ -1609,6 +1610,9 @@ INCOMPATIBLE_TAMPER_SCRIPTS = [
                   ("ansiquote", "uninitializedvariable"),
                   # "''" is literal inside the double-quoted "tr" ranges that "randomcase" builds.
                   ("randomcase", "singlequotes"),
+                  # Both name the same function in the same call, so the second finds the name of
+                  # the first already broken up and has nothing left to rewrite.
+                  ("phphexname", "phpconcat"),
                   # All three replace the user's command outright, so only one of them can have it.
                   ("cmd2wildcard", "rev"),
                   ("cmd2wildcard", "randomcase"),
