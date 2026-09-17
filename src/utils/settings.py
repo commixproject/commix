@@ -24,7 +24,6 @@ import threading as _threading
 from datetime import date
 from datetime import datetime
 from src.core.compat import xrange
-from src.thirdparty.six.moves import urllib as _urllib
 from src.core import eval as _eval
 
 # The language whose code injection grammar is in use; '--eval' can name another one.
@@ -383,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "144"
+REVISION = "145"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1451,6 +1450,8 @@ OS_CMD_DONE = False
 PENDING_OS_SHELL_ENTRY = None
 # Guards the resumed-session log notice against quit()'s recursion.
 LOGS_NOTIFICATION_SHOWN = False
+# Log files that could not be written, so the run neither retries the warning nor claims they hold anything.
+UNWRITABLE_LOG_FILES = set()
 # Set once a finding is worth suggesting '--os-shell' for, printed where the run ends.
 OS_SHELL_SUGGESTION_PENDING = False
 
@@ -1848,6 +1849,10 @@ PARTIAL_VALUE_MARKER = "\x02COMMIX_PARTIAL\x02"
 
 # Max characters shown at once in the live progress line.
 PROGRESS_DISPLAY_WIDTH = 60
+
+# Stands in for a character the time-related techniques never resolved, in the live progress line
+# and in the output they return - a dropped one would read as a value that was fully retrieved.
+UNRESOLVED_CHAR = "?"
 
 # Init Test
 INIT_TEST = ""

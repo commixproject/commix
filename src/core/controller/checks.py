@@ -37,7 +37,6 @@ from src.core.parse import cmdline as menu
 from src.utils import settings
 from src.thirdparty.odict import OrderedDict
 from src.core.convert import hexdecode
-from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import parameters
@@ -3898,7 +3897,8 @@ def shell_download(execute_cmd, cmd, filename):
   logs.report_add_file(remote_file, local_file)
   if settings.INCOMPLETE_OUTPUT:
     err_msg = "The file '" + remote_file + "' was written to '" + local_file + "' (" + str(len(content))
-    err_msg += " bytes) but is incomplete - the characters listed above are missing from it."
+    err_msg += " bytes) but is incomplete - the characters listed above are unresolved, and stand in it as '"
+    err_msg += settings.UNRESOLVED_CHAR + "'."
     settings.print_data_to_stdout(settings.print_error_msg(err_msg))
     return
   info_msg = "The file '" + remote_file + "' has been successfully downloaded to '" + local_file

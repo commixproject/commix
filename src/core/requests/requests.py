@@ -28,7 +28,6 @@ from src.thirdparty.six.moves import http_client as _http_client
 _http_client._MAXLINE = 1 * 1024 * 1024
 from src.utils import common
 from src.utils import crawler
-from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import parameters
 from src.core.requests import redirection

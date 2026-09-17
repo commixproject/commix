@@ -13,17 +13,13 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
-import os
 import random
 import string
-import subprocess
-from src.utils import common
 from src.core.parse import cmdline as menu
 from src.utils import settings
 from src.core.compat import xrange
 from src.core.controller import checks
 from src.core.shells import modes
-from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
 Use %XX only where the target performs one URL-decode pass; use literals for header-based injection points.

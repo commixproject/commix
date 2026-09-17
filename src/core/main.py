@@ -18,7 +18,6 @@ import os
 import sys
 import time
 import random
-import signal
 from src.thirdparty.six.moves import http_client as _http_client
 # accept overly long result lines
 _http_client._MAXLINE = 1 * 1024 * 1024
@@ -29,18 +28,16 @@ from src.utils import logs
 from src.utils import purge
 from src.utils import update
 from src.utils import common
-from src.utils import version
 from src.utils import install
 from src.utils import crawler
 from src.utils import settings
 from src.utils import session_handler
 from src.thirdparty.colorama import init
-from src.core.testing import smoke_test
-from src.core.requests import tor
+from src.core import startup
+from src.core import options
 from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import requests
-from src.core.requests import cookies
 from src.core.requests import redirection
 from src.core.controller import checks
 from src.core.parse import request as parser
@@ -785,716 +782,395 @@ def main(filename, url, http_request_method):
     checks.handle_early_interrupt(filename, url)
     return
 
-try:
-  filename = ""
+"""
+Everything a run does before it has a target, and the dispatch that finds them.
 
-  # Check if defined "--version" option.
-  if menu.options.version:
-    version.show_version()
-    raise SystemExit()
-
-  # Print the legal disclaimer msg.
-  settings.print_data_to_stdout(settings.print_legal_disclaimer_msg(settings.LEGAL_DISCLAIMER_MSG))
-
-  # Get total number of days from last update
-  if settings.STABLE_RELEASE is False:
-    common.days_from_last_update()
-
-  # Check if specified wrong alternative interpreter
-  if menu.options.interpreter:
-    # Resolved before it is checked, and kept resolved - what reads it later compares against the
-    # name commix knows, so 'py' has to have become 'python' by now.
-    menu.options.interpreter = settings.resolve_language(menu.options.interpreter)
-    if menu.options.interpreter not in settings.AVAILABLE_INTERPRETERS:
-      err_msg = "'" + menu.options.interpreter + "' interpreter is not supported!"
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-
-  # Define the level of verbosity.
-  if menu.options.verbose > 4:
-    err_msg = "The value for option '-v' "
-    err_msg += "must be an integer value from range [0, 4]."
-    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
-  else:
-    settings.VERBOSITY_LEVEL = menu.options.verbose
-
-  # Hard '--time-limit' cutoff - a signal, immune to exception handling elsewhere.
-  if menu.options.time_limit and hasattr(signal, "alarm"):
-    # Stop the run where it has been going longer than '--time-limit' allows.
-    def _time_limit_reached(signum, frame):
-      err_msg = "Reached the specified time limit of " + str(menu.options.time_limit) + " second(s)."
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      os._exit(0)
-    signal.signal(signal.SIGALRM, _time_limit_reached)
-    signal.alarm(max(1, int(round(menu.options.time_limit))))
-
-  if settings.VERBOSITY_LEVEL != 0:
-    settings.print_data_to_stdout(settings.execution("Starting"))
-
-  if menu.options.smoke_test:
-    smoke_test()
+Called rather than executed on import: what the module does on the way in is otherwise the
+program itself, and nothing above can be reached without running all of it.
+"""
+def run():
+  # Bound here and read back by scan_parsed_targets(), which walks a list of targets in turn.
+  global response, url, filename
 
   try:
-    # Treat non-interactive stdin as targets only without an explicit target; skip CI log pipes.
-    if hasattr(sys.stdin, "fileno") and not any((os.isatty(sys.stdin.fileno()), menu.options.ignore_stdin,
-                "CI" in os.environ,
-                menu.options.url, menu.options.requestfile, menu.options.bulkfile, menu.options.logfile)):
-      settings.STDIN_PARSING = True
-  except Exception as ex:
-    if "fileno" in str(ex) and settings.STDIN_PARSING:
-      settings.STDIN_PARSING = False
+    filename = ""
 
-  if settings.STDIN_PARSING or settings.CRAWLING or menu.options.bulkfile or menu.options.shellshock:
-    settings.OS_CHECKS_NUM = 1
+    # Settled before a target is in hand - see src/core/startup.py.
+    startup.bootstrap()
 
-  for os_checks_num in range(0, int(settings.OS_CHECKS_NUM)):
-    # Check if defined "--list-tampers" option.
-    if menu.options.list_tampers:
-      checks.list_tamper_scripts()
-      raise SystemExit()
+    for os_checks_num in range(0, int(settings.OS_CHECKS_NUM)):
+      # Check if defined "--list-tampers" option.
+      if menu.options.list_tampers:
+        checks.list_tamper_scripts()
+        raise SystemExit()
 
-    if settings.READLINE_ERROR :
-      checks.no_readline_module()
-      raise SystemExit()
+      if settings.READLINE_ERROR :
+        checks.no_readline_module()
+        raise SystemExit()
 
-    # Check if defined "--ignore-dependencies" option.
-    if not menu.options.ignore_dependencies:
-      checks.third_party_dependencies()
+      # Check if defined "--ignore-dependencies" option.
+      if not menu.options.ignore_dependencies:
+        checks.third_party_dependencies()
 
-    # Before the target is touched: a mistyped option is the user's to correct, not the target's
-    # to be probed over.
-    checks.validate_tamper_scripts()
-    checks.apply_injection_type()
-    checks.validate_techniques()
-    checks.validate_options()
+      # Before the target is touched: a mistyped option is the user's to correct, not the target's
+      # to be probed over.
+      checks.validate_tamper_scripts()
+      checks.apply_injection_type()
+      checks.validate_techniques()
+      checks.validate_options()
 
-    # Check if defined "--update" option.
-    if menu.options.update:
-      update.updater()
+      # Check if defined "--update" option.
+      if menu.options.update:
+        update.updater()
 
-    # Check if defined "--install" option.
-    if menu.options.install:
-      install.installer()
-      raise SystemExit()
+      # Check if defined "--install" option.
+      if menu.options.install:
+        install.installer()
+        raise SystemExit()
 
-    # Check if defined "--purge" option.
-    if menu.options.purge:
-      purge.purge()
+      # Check if defined "--purge" option.
+      if menu.options.purge:
+        purge.purge()
 
-    # Check for missing mandatory option(s).
-    if not settings.STDIN_PARSING and not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, \
-                menu.options.requestfile, menu.options.sitemap_url, menu.options.wizard, \
-                menu.options.update, menu.options.list_tampers)):
-      if not menu.options.purge:
-        err_msg = "Missing a mandatory option (-u, -l, -m, -r, -x, --wizard, --update, --list-tampers or --purge). "
-        err_msg += "Use -h for help."
-        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      # Everything the options say, settled before a target is contacted - see options.py.
+      options.validate()
+      # Enable detection phase
+      settings.DETECTION_PHASE = True
 
-    # Any out-of-band option on its own is enough to ask for the channel.
-    if any((menu.options.oob_server, menu.options.oob_token, menu.options.oob_poll != settings.OOB_POLL_INTERVAL)):
-      menu.options.oob = True
-
-    checks.init_keep_alive()
-    checks.set_optimize()
-
-    if menu.options.codec:
-      if not settings.known_encoding(menu.options.codec):
-        err_msg = "The provided charset '"  + menu.options.codec + "' is unknown. "
-        err_msg += "Please visit 'http://docs.python.org/library/codecs.html#standard-encodings' "
-        err_msg += "to get the full list of supported charsets."
+      # Parse target and data from HTTP proxy logs (i.e. Burp / WebScarab).
+      if menu.options.requestfile and menu.options.logfile:
+        err_msg = "The '-r' option is unlikely to work combined with the '-l' option."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
         raise SystemExit()
+      elif menu.options.requestfile or menu.options.logfile:
+        parser.logfile_parser()
+
+      # Check if ".git" exists and check for updated version!
+      if os.path.isdir("./.git") and settings.CHECK_FOR_UPDATES_ON_START:
+        update.check_for_update()
+
+      # Check if option is "--url" for single url test.
+      if menu.options.sitemap_url:
+        url = menu.options.sitemap_url
       else:
-        settings.DEFAULT_CODEC  = menu.options.codec.lower()
+        url = menu.options.url
 
-    if menu.options.header and len(menu.options.header.split(settings.END_LINE.ESCAPED_LF))> 1:
-        warn_msg = "Due to multiple provided HTTP headers, switching '--header' to '--headers'."
-        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-
-    if menu.options.method:
-      settings.HTTP_METHOD = menu.options.method
-
-    if menu.options.answers:
-      settings.ANSWERS = menu.options.answers
-
-    # Check if defined "--proxy" option.
-    if menu.options.proxy:
-      if menu.options.tor:
-        err_msg = "The switch '--tor' is incompatible with option '--proxy'."
-        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
-
-      if menu.options.ignore_proxy:
-        err_msg = "The option '--proxy' is incompatible with switch '--ignore-proxy'."
-        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
-
-      for match in re.finditer(settings.PROXY_REGEX, menu.options.proxy):
-        _, proxy_scheme, proxy_address, proxy_port = match.groups()
-        if settings.SCHEME or proxy_scheme:
-          if not settings.SCHEME:
-            settings.SCHEME = proxy_scheme
-          menu.options.proxy = proxy_address + ":" + proxy_port
-          break
+      if menu.options.data and not settings.CRAWLING:
+        settings.USER_DEFINED_POST_DATA = menu.options.data
+        # Check if defined character used for splitting parameter values.
+        if menu.options.pdel and menu.options.pdel in settings.USER_DEFINED_POST_DATA:
+          settings.POST_DATA_PARAM_DELIMITER = menu.options.pdel
       else:
-        err_msg = "Proxy value must be in format '(http|https)://address:port'."
-        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
-
-    if not menu.options.proxy:
-      # Check if defined Tor (--tor option).
-      if menu.options.tor:
-        if menu.options.tor_port:
-          settings.TOR_HTTP_PROXY_PORT = menu.options.tor_port
-        menu.options.proxy = settings.TOR_HTTP_PROXY_IP + ":" + settings.TOR_HTTP_PROXY_PORT
-        tor.do_check()
-
-    if menu.options.ignore_session and menu.options.flush_session:
-      err_msg = "The '--ignore-session' switch is unlikely to work combined with the '--flush-session' switch."
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-
-    if menu.options.failed_tries == 0:
-      err_msg = "You must specify '--failed-tries' value, greater than zero."
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-
-    # Check if defined "--auth-cred" and/or '--auth-type'.
-    if (menu.options.auth_type and not menu.options.auth_cred) or (menu.options.auth_cred and not menu.options.auth_type):
-      err_msg = "You must specify both '--auth-cred' and '--auth-type' options."
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-
-    if menu.options.auth_cred and menu.options.auth_type:
-      if menu.options.auth_type.lower() in (settings.AUTH_TYPE.BASIC, settings.AUTH_TYPE.DIGEST) and not re.search(settings.AUTH_CRED_REGEX, menu.options.auth_cred):
-        error_msg = "HTTP " + str(menu.options.auth_type)
-        error_msg += " authentication credentials value must be in format 'username:password'."
-        settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
-        raise SystemExit()
-
-    if menu.options.requestfile and menu.options.url:
-      err_msg = "The '-r' option is incompatible with option '-u' ('--url')."
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-
-    if menu.options.bulkfile and menu.options.url:
-      err_msg = "The '-m' option is incompatible with option '-u' ('--url')."
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-
-    # Check the user-defined OS.
-    if menu.options.os:
-      checks.user_defined_os()
-
-    # Check if defined "--abort-code" option.
-    if menu.options.abort_code:
-      try:
-        settings.ABORT_CODE = [int(_) for _ in re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.abort_code)]
-      except ValueError:
-        err_msg = "The option '--abort-code' should contain a list of integer values."
-        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
-
-    # Check if defined "--ignore-code" option.
-    if menu.options.ignore_code:
-      try:
-        settings.IGNORE_CODE = [int(_) for _ in re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.ignore_code)]
-        if settings.VERBOSITY_LEVEL != 0:
-          debug_msg = "Ignoring '" + str(', '.join(str(x) for x in settings.IGNORE_CODE)) + "' HTTP error code"+('', 's')[len(settings.IGNORE_CODE) > 1]+ "."
-          settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-      except ValueError:
-        err_msg = "The option '--ignore-code' should contain a list of integer values."
-        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
-
-    # Check if defined "--wizard" option.
-    if menu.options.wizard:
-      info_msg = "Starting wizard interface."
-      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-      message = "Please enter full target URL (-u) "
-      if menu.options.url:
-        settings.print_data_to_stdout(settings.print_message(message + str(menu.options.url)))
-      elif not menu.options.url and not settings.STDIN_PARSING:
-        while True:
-          menu.options.url = common.read_input(message, default=None, check_batch=True)
-          if menu.options.url is None or len(menu.options.url) == 0:
-            pass
-          else:
-            break
-      message = "POST data (--data) [Enter for None] "
-      if settings.STDIN_PARSING or menu.options.data:
-        settings.print_data_to_stdout(settings.print_message(message + str(menu.options.data)))
-      else:
-        menu.options.data = common.read_input(message, default=None, check_batch=True)
-        if menu.options.data is not None and len(menu.options.data) == 0:
-          menu.options.data = False
-      while True:
-        message = "Injection difficulty (--level) [1-3, Default: 1] "
-        if settings.STDIN_PARSING:
-          settings.print_data_to_stdout(settings.print_message(message + str(settings.INJECTION_LEVEL)))
-          break
-        try:
-          settings.INJECTION_LEVEL = int(common.read_input(message, default=settings.DEFAULT_INJECTION_LEVEL, check_batch=True))
-          if settings.INJECTION_LEVEL > int(settings.HTTP_HEADER_INJECTION_LEVEL):
-            pass
-          else:
-            break
-        except ValueError:
-          pass
-
-    # Seconds to delay between each HTTP request.
-    if menu.options.delay != 0:
-      settings.DELAY = menu.options.delay
-
-    # Check if defined "--timesec" option.
-    if menu.options.timesec != 0:
-      settings.TIMESEC = menu.options.timesec
-
-    # Check if defined "--threads" option.
-    if menu.options.threads > 1:
-      try:
-        import concurrent.futures
-        threads_supported = True
-      except ImportError:
-        threads_supported = False
-      if not threads_supported:
-        warn_msg = "'--threads' needs Python 3.2+; continuing with a single thread."
-        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-      elif menu.options.threads > settings.MAX_THREADS:
-        settings.THREADS = settings.MAX_THREADS
-        warn_msg = "Setting '--threads' to the maximum of " + str(settings.MAX_THREADS) + " concurrent HTTP requests."
-        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-      else:
-        settings.THREADS = menu.options.threads
-      if settings.THREADS > 1 and settings.VERBOSITY_LEVEL != 0:
-        debug_msg = "Setting " + str(settings.THREADS) + " concurrent HTTP requests."
-        settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-
-    if menu.options.tor:
-      settings.TIMESEC = settings.TIMESEC * 2
-      warn_msg = "Increasing default value for option '--time-sec' to"
-      warn_msg += " " + str(settings.TIMESEC) + ", because you provided switch '--tor'."
-      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-
-    if menu.options.sitemap_url:
-      settings.SITEMAP_CHECK = True
-
-    if menu.options.crawldepth > 0 or settings.SITEMAP_CHECK:
-      settings.CRAWLING = True
-
-    if menu.options.crawl_exclude:
-      if not settings.CRAWLING:
-        err_msg = "The '--crawl-exclude' option requires usage of the '--crawl' option."
-        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
-      try:
-        re.compile(menu.options.crawl_exclude)
-      except Exception as e:
-        err_msg = "invalid regular expression '" + menu.options.crawl_exclude + "' (" + str(e) + ")."
-        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
-
-    # Only a request carrying a body can be split into chunks.
-    if menu.options.chunked and not any((menu.options.data, menu.options.requestfile, \
-       menu.options.logfile, menu.options.forms)):
-      err_msg = "The '--chunked' switch requires usage of POST data."
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-
-    for option, cookies_file in (("--load-cookies", menu.options.load_cookies), ("--live-cookies", menu.options.live_cookies)):
-      if cookies_file and not os.path.isfile(cookies_file):
-        err_msg = "It seems the '" + cookies_file + "' file, provided with the '" + option + "' option, does not exist."
-        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
-
-    # The file keeps being read as it changes, so what it holds now would only be overwritten.
-    if menu.options.load_cookies and not menu.options.live_cookies:
-      menu.options.cookie = cookies.load_cookies()
-
-    if menu.options.scope:
-      try:
-        re.compile(menu.options.scope)
-      except Exception as e:
-        err_msg = "invalid regular expression '" + menu.options.scope + "' (" + str(e) + ")."
-        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
-      info_msg = "Using regular expression '" + menu.options.scope + "' for filtering targets."
-      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-
-    if menu.options.forms and not settings.CRAWLING:
-      err_msg = "The '--forms' switch requires the '--crawl' option."
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-
-    # Check arguments
-    if len(sys.argv) == 1 and not settings.STDIN_PARSING:
-      menu.parser.print_help()
-      settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-      raise SystemExit()
-    else:
-      # Check for INJECT_HERE tag.
-      inject_tag_regex_match = re.search(settings.INJECT_TAG_REGEX, ",".join(str(x) for x in sys.argv))
-      if inject_tag_regex_match:
-        settings.INJECT_TAG = inject_tag_regex_match.group(0)
-
-    # What can be answered without the target is answered before it is contacted: a path that does
-    # not exist is no reason to have opened a connection, let alone to have sent it a payload.
-    if menu.options.file_write is not None:
-      if not os.path.exists(menu.options.file_write):
-        err_msg = "The specified local file '" + menu.options.file_write + "' does not exist."
-        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
-      if not os.path.isfile(menu.options.file_write):
-        err_msg = "The specified path '" + menu.options.file_write + "' is not a file."
-        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
-
-    # Check provided parameters for tests
-    checks.check_provided_parameters()
-
-    # Define the local path where Metasploit Framework is installed.
-    if menu.options.msf_path:
-      settings.METASPLOIT_PATH = menu.options.msf_path
-
-    # Enable detection phase
-    settings.DETECTION_PHASE = True
-
-    # Parse target and data from HTTP proxy logs (i.e. Burp / WebScarab).
-    if menu.options.requestfile and menu.options.logfile:
-      err_msg = "The '-r' option is unlikely to work combined with the '-l' option."
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
-    elif menu.options.requestfile or menu.options.logfile:
-      parser.logfile_parser()
-
-    # Check if ".git" exists and check for updated version!
-    if os.path.isdir("./.git") and settings.CHECK_FOR_UPDATES_ON_START:
-      update.check_for_update()
-
-    # Check if option is "--url" for single url test.
-    if menu.options.sitemap_url:
-      url = menu.options.sitemap_url
-    else:
-      url = menu.options.url
-
-    if menu.options.data and not settings.CRAWLING:
-      settings.USER_DEFINED_POST_DATA = menu.options.data
-      # Check if defined character used for splitting parameter values.
-      if menu.options.pdel and menu.options.pdel in settings.USER_DEFINED_POST_DATA:
-        settings.POST_DATA_PARAM_DELIMITER = menu.options.pdel
-    else:
-      # Check if defined character used for splitting parameter values.
-      if menu.options.pdel and menu.options.pdel in url:
-        settings.URL_PARAM_DELIMITER = menu.options.pdel
+        # Check if defined character used for splitting parameter values.
+        if menu.options.pdel and menu.options.pdel in url:
+          settings.URL_PARAM_DELIMITER = menu.options.pdel
         
-    http_request_method  = checks.check_http_method(url)
-    # A request / proxy log file holding more than one request is tested target by target.
-    if len(settings.MULTI_REQUEST_TARGETS) > 1 and not settings.CRAWLING:
-      settings.MULTI_TARGETS = True
-      menu.options.batch = True
-      scan_parsed_targets(os_checks_num)
-      raise SystemExit()
-    if not settings.STDIN_PARSING and not menu.options.bulkfile and not settings.CRAWLING:
-      if os_checks_num == 0:
-        settings.INIT_TEST = True
-      # Skip upfront detection-only probes below when a stored technique already exists.
-      settings.LIKELY_RESUME = session_handler.has_any_stored_technique(url, http_request_method)
-      response, url = url_response(url, http_request_method)
-      if response is not False:
-        filename = logs.logs_filename_creation(url)
-        session_handler.restore_waf_status(url)
-        main(filename, url, http_request_method)
-      else:
-        err_msg = "Unable to establish a connection with the target URL."
-        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-
-    else:
-      output_href = []
-      output_forms = []
-      # Check if option is "-m" for multiple urls test.
-      if menu.options.bulkfile:
-        bulkfile = menu.options.bulkfile
+      http_request_method  = checks.check_http_method(url)
+      # A request / proxy log file holding more than one request is tested target by target.
+      if len(settings.MULTI_REQUEST_TARGETS) > 1 and not settings.CRAWLING:
+        settings.MULTI_TARGETS = True
+        menu.options.batch = True
+        scan_parsed_targets(os_checks_num)
+        raise SystemExit()
+      if not settings.STDIN_PARSING and not menu.options.bulkfile and not settings.CRAWLING:
         if os_checks_num == 0:
-          info_msg = "Parsing targets using the '" + os.path.split(bulkfile)[1] + "' file. "
-          settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-          
-        if not os.path.exists(bulkfile):
-          err_msg = "It seems the '" + bulkfile + "' file does not exist."
-          settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-          raise SystemExit()
-
-        elif os.stat(bulkfile).st_size == 0:
-          err_msg = "It seems the '" + bulkfile + "' file is empty."
-          settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-          raise SystemExit()
-
+          settings.INIT_TEST = True
+        # Skip upfront detection-only probes below when a stored technique already exists.
+        settings.LIKELY_RESUME = session_handler.has_any_stored_technique(url, http_request_method)
+        response, url = url_response(url, http_request_method)
+        if response is not False:
+          filename = logs.logs_filename_creation(url)
+          session_handler.restore_waf_status(url)
+          main(filename, url, http_request_method)
         else:
-          settings.MULTI_TARGETS = True
-          menu.options.batch = True
-          with open(menu.options.bulkfile, encoding="utf-8-sig") as f:
-            lines = [line for line in f if line.strip() and not line.lstrip().startswith("#")]
-          bulkfile = [x for x in (parse_target_line(line) for line in lines) if x]
-          # A line that names no usable target is dropped, and a list is long enough that dropping
-          # one quietly would never be noticed - so how many went is said before the run starts.
-          skipped = len(lines) - len(bulkfile)
-          if skipped:
-            warn_msg = "Skipped " + str(skipped) + " line" + ("s" if skipped > 1 else "")
-            warn_msg += " that named no target within scope."
-            settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+          err_msg = "Unable to establish a connection with the target URL."
+          settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
 
-      # Check if option "--crawl" is enabled.
-      if settings.CRAWLING:
-        settings.CRAWLING_PHASE = True
-        url_num = 1
-        if not menu.options.bulkfile and not settings.STDIN_PARSING:
-          crawling_list = 1
-          output_href = crawler.crawler(url, url_num, crawling_list, http_request_method)
-          output_href.append(url)
-          output_forms += crawler.crawled_forms
-        else:
-          if settings.STDIN_PARSING:
-            # --crawl requires the full target list; stream only plain stdin targets.
-            bulkfile = list(stdin_parsing_target(os_checks_num))
-          crawling_list = len(bulkfile)
-          for url in bulkfile:
-            output_href += (crawler.crawler(url, url_num, crawling_list, http_request_method))
-            output_forms += crawler.crawled_forms
-            url_num += 1
-          output_href = output_href + bulkfile
-          output_href = [x for x in output_href if x not in settings.HREF_SKIPPED]
-        if not menu.options.shellshock:
-          try:
-            output_href = crawler.normalize_results(output_href)
-          except SystemExit:
-            # No GET links; continue if crawled POST forms are available.
-            if not output_forms:
-              raise
-            output_href = []
-        settings.CRAWLING_PHASE = False
       else:
-        filename = None
-        if not settings.STDIN_PARSING:
-          output_href = output_href + bulkfile
-
-      # Stream plain stdin targets as they arrive; total_href stays None until the stream ends.
-      if settings.STDIN_PARSING and not settings.CRAWLING:
-        # The same items in the same order, with anything seen before left out.
-        def _dedupe_lazy(iterable):
-          seen = set()
-          for x in iterable:
-            if x and x not in seen:
-              seen.add(x)
-              yield x
-        clean_output_href = _dedupe_lazy(stdin_parsing_target(os_checks_num))
-        total_href = None
-      else:
-        # Removing duplicates from list (order-preserving, O(n)).
-        clean_output_href = []
-        seen_href = set()
-        for x in output_href:
-          if x not in seen_href:
-            seen_href.add(x)
-            clean_output_href.append(x)
-        # Removing empty elements from list.
-        clean_output_href = [x for x in clean_output_href if x]
-        if len(output_href) != 0:
-          if filename is not None:
-            filename = crawler.store_crawling(output_href)
-        total_href = len(clean_output_href)
-
-      # Removing duplicates from the identified (crawled) forms (order-preserving, O(n)).
-      clean_output_forms = []
-      seen_forms = set()
-      for x in output_forms:
-        if x not in seen_forms:
-          seen_forms.add(x)
-          clean_output_forms.append(x)
-
-      # Merge target/form counts into one message (total_href is None in lazy stdin mode).
-      summary_parts = []
-      if total_href:
-        summary_parts.append(str(total_href) + " target" + "s"[total_href == 1:])
-      if len(clean_output_forms) != 0:
-        summary_parts.append(str(len(clean_output_forms)) + " form" + "s"[len(clean_output_forms) == 1:])
-      if summary_parts:
-        info_msg = "Found a total of " + " and ".join(summary_parts) + "."
-        if settings.SKIPPED_OUT_OF_SCOPE:
-          info_msg += " Skipped " + str(len(settings.SKIPPED_OUT_OF_SCOPE)) + " target" + "s"[len(settings.SKIPPED_OUT_OF_SCOPE) == 1:] + " out of scope."
-        settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-
-      # Test crawled POST forms first; their method/data are handled separately.
-      form_num = 0
-      orig_data = menu.options.data
-      orig_user_defined_post_data = settings.USER_DEFINED_POST_DATA
-      for form_url, form_data in clean_output_forms:
-        if check_for_injected_url(form_url):
-          prompt_skip_vulnerable_host(form_url)
-
-        if settings.SKIP_VULNERABLE_HOST:
-          form_num += 1
-          info_msg = "Skipping form URL '" + form_url + "' (" + str(form_num) + "/" + str(len(clean_output_forms)) + ")."
-          settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-          continue
-
-        if not check_for_injected_url(form_url):
-          settings.SKIP_VULNERABLE_HOST = None
-        form_num += 1
-        perform_check = True
-        while True:
-          settings.print_data_to_stdout(settings.print_message("[" + str(form_num) + "/" + str(len(clean_output_forms)) + "] FORM - POST " + form_url + " - " + form_data))
-          message = "Do you want to use form #" + str(form_num) + " for testing? [Y/n/q] "
-          next_form = common.read_input(message, default="Y", check_batch=True)
-          if next_form in settings.CHOICE_YES:
-            info_msg = "Testing form '" + form_url + "'."
-            settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-            break
-          elif next_form in settings.CHOICE_NO:
-            perform_check = False
-            break
-          elif next_form in settings.CHOICE_QUIT:
-            raise SystemExit()
-          else:
-            common.invalid_option(next_form)
-            pass
-        if perform_check:
-          has_blank_fields = re.search(settings.EMPTY_FORM_FIELDS_REGEX, form_data) is not None
-          edit_msg = "Edit POST data [default: " + form_data + "]"
-          if has_blank_fields:
-            edit_msg += " (Warning: blank fields detected)"
-          edit_msg += ": "
-          form_data = common.read_input(edit_msg, default=form_data, check_batch=True)
-          if re.search(settings.EMPTY_FORM_FIELDS_REGEX, form_data):
-            fill_msg = "Do you want to fill blank fields with random values? [Y/n] "
-            if common.read_input(fill_msg, default="Y", check_batch=True) in settings.CHOICE_YES:
-              form_data = crawler.random_fill_blank_fields(form_data)
-          if menu.options.threads <= 1:
-            threads_msg = "Please enter number of threads? [Enter for " + str(menu.options.threads) + " (current)] "
-            threads_answer = common.read_input(threads_msg, default=str(menu.options.threads), check_batch=True)
-            try:
-              threads_value = int(threads_answer)
-              if threads_value > 1:
-                menu.options.threads = threads_value
-                settings.THREADS = min(threads_value, settings.MAX_THREADS)
-                if threads_value > settings.MAX_THREADS:
-                  warn_msg = "Setting '--threads' to the maximum of " + str(settings.MAX_THREADS) + " concurrent HTTP requests."
-                  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-              elif threads_value < 1:
-                common.invalid_option(threads_answer)
-            except ValueError:
-              common.invalid_option(threads_answer)
+        output_href = []
+        output_forms = []
+        # Check if option is "-m" for multiple urls test.
+        if menu.options.bulkfile:
+          bulkfile = menu.options.bulkfile
           if os_checks_num == 0:
-            settings.INIT_TEST = True
-          # Reset the injection level
-          if settings.INJECTION_LEVEL > settings.HTTP_HEADER_INJECTION_LEVEL:
-            settings.INJECTION_LEVEL = 1
-          settings.reset_target_state(menu.options)
-          menu.options.url = form_url
-          menu.options.data = form_data
-          settings.USER_DEFINED_POST_DATA = form_data
-          settings.IGNORE_USER_DEFINED_POST_DATA = False
-          init_injection(form_url)
-          try:
-            response, form_url = url_response(form_url, settings.HTTPMETHOD.POST)
-            if response is not False:
-              filename = logs.logs_filename_creation(form_url)
-              session_handler.restore_waf_status(form_url)
-              main(filename, form_url, settings.HTTPMETHOD.POST)
-          except KeyboardInterrupt:
-            checks.handle_early_interrupt(filename, form_url)
-          except (Exception, SystemExit):
-            pass
-          menu.options.data = orig_data
-          settings.USER_DEFINED_POST_DATA = orig_user_defined_post_data
+            info_msg = "Parsing targets using the '" + os.path.split(bulkfile)[1] + "' file. "
+            settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+          
+          if not os.path.exists(bulkfile):
+            err_msg = "It seems the '" + bulkfile + "' file does not exist."
+            settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+            raise SystemExit()
 
-      url_num = 0
-      href_count_suffix = ("/" + str(total_href)) if total_href is not None else ""
-      for url, is_last_href in with_is_last(clean_output_href):
-        if check_for_injected_url(url):
-          prompt_skip_vulnerable_host(url)
+          elif os.stat(bulkfile).st_size == 0:
+            err_msg = "It seems the '" + bulkfile + "' file is empty."
+            settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+            raise SystemExit()
+
+          else:
+            settings.MULTI_TARGETS = True
+            menu.options.batch = True
+            with open(menu.options.bulkfile, encoding="utf-8-sig") as f:
+              lines = [line for line in f if line.strip() and not line.lstrip().startswith("#")]
+            bulkfile = [x for x in (parse_target_line(line) for line in lines) if x]
+            # A line that names no usable target is dropped, and a list is long enough that dropping
+            # one quietly would never be noticed - so how many went is said before the run starts.
+            skipped = len(lines) - len(bulkfile)
+            if skipped:
+              warn_msg = "Skipped " + str(skipped) + " line" + ("s" if skipped > 1 else "")
+              warn_msg += " that named no target within scope."
+              settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
+        # Check if option "--crawl" is enabled.
+        if settings.CRAWLING:
+          settings.CRAWLING_PHASE = True
+          url_num = 1
+          if not menu.options.bulkfile and not settings.STDIN_PARSING:
+            crawling_list = 1
+            output_href = crawler.crawler(url, url_num, crawling_list, http_request_method)
+            output_href.append(url)
+            output_forms += crawler.crawled_forms
+          else:
+            if settings.STDIN_PARSING:
+              # --crawl requires the full target list; stream only plain stdin targets.
+              bulkfile = list(stdin_parsing_target(os_checks_num))
+            crawling_list = len(bulkfile)
+            for url in bulkfile:
+              output_href += (crawler.crawler(url, url_num, crawling_list, http_request_method))
+              output_forms += crawler.crawled_forms
+              url_num += 1
+            output_href = output_href + bulkfile
+            output_href = [x for x in output_href if x not in settings.HREF_SKIPPED]
+          if not menu.options.shellshock:
+            try:
+              output_href = crawler.normalize_results(output_href)
+            except SystemExit:
+              # No GET links; continue if crawled POST forms are available.
+              if not output_forms:
+                raise
+              output_href = []
+          settings.CRAWLING_PHASE = False
+        else:
+          filename = None
+          if not settings.STDIN_PARSING:
+            output_href = output_href + bulkfile
+
+        # Stream plain stdin targets as they arrive; total_href stays None until the stream ends.
+        if settings.STDIN_PARSING and not settings.CRAWLING:
+          # The same items in the same order, with anything seen before left out.
+          def _dedupe_lazy(iterable):
+            seen = set()
+            for x in iterable:
+              if x and x not in seen:
+                seen.add(x)
+                yield x
+          clean_output_href = _dedupe_lazy(stdin_parsing_target(os_checks_num))
+          total_href = None
+        else:
+          # Removing duplicates from list (order-preserving, O(n)).
+          clean_output_href = []
+          seen_href = set()
+          for x in output_href:
+            if x not in seen_href:
+              seen_href.add(x)
+              clean_output_href.append(x)
+          # Removing empty elements from list.
+          clean_output_href = [x for x in clean_output_href if x]
+          if len(output_href) != 0:
+            if filename is not None:
+              filename = crawler.store_crawling(output_href)
+          total_href = len(clean_output_href)
+
+        # Removing duplicates from the identified (crawled) forms (order-preserving, O(n)).
+        clean_output_forms = []
+        seen_forms = set()
+        for x in output_forms:
+          if x not in seen_forms:
+            seen_forms.add(x)
+            clean_output_forms.append(x)
+
+        # Merge target/form counts into one message (total_href is None in lazy stdin mode).
+        summary_parts = []
+        if total_href:
+          summary_parts.append(str(total_href) + " target" + "s"[total_href == 1:])
+        if len(clean_output_forms) != 0:
+          summary_parts.append(str(len(clean_output_forms)) + " form" + "s"[len(clean_output_forms) == 1:])
+        if summary_parts:
+          info_msg = "Found a total of " + " and ".join(summary_parts) + "."
+          if settings.SKIPPED_OUT_OF_SCOPE:
+            info_msg += " Skipped " + str(len(settings.SKIPPED_OUT_OF_SCOPE)) + " target" + "s"[len(settings.SKIPPED_OUT_OF_SCOPE) == 1:] + " out of scope."
+          settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
+        # Test crawled POST forms first; their method/data are handled separately.
+        form_num = 0
+        orig_data = menu.options.data
+        orig_user_defined_post_data = settings.USER_DEFINED_POST_DATA
+        for form_url, form_data in clean_output_forms:
+          if check_for_injected_url(form_url):
+            prompt_skip_vulnerable_host(form_url)
 
           if settings.SKIP_VULNERABLE_HOST:
-            url_num += 1
-            info_msg = "Skipping URL '" + url + "' (" + str(url_num) + href_count_suffix + ")."
+            form_num += 1
+            info_msg = "Skipping form URL '" + form_url + "' (" + str(form_num) + "/" + str(len(clean_output_forms)) + ")."
             settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+            continue
 
-        if not check_for_injected_url(url) or settings.SKIP_VULNERABLE_HOST is False:
-          if not check_for_injected_url(url):
+          if not check_for_injected_url(form_url):
             settings.SKIP_VULNERABLE_HOST = None
-          http_request_method = checks.check_http_method(url)
-          if (settings.CRAWLING and re.search(r"(.*?)\?(.+)", url) or menu.options.shellshock) or settings.MULTI_TARGETS:
-            url_num += 1
-            perform_check = True
-            while True:
-              settings.print_data_to_stdout(settings.print_message("[" + str(url_num) + href_count_suffix + "] URL - " + http_request_method + " " + url))
-              message = "Do you want to use URL #" + str(url_num) + " for testing? [Y/n] "
-              next_url = common.read_input(message, default="Y", check_batch=True)
-              if next_url in settings.CHOICE_YES:
-                info_msg = "Testing URL '" + url + "'."
-                settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-                break
-              elif next_url in settings.CHOICE_NO:
-                perform_check = False
-                if is_last_href:
+          form_num += 1
+          perform_check = True
+          while True:
+            settings.print_data_to_stdout(settings.print_message("[" + str(form_num) + "/" + str(len(clean_output_forms)) + "] FORM - POST " + form_url + " - " + form_data))
+            message = "Do you want to use form #" + str(form_num) + " for testing? [Y/n/q] "
+            next_form = common.read_input(message, default="Y", check_batch=True)
+            if next_form in settings.CHOICE_YES:
+              info_msg = "Testing form '" + form_url + "'."
+              settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+              break
+            elif next_form in settings.CHOICE_NO:
+              perform_check = False
+              break
+            elif next_form in settings.CHOICE_QUIT:
+              raise SystemExit()
+            else:
+              common.invalid_option(next_form)
+              pass
+          if perform_check:
+            has_blank_fields = re.search(settings.EMPTY_FORM_FIELDS_REGEX, form_data) is not None
+            edit_msg = "Edit POST data [default: " + form_data + "]"
+            if has_blank_fields:
+              edit_msg += " (Warning: blank fields detected)"
+            edit_msg += ": "
+            form_data = common.read_input(edit_msg, default=form_data, check_batch=True)
+            if re.search(settings.EMPTY_FORM_FIELDS_REGEX, form_data):
+              fill_msg = "Do you want to fill blank fields with random values? [Y/n] "
+              if common.read_input(fill_msg, default="Y", check_batch=True) in settings.CHOICE_YES:
+                form_data = crawler.random_fill_blank_fields(form_data)
+            if menu.options.threads <= 1:
+              threads_msg = "Please enter number of threads? [Enter for " + str(menu.options.threads) + " (current)] "
+              threads_answer = common.read_input(threads_msg, default=str(menu.options.threads), check_batch=True)
+              try:
+                threads_value = int(threads_answer)
+                if threads_value > 1:
+                  menu.options.threads = threads_value
+                  settings.THREADS = min(threads_value, settings.MAX_THREADS)
+                  if threads_value > settings.MAX_THREADS:
+                    warn_msg = "Setting '--threads' to the maximum of " + str(settings.MAX_THREADS) + " concurrent HTTP requests."
+                    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+                elif threads_value < 1:
+                  common.invalid_option(threads_answer)
+              except ValueError:
+                common.invalid_option(threads_answer)
+            if os_checks_num == 0:
+              settings.INIT_TEST = True
+            # Reset the injection level
+            if settings.INJECTION_LEVEL > settings.HTTP_HEADER_INJECTION_LEVEL:
+              settings.INJECTION_LEVEL = 1
+            settings.reset_target_state(menu.options)
+            menu.options.url = form_url
+            menu.options.data = form_data
+            settings.USER_DEFINED_POST_DATA = form_data
+            settings.IGNORE_USER_DEFINED_POST_DATA = False
+            init_injection(form_url)
+            try:
+              response, form_url = url_response(form_url, settings.HTTPMETHOD.POST)
+              if response is not False:
+                filename = logs.logs_filename_creation(form_url)
+                session_handler.restore_waf_status(form_url)
+                main(filename, form_url, settings.HTTPMETHOD.POST)
+            except KeyboardInterrupt:
+              checks.handle_early_interrupt(filename, form_url)
+            except (Exception, SystemExit):
+              pass
+            menu.options.data = orig_data
+            settings.USER_DEFINED_POST_DATA = orig_user_defined_post_data
+
+        url_num = 0
+        href_count_suffix = ("/" + str(total_href)) if total_href is not None else ""
+        for url, is_last_href in with_is_last(clean_output_href):
+          if check_for_injected_url(url):
+            prompt_skip_vulnerable_host(url)
+
+            if settings.SKIP_VULNERABLE_HOST:
+              url_num += 1
+              info_msg = "Skipping URL '" + url + "' (" + str(url_num) + href_count_suffix + ")."
+              settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
+          if not check_for_injected_url(url) or settings.SKIP_VULNERABLE_HOST is False:
+            if not check_for_injected_url(url):
+              settings.SKIP_VULNERABLE_HOST = None
+            http_request_method = checks.check_http_method(url)
+            if (settings.CRAWLING and re.search(r"(.*?)\?(.+)", url) or menu.options.shellshock) or settings.MULTI_TARGETS:
+              url_num += 1
+              perform_check = True
+              while True:
+                settings.print_data_to_stdout(settings.print_message("[" + str(url_num) + href_count_suffix + "] URL - " + http_request_method + " " + url))
+                message = "Do you want to use URL #" + str(url_num) + " for testing? [Y/n] "
+                next_url = common.read_input(message, default="Y", check_batch=True)
+                if next_url in settings.CHOICE_YES:
+                  info_msg = "Testing URL '" + url + "'."
+                  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+                  break
+                elif next_url in settings.CHOICE_NO:
+                  perform_check = False
+                  if is_last_href:
+                    raise SystemExit()
+                  else:
+                    break
+                elif next_url in settings.CHOICE_QUIT:
                   raise SystemExit()
                 else:
-                  break
-              elif next_url in settings.CHOICE_QUIT:
-                raise SystemExit()
-              else:
-                common.invalid_option(next_url)
-                pass
-            if perform_check:
-              if settings.CRAWLING:
-                split_url = _urllib.parse.urlsplit(url)
-                if re.search(settings.EMPTY_FORM_FIELDS_REGEX, split_url.query):
-                  edit_msg = "Edit URL [default: " + url + "] (Warning: blank fields detected): "
-                  url = common.read_input(edit_msg, default=url, check_batch=True)
+                  common.invalid_option(next_url)
+                  pass
+              if perform_check:
+                if settings.CRAWLING:
                   split_url = _urllib.parse.urlsplit(url)
                   if re.search(settings.EMPTY_FORM_FIELDS_REGEX, split_url.query):
-                    fill_msg = "Do you want to fill blank fields with random values? [Y/n] "
-                    if common.read_input(fill_msg, default="Y", check_batch=True) in settings.CHOICE_YES:
-                      url = _urllib.parse.urlunsplit(split_url._replace(query=crawler.random_fill_blank_fields(split_url.query)))
-              if os_checks_num == 0:
-                settings.INIT_TEST = True
-              # Reset the injection level
-              if settings.INJECTION_LEVEL > settings.HTTP_HEADER_INJECTION_LEVEL:
-                settings.INJECTION_LEVEL = 1
-              settings.reset_target_state(menu.options)
-              menu.options.url = url
-              init_injection(url)
-              try:
-                response, url = url_response(url, http_request_method)
-                if response is not False:
-                  filename = logs.logs_filename_creation(url)
-                  session_handler.restore_waf_status(url)
-                  main(filename, url, http_request_method)
-              except KeyboardInterrupt:
-                checks.handle_early_interrupt(filename, url)
-              except (Exception, SystemExit):
-                pass
-          else:
-            url_num += 1
-            settings.print_data_to_stdout(settings.print_message("[" + str(url_num) + href_count_suffix + "] Skipping URL - " + http_request_method + " " + url))
+                    edit_msg = "Edit URL [default: " + url + "] (Warning: blank fields detected): "
+                    url = common.read_input(edit_msg, default=url, check_batch=True)
+                    split_url = _urllib.parse.urlsplit(url)
+                    if re.search(settings.EMPTY_FORM_FIELDS_REGEX, split_url.query):
+                      fill_msg = "Do you want to fill blank fields with random values? [Y/n] "
+                      if common.read_input(fill_msg, default="Y", check_batch=True) in settings.CHOICE_YES:
+                        url = _urllib.parse.urlunsplit(split_url._replace(query=crawler.random_fill_blank_fields(split_url.query)))
+                if os_checks_num == 0:
+                  settings.INIT_TEST = True
+                # Reset the injection level
+                if settings.INJECTION_LEVEL > settings.HTTP_HEADER_INJECTION_LEVEL:
+                  settings.INJECTION_LEVEL = 1
+                settings.reset_target_state(menu.options)
+                menu.options.url = url
+                init_injection(url)
+                try:
+                  response, url = url_response(url, http_request_method)
+                  if response is not False:
+                    filename = logs.logs_filename_creation(url)
+                    session_handler.restore_waf_status(url)
+                    main(filename, url, http_request_method)
+                except KeyboardInterrupt:
+                  checks.handle_early_interrupt(filename, url)
+                except (Exception, SystemExit):
+                  pass
+            else:
+              url_num += 1
+              settings.print_data_to_stdout(settings.print_message("[" + str(url_num) + href_count_suffix + "] Skipping URL - " + http_request_method + " " + url))
 
-        if is_last_href:
-          raise SystemExit()
+          if is_last_href:
+            raise SystemExit()
 
-except KeyboardInterrupt:
-  try:
-    checks.user_aborted(filename, url)
-  except NameError:
-    abort_msg = "User quit (Ctrl-C pressed)."
-    settings.print_data_to_stdout(settings.print_abort_msg(abort_msg))
-  raise checks.exit()
+  except KeyboardInterrupt:
+    try:
+      checks.user_aborted(filename, url)
+    except NameError:
+      abort_msg = "User quit (Ctrl-C pressed)."
+      settings.print_data_to_stdout(settings.print_abort_msg(abort_msg))
+    raise checks.exit()
 
-except EOFError:
-  err_msg = "Exiting, due to EOFError."
-  settings.print_data_to_stdout(settings.print_error_msg(err_msg))
-  raise checks.exit()
+  except EOFError:
+    err_msg = "Exiting, due to EOFError."
+    settings.print_data_to_stdout(settings.print_error_msg(err_msg))
+    raise checks.exit()
 
-except SystemExit:
-  raise checks.exit()
+  except SystemExit:
+    raise checks.exit()
 
 # eof

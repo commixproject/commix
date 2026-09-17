@@ -15,7 +15,6 @@ For more see the file 'readme/COPYING' for copying permission.
 
 import threading
 from socket import error as SocketError
-from src.utils import settings
 from src.thirdparty.six.moves import http_client as _http_client
 from src.thirdparty.six.moves import urllib as _urllib
 

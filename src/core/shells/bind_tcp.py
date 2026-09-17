@@ -13,13 +13,10 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
-import os
 from src.core.parse import cmdline as menu
-from src.utils import common
 from src.utils import settings
 from src.core.controller import checks
 from src.core.shells import modes
-from src.thirdparty.colorama import Fore, Back, Style, init
 
 """
 Netcat bind TCP shell - one generator, parameterized by which netcat binary to target.

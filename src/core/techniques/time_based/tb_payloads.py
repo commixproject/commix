@@ -15,7 +15,6 @@ For more see the file 'readme/COPYING' for copying permission.
 
 from src.utils import settings
 from src.core.controller import checks
-from src.thirdparty.six.moves import urllib as _urllib
 
 """
 The "time-based" injection technique on Blind OS Command Injection.

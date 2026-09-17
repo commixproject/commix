@@ -650,7 +650,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
       for pos in range(1, output_length + 1):
         ascii_char = results_by_position.get(pos)
         if ascii_char == UNRESOLVED_POSITION:
-          chars.append("?")
+          chars.append(settings.UNRESOLVED_CHAR)
           furthest = pos
         elif ascii_char is not None:
           ch = chr(ascii_char)
@@ -1051,10 +1051,40 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
         else:
           executor.shutdown(wait=True)
           remaining = []
-    # Assemble in position order; unresolved positions are dropped, not filled with a placeholder.
+
+    # A position that returned no delay is usually a transient miss - a lagging response, or one
+    # worker's request read as another's - so each one is asked again, alone, whether or not the
+    # first pass was threaded. Every position failing is a systematic failure instead, and asking
+    # the same oracle twice would only spend the requests again.
+    if failed_positions and len(failed_positions) < len(positions):
+      retry_positions = sorted(failed_positions)
+      info_msg = "Re-attempting " + str(len(retry_positions)) + " character"
+      info_msg += "s"[len(retry_positions) == 1:] + " that returned no delay."
+      settings.print_data_to_stdout(settings.END_LINE.LF + settings.print_info_msg(info_msg))
+      for pos in retry_positions:
+        try:
+          _, ascii_char, conn_error_flag = _extract_position(pos)
+        except SystemExit:
+          _save_progress()
+          raise
+        except KeyboardInterrupt:
+          _save_progress()
+          checks.handle_exploitation_interrupt(filename, url)
+          break
+        if ascii_char is None:
+          continue
+        failed_positions.discard(pos)
+        conn_error_positions.discard(pos)
+        results_by_position[pos] = ascii_char
+        _print_progress()
+
+    # Assemble in position order. A position that stayed unresolved is marked rather than dropped:
+    # a silently shorter output is indistinguishable from a real value.
     for pos in positions:
       ascii_char = results_by_position.get(pos)
-      if ascii_char is not None and ascii_char != UNRESOLVED_POSITION:
+      if ascii_char == UNRESOLVED_POSITION:
+        output.append(settings.UNRESOLVED_CHAR)
+      elif ascii_char is not None:
         output.append(chr(ascii_char))
 
     boundary_char = chr(max(settings.CHAR_POOL_MULTI))
@@ -1069,8 +1099,9 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
       settings.INCOMPLETE_OUTPUT = True
       warn_msg = str(len(failed_positions)) + " of " + str(len(positions)) + " character"
       warn_msg += "s"[len(positions) == 1:] + " could not be extracted (no delay was ever observed for "
-      warn_msg += ("them" if len(failed_positions) != 1 else "it") + ") - the retrieved output below is missing "
-      warn_msg += ("those characters" if len(failed_positions) != 1 else "that character") + "."
+      warn_msg += ("them" if len(failed_positions) != 1 else "it") + ", on a second attempt either) - "
+      warn_msg += ("they are" if len(failed_positions) != 1 else "it is") + " marked '"
+      warn_msg += settings.UNRESOLVED_CHAR + "' in the retrieved output below."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
     check_end  = time.time()

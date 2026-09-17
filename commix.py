@@ -29,6 +29,7 @@ except ImportError as ex:
 # Main
 def main():
   import src.core.main
+  src.core.main.run()
 
 # Main
 if __name__ == '__main__':
