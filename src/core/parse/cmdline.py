@@ -366,6 +366,18 @@ request.add_option("--ignore-redirects",
                 default=False,
                 help="Ignore redirection attempts.")
 
+request.add_option("--ignore-timeouts",
+                action="store_true",
+                dest="ignore_timeouts",
+                default=False,
+                help="Ignore connection timeouts.")
+
+request.add_option("--randomize",
+                action="store",
+                dest="randomize",
+                default=None,
+                help="Randomly change value for given parameter(s).")
+
 request.add_option("--timeout",
                 action="store",
                 dest="timeout",
@@ -386,6 +398,13 @@ request.add_option("--delay",
                 type="int",
                 dest="delay",
                 help="Seconds to delay between each HTTP request.")
+
+request.add_option("--jitter",
+                default=0,
+                action="store",
+                type="float",
+                dest="jitter",
+                help="Seconds of random variation added to '--delay'.")
 
 request.add_option("--drop-set-cookie",
                 action="store_true",
@@ -677,6 +696,18 @@ detection.add_option("--skip-empty",
                 dest="skip_empty",
                 default=False,
                 help="Skip testing the parameter(s) with empty value(s).")
+
+detection.add_option("--skip-static",
+                action="store_true",
+                dest="skip_static",
+                default=False,
+                help="Skip testing the parameter(s) that do not appear to be dynamic.")
+
+detection.add_option("--disable-stats",
+                action="store_true",
+                dest="disable_stats",
+                default=False,
+                help="Disable the statistical model for detecting the delay.")
 
 detection.add_option("--failed-tries",
                 action="store",

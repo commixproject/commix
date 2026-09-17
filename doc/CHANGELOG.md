@@ -1,4 +1,10 @@
 ## Version 4.2 (TBA)
+* Added: New switch `--ignore-timeouts` for skipping requests that time out, instead of ending the run.
+* Added: New switch `--skip-static` for skipping the parameter(s) that do not appear to be dynamic.
+* Added: New switch `--disable-stats` for reading time-related results against the delay alone.
+* Added: New option `--jitter` for adding a random number of seconds to the delay between requests.
+* Added: New option `--randomize` for giving the value of the given parameter(s) a new value per request.
+* Revised: Characters that the time-related techniques never resolved are re-attempted once, and marked in the retrieved output instead of being dropped from it.
 * Added: New tamper script `pyhexname.py`, that runs the command through a Python module and function named in hex.
 * Added: New tamper script `phpconcat.py`, that runs the command through a PHP function named in concatenated pieces.
 * Added: New option `--type` to select injection techniques by the injection type they report (i.e. `c` for classic, `b` for blind).
@@ -9,8 +15,8 @@
 * Added: New tamper script `cmd2var.py`, that splits the name of the user-supplied operating system command across unset shell variables.
 * Added: New tamper script `cmd2wildcard.py`, that replaces the paths in the user-supplied operating system command with wildcards.
 * Added: New tamper script `ansiquote.py`, that rewrites the command names and paths in a given payload as ANSI-C quoted hex.
-* Added: New tamper script `space2brace`, which replaces the space character (%20) with a brace expansion ({a,b}) in a given payload.
-* Added: New tamper script `dollarstars.py`, which adds dollar sign followed by an asterisk ($*) between the characters in a given payload.
+* Added: New tamper script `space2brace`, which replaces the space character (%20) with a brace expansion (`{a,b}`) in a given payload.
+* Added: New tamper script `dollarstars.py`, which adds dollar sign followed by an asterisk (`$*`) between the characters in a given payload.
 * Added: New tamper script `cmd2loop.py`, which wraps a payload's command in a single-iteration "for" loop, so that it follows a shell keyword rather than a separator.
 * Added: Code injection now supports Python as well as PHP, over every technique.
 * Added: The `--eval` switch now also reaches the time-based and file-based techniques, so code injection is proven blind and semi-blind as well as results-based.

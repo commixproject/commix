@@ -386,6 +386,16 @@ Exceptions regarding requests failure(s)
 """
 def request_failed(err_msg):
 
+  # Asked for with '--ignore-timeouts': the request is given up on and the run carries on without
+  # it, so a target that answers late neither reads as unreachable nor spends the error budget.
+  if menu.options.ignore_timeouts and re.search(r"timed?\s*out", str(err_msg), re.IGNORECASE):
+    settings.IGNORED_TIMEOUTS += 1
+    if settings.IGNORED_TIMEOUTS == 1 or settings.VERBOSITY_LEVEL != 0:
+      warn_msg = "The target did not answer in time, so the request is skipped ('--ignore-timeouts')"
+      warn_msg += " - " + str(settings.IGNORED_TIMEOUTS) + " so far." if settings.IGNORED_TIMEOUTS > 1 else "."
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    return False
+
   stability.mark_url_invalid()
 
   # Pacing is answered on its own: being told to slow down holds whether or not a WAF is looked for.

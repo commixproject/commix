@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "145"
+REVISION = "146"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1853,6 +1853,12 @@ PROGRESS_DISPLAY_WIDTH = 60
 # Stands in for a character the time-related techniques never resolved, in the live progress line
 # and in the output they return - a dropped one would read as a value that was fully retrieved.
 UNRESOLVED_CHAR = "?"
+
+# Requests dropped on a timeout because '--ignore-timeouts' was given, counted for the run's summary.
+IGNORED_TIMEOUTS = 0
+
+# The parameters '--randomize' was given, each one carrying a fresh value on every request.
+RANDOMIZE_PARAMETERS_LIST = []
 
 # Init Test
 INIT_TEST = ""

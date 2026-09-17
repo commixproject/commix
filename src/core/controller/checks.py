@@ -386,6 +386,14 @@ def finish_target():
     info_msg = "Files left behind: " + ", ".join(settings.LEFTOVER_FILES) + "."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
     del settings.LEFTOVER_FILES[:]
+  # Said once at the end rather than per request: what was dropped is worth knowing, since results
+  # are read from the requests that did answer.
+  if settings.IGNORED_TIMEOUTS:
+    info_msg = str(settings.IGNORED_TIMEOUTS) + " request"
+    info_msg += "s"[settings.IGNORED_TIMEOUTS == 1:] + " timed out and "
+    info_msg += ("were" if settings.IGNORED_TIMEOUTS != 1 else "was") + " skipped ('--ignore-timeouts')."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    settings.IGNORED_TIMEOUTS = 0
 
 """
 Technique letters written out, optionally saying how each one shows execution. Used to name what a
@@ -817,6 +825,15 @@ def ignore_anticsrf_parameter(parameter):
         info_msg += "' that appears to hold anti-CSRF token '" + parameter.split("=")[1] +  "'."
         settings.print_data_to_stdout(settings.print_info_msg(info_msg))
       return True
+
+# Whether a parameter is one '--randomize' carries a fresh value in, which is what it is for -
+# a payload of ours in its place would be rewritten by the next request.
+def ignore_randomized_parameter(parameter):
+  name = parameter.split("=")[0].strip()
+  if name in settings.RANDOMIZE_PARAMETERS_LIST:
+    info_msg = "Skipping the randomized parameter '" + name + "'."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    return True
 
 """
 Ignoring the parameter(s) carrying session or framework state.
@@ -2022,6 +2039,10 @@ under the one line rather than printing the same warning over the top of it. Suc
 'close' as False and closes the line itself once its own dots are done.
 """
 def warm_up_response_baseline(url, http_request_method, close=True):
+  # Nothing reads the model once '--disable-stats' is given, so the requests that fill it are not
+  # spent either.
+  if menu.options.disable_stats:
+    return False
   if len(settings.RESPONSE_TIMES) >= settings.MIN_TIME_RESPONSES:
     return False
   warn_msg = settings.TIMING_BASELINE_MSG
@@ -2088,6 +2109,10 @@ def _delay_threshold_from(times):
 
 # How late an answer has to be before it counts as a delay that was asked for.
 def current_delay_threshold():
+  # Turned off with '--disable-stats': the delay asked for is then the only thing a probe is read
+  # against, which is what the caller falls back to where no threshold is returned.
+  if menu.options.disable_stats:
+    return None
   # The payload costs more than a plain request - on the file-based path, two PowerShell launches
   # more - so what it costs with nothing held back is the only thing a probe can be judged against.
   # The plain model answers only until enough probes have been seen to have one of their own; the
@@ -2190,6 +2215,17 @@ def check_provided_parameters():
 
   if menu.options.skip_parameter:
     settings.SKIP_PARAMETERS_LIST = parse_parameter_list(menu.options.skip_parameter)
+
+  if menu.options.randomize:
+    settings.RANDOMIZE_PARAMETERS_LIST = [_.strip() for _ in parse_parameter_list(menu.options.randomize) if _.strip()]
+    # A parameter cannot be both the one carrying a new value every request and the one a payload
+    # is placed in - the next request would rewrite the payload.
+    clash = [_ for _ in settings.RANDOMIZE_PARAMETERS_LIST if _ in settings.TESTABLE_PARAMETERS_LIST]
+    if clash:
+      err_msg = "The option '--randomize' is incompatible with the option '-p', for the parameter"
+      err_msg += "s"[len(clash) == 1:] + " '" + ", ".join(clash) + "'."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit()
 
 
 """

@@ -657,9 +657,11 @@ def check_parameter_dynamism(url, http_request_method, check_parameter):
   if changed >= min(noise, settings.STABILITY_SIMILARITY_THRESHOLD):
     warn_msg = param_label + " does not appear to be dynamic."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-  elif settings.VERBOSITY_LEVEL != 0:
+    return False
+  if settings.VERBOSITY_LEVEL != 0:
     debug_msg = param_label + " appears to be dynamic."
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+  return True
 
 """
 Replace the parameter value with a disposable placeholder if the response stays the same but gets faster.
@@ -751,7 +753,14 @@ def injection_process(url, check_parameter, http_request_method, filename, times
   # them, and the loop over operating systems below reads this either way.
   end_detection = False
 
-  check_parameter_dynamism(url, http_request_method, check_parameter)
+  # False only where the check ran and the response never moved with the parameter - where it did
+  # not run, nothing was learned and the parameter is tested as it would have been.
+  is_dynamic = check_parameter_dynamism(url, http_request_method, check_parameter)
+  if is_dynamic is False and menu.options.skip_static and not checks.explicitly_testable(check_parameter):
+    info_msg = "Skipping the parameter '" + check_parameter + "' that does not appear to be dynamic."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    return
+
   url = attempt_skip_testable_value(url, http_request_method, check_parameter)
 
   # Both, where the target's own answer did not identify one - that being what the question asked.

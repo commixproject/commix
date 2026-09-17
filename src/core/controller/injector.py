@@ -122,6 +122,10 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
 
   # Sample how long the target takes to answer when nothing is asking it to wait.
   def _warm_up_baseline(announce=True):
+    # With '--disable-stats' a probe is read against the delay it asked for and nothing else, so
+    # neither model is consulted and neither is worth the requests that fill it.
+    if menu.options.disable_stats:
+      return
     fan_out = retrieval_concurrency()
     # A model of responses asked for one at a time says nothing about how the target answers while
     # it is serving several: those take longer, and every one of them then reads as a delay the

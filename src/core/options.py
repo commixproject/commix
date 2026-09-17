@@ -197,6 +197,12 @@ def validate():
   if menu.options.delay != 0:
     settings.DELAY = menu.options.delay
 
+  # Random seconds added on top of that delay, which cannot be asked for backwards.
+  if menu.options.jitter < 0:
+    err_msg = "The value of the '--jitter' option must not be negative."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
   # Check if defined "--timesec" option.
   if menu.options.timesec != 0:
     settings.TIMESEC = menu.options.timesec

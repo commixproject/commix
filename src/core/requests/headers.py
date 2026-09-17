@@ -15,6 +15,8 @@ For more see the file 'readme/COPYING' for copying permission.
 
 import re
 import time
+import random
+import string
 try:
   from base64 import encodebytes
 except ImportError:
@@ -147,12 +149,60 @@ def discover_digest_realm(url):
   return ""
 
 """
+A fresh value for a parameter named with '--randomize', shaped like the one it replaces - digits
+stay digits and letters keep their case, so a target that validates the format still accepts it.
+"""
+def randomized_value(value):
+  def _swap(match):
+    original = match.group()
+    if original.isdigit():
+      pool = string.digits
+    elif original.isupper():
+      pool = string.ascii_uppercase
+    else:
+      pool = string.ascii_lowercase
+    while True:
+      candidate = "".join(random.choice(pool) for _ in original)
+      if candidate != original:
+        return candidate
+  return re.sub(r"[0-9]+|[A-Z]+|[a-z]+", _swap, value)
+
+"""
+Give every parameter named with '--randomize' a new value, wherever it travels - the query string
+of the URL and the body alike.
+"""
+def randomize_parameters(request):
+  if not settings.RANDOMIZE_PARAMETERS_LIST:
+    return request
+
+  def _rewrite(text):
+    def _pair(match):
+      name, value = match.group("name").strip(), match.group("value")
+      if name not in settings.RANDOMIZE_PARAMETERS_LIST:
+        return match.group()
+      return match.group().replace(name + "=" + value, name + "=" + randomized_value(value), 1)
+    # Both delimiters, so a cookie's pairs are read the way a query string's are.
+    return re.sub(r"(?P<name>[^=&;?]+)=(?P<value>[^&;]*)", _pair, text)
+
+  parts = request.full_url.split("?", 1)
+  if len(parts) == 2 and parts[1]:
+    request.full_url = parts[0] + "?" + _rewrite(parts[1])
+  if request.data:
+    body = request.data.decode(settings.DEFAULT_CODEC, errors="replace")
+    request.data = _rewrite(body).encode(settings.DEFAULT_CODEC)
+  # The cookie is added further down from the option it was given in, so it is randomized there.
+  if menu.options.cookie:
+    menu.options.cookie = _rewrite(menu.options.cookie)
+  return request
+
+"""
 Checking the HTTP Headers & HTTP/S Request.
 """
 def check_http_traffic(request):
   settings.LAST_HTTP_ERROR = None
-  # Delay in seconds between each HTTP request, plus whatever backing off the target has earned.
-  time.sleep(int(settings.DELAY) + settings.ADAPTIVE_DELAY)
+  # Delay in seconds between each HTTP request, plus whatever backing off the target has earned -
+  # and, where '--jitter' was given, a different fraction of a second on top of every one of them.
+  time.sleep(int(settings.DELAY) + settings.ADAPTIVE_DELAY + (random.uniform(0, menu.options.jitter) if menu.options.jitter else 0))
   if request.type == 'https':
     http_client = _http_client.HTTPSConnection
   else:
@@ -457,6 +507,7 @@ Check for added headers.
 def do_check(request):
 
   request = encode_non_ascii_url(request)
+  randomize_parameters(request)
 
   # Frame the body as chunks, so a filter inspecting it never sees the payload in one piece.
   if menu.options.chunked and request.data and not request.has_header(settings.TRANSFER_ENCODING):
