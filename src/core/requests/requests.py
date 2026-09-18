@@ -13,6 +13,7 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import io
 import re
 import time
 import threading
@@ -548,16 +549,73 @@ def request_failed(err_msg):
 """
 Get the response of the request
 """
+class ReReadableResponse(object):
+  """
+  A response whose body has already been read, handed on as though it had not been.
+
+  Everything else about it is the response itself: the status, the headers and the URL are asked
+  of the original, and only the reading is answered from what was kept.
+  """
+  def __init__(self, response, body):
+    self._response = response
+    self._body = io.BytesIO(body)
+
+  def read(self, *args, **kwargs):
+    return self._body.read(*args, **kwargs)
+
+  def readlines(self, *args, **kwargs):
+    return self._body.readlines(*args, **kwargs)
+
+  def close(self):
+    try:
+      self._response.close()
+    except Exception:
+      pass
+
+  def __getattr__(self, name):
+    return getattr(self._response, name)
+
+"""
+Send the request again while its answer is a page the run was told to retry on.
+
+What it is for is a target that answers something other than what it was asked - a rate limit, a
+'try again later', an interstitial - where the response is a valid one and only its content says
+that nothing was tested.
+"""
+def retry_on_undesired_content(request, response):
+  attempts = 0
+  while True:
+    try:
+      body = response.read()
+    except Exception:
+      return response
+    content = body.decode(settings.DEFAULT_CODEC, errors="replace")
+    if not re.search(menu.options.retry_on, content, re.I) or attempts >= settings.MAX_RETRIES:
+      return ReReadableResponse(response, body)
+    attempts += 1
+    warn_msg = "Forced retry of the request, because of undesired page content."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    retried = headers.check_http_traffic(request)
+    if retried is None:
+      try:
+        retried = headers.resend(request)
+      except Exception as err_msg:
+        return ReReadableResponse(response, body)
+    if retried is None or isinstance(retried, bool):
+      return ReReadableResponse(response, body)
+    response = retried
+
 def get_request_response(request):
 
   response = headers.check_http_traffic(request)
-  if response is not None:
-    return response
+  if response is None:
+    try:
+      response = headers.resend(request)
+    except Exception as err_msg:
+      response = request_failed(err_msg)
 
-  try:
-    response = headers.resend(request)
-  except Exception as err_msg:
-    response = request_failed(err_msg)
+  if menu.options.retry_on and response is not None and not isinstance(response, bool):
+    response = retry_on_undesired_content(request, response)
 
   return response
 

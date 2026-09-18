@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "147"
+REVISION = "148"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -430,7 +430,13 @@ if RANDOM_TAG == "" :
   RANDOM_TAG = RANDOM_STRING_GENERATOR
 
 # Proxy
-PROXY_REGEX = r"((http[^:]*)://)?([\w\-.]+):(\d+)"
+# A proxy as it may be written: an optional scheme, optional credentials of its own, an address
+# and a port - so that a SOCKS proxy is not read as an HTTP one, and a password is not dropped.
+PROXY_REGEX = r"(?i)\A((http[s]?|socks[45])://)?(?:([^:@\s/]+:[^@\s/]*)@)?([\w\-.]+):(\d+)\Z"
+# The scheme the proxy itself speaks, which is not the scheme of the target - SCHEME is that one.
+PROXY_SCHEME = ""
+PROXY_SCHEMES = ("http", "https", "socks4", "socks5")
+SOCKS_SCHEMES = ("socks4", "socks5")
 
 # Auth Credentials format
 AUTH_CRED_REGEX = r"^(.*?):(.*?)$"
@@ -797,6 +803,7 @@ HTTP_HEADER_INJECTION_LEVEL = 3
 INJECTION_LEVEL = 0
 USER_APPLIED_LEVEL = False
 USER_APPLIED_RETRIES = False
+USER_APPLIED_TIMEOUT = False
 PERFORM_BASIC_SCANS = True
 
 # Default Temp Directory
@@ -1877,6 +1884,22 @@ RANDOMIZE_PARAMETERS_LIST = []
 
 # The places '--param-filter' was given, in upper case - a parameter elsewhere is not tested.
 PARAM_FILTER_PLACES = []
+
+# Said once, however many requests a SOCKS4 proxy carries.
+SOCKS4_DNS_WARNING = False
+
+# The proxies read from '--proxy-file', and which of them is in use.
+PROXY_LIST = []
+PROXY_LIST_INDEX = 0
+
+# The request '--safe-req' was given, parsed once and replayed as it was written.
+SAFE_REQUEST = None
+
+# Every request this run has sent, counted for the options that act every so many of them.
+REQUEST_COUNTER = 0
+
+# True while the safe request is on its way, so that it does not count itself.
+SENDING_SAFE_REQUEST = False
 
 # Init Test
 INIT_TEST = ""

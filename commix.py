@@ -35,9 +35,11 @@ def main():
 if __name__ == '__main__':
   try:
     main()
-  except SystemExit:
+  except SystemExit as err_msg:
+    # Raised as it was given: a caller that reads the exit code is told whether the run ended the
+    # way it meant to, and a bare one is zero as it always was.
     import sys
-    raise SystemExit()
+    raise SystemExit(err_msg.code)
   except KeyboardInterrupt:
     import sys
     raise SystemExit()

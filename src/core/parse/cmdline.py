@@ -366,6 +366,25 @@ request.add_option("--chunked",
                 default=False,
                 help="Use HTTP chunked transfer encoded (POST) requests.")
 
+request.add_option("--proxy-file",
+                action="store",
+                dest="proxy_file",
+                default=None,
+                help="Load proxy list from a file.")
+
+request.add_option("--proxy-freq",
+                action="store",
+                dest="proxy_freq",
+                default=0,
+                type="int",
+                help="Requests between change of proxy from a given list.")
+
+request.add_option("--proxy-cred",
+                action="store",
+                dest="proxy_cred",
+                default=None,
+                help="Proxy authentication credentials (name:password).")
+
 request.add_option("--ignore-proxy",
                 action="store_true",
                 dest="ignore_proxy",
@@ -389,6 +408,37 @@ request.add_option("--randomize",
                 dest="randomize",
                 default=None,
                 help="Randomly change value for given parameter(s).")
+
+request.add_option("--retry-on",
+                action="store",
+                dest="retry_on",
+                default=None,
+                help="Retry request on regexp matching content (e.g. 'drop').")
+
+request.add_option("--safe-url",
+                action="store",
+                dest="safe_url",
+                default=None,
+                help="URL address to visit frequently during testing.")
+
+request.add_option("--safe-post",
+                action="store",
+                dest="safe_post",
+                default=None,
+                help="POST data to send to a safe URL.")
+
+request.add_option("--safe-req",
+                action="store",
+                dest="safe_req",
+                default=None,
+                help="Load safe HTTP request from a file.")
+
+request.add_option("--safe-freq",
+                action="store",
+                dest="safe_freq",
+                default=0,
+                type="int",
+                help="Regular requests between visits to a safe URL.")
 
 request.add_option("--skip-urlencode",
                 action="store_true",
@@ -794,6 +844,12 @@ misc.add_option("--purge",
                 default=False,
                 help="Safely remove all content from commix data directory.")
 
+misc.add_option("--unstable",
+                action="store_true",
+                dest="unstable",
+                default=False,
+                help="Adjust options for unstable connections.")
+
 misc.add_option("--skip-waf",
                 action="store_true",
                 dest="skip_waf",
@@ -870,6 +926,7 @@ settings.USER_APPLIED_WEB_ROOT = bool(options.web_root)
 
 # Remember whether '--retries' was explicitly supplied, since it carries a default of its own
 settings.USER_APPLIED_RETRIES = any(_ in sys.argv for _ in ("--retries",)) or any(_.startswith("--retries=") for _ in sys.argv)
+settings.USER_APPLIED_TIMEOUT = any(_ in sys.argv for _ in ("--timeout",)) or any(_.startswith("--timeout=") for _ in sys.argv)
 
 # Remember whether '--auth-cred'/'--auth-type' were explicitly supplied on the CLI
 settings.USER_APPLIED_COOKIE = options.cookie or ""

@@ -305,6 +305,46 @@ def parse_requests(request_file):
   return targets
 
 """
+The request of '--safe-req', read from a file written the way '-r' expects one.
+
+Only the first request of the file is taken: this is the one request that is repeated, and a file
+holding several says nothing about which.
+"""
+def parse_safe_request(request_file):
+  if not os.path.exists(request_file):
+    err_msg = "It seems the '" + request_file + "' file does not exist."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+  try:
+    with open(request_file, encoding=settings.DEFAULT_CODEC) as file:
+      content = file.read()
+  except IOError as err_msg:
+    error_msg = "The '" + request_file + "' " + str(err_msg.args[1]).lower() + "."
+    settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
+    raise SystemExit()
+
+  for raw_request in _split_requests(content):
+    target = _parse_request(raw_request, request_file)
+    if target is None:
+      continue
+    headers = []
+    for header in (target["raw_headers"] or "").split(settings.END_LINE.ESCAPED_LF):
+      if ":" in header:
+        name, _, value = header.partition(":")
+        if name.strip().lower() not in ("content-length",):
+          headers.append((name.strip(), value.strip()))
+    return {
+             "url" : target["url"],
+             "method" : target["method"],
+             "data" : target["data"],
+             "headers" : headers
+           }
+
+  err_msg = "Invalid format of the safe request file '" + request_file + "'."
+  settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+  raise SystemExit()
+
+"""
 Parse target and data from http proxy logs (i.e. Burp or WebScarab)
 """
 def logfile_parser():

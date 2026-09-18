@@ -196,10 +196,71 @@ def randomize_parameters(request):
   return request
 
 """
+Count one request, and do what the options ask for every so many of them: change the proxy the run
+goes out through, and visit the URL that keeps the session alive.
+
+The safe request is sent through the same path as any other, so it is counted out here rather than
+inside it - a request made to keep the session alive is not one of the requests being paced.
+"""
+def count_request():
+  with settings.REQUESTS_LOCK:
+    settings.REQUEST_COUNTER += 1
+    counter = settings.REQUEST_COUNTER
+    if settings.SENDING_SAFE_REQUEST:
+      return
+
+  if menu.options.proxy_freq and counter % menu.options.proxy_freq == 0:
+    proxy.rotate_proxy()
+
+  if menu.options.safe_freq and counter % menu.options.safe_freq == 0:
+    send_safe_request()
+
+"""
+Visit the URL that has nothing to do with the test, at the frequency asked for.
+
+What it is for is the session: a target that logs out, locks an account or expires a token after so
+many odd-looking requests sees an ordinary one in between them.
+"""
+def send_safe_request():
+  if settings.SENDING_SAFE_REQUEST:
+    return
+  settings.SENDING_SAFE_REQUEST = True
+  try:
+    if settings.SAFE_REQUEST:
+      safe = settings.SAFE_REQUEST
+      data = safe["data"].encode(settings.DEFAULT_CODEC) if safe["data"] else None
+      request = _urllib.request.Request(safe["url"], data, method=safe["method"] or settings.HTTPMETHOD.GET)
+      for header_name, header_value in safe["headers"]:
+        request.add_header(header_name, header_value)
+    else:
+      data = menu.options.safe_post.encode(settings.DEFAULT_CODEC) if menu.options.safe_post else None
+      method = settings.HTTPMETHOD.POST if menu.options.safe_post else settings.HTTPMETHOD.GET
+      request = _urllib.request.Request(menu.options.safe_url, data, method=method)
+      do_check(request)
+    if settings.VERBOSITY_LEVEL >= 2:
+      debug_msg = "Visiting the safe URL '" + request.get_full_url() + "'."
+      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+    response = check_http_traffic(request)
+    if response is None:
+      response = resend(request)
+    if response is not None and not isinstance(response, bool):
+      try:
+        response.close()
+      except Exception:
+        pass
+  except Exception:
+    # A safe visit that fails is not the run's business: nothing is read from it, and the request
+    # it was sent between is the one that matters.
+    pass
+  finally:
+    settings.SENDING_SAFE_REQUEST = False
+
+"""
 Checking the HTTP Headers & HTTP/S Request.
 """
 def check_http_traffic(request):
   settings.LAST_HTTP_ERROR = None
+  count_request()
   # Delay in seconds between each HTTP request, plus whatever backing off the target has earned -
   # and, where '--jitter' was given, a different fraction of a second on top of every one of them.
   time.sleep(int(settings.DELAY) + settings.ADAPTIVE_DELAY + (random.uniform(0, menu.options.jitter) if menu.options.jitter else 0))
@@ -297,11 +358,10 @@ def check_http_traffic(request):
   # Also route through the configured proxy/Tor, so this fetch is reusable.
   if menu.options.ignore_proxy:
     opener = _urllib.request.build_opener(_urllib.request.ProxyHandler({}), connection_handler(context=settings.unverified_context()), redirection.RedirectHandler(), *extra_handlers)
-  elif menu.options.tor:
+  elif menu.options.tor and menu.options.tor_type == settings.PROXY_TYPE.HTTP:
     opener = _urllib.request.build_opener(_urllib.request.ProxyHandler({settings.SCHEME: menu.options.proxy}), connection_handler(context=settings.unverified_context()), redirection.RedirectHandler(), *extra_handlers)
   else:
-    if menu.options.proxy:
-      request.set_proxy(menu.options.proxy, settings.SCHEME)
+    proxy.apply_to_request(request)
     opener = _urllib.request.build_opener(connection_handler(context=settings.unverified_context()), redirection.RedirectHandler(), *extra_handlers)
 
   # Time limit mechanism.

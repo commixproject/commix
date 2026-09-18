@@ -396,14 +396,11 @@ def finish_target():
     settings.IGNORED_TIMEOUTS = 0
 
 """
-Technique letters written out, optionally saying how each one shows execution. Used to name what a
-run did not look at, and which techniques can reach a sink at all.
+Technique letters written out. Used to name what a run did not look at.
 """
-def technique_names(letters, qualified=False):
+def technique_names(letters):
   plain = {"r": "results-based", "t": "time-based", "f": "file-based"}
-  # The sink is worth spelling out where the point is which techniques exist at all.
-  shows = {"r": "results-based", "t": "blind", "f": "blind"}
-  chosen = [plain[_] + (" (" + shows[_] + ")" if qualified else "") for _ in ("r", "t", "f") if _ in letters]
+  chosen = [plain[_] for _ in ("r", "t", "f") if _ in letters]
   if not chosen:
     return ""
   name = chosen[0] if len(chosen) == 1 else ", ".join(chosen[:-1]) + " and " + chosen[-1]

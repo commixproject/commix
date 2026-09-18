@@ -21,6 +21,8 @@ from src.utils import common
 from src.utils import settings
 from src.core.parse import cmdline as menu
 from src.core.requests import tor
+from src.core.requests import proxy
+from src.core.parse import request
 from src.core.requests import cookies
 from src.core.controller import checks
 
@@ -80,15 +82,64 @@ def validate():
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
-    for match in re.finditer(settings.PROXY_REGEX, menu.options.proxy):
-      _, proxy_scheme, proxy_address, proxy_port = match.groups()
-      if settings.SCHEME or proxy_scheme:
-        if not settings.SCHEME:
-          settings.SCHEME = proxy_scheme
-        menu.options.proxy = proxy_address + ":" + proxy_port
-        break
-    else:
-      err_msg = "Proxy value must be in format '(http|https)://address:port'."
+    match = re.search(settings.PROXY_REGEX, menu.options.proxy.strip())
+    if not match:
+      err_msg = "Proxy value must be in format '(" + "|".join(settings.PROXY_SCHEMES) + ")://address:port'."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit()
+    _, proxy_scheme, proxy_cred, proxy_address, proxy_port = match.groups()
+    settings.PROXY_SCHEME = (proxy_scheme or "http").lower()
+    menu.options.proxy = proxy_address + ":" + proxy_port
+    # Credentials written into the proxy value itself are the ones that proxy asks for.
+    if proxy_cred:
+      menu.options.proxy_cred = proxy_cred
+    proxy.configure()
+
+  if menu.options.proxy and menu.options.proxy_file:
+    err_msg = "The option '--proxy' is incompatible with the option '--proxy-file'."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
+  if menu.options.proxy_freq and not menu.options.proxy_file:
+    err_msg = "The option '--proxy-freq' requires the option '--proxy-file'."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
+  # Read once and kept in the order they were written, so a run that rotates through them is
+  # repeatable rather than picking one at random.
+  if menu.options.proxy_file:
+    proxy.load_proxy_list()
+
+  if menu.options.safe_post and not menu.options.safe_url:
+    err_msg = "The option '--safe-post' requires the option '--safe-url'."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
+  if menu.options.safe_req and any((menu.options.safe_url, menu.options.safe_post)):
+    err_msg = "The option '--safe-req' is incompatible with the options '--safe-url' and '--safe-post'."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
+  if menu.options.safe_freq and not any((menu.options.safe_url, menu.options.safe_req)):
+    err_msg = "The option '--safe-freq' requires the option '--safe-url' or the option '--safe-req'."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
+  if any((menu.options.safe_url, menu.options.safe_req)):
+    if menu.options.safe_freq <= 0:
+      err_msg = "You must specify a '--safe-freq' value, greater than zero, to visit a safe URL."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit()
+    if menu.options.safe_url and not re.search(r"(?i)\Ahttp[s]*://", menu.options.safe_url):
+      menu.options.safe_url = ("https://" if ":443/" in menu.options.safe_url else "http://") + menu.options.safe_url
+    if menu.options.safe_req:
+      settings.SAFE_REQUEST = request.parse_safe_request(menu.options.safe_req)
+
+  if menu.options.retry_on:
+    try:
+      re.compile(menu.options.retry_on)
+    except Exception as err:
+      err_msg = "Invalid regular expression '" + menu.options.retry_on + "' (" + str(err) + ")."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
@@ -155,6 +206,11 @@ def validate():
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
+  # A page that asks to be retried is not a page to abort on: the two would otherwise both answer
+  # for the same response, and the abort would win.
+  if menu.options.retry_on and settings.ABORT_CODE:
+    settings.ABORT_CODE = []
+
   # Check if defined "--ignore-code" option.
   if menu.options.ignore_code:
     try:
@@ -216,6 +272,23 @@ def validate():
   if menu.options.timesec != 0:
     settings.TIMESEC = menu.options.timesec
 
+  # What an unstable connection needs more of - doubled, and only where the run did not say
+  # otherwise itself: a value given by hand is the one that was meant.
+  if menu.options.unstable:
+    # The delay is held at zero until a technique asks for one, and the answer it gets is the
+    # safe minimum - so that, not the zero, is what there is twice as much of.
+    if not settings.USER_APPLIED_TIMESEC:
+      settings.TIMESEC = menu.options.timesec = (settings.TIMESEC or settings.MIN_SAFE_TIMESEC) * 2
+    if not settings.USER_APPLIED_RETRIES:
+      settings.MAX_RETRIES = menu.options.retries = menu.options.retries * 2
+    if not settings.USER_APPLIED_TIMEOUT:
+      settings.TIMEOUT = menu.options.timeout = menu.options.timeout * 2
+    if settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "Doubling what an unstable connection needs more of, except where it was given: "
+      debug_msg += "'--time-sec=" + str(menu.options.timesec) + "', '--retries=" + str(menu.options.retries)
+      debug_msg += "', '--timeout=" + str(menu.options.timeout) + "'."
+      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+
   # Check if defined "--threads" option.
   if menu.options.threads > 1:
     try:
@@ -237,9 +310,11 @@ def validate():
       settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
 
   if menu.options.tor:
-    settings.TIMESEC = settings.TIMESEC * 2
-    warn_msg = "Increasing default value for option '--time-sec' to"
-    warn_msg += " " + str(settings.TIMESEC) + ", because you provided switch '--tor'."
+    # Doubled from the delay that would otherwise be asked for - which is the safe minimum until a
+    # technique settles on one, rather than the zero the option sits at.
+    settings.TIMESEC = menu.options.timesec = (settings.TIMESEC or settings.MIN_SAFE_TIMESEC) * 2
+    warn_msg = "Increasing the value for the option '--time-sec' to"
+    warn_msg += " " + str(settings.TIMESEC) + ", because you provided the switch '--tor'."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
   if menu.options.sitemap_url:

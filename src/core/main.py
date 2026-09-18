@@ -231,7 +231,8 @@ def init_request(url, http_request_method):
     if menu.options.ignore_proxy:
       probe_handlers.append(_urllib.request.ProxyHandler({}))
     elif menu.options.proxy:
-      probe_handlers.append(_urllib.request.ProxyHandler({settings.SCHEME: menu.options.proxy}))
+      if not proxy.is_socks():
+        probe_handlers.append(_urllib.request.ProxyHandler({settings.SCHEME: menu.options.proxy}))
     if menu.options.auth_cred and menu.options.auth_type and menu.options.auth_type.lower() == settings.AUTH_TYPE.DIGEST:
       if settings.DIGEST_AUTH_REALM is None:
         settings.DIGEST_AUTH_REALM = headers.discover_digest_realm(url)
@@ -245,7 +246,7 @@ def init_request(url, http_request_method):
     _urllib.request.install_opener(opener)
     probe_request = redirect_probe_request(url, http_request_method)
     if menu.options.proxy and not menu.options.tor and not menu.options.ignore_proxy:
-      probe_request.set_proxy(menu.options.proxy, settings.SCHEME)
+      proxy.apply_to_request(probe_request)
     response = opener.open(probe_request, timeout=settings.TIMEOUT)
     if response.geturl() != url:
       redirect_url = response.geturl()

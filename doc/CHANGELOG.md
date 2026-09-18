@@ -1,4 +1,9 @@
 ## Version 4.2 (TBA)
+* Added: New options `--proxy-file`, `--proxy-freq` and `--proxy-cred` for using a list of proxies and the credentials they ask for.
+* Added: Support for SOCKS4/5 proxies given with the `--proxy` option.
+* Added: New option `--retry-on` for repeating a request whose response content matches a given regexp.
+* Added: New options `--safe-url`, `--safe-post`, `--safe-req` and `--safe-freq` for visiting a harmless URL every so many requests.
+* Added: New switch `--unstable` for doubling the delay, the retries and the timeout on an unreliable connection.
 * Added: Bundled the "PySocks" library, so that the Tor service can be reached over SOCKS directly.
 * Added: New switches `--skip-urlencode` and `--skip-xmlencode` for sending payload data without the encoding a carrier would otherwise get.
 * Added: New options `--param-exclude` and `--param-filter` for choosing testable parameters by name and by place.
