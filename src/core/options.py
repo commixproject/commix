@@ -92,12 +92,21 @@ def validate():
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit()
 
+  # Asked for on its own, it has nothing to check: the run goes out the way it always would.
+  if menu.options.check_tor and not any((menu.options.tor, menu.options.proxy)):
+    err_msg = "The switch '--check-tor' requires the switch '--tor' or the option '--proxy'."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
+  if menu.options.tor_type and not menu.options.tor:
+    err_msg = "The option '--tor-type' requires the switch '--tor'."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+
   if not menu.options.proxy:
     # Check if defined Tor (--tor option).
     if menu.options.tor:
-      if menu.options.tor_port:
-        settings.TOR_HTTP_PROXY_PORT = menu.options.tor_port
-      menu.options.proxy = settings.TOR_HTTP_PROXY_IP + ":" + settings.TOR_HTTP_PROXY_PORT
+      tor.set_proxy_settings()
       tor.do_check()
 
   if menu.options.ignore_session and menu.options.flush_session:

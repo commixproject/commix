@@ -28,7 +28,7 @@ def use_proxy(request):
       proxy = _urllib.request.ProxyHandler({})
       opener = _urllib.request.build_opener(proxy, redirection.RedirectHandler(), _urllib.request.HTTPSHandler(context=settings.unverified_context()))
       _urllib.request.install_opener(opener)
-    elif menu.options.tor:
+    elif menu.options.tor and menu.options.tor_type == settings.PROXY_TYPE.HTTP:
       proxy = _urllib.request.ProxyHandler({settings.SCHEME:menu.options.proxy})
       opener = _urllib.request.build_opener(proxy, redirection.RedirectHandler(), _urllib.request.HTTPSHandler(context=settings.unverified_context()))
       _urllib.request.install_opener(opener)

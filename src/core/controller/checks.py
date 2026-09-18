@@ -1620,6 +1620,24 @@ this way at all.
 def strip_xml_forbidden(value):
   return "".join(char for char in value if char >= " " or char in "\t\n\r")
 
+def xml_encode_payload(payload):
+  """
+  A payload on its way into a SOAP/XML body, with the characters the document cannot carry as
+  themselves written as their entities.
+
+  What the shell receives is unchanged: the target's parser turns each entity back into the
+  character before the value is used. What changes is that the document stays well-formed, where
+  an '&' or a '<' of the payload's own would otherwise end the request at the parser instead of
+  at the shell. A numeric entity the payload wrote itself is kept, rather than having its own '&'
+  encoded a second time.
+  """
+  if menu.options.skip_xmlencode:
+    return payload
+  marker = settings.RANDOM_TAG
+  payload = payload.replace("&#", marker)
+  payload = payload.replace("&", "&amp;").replace(">", "&gt;").replace("<", "&lt;").replace("\"", "&quot;").replace("'", "&apos;")
+  return payload.replace(marker, "&#")
+
 """
 Take the evaluated language from something the target already said about itself.
 
@@ -1657,6 +1675,10 @@ def encode_payload(payload):
   So a '%' with no two hex digits behind it is made '%25' first - unless a tamper script is in play,
   since those write escapes of their own and this cannot tell theirs from a stray one.
   """
+  # Sent as written, where the target is one that decodes what it is given a second time - or does
+  # not decode it at all.
+  if menu.options.skip_urlencode:
+    return payload
   if "%" in payload and not menu.options.tamper:
     payload = re.sub(r"%(?![0-9a-fA-F]{2})", "%25", payload)
   return _urllib.parse.quote(payload, safe=settings.payload_safe_chars())
@@ -2215,6 +2237,21 @@ def check_provided_parameters():
 
   if menu.options.skip_parameter:
     settings.SKIP_PARAMETERS_LIST = parse_parameter_list(menu.options.skip_parameter)
+
+  # A plain list of names is accepted in place of an expression, and becomes one that matches those
+  # names whole - so '--param-exclude="id,ses"' does not also exclude 'session_id'.
+  if menu.options.param_exclude:
+    if re.search(r"\A\w+,", menu.options.param_exclude):
+      menu.options.param_exclude = r"\A(" + "|".join(re.escape(_).strip() for _ in menu.options.param_exclude.split(settings.PARAMETER_SPLITTING_REGEX)) + r")\Z"
+    try:
+      re.compile(menu.options.param_exclude)
+    except Exception as err:
+      err_msg = "Invalid regular expression '" + menu.options.param_exclude + "' (" + str(err) + ")."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit()
+
+  if menu.options.param_filter:
+    settings.PARAM_FILTER_PLACES = [_.strip() for _ in menu.options.param_filter.upper().split(settings.PARAMETER_SPLITTING_REGEX) if _.strip()]
 
   if menu.options.randomize:
     settings.RANDOMIZE_PARAMETERS_LIST = [_.strip() for _ in parse_parameter_list(menu.options.randomize) if _.strip()]

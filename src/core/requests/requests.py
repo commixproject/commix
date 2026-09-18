@@ -609,7 +609,7 @@ def init_injection(payload, http_request_method, url):
         pass
     elif settings.IS_XML:
       # Likewise here: nothing to decode, and the characters XML cannot carry at all are dropped.
-      data = checks.restore_xml_layout(checks.process_injectable_value(checks.strip_xml_forbidden(payload), menu.options.data))
+      data = checks.restore_xml_layout(checks.process_injectable_value(checks.xml_encode_payload(checks.strip_xml_forbidden(payload)), menu.options.data))
     else:
       data = checks.process_injectable_value(encoded_for_url(payload), menu.options.data)
     request = _urllib.request.Request(url, data.encode(settings.DEFAULT_CODEC), method=http_request_method)

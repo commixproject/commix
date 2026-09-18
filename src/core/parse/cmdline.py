@@ -310,6 +310,18 @@ request.add_option("--tor-port",
                 default=False,
                 help="Set Tor proxy port (Default: 8118).")
 
+request.add_option("--tor-type",
+                action="store",
+                dest="tor_type",
+                default=None,
+                help="Set Tor proxy type (HTTP (default), SOCKS4 or SOCKS5).")
+
+request.add_option("--check-tor",
+                action="store_true",
+                dest="check_tor",
+                default=False,
+                help="Check to see if Tor is used properly.")
+
 request.add_option("--auth-url",
                 action="store",
                 dest="auth_url",
@@ -377,6 +389,18 @@ request.add_option("--randomize",
                 dest="randomize",
                 default=None,
                 help="Randomly change value for given parameter(s).")
+
+request.add_option("--skip-urlencode",
+                action="store_true",
+                dest="skip_urlencode",
+                default=False,
+                help="Skip URL encoding of payload data.")
+
+request.add_option("--skip-xmlencode",
+                action="store_true",
+                dest="skip_xmlencode",
+                default=False,
+                help="Skip safe encoding of payload data for SOAP/XML.")
 
 request.add_option("--timeout",
                 action="store",
@@ -541,6 +565,18 @@ injection.add_option("--skip",
                 action="store",
                 dest="skip_parameter",
                 help="Skip testing for given parameter(s).")
+
+injection.add_option("--param-exclude",
+                action="store",
+                dest="param_exclude",
+                default=None,
+                help="Regexp to exclude parameters from testing (e.g. 'ses').")
+
+injection.add_option("--param-filter",
+                action="store",
+                dest="param_filter",
+                default=None,
+                help="Select testable parameter(s) by place (e.g. 'POST').")
 
 injection.add_option("--suffix",
                 action="store",

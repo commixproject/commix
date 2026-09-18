@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "146"
+REVISION = "147"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1154,6 +1154,21 @@ SCHEME = ""
 TOR_HTTP_PROXY_IP = "127.0.0.1"
 TOR_HTTP_PROXY_PORT = "8118"
 CHECK_TOR_PAGE = "https://check.torproject.org/"
+# Answered as JSON, so that what is read back is a stated fact rather than a phrase on a page.
+CHECK_TOR_API_PAGE = "https://check.torproject.org/api/ip"
+
+# The proxy types '--tor-type' accepts, and the ports each one is looked for on.
+class PROXY_TYPE(object):
+  HTTP = "HTTP"
+  SOCKS4 = "SOCKS4"
+  SOCKS5 = "SOCKS5"
+
+TOR_TYPES = (PROXY_TYPE.HTTP, PROXY_TYPE.SOCKS4, PROXY_TYPE.SOCKS5)
+# SOCKS is what the Tor service itself listens as, so it is what a default run asks for - an HTTP
+# proxy in front of Tor (e.g. Privoxy) is a second piece of software, and its own thing to get wrong.
+DEFAULT_TOR_TYPE = PROXY_TYPE.SOCKS5
+DEFAULT_TOR_SOCKS_PORTS = (9050, 9150)
+DEFAULT_TOR_HTTP_PORTS = (8123, 8118)
 
 # Cookie injection
 COOKIE_INJECTION = None
@@ -1859,6 +1874,9 @@ IGNORED_TIMEOUTS = 0
 
 # The parameters '--randomize' was given, each one carrying a fresh value on every request.
 RANDOMIZE_PARAMETERS_LIST = []
+
+# The places '--param-filter' was given, in upper case - a parameter elsewhere is not tested.
+PARAM_FILTER_PLACES = []
 
 # Init Test
 INIT_TEST = ""

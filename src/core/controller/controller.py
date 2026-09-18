@@ -142,7 +142,12 @@ def heuristic_request(url, http_request_method, check_parameter, payload, whites
 
   if not settings.IGNORE_USER_DEFINED_POST_DATA and menu.options.data and settings.INJECT_TAG in menu.options.data:
     # A structured body escapes for itself; a form-encoded one needs the payload encoded for it.
-    body_payload = payload if (settings.IS_JSON or settings.IS_XML) else checks.encode_payload(payload)
+    if settings.IS_JSON:
+      body_payload = payload
+    elif settings.IS_XML:
+      body_payload = checks.xml_encode_payload(checks.strip_xml_forbidden(payload))
+    else:
+      body_payload = checks.encode_payload(payload)
     data = checks.restore_xml_layout(checks.process_injectable_value(body_payload, menu.options.data)).encode(settings.DEFAULT_CODEC)
   else:
     if settings.USER_DEFINED_POST_DATA:
@@ -748,6 +753,21 @@ def attempt_skip_testable_value(url, http_request_method, check_parameter):
 Proceed to the injection process for the appropriate parameter.
 """
 def injection_process(url, check_parameter, http_request_method, filename, timesec, place):
+  # Named with '--param-filter': a parameter is tested only where it travels in one of the places
+  # asked for, and nothing is said about the rest - naming them is saying which ones matter.
+  if settings.PARAM_FILTER_PLACES and str(place).upper() not in settings.PARAM_FILTER_PLACES:
+    if settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "Skipping the '" + str(place) + "' parameter '" + str(check_parameter) + "', which '--param-filter' does not name."
+      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+    return
+  # Matched with '--param-exclude', against the parameter's own name and against the place it
+  # travels in, either of which is enough to leave it alone.
+  if menu.options.param_exclude and (re.search(menu.options.param_exclude, str(check_parameter), re.I) or \
+     re.search(menu.options.param_exclude, str(place), re.I)):
+    info_msg = "Skipping the parameter '" + str(check_parameter) + "', excluded with '--param-exclude'."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    return
+
   settings.NOT_TESTABLE_PARAMETERS = False
   # Bound here rather than where the techniques run: the parameter may be skipped before reaching
   # them, and the loop over operating systems below reads this either way.

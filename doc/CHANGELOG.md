@@ -1,4 +1,9 @@
 ## Version 4.2 (TBA)
+* Added: Bundled the "PySocks" library, so that the Tor service can be reached over SOCKS directly.
+* Added: New switches `--skip-urlencode` and `--skip-xmlencode` for sending payload data without the encoding a carrier would otherwise get.
+* Added: New options `--param-exclude` and `--param-filter` for choosing testable parameters by name and by place.
+* Added: New option `--tor-type` and new switch `--check-tor` for choosing how Tor is reached and confirming that traffic goes through it.
+* Revised: Payload data placed in a SOAP/XML body is now encoded for the document, keeping it well-formed.
 * Added: New switch `--ignore-timeouts` for skipping requests that time out, instead of ending the run.
 * Added: New switch `--skip-static` for skipping the parameter(s) that do not appear to be dynamic.
 * Added: New switch `--disable-stats` for reading time-related results against the delay alone.
@@ -375,7 +380,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 * Revised: Minor improvement regarding identifying corrupted .pyc file(s).
 * Added: New tamper script "dollaratsigns.py" that adds dollar-sign followed by an at-sign (`$@`) between the characters of the generated payloads.
 * Fixed: Bug-fix regarding proxying SSL/TLS requests.
-* Revised: Minor improvement regarding checking for potentially miswritten (illegal '=') short option.
+* Revised: Minor improvement regarding checking for potentially miswritten (illegal `=`) short option.
 * Revised: Minor improvement regarding checking for illegal (non-console) quote and comma characters.
 * Revised: Minor improvement regarding merging of tamper script arguments.
 * Revised: Minor improvement regarding ignoring the parameter(s) that carrying anti-CSRF token(s) in all scanning attempts.
@@ -582,7 +587,7 @@ _Note: For more check the [detailed changeset](https://github.com/commixproject/
 _Note: For more check the [detailed changeset](https://github.com/commixproject/commix/compare/v1.4-20161017...v1.5-20161117)._
 
 ## Version 1.4 (2016-10-17)
-* Added: Support on crawler for checking target for the existence of 'sitemap.xml'.
+* Added: Support on crawler for checking target for the existence of "sitemap.xml".
 * Revised: The payload for Ruby reverse-shell has been shortly revised.
 * Added: Support for bind TCP shell (via "bind_tcp" option).
 * Added: New option `--crawl` (1,2) for crawling of a given website, starting from the target url.

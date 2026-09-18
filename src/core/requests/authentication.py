@@ -118,7 +118,7 @@ def _try_credentials(url, realm, http_request_method, authentication_type, usern
     request = _urllib.request.Request(url, method=http_request_method)
     if menu.options.ignore_proxy:
       opener = _urllib.request.build_opener(_urllib.request.ProxyHandler({}), authhandler, redirection.RedirectHandler(), _urllib.request.HTTPSHandler(context=settings.unverified_context()))
-    elif menu.options.tor:
+    elif menu.options.tor and menu.options.tor_type == settings.PROXY_TYPE.HTTP:
       opener = _urllib.request.build_opener(_urllib.request.ProxyHandler({settings.SCHEME: menu.options.proxy}), authhandler, redirection.RedirectHandler(), _urllib.request.HTTPSHandler(context=settings.unverified_context()))
     else:
       if menu.options.proxy:
