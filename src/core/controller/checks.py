@@ -813,10 +813,46 @@ def explicitly_testable(parameter):
   name = parameter.split("=")[0].strip().lower()
   return any(name == _.split("=")[0].strip().lower() for _ in settings.TESTABLE_PARAMETERS_LIST)
 
+"""
+Settle what names the anti-CSRF token, from what the user wrote.
+
+A name is taken as a name: where it would also read as an expression, the user is asked which was
+meant, because the difference decides what the token is looked up by on every request from here on.
+"""
+def set_anticsrf_token(value):
+  settings.CSRF_TOKEN_ORIGINAL = value
+  try:
+    re.compile(value)
+    if re.escape(value) != value:
+      message = "The provided value for the option '--csrf-token' ('" + value + "') is a regular expression? [y/N] "
+      if common.read_input(message, default="N", check_batch=True) not in settings.CHOICE_YES:
+        value = re.escape(value)
+  except re.error:
+    value = re.escape(value)
+  settings.CSRF_TOKEN = value
+
+"""
+Offer to keep a parameter that looks like an anti-CSRF token up to date, where none was named.
+
+The parameter is skipped for testing either way - what is asked here is whether its value should be
+fetched again before every request, which is what a target that checks it requires.
+"""
+def offer_anticsrf_token(parameter):
+  if settings.CSRF_TOKEN or menu.options.batch or settings.LOAD_SESSION:
+    return
+  name = parameter.split("=")[0].strip()
+  if not name or not any(name.lower().count(token) for token in settings.CSRF_TOKEN_PARAMETER_INFIXES):
+    return
+  message = "The parameter '" + name + "' appears to hold an anti-CSRF token. "
+  message += "Do you want commix to automatically update it in further requests? [y/N] "
+  if common.read_input(message, default="N", check_batch=True) in settings.CHOICE_YES:
+    set_anticsrf_token(name)
+
 # Whether a parameter looks like an anti-CSRF token, which testing would only invalidate.
 def ignore_anticsrf_parameter(parameter):
   if any(parameter.lower().count(token) for token in settings.CSRF_TOKEN_PARAMETER_INFIXES):
     if not explicitly_testable(parameter):
+      offer_anticsrf_token(parameter)
       if (len(parameter.split("="))) == 2:
         info_msg = "Ignoring the parameter '" + parameter.split("=")[0]
         info_msg += "' that appears to hold anti-CSRF token '" + parameter.split("=")[1] +  "'."

@@ -440,6 +440,37 @@ request.add_option("--safe-freq",
                 type="int",
                 help="Regular requests between visits to a safe URL.")
 
+request.add_option("--csrf-token",
+                action="store",
+                dest="csrf_token",
+                default=None,
+                help="Parameter used to hold anti-CSRF token.")
+
+request.add_option("--csrf-url",
+                action="store",
+                dest="csrf_url",
+                default=None,
+                help="URL address to visit for extraction of anti-CSRF token.")
+
+request.add_option("--csrf-method",
+                action="store",
+                dest="csrf_method",
+                default=None,
+                help="HTTP method to use during anti-CSRF token page visit.")
+
+request.add_option("--csrf-data",
+                action="store",
+                dest="csrf_data",
+                default=None,
+                help="POST data to send during anti-CSRF token page visit.")
+
+request.add_option("--csrf-retries",
+                action="store",
+                dest="csrf_retries",
+                default=0,
+                type="int",
+                help="Retries for anti-CSRF token retrieval (default 0).")
+
 request.add_option("--skip-urlencode",
                 action="store_true",
                 dest="skip_urlencode",

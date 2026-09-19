@@ -30,6 +30,7 @@ from src.core.controller import checks
 from src.core.requests import proxy
 from src.core.requests import cookies
 from src.core.requests import chunked
+from src.core.requests import anticsrf
 from src.core.requests import redirection
 from src.core.requests import keepalive
 from src.core.requests import stability
@@ -568,6 +569,7 @@ def do_check(request):
 
   request = encode_non_ascii_url(request)
   randomize_parameters(request)
+  anticsrf.apply_token(request)
 
   # Frame the body as chunks, so a filter inspecting it never sees the payload in one piece.
   if menu.options.chunked and request.data and not request.has_header(settings.TRANSFER_ENCODING):

@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "148"
+REVISION = "149"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1901,6 +1901,12 @@ REQUEST_COUNTER = 0
 # True while the safe request is on its way, so that it does not count itself.
 SENDING_SAFE_REQUEST = False
 
+# The anti-CSRF token: what names it (an expression), what the user wrote, and True while the page
+# holding it is being fetched - a fetch that must not go looking for a token of its own.
+CSRF_TOKEN = None
+CSRF_TOKEN_ORIGINAL = None
+FETCHING_CSRF_TOKEN = False
+
 # Init Test
 INIT_TEST = ""
 
@@ -2020,6 +2026,9 @@ PROXY_CONNECTION = "Proxy-Connection"
 IF_MODIFIED_SINCE = "If-Modified-Since"
 IF_NONE_MATCH = "If-None-Match"
 CONTENT_TYPE = "Content-Type"
+# A page that answers with the token itself, rather than with a page holding it.
+PLAIN_TEXT_CONTENT_TYPE = "text/plain"
+OK_RESPONSE_CODE = 200
 SERVER = "Server"
 SET_COOKIE = "Set-Cookie"
 X_POWERED_BY = "X-Powered-By"

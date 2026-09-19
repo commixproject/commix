@@ -135,6 +135,21 @@ def validate():
     if menu.options.safe_req:
       settings.SAFE_REQUEST = request.parse_safe_request(menu.options.safe_req)
 
+  for option_name, option_value in (("--csrf-url", menu.options.csrf_url), ("--csrf-method", menu.options.csrf_method), ("--csrf-data", menu.options.csrf_data)):
+    if option_value and not menu.options.csrf_token:
+      err_msg = "The option '" + option_name + "' requires the option '--csrf-token'."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit()
+
+  if menu.options.csrf_token:
+    # A token is one value at a time: a second worker spends the one the first was given, and both
+    # requests are then answered as though neither had a token at all.
+    if menu.options.threads > 1:
+      err_msg = "The option '--csrf-token' is incompatible with the option '--threads'."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit()
+    checks.set_anticsrf_token(menu.options.csrf_token)
+
   if menu.options.retry_on:
     try:
       re.compile(menu.options.retry_on)

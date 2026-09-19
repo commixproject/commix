@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New options `--csrf-token`, `--csrf-url`, `--csrf-method`, `--csrf-data` and `--csrf-retries` for testing targets that check an anti-CSRF token.
 * Added: New options `--proxy-file`, `--proxy-freq` and `--proxy-cred` for using a list of proxies and the credentials they ask for.
 * Added: Support for SOCKS4/5 proxies given with the `--proxy` option.
 * Added: New option `--retry-on` for repeating a request whose response content matches a given regexp.
