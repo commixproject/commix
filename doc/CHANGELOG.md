@@ -1,4 +1,6 @@
 ## Version 4.2 (TBA)
+* Added: Bundled the "chardet" library and a built-in Brotli decoder to handle pages regardless of their character encoding or compression format.
+* Added: New options `--second-url` and `--second-req` for reading the result of an injection from the page it shows up on.
 * Added: New options `--csrf-token`, `--csrf-url`, `--csrf-method`, `--csrf-data` and `--csrf-retries` for testing targets that check an anti-CSRF token.
 * Added: New options `--proxy-file`, `--proxy-freq` and `--proxy-cred` for using a list of proxies and the credentials they ask for.
 * Added: Support for SOCKS4/5 proxies given with the `--proxy` option.

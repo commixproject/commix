@@ -638,7 +638,7 @@ def do_check(request):
 
   # Default value for "Accept-Encoding" HTTP header
   if not (menu.options.requestfile or menu.options.logfile):
-    request.add_header(settings.ACCEPT_ENCODING, settings.HTTP_ACCEPT_ENCODING_HEADER_VALUE)
+    request.add_header(settings.ACCEPT_ENCODING, settings.HTTP_ACCEPT_ENCODING_HEADER_VALUE if settings.PAGE_COMPRESSION else settings.HTTP_ACCEPT_ENCODING_IDENTITY)
 
   # Appends a fake HTTP header 'X-Forwarded-For' (and similar)
   if settings.TAMPER_SCRIPTS["xforwardedfor"]:
@@ -699,7 +699,7 @@ def do_check(request):
          if settings.CONTENT_TYPE not in str(extra_headers):
           request.add_header(settings.CONTENT_TYPE, settings.HTTP_CONTENT_TYPE_XML_HEADER_VALUE)
     if settings.ACCEPT_ENCODING not in str(extra_headers):
-      request.add_header(settings.ACCEPT_ENCODING, settings.HTTP_ACCEPT_ENCODING_HEADER_VALUE)
+      request.add_header(settings.ACCEPT_ENCODING, settings.HTTP_ACCEPT_ENCODING_HEADER_VALUE if settings.PAGE_COMPRESSION else settings.HTTP_ACCEPT_ENCODING_IDENTITY)
 
     for extra_header in extra_headers:
       try:

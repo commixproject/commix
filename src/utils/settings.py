@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "150"
+REVISION = "151"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1905,6 +1905,11 @@ PROXY_LIST_INDEX = 0
 # The request '--safe-req' was given, parsed once and replayed as it was written.
 SAFE_REQUEST = None
 
+# The request '--second-req' was given: where the output of an injection shows up, rather than
+# where the injection is sent. True while that page is being fetched, so it fetches nothing itself.
+SECOND_ORDER_REQUEST = None
+FETCHING_SECOND_ORDER = False
+
 # Every request this run has sent, counted for the options that act every so many of them.
 REQUEST_COUNTER = 0
 
@@ -2049,7 +2054,67 @@ DEFAULT_HTTP_CONTENT_TYPE_VALUE = "application/x-www-form-urlencoded"
 HTTP_CONTENT_TYPE_JSON_HEADER_VALUE = "application/json"
 HTTP_CONTENT_TYPE_XML_HEADER_VALUE = "application/xml"
 # Only what the response handling can actually decompress is asked for.
-HTTP_ACCEPT_ENCODING_HEADER_VALUE = "gzip,deflate"
+"""
+The encodings a response may arrive in.
+
+Only what can be read back is asked for: a page that arrives in an encoding with no decoder is a
+page that cannot be searched for anything, and the target has no way of knowing that.
+"""
+try:
+  from src.utils import brotli as _brotli
+except ImportError:
+  try:
+    import brotli as _brotli
+  except ImportError:
+    try:
+      import brotlicffi as _brotli
+    except ImportError:
+      _brotli = None
+try:
+  from compression import zstd as _zstd    # Python 3.14+ carries it in the standard library
+except ImportError:
+  _zstd = None
+
+try:
+  from src.thirdparty.chardet import detect as _detect_charset
+except ImportError:
+  try:
+    from chardet import detect as _detect_charset
+  except ImportError:
+    try:
+      from charset_normalizer import detect as _detect_charset
+    except ImportError:
+      _detect_charset = None
+
+CHARSET_DETECTOR = _detect_charset
+# The named entities a page may be written with, as the characters a browser would read them as -
+# taken from the platform's own table rather than kept as a list of our own.
+try:
+  from html.entities import name2codepoint as _name2codepoint
+except ImportError:
+  from htmlentitydefs import name2codepoint as _name2codepoint
+HTML_ENTITIES = dict(_name2codepoint)
+# How much of a page is enough to guess what it is written in.
+HEURISTIC_PAGE_SIZE_THRESHOLD = 20 * 1024
+# The charset a page declares, read out of its own head.
+META_CHARSET_REGEX = r"""(?si)<head\b[^>]*>(?:(?!</head>).)*?<meta[^>]{0,300}?charset\s*=\s*["']?(?P<result>[^"'> ]+)"""
+# Names a page may declare itself in that are not the names the codecs are registered under.
+CHARSET_ALIASES = {
+  "windows-874" : "iso-8859-11", "utf-8859-1" : "utf8", "en_us" : "utf8", "macintosh" : "iso-8859-1",
+  "euc_tw" : "big5_tw", "th" : "tis-620", "unicode" : "utf8", "utc8" : "utf8", "ebcdic" : "ebcdic-cp-be",
+  "iso-8859" : "iso8859-1", "iso-8859-0" : "iso8859-1", "ansi" : "ascii", "gbk2312" : "gbk",
+  "windows-31j" : "cp932", "en" : "us"
+}
+
+BROTLI_DECODER = _brotli
+ZSTD_DECODER = _zstd
+HTTP_ACCEPT_ENCODING_HEADER_VALUE = "gzip,deflate" + (",br" if _brotli is not None else "") + (",zstd" if _zstd is not None else "")
+# What is asked for instead, once a page has come back as something other than what it declared.
+HTTP_ACCEPT_ENCODING_IDENTITY = "identity"
+PAGE_COMPRESSION = True
+# The most a page is decompressed into: a small response can name a very large one, and reading it
+# whole is how a target with nothing to hide empties this machine's memory.
+MAX_PAGE_SIZE = 100 * 1024 * 1024
 
 # The web server named by the 'Server' header, and the ones that are recognised.
 SERVER_BANNER = ""

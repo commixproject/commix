@@ -17,6 +17,7 @@ import re
 from src.thirdparty.six.moves import urllib as _urllib
 from src.core.parse import cmdline as menu
 from src.utils import settings
+from src.core.controller import checks
 
 """
 Anti-CSRF token handling.
@@ -80,7 +81,9 @@ def _fetch_token_page(url, http_request_method):
   if response is None or isinstance(response, bool):
     return "", None, None
   try:
-    page = response.read().decode(settings.DEFAULT_CODEC, errors="replace")
+    # Decompressed and decoded the way every other page is: a gzip-encoded page read raw holds no
+    # token that any expression could find.
+    page = checks.process_page_content(response, action="decode")
   except Exception:
     page = ""
   code = getattr(response, "code", None) or getattr(response, "status", None)

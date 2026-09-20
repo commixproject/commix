@@ -193,6 +193,18 @@ target.add_option("--crawl-exclude",
                 default=None,
                 help="Regexp to exclude pages from crawling (e.g. 'logout').")
 
+target.add_option("--second-url",
+                action="store",
+                dest="second_url",
+                default=None,
+                help="Resulting page URL searched for second-order response.")
+
+target.add_option("--second-req",
+                action="store",
+                dest="second_req",
+                default=None,
+                help="Load second-order HTTP request from file.")
+
 target.add_option("--scope",
                 dest="scope",
                 default=None,

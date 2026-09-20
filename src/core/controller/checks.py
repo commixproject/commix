@@ -15,6 +15,7 @@ For more see the file 'readme/COPYING' for copying permission.
 
 import io
 import re
+import codecs
 import os
 import sys
 import json
@@ -918,6 +919,202 @@ def normalize_newlines(payload):
 """
 Process HTTP response content: handle decompression and encode/decode page content.
 """
+def decompress_page(body, content_encoding):
+  """
+  A page as it was written, from the encoding it arrived in.
+
+  Every decoder is stopped at the size a page is allowed to reach: a few hundred bytes can name
+  gigabytes, and reading that whole is how a target empties the memory of the machine testing it.
+  """
+  content_encoding = (content_encoding or "").lower()
+  if content_encoding not in ("gzip", "x-gzip", "deflate", "br", "zstd"):
+    return body
+  cap = settings.MAX_PAGE_SIZE
+  original = body
+  try:
+    if content_encoding == "deflate":
+      # Raw deflate, read in bounded steps rather than expanded whole and measured afterwards.
+      decompressor = zlib.decompressobj(-15)
+      body = decompressor.decompress(body, cap + 1)
+      if len(body) > cap:
+        raise ValueError("size too large")
+      body += decompressor.flush()
+      if len(body) > cap:
+        raise ValueError("size too large")
+    elif content_encoding == "br":
+      if settings.BROTLI_DECODER is None:
+        raise ValueError("no brotli decoder available")
+      body = settings.BROTLI_DECODER.decompress(body)
+      if len(body) > cap:
+        raise ValueError("size too large")
+    elif content_encoding == "zstd":
+      if settings.ZSTD_DECODER is None:
+        raise ValueError("no zstandard decoder available")
+      decompressor = settings.ZSTD_DECODER.ZstdDecompressor(options={settings.ZSTD_DECODER.DecompressionParameter.window_log_max: 23})
+      body = decompressor.decompress(body, max_length=cap + 1)
+      if len(body) > cap:
+        raise ValueError("size too large")
+      if not decompressor.eof:
+        raise ValueError("incomplete stream")
+    else:
+      with contextlib.closing(gzip.GzipFile(fileobj=io.BytesIO(body), mode="rb")) as gz:
+        body = gz.read(cap + 1)
+      if len(body) > cap:
+        raise ValueError("size too large")
+  except Exception:
+    # A page that is not what it says it is: said once, and asked for uncompressed from here on,
+    # rather than arriving in the same state and failing the same way for the rest of the run.
+    if settings.PAGE_COMPRESSION:
+      settings.PAGE_COMPRESSION = False
+      warn_msg = "Page decompression failed, turning off page compression."
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    # Handed back as it arrived rather than half-expanded: what was read of it says nothing about
+    # the page, and the next request asks for one that needs no expanding at all.
+    return original
+  return body
+
+def normalize_charset(charset, warn=True):
+  """
+  The name a page declares itself in, as a name the platform actually has.
+
+  What a page says about its own encoding is written by hand as often as not: it arrives with the
+  media type still attached, misspelled, aliased, or naming nothing at all. Anything that cannot be
+  decoded with in the end is refused, rather than used to read every page of the run wrongly.
+  """
+  if not charset:
+    return None
+  charset = str(charset).lower()
+  for delimiter in (";", ",", "("):
+    if delimiter in charset:
+      charset = charset[:charset.find(delimiter)].strip()
+  charset = charset.replace("&quot", "")
+
+  # Transpositions of a number that is nearly always '8859', and one that is nearly always '2312'.
+  for typo, correction in (("8858", "8859"), ("8559", "8859"), ("8895", "8859"), ("5889", "8859"), ("5589", "8859"), ("2313", "2312")):
+    if typo in charset:
+      charset = charset.replace(typo, correction)
+      break
+  else:
+    if charset.startswith("x-"):
+      charset = charset[len("x-"):]
+    elif "windows-cp" in charset:
+      charset = charset.replace("windows-cp", "windows")
+
+  if charset.startswith("8859"):
+    charset = "iso-" + charset
+  elif charset.startswith("cp-"):
+    charset = "cp" + charset[3:]
+  elif charset.startswith("euc-"):
+    charset = "euc_" + charset[4:]
+  elif charset.startswith("windows") and not charset.startswith("windows-"):
+    charset = "windows-" + charset[7:]
+  elif charset.find("iso-88") > 0:
+    charset = charset[charset.find("iso-88"):]
+  elif charset.startswith("is0-"):
+    charset = "iso" + charset[4:]
+  elif charset.find("ascii") > 0:
+    charset = "ascii"
+  elif charset.find("utf8") > 0:
+    charset = "utf8"
+  elif charset.find("utf-8") > 0:
+    charset = "utf-8"
+
+  if charset in settings.CHARSET_ALIASES:
+    charset = settings.CHARSET_ALIASES[charset]
+  elif charset in ("null", "{charset}", "charset", "*") or not re.search(r"\w", charset):
+    return None
+
+  try:
+    codecs.lookup(charset)
+  except (LookupError, ValueError):
+    # A charset carrying a NUL is not a charset - and it is the target that chose it.
+    return None
+  try:
+    str(b"commix", charset)
+  except (UnicodeDecodeError, LookupError):
+    if warn and settings.VERBOSITY_LEVEL != 0:
+      warn_msg = "Invalid web page charset '" + charset + "'."
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    return None
+  return charset
+
+def heuristic_charset(page):
+  """
+  What a page looks like it is written in, where it says nothing about itself.
+  """
+  if settings.CHARSET_DETECTOR is None or not page:
+    return None
+  try:
+    return normalize_charset(settings.CHARSET_DETECTOR(page[:settings.HEURISTIC_PAGE_SIZE_THRESHOLD]).get("encoding"), warn=False)
+  except Exception:
+    return None
+
+def decode_page_body(body, response=None, percent_decode=True):
+  """
+  A page already read from its response, as text: decompressed if it was compressed, and read in
+  the encoding it declares.
+
+  Used where the body is in hand rather than the response - a page kept for later, or one read once
+  and handed on to whoever reads it next.
+  """
+  content_encoding = content_type = ""
+  if response is not None:
+    try:
+      content_encoding = response.info().get("Content-Encoding") or ""
+      content_type = (response.info().get(settings.CONTENT_TYPE) or "").lower()
+    except Exception:
+      content_encoding = content_type = ""
+  body = decompress_page(body, content_encoding)
+
+  """
+  What the page is written in, from what it says about itself.
+
+  A page declares its charset twice - in the header it was served with and in its own head - and
+  the two disagree often enough that agreeing is what makes either believable. One on its own is
+  taken where the other is silent; two that differ are both discarded, and what the page looks like
+  is asked for instead.
+  """
+  if menu.options.codec:
+    page_encoding = settings.DEFAULT_CODEC
+  else:
+    http_charset = meta_charset = None
+    if "charset=" in content_type:
+      http_charset = normalize_charset(content_type.split("charset=")[-1])
+    if isinstance(body, bytes):
+      declared = re.search(settings.META_CHARSET_REGEX, body.decode(settings.DEFAULT_CODEC, errors="replace"))
+      meta_charset = normalize_charset(declared.group("result")) if declared else None
+    if (any((http_charset, meta_charset)) and not all((http_charset, meta_charset))) or (http_charset == meta_charset and all((http_charset, meta_charset))):
+      page_encoding = http_charset or meta_charset
+    else:
+      page_encoding = None
+
+  """
+  A page is written for a browser, which reads an entity and a per-cent escape as the character
+  each stands for - so what the target wrote is not what arrived, and the marker a technique looks
+  for would be searched for in text the target never sent.
+  """
+  if isinstance(body, bytes) and "text/" in content_type:
+    if b"&#" in body:
+      body = re.sub(b"(?i)&#x([0-9a-f]{1,2});", lambda _: codecs.decode(_.group(1) if len(_.group(1)) == 2 else b"0" + _.group(1), "hex"), body)
+      body = re.sub(b"&#(\\d{1,3});", lambda _: bytes(bytearray([int(_.group(1))])) if int(_.group(1)) < 256 else _.group(0), body)
+    if percent_decode and b"%" in body:
+      body = re.sub(b"(?i)%([0-9a-f]{2})", lambda _: codecs.decode(_.group(1), "hex"), body)
+    body = re.sub(b"&([^;]+);", lambda _: bytes(bytearray([settings.HTML_ENTITIES[_.group(1).decode("ascii", errors="replace")]])) if settings.HTML_ENTITIES.get(_.group(1).decode("ascii", errors="replace"), 256) < 256 else _.group(0), body)
+    page_encoding = page_encoding or heuristic_charset(body)
+    if (page_encoding or "").lower() == "utf-8-sig":
+      page_encoding = "utf-8"
+      if body.startswith(b"\xef\xbb\xbf"):
+        body = body[3:]
+
+  if page_encoding:
+    settings.DEFAULT_PAGE_ENCODING = page_encoding
+  for codec in (page_encoding or settings.DEFAULT_PAGE_ENCODING or settings.DEFAULT_CODEC, settings.DEFAULT_CODEC):
+    try:
+      return body.decode(codec, errors="replace")
+    except (UnicodeDecodeError, LookupError, TypeError):
+      continue
+  return ""
+
 def process_page_content(response, action):
   try:
     page = response.read()
@@ -931,21 +1128,15 @@ def process_page_content(response, action):
     response.close()
   except Exception:
     pass
-  if content_encoding in ("gzip", "x-gzip", "deflate"):
-    try:
-      if content_encoding == 'deflate':
-        # zlib decompression; -15 for raw deflate
-        page = zlib.decompress(page, -15)
-      else:  # gzip / x-gzip
-        with contextlib.closing(gzip.GzipFile(fileobj=io.BytesIO(page), mode='rb')) as gz:
-          page = gz.read()
-    except (zlib.error, OSError, EOFError):
-      # Only catch relevant decompression errors
-      warn_msg = "Page decompression failed, turning off page compression."
-      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  # Read as text the one way every page is read: decompressed, in the charset the page and its
+  # header agree on, with what a browser would resolve already resolved.
+  if action != "encode":
+    return decode_page_body(page, response, percent_decode=not settings.CRAWLING)
 
-  # Encode or decode page content, in what the page said it is written in - unless the user named
-  # a codec of their own with '--codec', which outranks whatever the page declares.
+  page = decompress_page(page, content_encoding)
+
+  # Encode page content, in what the page said it is written in - unless the user named a codec of
+  # their own with '--codec', which outranks whatever the page declares.
   chosen = settings.DEFAULT_CODEC if menu.options.codec else (settings.DEFAULT_PAGE_ENCODING or settings.DEFAULT_CODEC)
   error_occurred = False
   err_msg = ""

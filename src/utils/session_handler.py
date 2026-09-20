@@ -243,6 +243,15 @@ def clear(url):
     settings.print_data_to_stdout(settings.print_critical_msg("Error in clear(): " + str(e)))
 
 """
+Add any column a stored table was written before, so an older session file takes a newer row.
+"""
+def _ensure_columns(conn, table, columns):
+  existing = set(row[1] for row in conn.execute("PRAGMA table_info(\"" + table + "\");"))
+  for name, declaration in columns:
+    if name not in existing:
+      conn.execute("ALTER TABLE \"" + table + "\" ADD COLUMN " + name + " " + declaration + ";")
+
+"""
 Store details of a successful injection point into the session database.
 Includes various metadata such as technique, payload, timing, vulnerability status, HTTP method, headers, and cookies.
 """
@@ -258,19 +267,25 @@ def import_injection_points(url, technique, injection_type, filename, separator,
                    "shell VARCHAR, vuln_parameter VARCHAR, prefix VARCHAR, suffix VARCHAR, "
                    "TAG VARCHAR, interpreter VARCHAR, payload VARCHAR, http_header VARCHAR, http_request_method VARCHAR, url_time_response INTEGER, "
                    "timesec INTEGER, exec_time INTEGER, output_length INTEGER, is_vulnerable VARCHAR, data VARCHAR, cookie VARCHAR, tamper VARCHAR, "
-                   "target_os VARCHAR, file_deleted VARCHAR DEFAULT '', web_root VARCHAR DEFAULT '', tmp_path VARCHAR DEFAULT '');")
+                   "target_os VARCHAR, file_deleted VARCHAR DEFAULT '', web_root VARCHAR DEFAULT '', tmp_path VARCHAR DEFAULT '', "
+                   "second_url VARCHAR DEFAULT '', second_req VARCHAR DEFAULT '', csrf_token VARCHAR DEFAULT '');")
+
+      # The options a stored payload was made with, for a session file that predates them.
+      _ensure_columns(conn, table, (("second_url", "VARCHAR DEFAULT ''"), ("second_req", "VARCHAR DEFAULT ''"), ("csrf_token", "VARCHAR DEFAULT ''")))
 
       # Check if an exact matching record already exists to avoid duplicates
       query_check = ("SELECT 1 FROM \"" + table + "\" WHERE url = ? AND technique = ? AND injection_type = ? AND separator = ? AND "
                      "shell = ? AND vuln_parameter = ? AND prefix = ? AND suffix = ? AND TAG = ? AND interpreter = ? AND payload = ? AND "
                      "http_header = ? AND http_request_method = ? AND url_time_response = ? AND timesec = ? AND exec_time = ? AND "
-                     "output_length = ? AND is_vulnerable = ? AND data = ? AND cookie = ? AND tamper = ? AND target_os = ? AND web_root = ? AND tmp_path = ? LIMIT 1;")
+                     "output_length = ? AND is_vulnerable = ? AND data = ? AND cookie = ? AND tamper = ? AND target_os = ? AND web_root = ? AND tmp_path = ? AND "
+                     "second_url = ? AND second_req = ? AND csrf_token = ? LIMIT 1;")
 
       params = (str(url), str(technique), str(injection_type), str(separator), str(shell), str(vuln_parameter or ""),
                 str(prefix), str(suffix), str(TAG), str(interpreter), str(payload), str(settings.HTTP_HEADER),
                 str(http_request_method), int(url_time_response), int(timesec), int(exec_time),
                 int(output_length), str(is_vulnerable), str(menu.options.data), str(menu.options.cookie),
-                str(menu.options.tamper or ""), str(settings.TARGET_OS), str(settings.WEB_ROOT or ""), str(menu.options.tmp_path or ""))
+                str(menu.options.tamper or ""), str(settings.TARGET_OS), str(settings.WEB_ROOT or ""), str(menu.options.tmp_path or ""),
+                str(menu.options.second_url or ""), str(menu.options.second_req or ""), str(settings.CSRF_TOKEN_ORIGINAL or ""))
 
       if settings.BASE64_PADDING in params[0]:
         params = (params[0].replace(settings.BASE64_PADDING, _urllib.parse.quote(settings.BASE64_PADDING)),) + params[1:]
@@ -281,8 +296,9 @@ def import_injection_points(url, technique, injection_type, filename, separator,
       if cursor.fetchone() is None:
         conn.execute("INSERT INTO \"" + table + "\" (url, technique, injection_type, separator, "
                      "shell, vuln_parameter, prefix, suffix, TAG, interpreter, payload, http_header, http_request_method, "
-                     "url_time_response, timesec, exec_time, output_length, is_vulnerable, data, cookie, tamper, target_os, web_root, tmp_path) "
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", params)
+                     "url_time_response, timesec, exec_time, output_length, is_vulnerable, data, cookie, tamper, target_os, web_root, tmp_path, "
+                     "second_url, second_req, csrf_token) "
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", params)
         conn.commit()
 
     # Mark injection checker as True to indicate session contains injection data
@@ -539,6 +555,11 @@ def apply_stored_technique(row):
   # directory a finding that fell back to one used.
   web_root = row[23] if len(row) > 23 else None
   tmp_path = row[24] if len(row) > 24 else None
+  # Nor the options that say where the result of this payload is read from - without them the
+  # payload is replayed into a target that answers it with nothing, and says nothing about why.
+  second_url = row[25] if len(row) > 25 else None
+  second_req = row[26] if len(row) > 26 else None
+  csrf_token = row[27] if len(row) > 27 else None
 
   if http_header:
     settings.HTTP_HEADER = http_header
@@ -571,6 +592,26 @@ def apply_stored_technique(row):
     if settings.USER_APPLIED_WEB_ROOT:
       announce_replay_conflict(web_root, menu.options.web_root, "document root", "--web-root")
     settings.WEB_ROOT = web_root
+  for stored, applied_name, label, switch in ((second_url, "second_url", "second-order URL", "--second-url"),
+                                             (second_req, "second_req", "second-order request file", "--second-req"),
+                                             (csrf_token, "csrf_token", "anti-CSRF token parameter", "--csrf-token")):
+    if not stored or stored == "None":
+      continue
+    applied = getattr(menu.options, applied_name)
+    if applied and str(applied) != str(stored):
+      announce_replay_conflict(stored, applied, label, switch)
+    elif not applied:
+      info_msg = "The stored finding was made with the " + label + " '" + str(stored) + "', which is put back for this run."
+      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    setattr(menu.options, applied_name, stored)
+
+  # Read back the way it was given, so what the token is looked up by is what it was found with.
+  if csrf_token and csrf_token != "None":
+    checks.set_anticsrf_token(csrf_token)
+  if second_req and second_req != "None" and os.path.isfile(second_req):
+    from src.core.parse import request as request_parser
+    settings.SECOND_ORDER_REQUEST = request_parser.parse_single_request(second_req, "second-order")
+
   if tmp_path and tmp_path != "None":
     # Likewise the temporary directory, for a finding that fell back to one.
     if settings.USER_APPLIED_TMP_PATH:

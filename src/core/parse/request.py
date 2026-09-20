@@ -311,6 +311,12 @@ Only the first request of the file is taken: this is the one request that is rep
 holding several says nothing about which.
 """
 def parse_safe_request(request_file):
+  return parse_single_request(request_file, "safe")
+
+"""
+The one request a file holds, for an option that replays it rather than testing it.
+"""
+def parse_single_request(request_file, label):
   if not os.path.exists(request_file):
     err_msg = "It seems the '" + request_file + "' file does not exist."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
@@ -340,7 +346,7 @@ def parse_safe_request(request_file):
              "headers" : headers
            }
 
-  err_msg = "Invalid format of the safe request file '" + request_file + "'."
+  err_msg = "Invalid format of the " + label + " request file '" + request_file + "'."
   settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
   raise SystemExit(settings.EXIT_FAILURE)
 

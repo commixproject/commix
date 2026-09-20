@@ -60,7 +60,7 @@ def is_url_content_stable(url, response=None, fetch_time=None, http_request_meth
       raw_body = response.read()
       first_response_content = raw_body.strip()
       response.read = (lambda _b: lambda *a, **kw: _b)(raw_body)
-      settings.ORIGINAL_PAGE = raw_body.decode(settings.DEFAULT_CODEC, errors="replace")
+      settings.ORIGINAL_PAGE = checks.decode_page_body(raw_body, response)
     else:
       first_response = _urllib.request.urlopen(_build_request(), timeout=settings.TIMEOUT)
       try:
@@ -590,8 +590,11 @@ def retry_on_undesired_content(request, response):
       body = response.read()
     except Exception:
       return response
-    content = body.decode(settings.DEFAULT_CODEC, errors="replace")
-    if not re.search(menu.options.retry_on, content, re.I) or attempts >= settings.MAX_RETRIES:
+    content = checks.decode_page_body(body, response)
+    # Bounded by the retries the run was given, not by the budget the connection layer keeps
+    # raising as requests are spent: a page that always asks to be retried would otherwise be
+    # asked again for as long as the run lasts.
+    if not re.search(menu.options.retry_on, content, re.I) or attempts >= menu.options.retries:
       return ReReadableResponse(response, body)
     attempts += 1
     warn_msg = "Forced retry of the request, because of undesired page content."
@@ -619,6 +622,49 @@ def get_request_response(request):
     response = retry_on_undesired_content(request, response)
 
   return response
+
+"""
+The page a second-order injection shows up on, which is not the page the payload was sent to.
+
+A target that stores what it is given and runs it somewhere else - a queue, a log viewer, an admin
+page - answers the injected request with nothing at all. So that answer is set aside and the page
+named by '--second-url'/'--second-req' is fetched in its place, and read for the result instead.
+"""
+def second_order_response(payload=None):
+  if settings.FETCHING_SECOND_ORDER:
+    return None
+  if not menu.options.second_url and not settings.SECOND_ORDER_REQUEST:
+    return None
+  # Looking for a protection in the way is not an injection, so its answer is not looked for
+  # anywhere else either.
+  if payload and settings.WAF_CHECK_PAYLOAD in str(payload):
+    return None
+
+  settings.FETCHING_SECOND_ORDER = True
+  try:
+    # The stored request may say where the payload goes, the way the target's own parameters do.
+    def _with_payload(value):
+      if value and settings.INJECT_TAG in value:
+        return checks.process_injectable_value(checks.encode_payload(payload or ""), value)
+      return value
+
+    if menu.options.second_url:
+      request = _urllib.request.Request(_with_payload(menu.options.second_url), method=settings.HTTPMETHOD.GET)
+      headers.do_check(request)
+    else:
+      stored = settings.SECOND_ORDER_REQUEST
+      data = _with_payload(stored["data"])
+      request = _urllib.request.Request(_with_payload(stored["url"]), data.encode(settings.DEFAULT_CODEC) if data else None, method=stored["method"] or settings.HTTPMETHOD.GET)
+      for header_name, header_value in stored["headers"]:
+        request.add_header(header_name, _with_payload(header_value))
+    if settings.VERBOSITY_LEVEL >= 2:
+      debug_msg = "Reading the result from '" + request.get_full_url() + "', where the output of a second-order injection shows up."
+      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+    return get_request_response(request)
+  except Exception:
+    return None
+  finally:
+    settings.FETCHING_SECOND_ORDER = False
 
 """
 Check if target host is vulnerable.
@@ -675,6 +721,11 @@ def init_injection(payload, http_request_method, url):
 
   headers.do_check(request)
   response = get_request_response(request)
+  # Sent before the clock is stopped: a delay asked for by the payload is paid on the request
+  # above, and what is read below is the page it shows up on.
+  second_order = second_order_response(payload)
+  if second_order is not None:
+    response = second_order
 
   if settings.TIME_RELATED_ATTACK:
     failed_attempts = 0
@@ -717,6 +768,9 @@ def header_injection(url, payload, http_request_method, set_header):
     response = inject_header(url, payload, http_request_method)
   except Exception as err_msg:
     response = request_failed(err_msg)
+  second_order = second_order_response(payload)
+  if second_order is not None:
+    response = second_order
 
   if settings.TIME_RELATED_ATTACK :
     failed_attempts = 0
