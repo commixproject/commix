@@ -338,94 +338,94 @@ def unhandled_exception():
     err_msg = "Identified corrupted .pyc file(s)."
     err_msg += "Please delete .pyc files on your system to fix the problem."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   elif "must be pinned buffer, not bytearray" in exc_msg:
     err_msg = "Error occurred at Python interpreter. "
     err_msg += "Python 2.7.x fixes this. Please update accordingly. "
     err_msg += "(Reference: https://bugs.python.org/issue8104)"
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   elif any(_ in exc_msg for _ in ("MemoryError", "Cannot allocate memory")):
     err_msg = "Memory exhaustion detected."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   elif "Permission denied: '" in exc_msg:
     match = re.search(r"Permission denied: '([^']*)", exc_msg)
     err_msg = "Permission error occurred while accessing file '" + match.group(1) + "'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   elif all(_ in exc_msg for _ in ("Access is denied", "subprocess", "metasploit")):
     err_msg = "Permission error occurred while running Metasploit."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   elif all(_ in exc_msg for _ in ("Permission denied", "metasploit")):
     err_msg = "Permission error occurred while using Metasploit."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   elif "Invalid argument" in exc_msg:
     err_msg = "Corrupted installation detected. "
     err_msg += "You should retrieve the latest (dev) version from the official GitHub "
     err_msg += "repository at '" + settings.GIT_URL + "'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   elif "database disk image is malformed" in exc_msg:
     err_msg = "Local session file seems to be malformed. Please re-run with '--flush-session'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   elif all(_ in exc_msg for _ in ("No such file", "_'")):
     err_msg = "Corrupted installation detected ('" + exc_msg.strip().split(settings.END_LINE.LF)[-1] + "'). "
     err_msg += "You should retrieve the latest (dev) version from the official GitHub "
     err_msg += "repository at '" + settings.GIT_URL + "'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   elif "Invalid IPv6 URL" in exc_msg:
     err_msg = "Invalid URL ('" + exc_msg.strip().split(settings.END_LINE.LF)[-1] + "')"
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   elif any(_ in exc_msg for _ in ("Broken pipe",)):
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   elif any(_ in exc_msg for _ in ("The paging file is too small",)):
     err_msg = "No space left for paging file."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   elif all(_ in exc_msg for _ in ("SyntaxError: Non-ASCII character", ".py on line", "but no encoding declared")) or \
        any(_ in exc_msg for _ in ("source code string cannot contain null bytes", "No module named")) or \
        any(_ in exc_msg for _ in ("ImportError", "ModuleNotFoundError", "<frozen", "Can't find file for module")):
     err_msg = "Invalid runtime environment ('" + exc_msg.split("Error: ")[-1].strip() + "')."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   elif any(_ in exc_msg for _ in ("No space left", "Disk quota exceeded", "Disk full while accessing")):
     err_msg = "No space left on output device."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   elif "Read-only file system" in exc_msg:
     err_msg = "Output device is mounted as read-only."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   elif "OperationalError: disk I/O error" in exc_msg:
     err_msg = "I/O error on output device."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   elif "Violation of BIDI" in exc_msg:
     err_msg = "Invalid URL (violation of Bidi IDNA rule - RFC 5893)."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   elif any(_ in exc_msg for _ in ("tempfile.mkdtemp", "tempfile.mkstemp", "tempfile.py")):
     err_msg = "Unable to write to the temporary directory. "
@@ -433,7 +433,7 @@ def unhandled_exception():
     err_msg += "that you have sufficient permissions to "
     err_msg += "create temporary files and/or directories."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   else:
     err_msg = "Unhandled exception occurred in '" + settings.VERSION[1:] + "'. "
@@ -476,7 +476,7 @@ def load_list_from_file(file_path, description="file"):
   if not os.path.isfile(file_path):
     err_msg = "The " + description + " '" + file_path + "' was not found."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   try:
     with open(file_path, "r", encoding="utf-8") as f:
@@ -485,12 +485,12 @@ def load_list_from_file(file_path, description="file"):
     err_msg = "Cannot read the " + description + " '" + file_path + "'. "
     err_msg += "Check if the file is corrupted or unreadable."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   if not items:
     err_msg = "The " + description + " '" + file_path + "' is empty."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   # Bookkeeping behind whatever the list is being loaded for, so it does not break up that check.
   if settings.VERBOSITY_LEVEL > 1:

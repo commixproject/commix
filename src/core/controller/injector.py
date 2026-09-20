@@ -1178,7 +1178,7 @@ def results_based_injection(separator, TAG, cmd, prefix, suffix, whitespace, htt
       else:
         err_msg = "Something went wrong. The request has failed (" + str(tries) + ") times in a row."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
+        raise SystemExit(settings.EXIT_FAILURE)
 
   return response
 
@@ -1443,7 +1443,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec, technique):
                 err_msg = "The URL to receive the execution output must start with 'http://' or "
                 err_msg += "'https://', and '" + str(message) + "' does not."
                 settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-                raise SystemExit()
+                raise SystemExit(settings.EXIT_FAILURE)
             else:
               output = settings.DEFINED_WEBROOT = message
               info_msg = "Using '" + output

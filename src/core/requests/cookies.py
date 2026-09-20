@@ -30,7 +30,7 @@ def _read_cookies_file(cookies_file):
   except IOError as err_msg:
     err_msg = "There was a problem reading the cookies file '" + cookies_file + "' (" + str(err_msg) + ")."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
 """
 Turn the Netscape/wget cookie format into the value of a Cookie HTTP header. Every line holds seven
@@ -58,7 +58,7 @@ def load_cookies():
   if not cookie:
     err_msg = "No valid cookies found in the '" + menu.options.load_cookies + "' file."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
   info_msg = "Loading cookies from the '" + os.path.split(menu.options.load_cookies)[1] + "' file. "
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   return cookie
@@ -80,7 +80,7 @@ def live_cookies():
     else:
       err_msg = "No cookies were provided in the '" + cookies_file + "' file."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
   content = _read_cookies_file(cookies_file).strip()
   # Either the header as it would be sent, or the tab-separated file a browser exports.

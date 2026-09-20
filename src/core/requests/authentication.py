@@ -43,7 +43,7 @@ def authentication_process(http_request_method):
   if not menu.options.auth_data:
     err_msg = "The '--auth-url' option requires you to also provide the '--auth-data' option."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   try:
     auth_url = menu.options.auth_url

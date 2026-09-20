@@ -41,7 +41,7 @@ def validate():
       err_msg = "Missing a mandatory option (-u, -l, -m, -r, -x, --wizard, --update, --list-tampers or --purge). "
       err_msg += "Use -h for help."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   # Any out-of-band option on its own is enough to ask for the channel.
   if any((menu.options.oob_server, menu.options.oob_token, menu.options.oob_poll != settings.OOB_POLL_INTERVAL)):
@@ -56,7 +56,7 @@ def validate():
       err_msg += "Please visit 'http://docs.python.org/library/codecs.html#standard-encodings' "
       err_msg += "to get the full list of supported charsets."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
     else:
       settings.DEFAULT_CODEC  = menu.options.codec.lower()
 
@@ -75,18 +75,18 @@ def validate():
     if menu.options.tor:
       err_msg = "The switch '--tor' is incompatible with option '--proxy'."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
     if menu.options.ignore_proxy:
       err_msg = "The option '--proxy' is incompatible with switch '--ignore-proxy'."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
     match = re.search(settings.PROXY_REGEX, menu.options.proxy.strip())
     if not match:
       err_msg = "Proxy value must be in format '(" + "|".join(settings.PROXY_SCHEMES) + ")://address:port'."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
     _, proxy_scheme, proxy_cred, proxy_address, proxy_port = match.groups()
     settings.PROXY_SCHEME = (proxy_scheme or "http").lower()
     menu.options.proxy = proxy_address + ":" + proxy_port
@@ -98,12 +98,12 @@ def validate():
   if menu.options.proxy and menu.options.proxy_file:
     err_msg = "The option '--proxy' is incompatible with the option '--proxy-file'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   if menu.options.proxy_freq and not menu.options.proxy_file:
     err_msg = "The option '--proxy-freq' requires the option '--proxy-file'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   # Read once and kept in the order they were written, so a run that rotates through them is
   # repeatable rather than picking one at random.
@@ -113,23 +113,23 @@ def validate():
   if menu.options.safe_post and not menu.options.safe_url:
     err_msg = "The option '--safe-post' requires the option '--safe-url'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   if menu.options.safe_req and any((menu.options.safe_url, menu.options.safe_post)):
     err_msg = "The option '--safe-req' is incompatible with the options '--safe-url' and '--safe-post'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   if menu.options.safe_freq and not any((menu.options.safe_url, menu.options.safe_req)):
     err_msg = "The option '--safe-freq' requires the option '--safe-url' or the option '--safe-req'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   if any((menu.options.safe_url, menu.options.safe_req)):
     if menu.options.safe_freq <= 0:
       err_msg = "You must specify a '--safe-freq' value, greater than zero, to visit a safe URL."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
     if menu.options.safe_url and not re.search(r"(?i)\Ahttp[s]*://", menu.options.safe_url):
       menu.options.safe_url = ("https://" if ":443/" in menu.options.safe_url else "http://") + menu.options.safe_url
     if menu.options.safe_req:
@@ -139,7 +139,7 @@ def validate():
     if option_value and not menu.options.csrf_token:
       err_msg = "The option '" + option_name + "' requires the option '--csrf-token'."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
   if menu.options.csrf_token:
     # A token is one value at a time: a second worker spends the one the first was given, and both
@@ -147,7 +147,7 @@ def validate():
     if menu.options.threads > 1:
       err_msg = "The option '--csrf-token' is incompatible with the option '--threads'."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
     checks.set_anticsrf_token(menu.options.csrf_token)
 
   if menu.options.retry_on:
@@ -156,18 +156,18 @@ def validate():
     except Exception as err:
       err_msg = "Invalid regular expression '" + menu.options.retry_on + "' (" + str(err) + ")."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
   # Asked for on its own, it has nothing to check: the run goes out the way it always would.
   if menu.options.check_tor and not any((menu.options.tor, menu.options.proxy)):
     err_msg = "The switch '--check-tor' requires the switch '--tor' or the option '--proxy'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   if menu.options.tor_type and not menu.options.tor:
     err_msg = "The option '--tor-type' requires the switch '--tor'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   if not menu.options.proxy:
     # Check if defined Tor (--tor option).
@@ -178,35 +178,35 @@ def validate():
   if menu.options.ignore_session and menu.options.flush_session:
     err_msg = "The '--ignore-session' switch is unlikely to work combined with the '--flush-session' switch."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   if menu.options.failed_tries == 0:
     err_msg = "You must specify '--failed-tries' value, greater than zero."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   # Check if defined "--auth-cred" and/or '--auth-type'.
   if (menu.options.auth_type and not menu.options.auth_cred) or (menu.options.auth_cred and not menu.options.auth_type):
     err_msg = "You must specify both '--auth-cred' and '--auth-type' options."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   if menu.options.auth_cred and menu.options.auth_type:
     if menu.options.auth_type.lower() in (settings.AUTH_TYPE.BASIC, settings.AUTH_TYPE.DIGEST) and not re.search(settings.AUTH_CRED_REGEX, menu.options.auth_cred):
       error_msg = "HTTP " + str(menu.options.auth_type)
       error_msg += " authentication credentials value must be in format 'username:password'."
       settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
   if menu.options.requestfile and menu.options.url:
     err_msg = "The '-r' option is incompatible with option '-u' ('--url')."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   if menu.options.bulkfile and menu.options.url:
     err_msg = "The '-m' option is incompatible with option '-u' ('--url')."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   # Check the user-defined OS.
   if menu.options.os:
@@ -219,7 +219,7 @@ def validate():
     except ValueError:
       err_msg = "The option '--abort-code' should contain a list of integer values."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
   # A page that asks to be retried is not a page to abort on: the two would otherwise both answer
   # for the same response, and the abort would win.
@@ -236,7 +236,7 @@ def validate():
     except ValueError:
       err_msg = "The option '--ignore-code' should contain a list of integer values."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
   # Check if defined "--wizard" option.
   if menu.options.wizard:
@@ -281,7 +281,7 @@ def validate():
   if menu.options.jitter < 0:
     err_msg = "The value of the '--jitter' option must not be negative."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   # Check if defined "--timesec" option.
   if menu.options.timesec != 0:
@@ -342,26 +342,26 @@ def validate():
     if not settings.CRAWLING:
       err_msg = "The '--crawl-exclude' option requires usage of the '--crawl' option."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
     try:
       re.compile(menu.options.crawl_exclude)
     except Exception as e:
       err_msg = "invalid regular expression '" + menu.options.crawl_exclude + "' (" + str(e) + ")."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
   # Only a request carrying a body can be split into chunks.
   if menu.options.chunked and not any((menu.options.data, menu.options.requestfile, \
      menu.options.logfile, menu.options.forms)):
     err_msg = "The '--chunked' switch requires usage of POST data."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   for option, cookies_file in (("--load-cookies", menu.options.load_cookies), ("--live-cookies", menu.options.live_cookies)):
     if cookies_file and not os.path.isfile(cookies_file):
       err_msg = "It seems the '" + cookies_file + "' file, provided with the '" + option + "' option, does not exist."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
   # The file keeps being read as it changes, so what it holds now would only be overwritten.
   if menu.options.load_cookies and not menu.options.live_cookies:
@@ -373,14 +373,14 @@ def validate():
     except Exception as e:
       err_msg = "invalid regular expression '" + menu.options.scope + "' (" + str(e) + ")."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
     info_msg = "Using regular expression '" + menu.options.scope + "' for filtering targets."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
   if menu.options.forms and not settings.CRAWLING:
     err_msg = "The '--forms' switch requires the '--crawl' option."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   # Check arguments
   if len(sys.argv) == 1 and not settings.STDIN_PARSING:
@@ -399,11 +399,11 @@ def validate():
     if not os.path.exists(menu.options.file_write):
       err_msg = "The specified local file '" + menu.options.file_write + "' does not exist."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
     if not os.path.isfile(menu.options.file_write):
       err_msg = "The specified path '" + menu.options.file_write + "' is not a file."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
   # Check provided parameters for tests
   checks.check_provided_parameters()

@@ -60,6 +60,7 @@ def is_url_content_stable(url, response=None, fetch_time=None, http_request_meth
       raw_body = response.read()
       first_response_content = raw_body.strip()
       response.read = (lambda _b: lambda *a, **kw: _b)(raw_body)
+      settings.ORIGINAL_PAGE = raw_body.decode(settings.DEFAULT_CODEC, errors="replace")
     else:
       first_response = _urllib.request.urlopen(_build_request(), timeout=settings.TIMEOUT)
       try:
@@ -188,7 +189,7 @@ def _measure_response_time_with_auth_handling(url, http_request_method):
     response.close()
   except _http_client.InvalidURL as err_msg:
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
     
   except (_urllib.error.HTTPError, _urllib.error.URLError) as err:
     ignore_start = time.time()
@@ -223,14 +224,14 @@ def _measure_response_time_with_auth_handling(url, http_request_method):
           err_msg = "The identified HTTP authentication type (" + str(auth_type) + ") "
           err_msg += "is not yet supported."
           settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-          raise SystemExit()
+          raise SystemExit(settings.EXIT_FAILURE)
 
         except IndexError:
           err_msg = "The provided pair of " + str(menu.options.auth_type)
           err_msg += " HTTP authentication credentials '" + str(menu.options.auth_cred) + "'"
           err_msg += " seems to be invalid."
           settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-          raise SystemExit()
+          raise SystemExit(settings.EXIT_FAILURE)
 
 
         if menu.options.auth_type and menu.options.auth_type != auth_type.lower():
@@ -321,7 +322,7 @@ def _measure_response_time_with_auth_handling(url, http_request_method):
 
   except ValueError as err_msg:
     settings.print_data_to_stdout(settings.print_critical_msg(str(err_msg) + "."))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   except Exception as err_msg:
     request_failed(err_msg)
@@ -422,7 +423,7 @@ def request_failed(err_msg):
       error_msg = error_msg + "Skipping to the next target."
     settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
     if not settings.CRAWLING:
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
     else:
       return False
 
@@ -452,7 +453,7 @@ def request_failed(err_msg):
     error_msg = err
     settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
     if not settings.CRAWLING:
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
     else:
       return False
 
@@ -475,7 +476,7 @@ def request_failed(err_msg):
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     if not settings.CRAWLING:
       if menu.options.auth_type and menu.options.auth_cred:
-        raise SystemExit()
+        raise SystemExit(settings.EXIT_FAILURE)
 
   elif settings.TOTAL_OF_REQUESTS == 1:
     if "IncompleteRead" in str(error_msg):
@@ -517,7 +518,7 @@ def request_failed(err_msg):
         error_msg += " and/or ".join(items)
     settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
     if not settings.CRAWLING:
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
     else:
       return False
 
@@ -855,7 +856,7 @@ def application_identification(url, response=None):
       if settings.TARGET_APPLICATION.lower() in unsupported.lower():
         err_msg = settings.TARGET_APPLICATION + " exploitation is not yet supported."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
+        raise SystemExit(settings.EXIT_FAILURE)
 
 """
 Detect the underlying operating system of the target server based on server headers.
@@ -875,7 +876,7 @@ def check_os(server_header):
       if settings.TARGET_OS == settings.OS.WINDOWS and menu.options.shellshock:
         err_msg = "The shellshock module ('--shellshock') is not available for Windows targets."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
+        raise SystemExit(settings.EXIT_FAILURE)
       break
 
   if named and settings.VERBOSITY_LEVEL != 0:

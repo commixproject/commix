@@ -66,19 +66,19 @@ def updater():
   if menu.options.offline:
     err_msg = "You cannot update " + settings.APPLICATION + " via GitHub without access to the Internet."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   root = _install_path()
   if not os.path.isdir(os.path.join(root, ".git")):
     err_msg = "Not a valid git repository. Please clone the '" + settings.APPLICATION + "' repository "
     err_msg += "from GitHub (e.g. 'git clone --depth 1 " + settings.GIT_URL + " " + settings.APPLICATION + "')."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   if not requirements.do_check("git"):
     err_msg = "The 'git' command was not found."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   info_msg = "Updating " + settings.APPLICATION + " to the latest development revision from the GitHub repository."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))

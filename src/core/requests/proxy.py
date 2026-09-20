@@ -34,7 +34,7 @@ def load_proxy_list():
   if not os.path.isfile(menu.options.proxy_file):
     err_msg = "It seems the '" + menu.options.proxy_file + "' file does not exist."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
   with open(menu.options.proxy_file, encoding=settings.DEFAULT_CODEC, errors="replace") as file:
     content = file.read()
   for match in re.finditer(r"(?i)((http[^:\s]*|socks[^:\s]*)://)?(?:([^:@\s/]+:[^@\s/]*)@)?([\w\-.]+):(\d+)", content):
@@ -43,7 +43,7 @@ def load_proxy_list():
   if not settings.PROXY_LIST:
     err_msg = "No proxy was found in the '" + menu.options.proxy_file + "' file."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
   info_msg = "Loaded " + str(len(settings.PROXY_LIST)) + " prox" + ("ies" if len(settings.PROXY_LIST) != 1 else "y")
   info_msg += " from the '" + os.path.split(menu.options.proxy_file)[1] + "' file."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
@@ -90,7 +90,7 @@ def credentials():
   if not match:
     err_msg = "The option '--proxy-cred' must be in format 'username:password'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
   return match.group(1), match.group(2)
 
 """
@@ -102,7 +102,7 @@ def configure():
   if scheme not in settings.PROXY_SCHEMES:
     err_msg = "Proxy value must be in format '(" + "|".join(settings.PROXY_SCHEMES) + ")://address:port'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   if scheme in settings.SOCKS_SCHEMES:
     username, password = credentials()
@@ -141,7 +141,7 @@ def authorization_header():
   if ":" not in menu.options.proxy_cred:
     err_msg = "The option '--proxy-cred' must be in format 'username:password'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
   return "Basic " + b64encode(menu.options.proxy_cred.encode(settings.DEFAULT_CODEC)).decode().replace(settings.END_LINE.LF, "")
 
 """

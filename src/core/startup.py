@@ -51,14 +51,14 @@ def bootstrap():
     if menu.options.interpreter not in settings.AVAILABLE_INTERPRETERS:
       err_msg = "'" + menu.options.interpreter + "' interpreter is not supported!"
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
   # Define the level of verbosity.
   if menu.options.verbose > 4:
     err_msg = "The value for option '-v' "
     err_msg += "must be an integer value from range [0, 4]."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
   else:
     settings.VERBOSITY_LEVEL = menu.options.verbose
 

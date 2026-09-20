@@ -257,7 +257,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
 
   except (_urllib.error.URLError, _urllib.error.HTTPError) as err_msg:
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
 """
 Heuristic (basic) test over the out-of-band channel.
@@ -433,7 +433,7 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, p
 
   except (_urllib.error.URLError, _urllib.error.HTTPError) as err_msg:
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
 """
 Run one technique via the given exploit() callable, updating its own state flag in settings - the shared skeleton behind the 4 functions below.
@@ -1362,18 +1362,18 @@ def perform_checks(url, http_request_method, filename):
       if main_content == auth_content:
         err_msg = "Authentication failed using the specified credentials and URL."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
+        raise SystemExit(settings.EXIT_FAILURE)
 
     except (_urllib.error.URLError, _urllib.error.HTTPError) as err_msg:
       # Authentication request failed due to a connection or HTTP error.
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
   # If only one of the required authentication options is provided, display an error and exit.
   elif menu.options.auth_url or menu.options.auth_data:
     err_msg = "Authentication requires specifying both '--auth-url' and '--auth-data' options."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   # If shellshock testing is enabled, force the injection level to HTTP header level.
   if menu.options.shellshock:
@@ -1512,7 +1512,7 @@ def do_check(url, http_request_method, filename):
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       if not settings.MULTI_TARGETS:
         common.show_http_error_codes()
-        raise SystemExit()
+        raise SystemExit(settings.EXIT_FAILURE)
     elif settings.MULTI_TARGETS:
       checks.finish_target()
       logs.print_logs_notification(filename, url)

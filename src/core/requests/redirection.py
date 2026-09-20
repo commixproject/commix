@@ -62,7 +62,7 @@ class RedirectHandler(_urllib.request.HTTPRedirectHandler, object):
     else:
       err_msg = str(_urllib.error.HTTPError(request.get_full_url(), code, msg, headers, fp)).replace(": "," (")
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg + ")."))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
 def do_check(url, redirect_url):
   """

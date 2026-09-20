@@ -30,7 +30,7 @@ def remove():
   except Exception as e:
     err_msg = "An error occurred while removing the application: " + str(e)
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   info_msg = "Successfully removed " + settings.APPLICATION.capitalize() + " and all related components."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
@@ -41,7 +41,7 @@ def abort_unsupported(packages, dependencies):
   err_msg += "To proceed on other systems, install the required packages (i.e. " + packages
   err_msg += ") and dependencies (i.e. " + dependencies + ") manually."
   settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-  raise SystemExit()
+  raise SystemExit(settings.EXIT_FAILURE)
 
 # Installer Function 
 def installer():
@@ -57,7 +57,7 @@ def installer():
   if not common.running_as_admin():
     err_msg = "This option requires administrative privileges to run."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   app_install_path = os.path.join(settings.INSTALL_DIR, settings.APPLICATION)
   launcher_path = os.path.join(settings.WRAPPER_PATH, settings.APPLICATION)
@@ -96,7 +96,7 @@ def installer():
     subprocess.call("chmod 775 " + os.path.join(app_install_path, settings.APPLICATION + ".py") + settings.NO_OUTPUT, shell=True)
   except Exception as e:
     settings.print_data_to_stdout(settings.print_critical_msg(str(e)))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Creating launcher script at '" + launcher_path + "'..."
@@ -110,7 +110,7 @@ def installer():
   except Exception as e:
     err_msg = "Failed to create launcher: " + str(e)
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   try:
     if not os.path.exists(settings.OUTPUT_DIR):
@@ -121,7 +121,7 @@ def installer():
     except IndexError:
       error_msg = str(err_msg) + "."
     settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   info_msg = "Completed the installation."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))

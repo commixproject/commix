@@ -309,7 +309,7 @@ def shellshock_handler(url, http_request_method, filename):
         settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
       err_msg = "All tested HTTP headers appear to be not injectable."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
             
   except _urllib.error.HTTPError as err_msg:
     # 500/400 during header/CVE probing just means this combination failed - not fatal.

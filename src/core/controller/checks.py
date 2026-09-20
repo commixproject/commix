@@ -63,12 +63,12 @@ except ImportError:
     settings.READLINE_ERROR = True
 
 """
-Exiting
+Exiting, with the code the run ended on - which is how a caller tells an error from a finished run.
 """
-def exit():
+def exit(code=0):
   if settings.VERBOSITY_LEVEL != 0:
     settings.print_data_to_stdout(settings.execution("Ending"))
-  os._exit(0)
+  os._exit(code if isinstance(code, int) else 0)
 
 """
 Persist a new WAF/IPS finding when possible; defer the import to avoid a circular dependency.
@@ -977,7 +977,7 @@ def process_page_content(response, action):
       err_msg += "out"
     err_msg += " option '--codec'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
 """
 Ignore verbatim payload reflections so they cannot trigger a false positive.
@@ -1501,7 +1501,7 @@ def check_url(url):
     err_msg += "Please ensure there are no leftover characters (e.g. '[' or ']') "
     err_msg += "in the hostname part."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
 """
 Verify whether the URL scheme is HTTP or HTTPS.
@@ -1537,7 +1537,7 @@ def check_http_s(url):
     else:
       err_msg = "Invalid target URL provided. "
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
   if _urllib.parse.urlparse(url).scheme != settings.SCHEME:
     if menu.options.force_ssl and settings.VERBOSITY_LEVEL != 0:
@@ -1563,13 +1563,13 @@ def check_connection(url):
         err_msg = "Host '" + hostname + "' does not exist."
         if not settings.MULTI_TARGETS:
           settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-          raise SystemExit()
+          raise SystemExit(settings.EXIT_FAILURE)
       except (socket.error, UnicodeError):
         err_msg = "Problem occurred while "
         err_msg += "resolving the hostname '" + hostname + "'"
         if not settings.MULTI_TARGETS:
           settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-          raise SystemExit()
+          raise SystemExit(settings.EXIT_FAILURE)
 
 """
 Force the user-defined operating system.
@@ -1587,7 +1587,7 @@ def user_defined_os():
       err_msg = "You defined an invalid value '" + menu.options.os + "' "
       err_msg += "for the operating system. The value must be 'Windows' or 'Unix-like'."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
 """
 Define the target operating system.
@@ -1808,12 +1808,12 @@ def validate_tamper_scripts():
       err_msg = "The '" + script + "' tamper script does not exist. "
       err_msg += "Use the '--list-tampers' switch for listing available tamper scripts."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
   for first, second in settings.INCOMPATIBLE_TAMPER_SCRIPTS:
     if first in provided_scripts and second in provided_scripts:
       err_msg = "Tamper script '" + first + "' is unlikely to work in combination with the tamper script '" + second + "'."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
   return provided_scripts
 
 """
@@ -1831,7 +1831,7 @@ def apply_injection_type():
     err_msg += "--skip-technique" if menu.options.skip_tech else "--technique"
     err_msg += "' cannot be used simultaneously."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
   # A string of letters, the way '--technique' is given - a separator between them is allowed too.
   ignored = settings.PARAMETER_SPLITTING_REGEX + settings.SINGLE_WHITESPACE
   letters = ""
@@ -1844,7 +1844,7 @@ def apply_injection_type():
       err_msg += ", ".join(settings.AVAILABLE_TYPES).upper()
       err_msg += ". Refer to the official wiki for details."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
     letters += settings.AVAILABLE_TYPES[given]
   menu.options.tech = "".join(sorted(set(letters), key=settings.AVAILABLE_TECHNIQUES.index))
   settings.USER_APPLIED_TECHNIQUE = True
@@ -1869,7 +1869,7 @@ def validate_techniques():
     err_msg += ", ".join(settings.AVAILABLE_TECHNIQUES).upper()
     err_msg += ". Refer to the official wiki for details."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
 """
 The remaining options whose value can be judged on its own, on the same ground as the two above.
@@ -1883,7 +1883,7 @@ def validate_options():
     if level not in (settings.DEFAULT_INJECTION_LEVEL, settings.COOKIE_INJECTION_LEVEL, settings.HTTP_HEADER_INJECTION_LEVEL):
       err_msg = "The value for option '--level' must be an integer value from range [1, 3]."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
   if menu.options.eval_sink:
     # 'py' and 'python' name the same language, here as for '--interpreter'.
@@ -1891,17 +1891,17 @@ def validate_options():
       err_msg = "You defined an invalid language '" + menu.options.eval_sink + "' for '--eval'. "
       err_msg += "Supported languages are: " + ", ".join(settings.SUPPORTED_EVAL_LANGUAGES) + "."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
   if menu.options.file_write is not None and not menu.options.file_dest:
     err_msg = "You must specify the host's absolute filepath to write (i.e. '--file-dest')."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   if menu.options.file_dest and menu.options.file_write is None:
     err_msg = "You must enter the '--file-write' parameter."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   # The remote destination must be an absolute filepath (Unix-style, Windows drive-letter, or UNC).
   if menu.options.file_dest and not (menu.options.file_dest.startswith(("/", "\\")) or \
@@ -1909,12 +1909,12 @@ def validate_options():
     err_msg = "The value for option '--file-dest' must be an absolute filepath "
     err_msg += "(e.g. '/tmp/file' or 'C:\\Windows\\Temp\\file')."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   if menu.options.file_write is not None and not os.path.exists(menu.options.file_write):
     err_msg = "The specified local file '" + menu.options.file_write + "' does not exist."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
 """
 Checking for all required third-party library dependencies.
@@ -1930,7 +1930,7 @@ def third_party_dependencies():
     err_msg = settings.APPLICATION + " requires 'sqlite3' third-party library "
     err_msg += "to store previous injection points and commands. "
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   try:
     import readline
@@ -1960,7 +1960,7 @@ def http_auth_err_msg():
   err_msg += "or use the '--ignore-code=401' option to ignore HTTP error 401 (Unauthorized) "
   err_msg += "and continue tests without providing valid credentials."
   settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-  raise SystemExit()
+  raise SystemExit(settings.EXIT_FAILURE)
 
 """
 Error while accessing session file
@@ -1970,7 +1970,7 @@ def error_loading_session_file():
   err_msg += settings.SESSION_FILE + "'). "
   err_msg += "Use the '--flush-session' switch."
   settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-  raise SystemExit()
+  raise SystemExit(settings.EXIT_FAILURE)
 
 """
 EOFError
@@ -2281,7 +2281,7 @@ def check_provided_parameters():
     except Exception as err:
       err_msg = "Invalid regular expression '" + menu.options.param_exclude + "' (" + str(err) + ")."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
   if menu.options.param_filter:
     settings.PARAM_FILTER_PLACES = [_.strip() for _ in menu.options.param_filter.upper().split(settings.PARAMETER_SPLITTING_REGEX) if _.strip()]
@@ -2295,7 +2295,7 @@ def check_provided_parameters():
       err_msg = "The option '--randomize' is incompatible with the option '-p', for the parameter"
       err_msg += "s"[len(clash) == 1:] + " '" + ", ".join(clash) + "'."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
 
 """
@@ -2637,7 +2637,7 @@ def tamper_check_space2plus_conflict(tamper_name):
   if len(settings.WHITESPACES) != 0 and settings.WHITESPACES[0] == _urllib.parse.quote_plus(settings.SINGLE_WHITESPACE):
     err_msg = "Tamper script '" + tamper_name + "' is unlikely to work when combined with the tamper script 'space2plus'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
 """
 Whether to answer the detected WAF/IPS with evasion, asked once and kept for the rest of the run.
@@ -2736,7 +2736,7 @@ def tamper_scripts(stored_tamper_scripts):
         err_msg = "Missing variable '__tamper__' "
         err_msg += "in tamper script '" + script + "'."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
+        raise SystemExit(settings.EXIT_FAILURE)
       priorities[script] = getattr(module, "__priority__", settings.PRIORITY.NORMAL)
       warn_msg = module.dependencies() if hasattr(module, "dependencies") else None
       if warn_msg:
@@ -3018,11 +3018,11 @@ def _apply_tamper(script_name, module, payload):
   except Exception as err:
     err_msg = "Tamper script '" + script_name + "' raised an unhandled error (" + str(err) + ")."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
   if not isinstance(result, str):
     err_msg = "Tamper script '" + script_name + "' returned an invalid payload type ('" + type(result).__name__ + "')."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
   return result
 
 """
@@ -3137,7 +3137,7 @@ def no_parameters_found():
   if not menu.options.crawldepth:
     err_msg += "Re-run with '--crawl=2'."
   settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-  raise SystemExit()
+  raise SystemExit(settings.EXIT_FAILURE)
 
 """
 Check if the provided value is empty.
@@ -3151,7 +3151,7 @@ def is_empty(multi_parameters, http_request_method):
       multi_params = flatten(json.loads(','.join(multi_params), object_pairs_hook=OrderedDict)) if is_JSON_check(','.join(multi_params)) else multi_params
     except ValueError as err_msg:
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
   for empty in multi_params:
     try:
       if settings.IS_JSON:
@@ -3224,7 +3224,7 @@ def is_JSON_check(parameter):
       elif "Expecting" in error_str and "end of data" in error_str:
           err_msg = "JSON parsing error: " + error_str + ". Check for extra commas or missing closing brackets."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
 
 # Process with JSON data
@@ -3683,7 +3683,7 @@ def print_single_os_cmd(cmd, output, filename):
     err_msg = common.invalid_cmd_output(cmd)
     settings.print_data_to_stdout(settings.print_error_msg(err_msg))
     if menu.options.abort_on_empty:
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
 """
 Quote provided cmd
@@ -3856,7 +3856,7 @@ def check_file_to_write(file_to_write=None, dest=None):
   if not os.path.exists(file_to_write):
     err_msg = "The specified local file '" + file_to_write + "' does not exist."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   if os.path.isfile(file_to_write):
     try:
@@ -3866,7 +3866,7 @@ def check_file_to_write(file_to_write=None, dest=None):
       err_msg = "Unable to read the local file '" + file_to_write + "' (" + str(err) + "). "
       err_msg += "Note that '--file-write' does not support binary files."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
     content = content.replace(settings.END_LINE.CRLF, settings.END_LINE.LF).replace(settings.END_LINE.CR, settings.END_LINE.LF)
     if settings.TARGET_OS == settings.OS.WINDOWS:
       import base64
@@ -4124,7 +4124,7 @@ def init_oob_channel():
     if transport not in known:
       err_msg = "The option '--oob-transport' takes one of: " + ", ".join("'" + _ + "'" for _ in known) + "."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
     settings.OOB_TRANSPORT = transport
   for option, attribute in (("--oob-timeout", "OOB_TIMEOUT"), ("--oob-poll", "OOB_POLL_INTERVAL")):
     value = menu.options.oob_timeout if attribute == "OOB_TIMEOUT" else menu.options.oob_poll
@@ -4135,7 +4135,7 @@ def init_oob_channel():
     if value < 1:
       err_msg = "The option '" + option + "' must be a positive integer number of seconds."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
     setattr(settings, attribute, value)
 
   # A wait can only observe an interaction if a poll falls inside it, after the interaction lands.
@@ -4161,7 +4161,7 @@ def init_oob_channel():
   except Exception as err:
     err_msg = provider.tls_error(err) or ("Unable to reach the out-of-band server (" + str(err) + ").")
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
   settings.OOB_CHANNEL = channel
   # The server is reached over both, so what the payloads use is the target's side of the choice:
   # a host with no TLS of its own, or one that only lets 443 out, needs the other one.
@@ -4172,7 +4172,7 @@ def init_oob_channel():
     if scheme not in ("http", "https"):
       err_msg = "The option '--oob-scheme' takes either 'http' or 'https'."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
     settings.OOB_SCHEME = scheme
   settings.OOB_IGNORE_TIMEOUT = True
   notice = channel.server_notice()
@@ -4583,7 +4583,7 @@ def time_related_export_injection_results(cmd, separator, output, check_exec_tim
       err_msg = common.invalid_cmd_output(cmd)
       settings.print_data_to_stdout(settings.print_error_msg(err_msg))
     if menu.options.abort_on_empty:
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
 """
 Success msg.

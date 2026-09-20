@@ -164,7 +164,7 @@ def do_GET_check(url, http_request_method):
         multi_parameters = [x for x in multi_parameters if x]
       except ValueError as err_msg:
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
+        raise SystemExit(settings.EXIT_FAILURE)
 
       if len([s for s in multi_parameters if "=" in s]) == 0:
         checks.no_parameters_found()
@@ -460,7 +460,7 @@ def split_post_parameters(parameter):
       multi_parameters = parameter.split(settings.POST_DATA_PARAM_DELIMITER)
     except ValueError as err_msg:
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
   if len([s for s in multi_parameters if "=" in s]) == 0 and not any((settings.IS_JSON, settings.IS_XML)):
     checks.no_parameters_found()
@@ -757,7 +757,7 @@ def do_cookie_check(cookie):
     multi_parameters = [param.lstrip(settings.SINGLE_WHITESPACE) for param in cookie.split(settings.COOKIE_PARAM_DELIMITER)]
   except ValueError as err_msg:
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   if len([s for s in multi_parameters if "=" in s]) == 0 and not menu.options.shellshock:
     checks.no_parameters_found()

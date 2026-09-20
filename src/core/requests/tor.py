@@ -32,7 +32,7 @@ def tor_connection_error():
   err_msg += "Please ensure Tor is running and reachable"
   err_msg += " and that any provided options (e.g. '--tor-port') are correct."
   settings.print_data_to_stdout(settings.print_error_msg(err_msg))
-  raise SystemExit()
+  raise SystemExit(settings.EXIT_FAILURE)
 
 
 # The first of the given ports that something on the loopback address is listening on.
@@ -69,7 +69,7 @@ def set_http_proxy_settings():
     err_msg += "Please make sure that you have Tor (bundle) installed and set up, "
     err_msg += "so that you are able to successfully use the '--tor' switch."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   settings.TOR_HTTP_PROXY_PORT = str(port)
   menu.options.proxy = settings.TOR_HTTP_PROXY_IP + ":" + settings.TOR_HTTP_PROXY_PORT
@@ -92,7 +92,7 @@ def set_socks_proxy_settings():
     err_msg += "Please make sure that you have Tor service installed and set up, "
     err_msg += "so that you are able to successfully use the '--tor' switch."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   # SOCKS5 has the names resolved at the other end, where SOCKS4 leaks each one to the local
   # resolver - which is the target's name, asked for by this host, in plain sight.
@@ -108,7 +108,7 @@ def set_proxy_settings():
   if tor_type not in settings.TOR_TYPES:
     err_msg = "The value of the '--tor-type' option must be one of " + ", ".join("'" + _ + "'" for _ in settings.TOR_TYPES) + "."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
   menu.options.tor_type = tor_type
 
   if tor_type == settings.PROXY_TYPE.HTTP:
@@ -128,7 +128,7 @@ def do_check():
   if menu.options.offline:
     err_msg = "You cannot use Tor network while offline."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   try:
     request = _urllib.request.Request(settings.CHECK_TOR_API_PAGE, method=settings.HTTPMETHOD.GET)
@@ -142,7 +142,7 @@ def do_check():
     err_msg = "It appears that Tor is not properly set. "
     err_msg += "Please try using the '--tor-type' and/or '--tor-port' options."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "The connection is routed through the Tor network."

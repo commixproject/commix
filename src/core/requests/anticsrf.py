@@ -151,7 +151,7 @@ def apply_token(request):
       if not menu.options.csrf_url:
         err_msg += " You can try to re-run by providing a valid value for the option '--csrf-url'."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
     if settings.VERBOSITY_LEVEL >= 2:
       debug_msg = "Using '" + token_value + "' as the value of the anti-CSRF token '" + token_name + "'."

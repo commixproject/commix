@@ -46,7 +46,7 @@ def path_creation(path):
       except IndexError:
         error_msg = str(err_msg) + "."
       settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
 """
 Logs filename creation.
@@ -101,7 +101,7 @@ def create_log_file(url, output_dir):
     else:
       err_msg = "The provided session file ('" + menu.options.session_file + "') does not exist."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
   else:
     settings.SESSION_FILE = logs_path + "session.db"
 
@@ -124,7 +124,7 @@ def create_log_file(url, output_dir):
     except IndexError:
       error_msg = str(err_msg.args[0]) + "."
     settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   if not menu.options.output_dir:
     filename = os.path.abspath(filename)

@@ -41,7 +41,7 @@ def _invalid_data(request_file):
   err_msg += "'" + request_file + "'"
   err_msg += " file does not contain a valid HTTP request."
   settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-  raise SystemExit()
+  raise SystemExit(settings.EXIT_FAILURE)
 
 """
 Split the content of a request / proxy log file into the single requests it holds.
@@ -196,14 +196,14 @@ def _parse_request(request, request_file):
           except (binascii.Error, UnicodeDecodeError) as e:
             err_msg = "Invalid base64-encoded credentials provided in Authorization header: " + format(str(e))
             settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-            raise SystemExit()
+            raise SystemExit(settings.EXIT_FAILURE)
 
         elif target["auth_type"].lower() == settings.AUTH_TYPE.DIGEST:
           if not menu.options.auth_cred:
             err_msg = "Use the '--auth-cred' option to provide a valid pair of "
             err_msg += "HTTP authentication credentials (i.e. '--auth-cred=admin:admin') "
             settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-            raise SystemExit()
+            raise SystemExit(settings.EXIT_FAILURE)
 
     # Add extra headers
     else:
@@ -267,7 +267,7 @@ def parse_requests(request_file):
   if not os.path.exists(request_file):
     err_msg = "It seems the '" + request_file + "' file does not exist."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   try:
     if os.stat(request_file).st_size == 0:
@@ -278,7 +278,7 @@ def parse_requests(request_file):
     error_msg = "The '" + request_file + "' "
     error_msg += str(err_msg.args[1]).lower() + "."
     settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   targets = []
   seen = set()
@@ -299,7 +299,7 @@ def parse_requests(request_file):
     if menu.options.scope and settings.SKIPPED_OUT_OF_SCOPE:
       err_msg = "No target of the '" + os.path.split(request_file)[1] + "' file is within the given scope."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
     _invalid_data(request_file)
 
   return targets
@@ -314,14 +314,14 @@ def parse_safe_request(request_file):
   if not os.path.exists(request_file):
     err_msg = "It seems the '" + request_file + "' file does not exist."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
   try:
     with open(request_file, encoding=settings.DEFAULT_CODEC) as file:
       content = file.read()
   except IOError as err_msg:
     error_msg = "The '" + request_file + "' " + str(err_msg.args[1]).lower() + "."
     settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
-    raise SystemExit()
+    raise SystemExit(settings.EXIT_FAILURE)
 
   for raw_request in _split_requests(content):
     target = _parse_request(raw_request, request_file)
@@ -342,7 +342,7 @@ def parse_safe_request(request_file):
 
   err_msg = "Invalid format of the safe request file '" + request_file + "'."
   settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-  raise SystemExit()
+  raise SystemExit(settings.EXIT_FAILURE)
 
 """
 Parse target and data from http proxy logs (i.e. Burp or WebScarab)

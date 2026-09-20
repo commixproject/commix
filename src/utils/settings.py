@@ -359,17 +359,17 @@ def sys_argv_errors():
     if len(sys.argv[i]) > 1 and all(ord(_) in xrange(0x2018, 0x2020) for _ in ((sys.argv[i].split('=', 1)[-1].strip() or ' ')[0], sys.argv[i][-1])):
         err_msg = "Illegal (non-console) quote characters ('" + sys.argv[i] + "')."
         print_data_to_stdout(print_critical_msg(err_msg))
-        raise SystemExit()
+        raise SystemExit(EXIT_FAILURE)
     # Check for illegal (non-console) comma characters.
     elif len(sys.argv[i]) > 1 and u"\uff0c" in sys.argv[i].split('=', 1)[-1]:
         err_msg = "Illegal (non-console) comma character ('" + sys.argv[i] + "')."
         print_data_to_stdout(print_critical_msg(err_msg))
-        raise SystemExit()
+        raise SystemExit(EXIT_FAILURE)
     # Check for potentially miswritten (illegal '=') short option.
     elif re.search(r"\A-\w=.+", sys.argv[i]):
         err_msg = "Potentially miswritten (illegal '=') short option detected ('" + sys.argv[i] + "')."
         print_data_to_stdout(print_critical_msg(err_msg))
-        raise SystemExit()
+        raise SystemExit(EXIT_FAILURE)
 
 # argv checks
 sys_argv_checks()
@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "149"
+REVISION = "150"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1876,11 +1876,21 @@ PROGRESS_DISPLAY_WIDTH = 60
 # and in the output they return - a dropped one would read as a value that was fully retrieved.
 UNRESOLVED_CHAR = "?"
 
+# What a run that ended on an error exits with, so that a caller can tell it apart from one that
+# finished. A run ending any other way - the user quitting, the work being done - still exits zero.
+EXIT_FAILURE = 1
+
 # Requests dropped on a timeout because '--ignore-timeouts' was given, counted for the run's summary.
 IGNORED_TIMEOUTS = 0
 
 # The parameters '--randomize' was given, each one carrying a fresh value on every request.
 RANDOMIZE_PARAMETERS_LIST = []
+
+# The target's own first page, and the values its '<select>' menus offer - a parameter that is a
+# menu is randomized by picking one of its own options, rather than by inventing a value.
+ORIGINAL_PAGE = ""
+RANDOM_POOL = {}
+RANDOM_POOL_READ = False
 
 # The places '--param-filter' was given, in upper case - a parameter elsewhere is not tested.
 PARAM_FILTER_PLACES = []

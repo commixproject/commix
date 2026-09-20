@@ -38,7 +38,7 @@ def load_modules(url, http_request_method, filename):
         getattr(module, handler_name)(url, http_request_method, filename)
       except ImportError as err_msg:
         settings.print_data_to_stdout(settings.END_LINE.LF + settings.print_critical_msg(err_msg))
-        raise SystemExit()
-      raise SystemExit()
+        raise SystemExit(settings.EXIT_FAILURE)
+      raise SystemExit(settings.EXIT_FAILURE)
 
 # eof

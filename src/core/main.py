@@ -111,7 +111,7 @@ def defined_http_headers(url):
         else:
           err_msg = "The switch '--random-agent' is incompatible with option '--user-agent' or switch '--mobile'."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
+        raise SystemExit(settings.EXIT_FAILURE)
 
     # Set the User-Agent
     if mobile_agent:
@@ -158,7 +158,7 @@ def examine_request(request, url):
         err_msg += " '--header=\"HEADER_NAME: " + settings.CUSTOM_INJECTION_MARKER_CHAR  + "\"' "
         err_msg += "if you want to try to exploit the provided HTTP header."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
+        raise SystemExit(settings.EXIT_FAILURE)
 
   except Exception as err_msg:
     requests.request_failed(err_msg)
@@ -553,7 +553,7 @@ def main(filename, url, http_request_method):
       if settings.INJECTION_LEVEL not in (settings.DEFAULT_INJECTION_LEVEL, settings.COOKIE_INJECTION_LEVEL, settings.HTTP_HEADER_INJECTION_LEVEL):
         err_msg = "The value for option '--level' must be an integer value from range [1, 3]."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
+        raise SystemExit(settings.EXIT_FAILURE)
     else:
       settings.INJECTION_LEVEL = settings.DEFAULT_INJECTION_LEVEL
 
@@ -578,7 +578,7 @@ def main(filename, url, http_request_method):
       err_msg = "The value for option '--level' "
       err_msg += "must be an integer value from range [1, 3]."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
     if menu.options.test_parameter and menu.options.skip_parameter:
       test_names = {p.split("=")[0] for p in menu.options.test_parameter.split(settings.PARAMETER_SPLITTING_REGEX)}
@@ -587,7 +587,7 @@ def main(filename, url, http_request_method):
         err_msg = "The options '-p' and '--skip' cannot be used "
         err_msg += "simultaneously for the same parameter(s)."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
+        raise SystemExit(settings.EXIT_FAILURE)
 
     if menu.options.ignore_session:
       # Ignore session
@@ -622,7 +622,7 @@ def main(filename, url, http_request_method):
         err_msg += "Currently, the only supported " + ("one is ", "ones are ")[len(settings.SUPPORTED_EVAL_LANGUAGES) != 1]
         err_msg += ", ".join("'" + _ + "'" for _ in settings.SUPPORTED_EVAL_LANGUAGES) + "."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
+        raise SystemExit(settings.EXIT_FAILURE)
       # Everything the payloads are built from follows the language that was named.
       if menu.options.eval_sink != settings.EVAL_ALL_LANGUAGES:
         settings.set_eval_grammar(menu.options.eval_sink)
@@ -639,7 +639,7 @@ def main(filename, url, http_request_method):
       err_msg = "The switch '--oob' selects the out-of-band technique on its own, so it cannot be "
       err_msg += "combined with '--technique'."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
     # Check for skipping injection techniques.
     if menu.options.skip_tech:
       # Convert injection technique(s) to lowercase
@@ -649,7 +649,7 @@ def main(filename, url, http_request_method):
         err_msg = "The options '--technique' and '--skip-technique' cannot be used "
         err_msg += "simultaneously (i.e. only one option must be set)."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
+        raise SystemExit(settings.EXIT_FAILURE)
       else:
         menu.options.tech = "".join(settings.AVAILABLE_TECHNIQUES)
       for skip_tech_name in settings.AVAILABLE_TECHNIQUES:
@@ -658,7 +658,7 @@ def main(filename, url, http_request_method):
       if len(menu.options.tech) == 0:
         err_msg = "Aborted the detection procedure due to skipping all injection techniques."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
+        raise SystemExit(settings.EXIT_FAILURE)
 
     """
     Nothing is checked here about which techniques reach the evaluation sink.
@@ -676,12 +676,12 @@ def main(filename, url, http_request_method):
     if menu.options.file_write is not None and not menu.options.file_dest:
       err_msg = "You must specify the host's absolute filepath to write (i.e. '--file-dest')."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
     if menu.options.file_dest and menu.options.file_write == None:
       err_msg = "You must enter the '--file-write' parameter."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
     # The remote destination must be an absolute filepath (Unix-style, Windows drive-letter, or UNC).
     if menu.options.file_dest and not (menu.options.file_dest.startswith(("/", "\\")) or \
@@ -689,18 +689,18 @@ def main(filename, url, http_request_method):
       err_msg = "The value for option '--file-dest' must be an absolute filepath "
       err_msg += "(e.g. '/tmp/file' or 'C:\\Windows\\Temp\\file')."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
     # Check the local file to write, before any tests are performed.
     if menu.options.file_write is not None:
       if not os.path.exists(menu.options.file_write):
         err_msg = "The specified local file '" + menu.options.file_write + "' does not exist."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
+        raise SystemExit(settings.EXIT_FAILURE)
       if not os.path.isfile(menu.options.file_write):
         err_msg = "The specified path '" + menu.options.file_write + "' is not a file."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
+        raise SystemExit(settings.EXIT_FAILURE)
 
     # Check if defined "--url" or "-m" option.
     if url:
@@ -757,7 +757,7 @@ def main(filename, url, http_request_method):
     else:
       err_msg = "You must specify the target URL."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
     # Retrieve everything from the supported enumeration options.
     if menu.options.enum_all:
@@ -775,7 +775,7 @@ def main(filename, url, http_request_method):
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     logs.print_logs_notification(filename, url)
     if any((settings.REVERSE_TCP, settings.BIND_TCP)):
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
   # Ctrl-C before controller.do_check() even starts (rare - do_check() has
   # its own handling for everything inside it).
@@ -842,7 +842,7 @@ def run():
       if menu.options.requestfile and menu.options.logfile:
         err_msg = "The '-r' option is unlikely to work combined with the '-l' option."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit()
+        raise SystemExit(settings.EXIT_FAILURE)
       elif menu.options.requestfile or menu.options.logfile:
         parser.logfile_parser()
 
@@ -900,12 +900,12 @@ def run():
           if not os.path.exists(bulkfile):
             err_msg = "It seems the '" + bulkfile + "' file does not exist."
             settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-            raise SystemExit()
+            raise SystemExit(settings.EXIT_FAILURE)
 
           elif os.stat(bulkfile).st_size == 0:
             err_msg = "It seems the '" + bulkfile + "' file is empty."
             settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-            raise SystemExit()
+            raise SystemExit(settings.EXIT_FAILURE)
 
           else:
             settings.MULTI_TARGETS = True
@@ -1169,9 +1169,9 @@ def run():
   except EOFError:
     err_msg = "Exiting, due to EOFError."
     settings.print_data_to_stdout(settings.print_error_msg(err_msg))
-    raise checks.exit()
+    raise checks.exit(settings.EXIT_FAILURE)
 
-  except SystemExit:
-    raise checks.exit()
+  except SystemExit as err_msg:
+    raise checks.exit(err_msg.code)
 
 # eof

@@ -106,7 +106,7 @@ def print_http_response(response_headers, code, page):
     if int(code) in settings.ABORT_CODE:
       err_msg = "Aborting due to detected HTTP code '" + str(code) + "'. "
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
   except (ValueError, TypeError):
     warn_msg = "Skipping abort check due to invalid (or missing) HTTP response code '" + str(code) + "'"
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
@@ -153,7 +153,32 @@ def discover_digest_realm(url):
 A fresh value for a parameter named with '--randomize', shaped like the one it replaces - digits
 stay digits and letters keep their case, so a target that validates the format still accepts it.
 """
-def randomized_value(value):
+def random_pool():
+  """
+  The values the target's own '<select>' menus offer, read once from the page the run started on.
+
+  A parameter that is a menu has an answer the target already accepts: inventing one of the right
+  shape would be refused by anything that validates the choice.
+  """
+  if not settings.RANDOM_POOL_READ:
+    settings.RANDOM_POOL_READ = True
+    for match in re.finditer(r"(?si)<select[^>]+\bname\s*=\s*[\"']?([^\"'\s>]+)[\"']?(.+?)</select>", settings.ORIGINAL_PAGE or ""):
+      name, body = match.groups()
+      options = tuple(re.findall(r"(?i)<option[^>]+\bvalue\s*=\s*[\"']?([^\"'\s>]*)", body))
+      if options:
+        settings.RANDOM_POOL[name] = options
+    if settings.RANDOM_POOL and settings.VERBOSITY_LEVEL >= 2:
+      debug_msg = "Read the values offered for " + ", ".join("'" + _ + "'" for _ in sorted(settings.RANDOM_POOL)) + " from the target's own page."
+      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+  return settings.RANDOM_POOL
+
+def randomized_value(value, name=None):
+  # A menu is answered with one of its own options, rather than with a value of the same shape.
+  pool = random_pool().get(name) if name else None
+  if pool:
+    candidates = [_ for _ in pool if _ != value] or list(pool)
+    return random.choice(candidates)
+
   def _swap(match):
     original = match.group()
     if original.isdigit():
@@ -181,13 +206,14 @@ def randomize_parameters(request):
       name, value = match.group("name").strip(), match.group("value")
       if name not in settings.RANDOMIZE_PARAMETERS_LIST:
         return match.group()
-      return match.group().replace(name + "=" + value, name + "=" + randomized_value(value), 1)
+      return match.group().replace(name + "=" + value, name + "=" + randomized_value(value, name), 1)
     # Both delimiters, so a cookie's pairs are read the way a query string's are.
     return re.sub(r"(?P<name>[^=&;?]+)=(?P<value>[^&;]*)", _pair, text)
 
   parts = request.full_url.split("?", 1)
-  if len(parts) == 2 and parts[1]:
-    request.full_url = parts[0] + "?" + _rewrite(parts[1])
+  # A parameter written into the path is bounded by its own slashes, not by the '&' a query uses.
+  path = "/".join(_rewrite(segment) for segment in parts[0].split("/"))
+  request.full_url = path + ("?" + _rewrite(parts[1]) if len(parts) == 2 and parts[1] else "")
   if request.data:
     body = request.data.decode(settings.DEFAULT_CODEC, errors="replace")
     request.data = _rewrite(body).encode(settings.DEFAULT_CODEC)
@@ -399,10 +425,10 @@ def check_http_traffic(request):
         settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
       err_msg = "You provided an invalid target URL."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
     except AttributeError:
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
     except (_urllib.error.HTTPError, _urllib.error.URLError) as err_msg:
       # A deliberately unfollowed redirect - retrying won't help.
@@ -507,7 +533,7 @@ def check_http_traffic(request):
           err_msg = error_msg
 
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg + ")."))
-        raise SystemExit()
+        raise SystemExit(settings.EXIT_FAILURE)
 
     except _urllib.error.URLError as err:
       if not menu.options.drop_set_cookie:
@@ -524,7 +550,7 @@ def check_http_traffic(request):
       page = ""
       print_http_response(response_headers, code, page)
       settings.print_data_to_stdout(settings.print_critical_msg("URL Error: " + reason))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
     # A raw connection-level error - retry it like any other transient failure.
     except (SocketError, _http_client.BadStatusLine, _http_client.RemoteDisconnected, _http_client.IncompleteRead) as err:
@@ -533,7 +559,7 @@ def check_http_traffic(request):
         continue
       err_msg = "The target host is not responding. Please ensure it is up and try again."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
 
 """
 Send again a request check_http_traffic() came back from empty-handed - which it does both when nothing answered and when the answer was a 3xx/4xx/5xx already read off the wire, and only the first is worth repeating.
@@ -625,7 +651,7 @@ def do_check(request):
     if menu.options.auth_type.lower() not in (settings.AUTH_TYPE.BASIC, settings.AUTH_TYPE.DIGEST, settings.AUTH_TYPE.BEARER):
       err_msg = "HTTP authentication type value must be Basic, Digest or Bearer."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-      raise SystemExit()
+      raise SystemExit(settings.EXIT_FAILURE)
     if menu.options.auth_type.lower() == settings.AUTH_TYPE.BEARER:
       request.add_header(settings.AUTHORIZATION, "Bearer " + menu.options.auth_cred.strip())
     elif menu.options.auth_type.lower() == settings.AUTH_TYPE.BASIC:
