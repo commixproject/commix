@@ -27,6 +27,7 @@ except ImportError:
   _THREADS_SUPPORTED = False
 from src.core.parse import cmdline as menu
 from src.utils import settings
+from src.utils import progress
 from src.core.requests import requests
 from src.core.requests import stability
 from src.utils import common
@@ -642,6 +643,8 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
     if output_length > 1 and _cached_length is None:
       settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_info_msg(info_msg))
 
+    eta_bar = progress.ProgressBar(maxvalue=output_length) if menu.options.eta else None
+
     observed_chars = set()
     observed_count = [0]
     char_frequency = {}
@@ -664,6 +667,8 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
           chars.append("_")
       if furthest == 0:
         return ""
+      if menu.options.no_truncate:
+        return "".join(chars[:furthest])
       width = settings.PROGRESS_DISPLAY_WIDTH
       start = max(1, furthest - width + 1)
       text = "".join(chars[start - 1:furthest])
@@ -675,6 +680,10 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
 
     # Rewrite the progress line with the characters resolved so far.
     def _print_progress():
+      # Asked for as an estimate rather than as the text: how much is left, and how long it will take.
+      if eta_bar is not None:
+        eta_bar.progress(sum(1 for _pos in range(1, output_length + 1) if results_by_position.get(_pos) is not None))
+        return
       if settings.VERBOSITY_LEVEL == 0:
         progress_msg = base_progress_msg.rstrip(".") + ": " + _render_output_so_far()
         settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_info_msg(progress_msg))

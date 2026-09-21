@@ -1,4 +1,7 @@
 ## Version 4.2 (TBA)
+* Added: New switch `--eta` for showing how much of the output is left to retrieve and how long it is expected to take.
+* Added: New switch `--no-truncate` for showing the retrieved output in full.
+* Added: New switch `-hh`, with `-h` now listing the options a first run is made of.
 * Added: Bundled the "chardet" library and a built-in Brotli decoder to handle pages regardless of their character encoding or compression format.
 * Added: New options `--second-url` and `--second-req` for reading the result of an injection from the page it shows up on.
 * Added: New options `--csrf-token`, `--csrf-url`, `--csrf-method`, `--csrf-data` and `--csrf-retries` for testing targets that check an anti-CSRF token.

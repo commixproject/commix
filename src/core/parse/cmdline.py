@@ -47,7 +47,7 @@ usage = "python %prog [option(s)]"
 parser = OptionParser(usage=usage)
 
 # General options
-general = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "General" + Style.RESET_ALL,
+general = OptionGroup(parser, "General",
                         "These options relate to general matters. ")
 
 general.add_option("-v",
@@ -104,6 +104,18 @@ general.add_option("-t",
                 default=None,
                 help="Log all HTTP traffic into a textual file.")
 
+general.add_option("--eta",
+                action="store_true",
+                dest="eta",
+                default=False,
+                help="Display for each output the estimated time of arrival.")
+
+general.add_option("--no-truncate",
+                action="store_true",
+                dest="no_truncate",
+                default=False,
+                help="Disable console output truncation.")
+
 general.add_option("--time-limit",
                 dest="time_limit",
                 type=float,
@@ -156,7 +168,7 @@ general.add_option("--report-json",
                 help="Store run results to a JSON file.")
 
 # Target options
-target = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Target" + Style.RESET_ALL,
+target = OptionGroup(parser, "Target",
                      "This options has to be provided, to define the target URL. ")
 
 target.add_option("-u","--url",
@@ -225,7 +237,7 @@ target.add_option("--method",
                 help="Force usage of given HTTP method (e.g. 'PUT').")
 
 # Request options
-request = OptionGroup(parser,  Style.BRIGHT + Style.UNDERLINE + "Request" + Style.RESET_ALL,
+request = OptionGroup(parser,  "Request",
                       "These options can be used to specify how to connect to the target URL.")
 
 
@@ -530,7 +542,7 @@ request.add_option("--drop-set-cookie",
                 help="Ignore Set-Cookie header from response.")
 
 # Enumeration options
-enumeration = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Enumeration" + Style.RESET_ALL,
+enumeration = OptionGroup(parser, "Enumeration",
                         "These options can be used to enumerate the target host.")
 
 enumeration.add_option("--all",
@@ -594,7 +606,7 @@ enumeration.add_option("--ps-version",
                 help="Retrieve PowerShell's version number.")
 
 # File access options
-file_access = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "File access" + Style.RESET_ALL,
+file_access = OptionGroup(parser, "File access",
                         "These options can be used to access files on the target host.")
 
 file_access.add_option("--file-read",
@@ -613,7 +625,7 @@ file_access.add_option("--file-dest",
                 help="Host's absolute filepath to write to.")
 
 # Modules options
-modules = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Modules" + Style.RESET_ALL,
+modules = OptionGroup(parser, "Modules",
                         "These options can be used increase the detection and/or injection capabilities.")
 
 modules.add_option("--shellshock",
@@ -623,7 +635,7 @@ modules.add_option("--shellshock",
                 help="The 'shellshock' injection module.")
 
 # Injection options
-optimization = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Optimization" + Style.RESET_ALL,
+optimization = OptionGroup(parser, "Optimization",
                         "These options can be used to optimize the performance.")
 
 optimization.add_option("-o",
@@ -646,7 +658,7 @@ optimization.add_option("--threads",
                 help="Max number of concurrent HTTP requests (default 1, max 10).")
 
 # Injection options
-injection = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Injection" + Style.RESET_ALL,
+injection = OptionGroup(parser, "Injection",
                         "These options can be used to specify which parameters to inject and to provide custom injection payloads.")
 
 injection.add_option("-p",
@@ -805,7 +817,7 @@ injection.add_option("--msf-path",
                 help="Set a local path where metasploit is installed.")
 
 # Detection options
-detection = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Detection" + Style.RESET_ALL, "These options can be "
+detection = OptionGroup(parser, "Detection", "These options can be "
                         "used to customize the detection phase.")
 
 detection.add_option("--level",
@@ -855,7 +867,7 @@ detection.add_option("--smart",
                 help="Perform thorough tests only if positive heuristic(s).")
 
 # Miscellaneous options
-misc = OptionGroup(parser, Style.BRIGHT + Style.UNDERLINE + "Miscellaneous" + Style.RESET_ALL)
+misc = OptionGroup(parser, "Miscellaneous")
 
 misc.add_option("--ignore-dependencies",
                 action="store_true",
@@ -952,6 +964,34 @@ def truncate_option_strings(self, *args):
 parser.formatter._format_option_strings = parser.formatter.format_option_strings
 parser.formatter.format_option_strings = type(parser.formatter.format_option_strings)(truncate_option_strings, parser)
 
+parser.add_option("--hh",
+                action="store_true",
+                dest="advanced_help",
+                default=False,
+                help="Show advanced help message and exit.")
+
+# Listed as '-hh' beside '-h', the way the short forms are.
+_advanced_help_option = parser.get_option("--hh")
+_advanced_help_option._short_opts = ["-hh"]
+_advanced_help_option._long_opts = []
+
+"""
+'-h' lists the options a first run is made of; '-hh' lists them all.
+"""
+_basic_help = any(_ in sys.argv for _ in ("-h", "--help")) and not any(_ in sys.argv for _ in ("-hh", "--hh"))
+if any(_ in sys.argv for _ in ("-hh", "--hh")):
+  sys.argv = ["-h" if _ in ("-hh", "--hh") else _ for _ in sys.argv]
+if _basic_help:
+  for _group in parser.option_groups[:]:
+    _shown = False
+    for _option in _group.option_list:
+      if _option.dest not in settings.BASIC_HELP_ITEMS:
+        _option.help = SUPPRESS
+      else:
+        _shown = True
+    if not _shown:
+      parser.option_groups.remove(_group)
+
 option = parser.get_option("-h")
 option.help = option.help.capitalize().replace("Show this help message and exit", "Show help and exit.")
 # Listed by its short form alone, the way every other switch is, while '--help' keeps working.
@@ -962,7 +1002,12 @@ for _index, _argument in enumerate(sys.argv):
   if _argument == "--eval":
     sys.argv[_index] = "--eval=" + settings.EVAL_ALL_LANGUAGES
 
-(options, args) = parser.parse_args()
+try:
+  (options, args) = parser.parse_args()
+except SystemExit:
+  if _basic_help:
+    settings.print_data_to_stdout("\n" + Style.BRIGHT + Style.UNDERLINE + "To see the full list of options run with '-hh'." + Style.RESET_ALL + "\n")
+  raise
 
 # Remember whether '--web-root' was explicitly supplied on the CLI
 settings.USER_APPLIED_WEB_ROOT = bool(options.web_root)

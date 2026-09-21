@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "151"
+REVISION = "152"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -838,6 +838,13 @@ LAST_LOG_GROUP = "header"
 
 # The max help option length.
 MAX_OPTION_LENGTH = 18
+
+# The options '-h' lists, out of the whole set that '--hh' lists: what a first run is made of.
+BASIC_HELP_ITEMS = (
+  "url", "logfile", "bulkfile", "requestfile", "data", "cookie", "random_agent", "proxy", "tor",
+  "check_tor", "test_parameter", "level", "tech", "eval_sink", "os_cmd", "os_shell", "file_read",
+  "file_write", "batch", "flush_session", "wizard", "version", "verbose"
+)
 
 # Python version.
 PYTHON_VERSION = sys.version.split()[0]
@@ -1871,6 +1878,13 @@ PARTIAL_VALUE_MARKER = "\x02COMMIX_PARTIAL\x02"
 
 # Max characters shown at once in the live progress line.
 PROGRESS_DISPLAY_WIDTH = 60
+
+# How much of the estimate on screen is kept when a fresh one is worked out, so that one slow
+# character does not swing the countdown.
+ETA_DISPLAY_SMOOTHING = 0.5
+# What the bar is given when the terminal's own width cannot be read, and the least it is drawn in.
+DEFAULT_CONSOLE_WIDTH = 80
+MIN_PROGRESS_WIDTH = 20
 
 # Stands in for a character the time-related techniques never resolved, in the live progress line
 # and in the output they return - a dropped one would read as a value that was fully retrieved.
