@@ -288,24 +288,36 @@ def proof(transport, plus=PLUS):
   second = random.randrange(1000, 9999)
   # Bracketed by a marker, so the result cannot be mistaken for a number occurring anywhere else.
   tag = "".join(random.choice(string.ascii_uppercase) for _ in range(6))
+  # Under '--skip-calc' the sum is replaced, but not by a literal - a replayed URL would carry that
+  # through unchanged and prove nothing. What stands in for it still has to be evaluated to resolve.
+  token = "".join(random.choice(string.ascii_uppercase) for _ in range(6))
+  expected = token if settings.SKIP_CALC else str(first + second)
   if transport == "powershell":
     # Concatenated outside the URL's quotes: PowerShell expands nothing inside a single-quoted
     # string, so a sum left in there would be sent as written.
-    total = "'" + plus + "(" + str(first) + plus + str(second) + ")" + plus + "'"
+    if settings.SKIP_CALC:
+      total = "'" + plus + "('" + token + "')" + plus + "'"
+    else:
+      total = "'" + plus + "(" + str(first) + plus + str(second) + ")" + plus + "'"
   elif settings.TARGET_OS == settings.OS.WINDOWS:
     # 'set /a' is the only arithmetic cmd.exe has and it only writes its answer out, so the sum is
     # worked out first and read into the variable the command is then built around.
-    prologue = ("for /f \"tokens=* eol=\" %i in ('cmd /c \"set /a " + str(first) + plus + str(second) +
+    inner = "echo " + token if settings.SKIP_CALC else "set /a " + str(first) + plus + str(second)
+    prologue = ("for /f \"tokens=* eol=\" %i in ('cmd /c \"" + inner +
                 "\"') do ")
-    return tag + "%i" + tag, tag + str(first + second) + tag, prologue
+    return tag + "%i" + tag, tag + expected + tag, prologue
+  elif settings.SKIP_CALC:
+    # Command substitution either way, so '--tamper=backticks' reaches here too.
+    total = settings.CMD_SUB_PREFIX + "echo" + settings.SINGLE_WHITESPACE + token + settings.CMD_SUB_SUFFIX
   elif settings.USE_BACKTICKS or settings.WAF_ENABLED:
     # Same fallback the classic technique uses, so '--tamper=backticks' reaches here too.
     total = (settings.CMD_SUB_PREFIX + "expr" + settings.SINGLE_WHITESPACE + str(first) +
              settings.SINGLE_WHITESPACE + plus + settings.SINGLE_WHITESPACE + str(second) +
              settings.CMD_SUB_SUFFIX)
   else:
-    total = settings.CMD_SUB_PREFIX + "(" + str(first) + plus + str(second) + "))"
-  return tag + total + tag, tag + str(first + second) + tag, ""
+    # Arithmetic expansion is the substitution pair with one more set of parentheses inside it.
+    total = settings.CMD_SUB_PREFIX + "(" + str(first) + plus + str(second) + ")" + settings.CMD_SUB_SUFFIX
+  return tag + total + tag, tag + expected + tag, ""
 
 """
 Report whether a transport can carry command output back.

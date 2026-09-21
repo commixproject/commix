@@ -41,17 +41,17 @@ def decision(separator, TAG, randv1, randv2):
               "\"') do @" + settings.CMD_NUL + " set /p=" + TAG + "%i" + TAG + TAG
               )
   else:
-    if settings.USE_BACKTICKS or settings.WAF_ENABLED:
-      math_calc = settings.CMD_SUB_PREFIX + "expr " + str(randv1) + " + " + str(randv2) + settings.CMD_SUB_SUFFIX
-    else:
-      math_calc = settings.CMD_SUB_PREFIX + "(" + str(randv1) + "+" + str(randv2) + "))"
-
     if settings.SKIP_CALC:
       payload = (separator +
                 "echo " + TAG +
-                settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX  + TAG 
+                settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX  + TAG
                 )
     else:
+      if settings.USE_BACKTICKS or settings.WAF_ENABLED:
+        math_calc = settings.CMD_SUB_PREFIX + "expr " + str(randv1) + " + " + str(randv2) + settings.CMD_SUB_SUFFIX
+      else:
+        # Arithmetic expansion is the substitution pair with one more set of parentheses inside it.
+        math_calc = settings.CMD_SUB_PREFIX + "(" + str(randv1) + "+" + str(randv2) + ")" + settings.CMD_SUB_SUFFIX
       payload = (separator +
                 "echo " + TAG +
                 math_calc +

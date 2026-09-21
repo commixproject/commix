@@ -913,15 +913,23 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
                   randv1 = random.randrange(0, 4)
                   randv2 = random.randrange(1, 5)
                   randvcalc = randv1 + randv2
+                  # A single character either way: the answer is read back one character at a time,
+                  # so anything longer costs a request per extra character.
+                  if settings.SKIP_CALC:
+                    randvcalc = random.randrange(0, 10)
 
                   if settings.TARGET_OS == settings.OS.WINDOWS:
                     if interpreter:
-                      cmd = settings.WIN_PYTHON_INTERPRETER + " -c \"print (" + str(randv1) + " + " + str(randv2) + ")\""
+                      if settings.SKIP_CALC:
+                        cmd = settings.WIN_PYTHON_INTERPRETER + " -c \"print (" + str(randvcalc) + ")\""
+                      else:
+                        cmd = settings.WIN_PYTHON_INTERPRETER + " -c \"print (" + str(randv1) + " + " + str(randv2) + ")\""
                     else:
-                      rand_num = randv1 + randv2
-                      cmd = "powershell.exe -InputFormat none write (" + str(rand_num) + ")"
+                      cmd = "powershell.exe -InputFormat none write (" + str(randvcalc) + ")"
                   else:
-                    if technique == settings.INJECTION_TECHNIQUE.TIME_BASED or technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
+                    if settings.SKIP_CALC:
+                      cmd = "echo " + str(randvcalc)
+                    elif technique == settings.INJECTION_TECHNIQUE.TIME_BASED or technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
                       cmd = "expr " + str(randv1) + " + " + str(randv2) + ""
                     else:
                       cmd = "echo $((" + str(randv1) + " + " + str(randv2) + "))"

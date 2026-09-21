@@ -39,7 +39,7 @@ def validate():
               menu.options.update, menu.options.list_tampers)):
     if not menu.options.purge:
       err_msg = "Missing a mandatory option (-u, -l, -m, -r, -x, --wizard, --update, --list-tampers or --purge). "
-      err_msg += "Use -h for help."
+      err_msg += "Use -h for basic and -hh for advanced help."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit(settings.EXIT_FAILURE)
 

