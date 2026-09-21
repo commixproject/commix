@@ -110,6 +110,15 @@ def adjust_parameter(param_string, name, value):
   return param_string
 
 """
+Write the token into a header, wherever that header is kept.
+"""
+def adjust_header(raw, name, value):
+  if not raw:
+    return raw
+  # Anchored at the start of a header, which in a string of them is written out as an escaped newline.
+  return re.sub(r"(?i)((?:\A|[\r\n]|\\n)\s*" + re.escape(name) + r"\s*:\s*)[^\\\r\n]*", lambda match: match.group(1) + value, raw)
+
+"""
 Put a freshly fetched token into the request that is about to be sent.
 
 The value travels wherever the parameter does: the query string, the body, a header of its own, or
@@ -172,6 +181,11 @@ def apply_token(request):
     for header_name in list(request.headers) + list(request.unredirected_hdrs):
       if header_name.lower() == token_name.lower():
         request.add_unredirected_header(header_name, token_value)
+    # The user-defined headers are written onto the request after this point, so the value is
+    # refreshed where it is kept rather than on a request that does not carry it yet.
+    menu.options.header = adjust_header(menu.options.header, token_name, token_value)
+    menu.options.headers = adjust_header(menu.options.headers, token_name, token_value)
+    settings.RAW_HTTP_HEADERS = adjust_header(settings.RAW_HTTP_HEADERS, token_name, token_value)
   finally:
     settings.FETCHING_CSRF_TOKEN = False
 

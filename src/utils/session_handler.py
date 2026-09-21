@@ -268,24 +268,27 @@ def import_injection_points(url, technique, injection_type, filename, separator,
                    "TAG VARCHAR, interpreter VARCHAR, payload VARCHAR, http_header VARCHAR, http_request_method VARCHAR, url_time_response INTEGER, "
                    "timesec INTEGER, exec_time INTEGER, output_length INTEGER, is_vulnerable VARCHAR, data VARCHAR, cookie VARCHAR, tamper VARCHAR, "
                    "target_os VARCHAR, file_deleted VARCHAR DEFAULT '', web_root VARCHAR DEFAULT '', tmp_path VARCHAR DEFAULT '', "
-                   "second_url VARCHAR DEFAULT '', second_req VARCHAR DEFAULT '', csrf_token VARCHAR DEFAULT '');")
+                   "second_url VARCHAR DEFAULT '', second_req VARCHAR DEFAULT '', csrf_token VARCHAR DEFAULT '', "
+                   "csrf_url VARCHAR DEFAULT '', csrf_method VARCHAR DEFAULT '', csrf_data VARCHAR DEFAULT '');")
 
       # The options a stored payload was made with, for a session file that predates them.
-      _ensure_columns(conn, table, (("second_url", "VARCHAR DEFAULT ''"), ("second_req", "VARCHAR DEFAULT ''"), ("csrf_token", "VARCHAR DEFAULT ''")))
+      _ensure_columns(conn, table, (("second_url", "VARCHAR DEFAULT ''"), ("second_req", "VARCHAR DEFAULT ''"), ("csrf_token", "VARCHAR DEFAULT ''"),
+                                    ("csrf_url", "VARCHAR DEFAULT ''"), ("csrf_method", "VARCHAR DEFAULT ''"), ("csrf_data", "VARCHAR DEFAULT ''")))
 
       # Check if an exact matching record already exists to avoid duplicates
       query_check = ("SELECT 1 FROM \"" + table + "\" WHERE url = ? AND technique = ? AND injection_type = ? AND separator = ? AND "
                      "shell = ? AND vuln_parameter = ? AND prefix = ? AND suffix = ? AND TAG = ? AND interpreter = ? AND payload = ? AND "
                      "http_header = ? AND http_request_method = ? AND url_time_response = ? AND timesec = ? AND exec_time = ? AND "
                      "output_length = ? AND is_vulnerable = ? AND data = ? AND cookie = ? AND tamper = ? AND target_os = ? AND web_root = ? AND tmp_path = ? AND "
-                     "second_url = ? AND second_req = ? AND csrf_token = ? LIMIT 1;")
+                     "second_url = ? AND second_req = ? AND csrf_token = ? AND csrf_url = ? AND csrf_method = ? AND csrf_data = ? LIMIT 1;")
 
       params = (str(url), str(technique), str(injection_type), str(separator), str(shell), str(vuln_parameter or ""),
                 str(prefix), str(suffix), str(TAG), str(interpreter), str(payload), str(settings.HTTP_HEADER),
                 str(http_request_method), int(url_time_response), int(timesec), int(exec_time),
                 int(output_length), str(is_vulnerable), str(menu.options.data), str(menu.options.cookie),
                 str(menu.options.tamper or ""), str(settings.TARGET_OS), str(settings.WEB_ROOT or ""), str(menu.options.tmp_path or ""),
-                str(menu.options.second_url or ""), str(menu.options.second_req or ""), str(settings.CSRF_TOKEN_ORIGINAL or ""))
+                str(menu.options.second_url or ""), str(menu.options.second_req or ""), str(settings.CSRF_TOKEN_ORIGINAL or ""),
+                str(menu.options.csrf_url or ""), str(menu.options.csrf_method or ""), str(menu.options.csrf_data or ""))
 
       if settings.BASE64_PADDING in params[0]:
         params = (params[0].replace(settings.BASE64_PADDING, _urllib.parse.quote(settings.BASE64_PADDING)),) + params[1:]
@@ -297,8 +300,8 @@ def import_injection_points(url, technique, injection_type, filename, separator,
         conn.execute("INSERT INTO \"" + table + "\" (url, technique, injection_type, separator, "
                      "shell, vuln_parameter, prefix, suffix, TAG, interpreter, payload, http_header, http_request_method, "
                      "url_time_response, timesec, exec_time, output_length, is_vulnerable, data, cookie, tamper, target_os, web_root, tmp_path, "
-                     "second_url, second_req, csrf_token) "
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", params)
+                     "second_url, second_req, csrf_token, csrf_url, csrf_method, csrf_data) "
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", params)
         conn.commit()
 
     # Mark injection checker as True to indicate session contains injection data
@@ -560,6 +563,9 @@ def apply_stored_technique(row):
   second_url = row[25] if len(row) > 25 else None
   second_req = row[26] if len(row) > 26 else None
   csrf_token = row[27] if len(row) > 27 else None
+  csrf_url = row[28] if len(row) > 28 else None
+  csrf_method = row[29] if len(row) > 29 else None
+  csrf_data = row[30] if len(row) > 30 else None
 
   if http_header:
     settings.HTTP_HEADER = http_header
@@ -604,6 +610,22 @@ def apply_stored_technique(row):
       info_msg = "The stored finding was made with the " + label + " '" + str(stored) + "', which is put back for this run."
       settings.print_data_to_stdout(settings.print_info_msg(info_msg))
     setattr(menu.options, applied_name, stored)
+
+  # Where the token was read from, which a restored token name is of little use without.
+  if csrf_url and csrf_url != "None":
+    if menu.options.csrf_url and menu.options.csrf_url != csrf_url:
+      announce_replay_conflict(csrf_url, menu.options.csrf_url, "anti-CSRF token page", "--csrf-url")
+    elif not menu.options.csrf_url:
+      info_msg = "The stored finding was made with the anti-CSRF token page '" + str(csrf_url) + "'"
+      if csrf_method and csrf_method != "None":
+        info_msg += " (" + str(csrf_method).upper() + (" '" + str(csrf_data) + "'" if csrf_data and csrf_data != "None" else "") + ")"
+      info_msg += ", which is put back for this run."
+      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    menu.options.csrf_url = csrf_url
+    if csrf_method and csrf_method != "None":
+      menu.options.csrf_method = csrf_method
+    if csrf_data and csrf_data != "None":
+      menu.options.csrf_data = csrf_data
 
   # Read back the way it was given, so what the token is looked up by is what it was found with.
   if csrf_token and csrf_token != "None":
