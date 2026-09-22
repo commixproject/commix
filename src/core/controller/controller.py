@@ -113,6 +113,8 @@ def reset_parameter_state():
   # The other technique states are put back as each technique starts; this one is reached as a
   # fallback from the file-based technique instead, so nothing else clears it.
   settings.TEMPFILE_BASED_STATE = False
+  # How one parameter carried its value says nothing about how the next one carries its own.
+  settings.VALUE_ENCODING = None
   # Whether a parameter needs the value it was given is asked of that parameter alone.
   settings.TESTABLE_VALUE_OPTIMIZED = False
   # Narrowed below for one parameter at a time, and put back here so the next one is tested with
@@ -162,6 +164,8 @@ def heuristic_request(url, http_request_method, check_parameter, payload, whites
   if settings.IS_JSON:
     payload = _urllib.parse.unquote(payload)
   payload = checks.perform_payload_modification(payload)
+  # Written back the way the parameter's own value arrived, as every later request is.
+  payload = checks.apply_encoding(payload, settings.VALUE_ENCODING)
   if settings.VERBOSITY_LEVEL >= 1:
     settings.print_data_to_stdout(settings.print_payload(payload))
   if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
@@ -836,6 +840,56 @@ def injection_process(url, check_parameter, http_request_method, filename, times
 
   # False only where the check ran and the response never moved with the parameter - where it did
   # not run, nothing was learned and the parameter is tested as it would have been.
+  """
+  Recognised before the value can be swapped for a placeholder below: a value that has been thrown
+  away is one nothing can notice the encoding of.
+
+  Where it is written in something, the request is rewritten to carry what it stands for, and the
+  writing back is done on the way out - so everything in between is testing the value the target
+  itself will read, rather than the envelope it arrived in.
+  """
+  # What the value stands for, once whatever it is written in has been taken off it.
+  def read_value_as(description):
+    nonlocal url
+    decoded = checks.strip_encoding(settings.TESTABLE_VALUE, description)
+    settings.VALUE_ENCODING = description
+    if decoded != settings.TESTABLE_VALUE:
+      if menu.options.data:
+        menu.options.data = menu.options.data.replace(settings.TESTABLE_VALUE, decoded)
+      url = url.replace(settings.TESTABLE_VALUE, decoded)
+      settings.TESTABLE_VALUE = decoded
+
+  named = checks.named_encoding(check_parameter, settings.TESTABLE_VALUE)
+  if settings.LOAD_SESSION:
+    """
+    A finding read back from a session carries the encoding it was made with, so there is nothing
+    to work out here. A name is only a fallback for a row stored before that was kept - and there,
+    a value that will not decode is one that was stored already decoded.
+    """
+    if named and not settings.VALUE_ENCODING:
+      try:
+        read_value_as(named)
+      except Exception:
+        pass
+  elif named:
+    # Named for this parameter, which settles it without asking.
+    try:
+      read_value_as(named)
+    except Exception:
+      err_msg = "The " + str(check_parameter) + " parameter does not carry a valid "
+      err_msg += str(settings.PARAMETER_ENCODINGS.get(check_parameter, settings.PARAMETER_ENCODING_DEFAULT))
+      err_msg += "-encoded value ('" + str(settings.TESTABLE_VALUE) + "')."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit(settings.EXIT_FAILURE)
+  elif not menu.options.skip_heuristics:
+    # Otherwise it is recognised, and what it stands for is what the rest of the run tests.
+    decoded, _encoding = checks.recognise_payload(payload=settings.TESTABLE_VALUE)
+    if settings.VALUE_ENCODING and decoded != settings.TESTABLE_VALUE:
+      if menu.options.data:
+        menu.options.data = menu.options.data.replace(settings.TESTABLE_VALUE, decoded)
+      url = url.replace(settings.TESTABLE_VALUE, decoded)
+      settings.TESTABLE_VALUE = decoded
+
   is_dynamic = check_parameter_dynamism(url, http_request_method, check_parameter)
   if is_dynamic is False and menu.options.skip_static and not checks.explicitly_testable(check_parameter):
     info_msg = "Skipping the parameter '" + check_parameter + "' that does not appear to be dynamic."

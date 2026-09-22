@@ -495,6 +495,12 @@ request.add_option("--csrf-retries",
                 type="int",
                 help="Retries for anti-CSRF token retrieval (default 0).")
 
+request.add_option("--param-encoding",
+                action="store",
+                dest="param_encoding",
+                default=None,
+                help="Encoding a parameter's value is carried in (e.g. 'addr=base64').")
+
 request.add_option("--skip-urlencode",
                 action="store_true",
                 dest="skip_urlencode",

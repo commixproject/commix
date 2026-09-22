@@ -74,7 +74,7 @@ def extract_vuln_param_from_pairs(text, delimiter, strip_leading_space=False, ch
       if settings.CUSTOM_INJECTION_MARKER:
         register_custom_injection_marker(vuln_parameter, param_value)
       settings.TESTABLE_VALUE = param_value.replace(settings.INJECT_TAG, "")
-      if check_base64_padding and settings.BASE64_PADDING in pair:
+      if check_base64_padding and settings.BASE64_PADDING in pair and not settings.TESTABLE_VALUE.endswith(settings.BASE64_PADDING):
         settings.TESTABLE_VALUE = settings.TESTABLE_VALUE + settings.BASE64_PADDING
       return vuln_parameter
   return None

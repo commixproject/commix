@@ -1096,7 +1096,10 @@ def _perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http
   
   payload = checks.tamper_outside_single_quotes(payload, lambda part: part.replace(settings.SINGLE_WHITESPACE, whitespace))
   payload = checks.perform_payload_modification(payload)
-  
+  # A parameter the target carries encoded is written back the way it arrived, the whole value at
+  # once rather than the injected part alone - which is what makes the value it reads a valid one.
+  payload = checks.apply_encoding(payload, settings.VALUE_ENCODING)
+
   # Check if defined "--verbose" option.
   if settings.VERBOSITY_LEVEL != 0:
     settings.print_data_to_stdout(settings.print_payload(payload))

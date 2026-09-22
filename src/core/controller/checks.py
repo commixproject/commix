@@ -2096,6 +2096,8 @@ Run before the target is touched: an option that cannot be acted on is the user'
 leaving it until the payloads are built costs a connection test and a WAF probe to find out.
 """
 def validate_tamper_scripts():
+  # An encoding named the old way is taken as an encoding before it is judged as a script name.
+  absorb_encoding_tampers()
   if not menu.options.tamper:
     return []
   raw_scripts = re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower())
@@ -3018,6 +3020,8 @@ def escalate_waf_evasion(on_block=True):
 Tamper script checker
 """
 def tamper_scripts(stored_tamper_scripts):
+  # A stored session may still name the scripts by their old names, as may the command line.
+  absorb_encoding_tampers()
   if menu.options.tamper:
     provided_scripts = validate_tamper_scripts()
     priorities = {}
@@ -3187,104 +3191,218 @@ def decoded_text_is_plausible(text):
   return printable / len(text) >= settings.ENCODING_PLAUSIBILITY_RATIO
 
 """
+What a value is written in, where it is written in anything at all.
+
+Answered as the alphabet and the padding it was found with, not merely as "base64", because what is
+sent back has to be written the same way: a value that arrived in the URL-safe alphabet and comes
+back in the standard one is a value the target no longer recognises.
+
+A value counts as encoded only where decoding it and writing it out again gives back exactly what
+arrived, and where what came out reads as text. Anything less takes a word that happens to be
+spellable in the alphabet - 'deadbeef', 'password' - for an encoded one.
+"""
+def recognise_encoding(value):
+  value = (value or "").strip()
+  if len(value) < settings.ENCODING_MIN_LENGTH:
+    return None
+
+  # Hexadecimal, which is the narrower shape: every character a digit, and two of them per byte.
+  if re.match(settings.HEX_RECOGNITION_REGEX, value):
+    body = value[2:] if value[:2].lower() == "0x" else value
+    if len(body) % 2 == 0:
+      try:
+        decoded = bytearray.fromhex(body).decode(settings.DEFAULT_CODEC)
+      except (ValueError, UnicodeDecodeError):
+        decoded = None
+      if decoded and decoded_text_is_plausible(decoded):
+        return {"codec": "hex", "upper": body.upper() == body and body.lower() != body,
+                "prefixed": value[:2].lower() == "0x"}
+    return None
+
+  # Base64, in either alphabet and with the padding it happened to carry.
+  urlsafe = "-" in value or "_" in value
+  alphabet = settings.BASE64_URLSAFE_RECOGNITION_REGEX if urlsafe else settings.BASE64_RECOGNITION_REGEX
+  if not re.match(alphabet, value):
+    return None
+  """
+  Padding is only known to be dropped where the length says it must have been: a value that is a
+  whole number of groups long needed none in the first place, and writing the next one out without
+  it is how a target that pads is handed something it does not recognise.
+  """
+  padded = value.endswith("=") or len(value) % 4 == 0
+  body = value.rstrip("=")
+  # A length one past a whole group cannot be base64, padded back or not.
+  if len(body) % 4 == 1:
+    return None
+  try:
+    raw = base64.urlsafe_b64decode(body + "=" * (-len(body) % 4)) if urlsafe \
+          else base64.b64decode(body + "=" * (-len(body) % 4))
+    decoded = raw.decode(settings.DEFAULT_CODEC)
+  except Exception:
+    return None
+  if "\\x" in decoded or not decoded_text_is_plausible(decoded):
+    return None
+  description = {"codec": "base64", "urlsafe": urlsafe, "padded": padded}
+  # Written out again the way it arrived: where that is not what arrived, it was never encoded.
+  if apply_encoding(decoded, description) != value:
+    return None
+  return description
+
+"""
+The encoding named with '--param-encoding', as the value it is named for actually carries it.
+
+The name settles the alphabet; the padding and the case are read off the value itself, so that a
+parameter written one way is not answered in another.
+"""
+def encoding_from_name(name, value):
+  name = (name or "").strip().lower()
+  value = value or ""
+  if name == settings.ENCODING_HEX:
+    body = value[2:] if value[:2].lower() == "0x" else value
+    return {"codec": "hex", "upper": body.upper() == body and body.lower() != body,
+            "prefixed": value[:2].lower() == "0x"}
+  if name in (settings.ENCODING_BASE64, settings.ENCODING_BASE64_SAFE):
+    urlsafe = name == settings.ENCODING_BASE64_SAFE
+    # The URL-safe alphabet is written without padding; the standard one keeps whatever it needs.
+    padded = False if urlsafe else (value.endswith("=") or len(value.rstrip("=")) % 4 == 0)
+    return {"codec": "base64", "urlsafe": urlsafe, "padded": padded}
+  return None
+
+"""
+What '--param-encoding' was given, as a parameter-to-encoding map.
+
+Written either as one encoding for every parameter tested, or as the parameters that carry one
+named each with their own.
+"""
+def parse_param_encoding():
+  given = (menu.options.param_encoding or "").strip()
+  if not given:
+    return
+  settings.PARAMETER_ENCODINGS = {}
+  settings.PARAMETER_ENCODING_DEFAULT = None
+  for entry in re.split(settings.PARAMETER_SPLITTING_REGEX, given):
+    entry = entry.strip()
+    if not entry:
+      continue
+    name, separator, encoding = entry.partition("=")
+    if not separator:
+      name, encoding = "", name
+    encoding = encoding.strip().lower()
+    if encoding not in settings.SUPPORTED_PARAMETER_ENCODINGS:
+      err_msg = "You specified an invalid value '" + encoding + "' for the option '--param-encoding'. "
+      err_msg += "The value must be one of " + ", ".join("'" + _ + "'" for _ in settings.SUPPORTED_PARAMETER_ENCODINGS) + "."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit(settings.EXIT_FAILURE)
+    if name:
+      settings.PARAMETER_ENCODINGS[name.strip()] = encoding
+    else:
+      settings.PARAMETER_ENCODING_DEFAULT = encoding
+
+"""
+An encoding asked for as a tamper script is the same thing said the way it used to be said.
+
+'base64encode' and 'hexencode' wrote the payload out encoded and left the value it was appended to
+alone, which only ever worked where the two happened to decode as one. Taken here as what they were
+reaching for - the value is carried in that encoding - and answered that way for every parameter
+tested, which is what naming a tamper meant.
+"""
+def absorb_encoding_tampers():
+  given = menu.options.tamper or ""
+  if not given:
+    return
+  kept = []
+  absorbed = None
+  for script in re.split(settings.PARAMETER_SPLITTING_REGEX, given):
+    name = script.strip().lower()
+    if name in settings.ENCODING_TAMPER_SCRIPTS:
+      absorbed = settings.ENCODING_TAMPER_SCRIPTS[name]
+    elif script.strip():
+      kept.append(script.strip())
+  if absorbed is None:
+    return
+  menu.options.tamper = ",".join(kept) if kept else None
+  warn_msg = "The value's encoding is no longer given as a tamper script. "
+  if menu.options.param_encoding:
+    warn_msg += "Carrying on with what '--param-encoding' names."
+  else:
+    settings.PARAMETER_ENCODING_DEFAULT = absorbed
+    warn_msg += "Carrying on as '--param-encoding=" + absorbed + "'."
+  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
+"""
+The encoding a parameter was said to carry, where one was named for it.
+"""
+def named_encoding(parameter, value):
+  encoding = settings.PARAMETER_ENCODINGS.get(parameter, settings.PARAMETER_ENCODING_DEFAULT)
+  return encoding_from_name(encoding, value) if encoding else None
+
+"""
+Write a value out the way the one it stands in for was written.
+"""
+def apply_encoding(value, description):
+  if not description:
+    return value
+  if description.get("codec") == "hex":
+    body = value.encode(settings.DEFAULT_CODEC).hex()
+    if description.get("upper"):
+      body = body.upper()
+    return ("0x" + body) if description.get("prefixed") else body
+  raw = value.encode(settings.DEFAULT_CODEC)
+  encoded = base64.urlsafe_b64encode(raw) if description.get("urlsafe") else base64.b64encode(raw)
+  encoded = encoded.decode(settings.DEFAULT_CODEC)
+  return encoded if description.get("padded") else encoded.rstrip("=")
+
+# What a value written in a known encoding stands for.
+def strip_encoding(value, description):
+  if not description:
+    return value
+  if description.get("codec") == "hex":
+    body = value[2:] if description.get("prefixed") else value
+    return bytearray.fromhex(body).decode(settings.DEFAULT_CODEC)
+  body = value.rstrip("=")
+  padded = body + "=" * (-len(body) % 4)
+  raw = base64.urlsafe_b64decode(padded) if description.get("urlsafe") else base64.b64decode(padded)
+  return raw.decode(settings.DEFAULT_CODEC)
+
+"""
 Check for applied (hex / b64) encoders.
 """
 def check_encoders(payload):
-  is_decoded = False
-  encoded_with = ""
-  check_value = payload
-  long_enough = len(check_value.strip()) >= settings.ENCODING_MIN_LENGTH
+  """
+  Whether the value the parameter carries is written in an encoding, and if it is, the run is told
+  to speak it: the value is read back as what it stands for, and every value sent from here on is
+  written out the same way - alphabet, padding and all.
+  """
+  description = recognise_encoding(payload)
+  if not description:
+    return payload, ""
 
-  settings.MULTI_ENCODED_PAYLOAD = list(dict.fromkeys(settings.MULTI_ENCODED_PAYLOAD))
-  for encode_type in list(settings.MULTI_ENCODED_PAYLOAD):
-    if encode_type == 'base64encode' or encode_type == 'hexencode':
-      while True:
-        message = "Do you want to keep using the '" + encode_type + "' tamper script? [y/N] "
-        procced_option = common.read_input(message, default="N", check_batch=True)
-        if procced_option in settings.CHOICE_YES:
-          break
-        elif procced_option in settings.CHOICE_NO:
-          if settings.VERBOSITY_LEVEL != 0:
-            debug_msg = "Unloading the '" + encode_type + "' tamper script."
-            settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-          settings.MULTI_ENCODED_PAYLOAD.remove(encode_type)
-          break
-        elif procced_option in settings.CHOICE_QUIT:
-          raise SystemExit()
-        else:
-          common.invalid_option(procced_option)
-          pass
+  encoded_with = description["codec"]
+  while True:
+    message = "The value appears to already be " + encoded_with + "-encoded. "
+    message += "Do you want commix to keep it that way? [Y/n] "
+    answer = common.read_input(message, default="Y", check_batch=True)
+    if answer in settings.CHOICE_YES:
+      break
+    elif answer in settings.CHOICE_NO:
+      if settings.VERBOSITY_LEVEL != 0:
+        debug_msg = "Leaving the value as it was given."
+        settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+      return payload, ""
+    elif answer in settings.CHOICE_QUIT:
+      raise SystemExit()
+    else:
+      common.invalid_option(answer)
 
-  if long_enough and (len(check_value.strip()) % 4 == 0) and \
-    re.match(settings.BASE64_RECOGNITION_REGEX, check_value) and \
-    not re.match(settings.HEX_RECOGNITION_REGEX, check_value):
-      _payload = base64.b64decode(check_value)
-      try:
-        decoded_text = _payload.decode(settings.DEFAULT_CODEC)
-        if not "\\x" in decoded_text and decoded_text_is_plausible(decoded_text):
-          settings.MULTI_ENCODED_PAYLOAD.append("base64encode")
-          decoded_payload = _payload
-          encoded_with = "base64"
-          if re.match(settings.HEX_RECOGNITION_REGEX, check_value):
-            decoded_payload, decoded = hexdecode(decoded_payload)
-            if decoded:
-              settings.MULTI_ENCODED_PAYLOAD.append("hexencode")
-              encoded_with = "hex"
-      except Exception:
-        pass
-
-  elif long_enough and re.match(settings.HEX_RECOGNITION_REGEX, check_value):
-    decoded_payload, decoded = hexdecode(check_value)
-    if decoded and decoded_text_is_plausible(decoded_payload):
-      settings.MULTI_ENCODED_PAYLOAD.append("hexencode")
-      encoded_with = "hex"
-      if (len(check_value.strip()) % 4 == 0) and \
-        re.match(settings.BASE64_RECOGNITION_REGEX, decoded_payload) and \
-        not re.match(settings.HEX_RECOGNITION_REGEX, decoded_payload):
-          _payload = base64.b64decode(check_value)
-          try:
-            decoded_text = _payload.decode(settings.DEFAULT_CODEC)
-            if not "\\x" in decoded_text and decoded_text_is_plausible(decoded_text):
-              settings.MULTI_ENCODED_PAYLOAD.append("base64encode")
-              decoded_payload = _payload
-              encoded_with = "base64"
-          except Exception:
-            pass
-  else:
-    decoded_payload = payload
-
-  if len(encoded_with) != 0:
-    is_decoded = True
-
-  if is_decoded:
-    while True:
-      message = "The value appears to already be " + encoded_with + "-encoded. "
-      message += "Do you want to load the '" + encoded_with + "encode' tamper script to keep it that way? [Y/n] "
-      procced_option = common.read_input(message, default="Y", check_batch=True)
-      if procced_option in settings.CHOICE_YES:
-        break
-      elif procced_option in settings.CHOICE_NO:
-        settings.MULTI_ENCODED_PAYLOAD.remove(encoded_with + "encode")
-        if settings.VERBOSITY_LEVEL != 0:
-          debug_msg = "Skipping load the '" + encoded_with + "encode' tamper script."
-          settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-        break
-      elif procced_option in settings.CHOICE_QUIT:
-        raise SystemExit()
-      else:
-        common.invalid_option(procced_option)
-        pass
-
-  if is_decoded and (encoded_with + "encode") in settings.MULTI_ENCODED_PAYLOAD:
-    tamper_name = encoded_with + "encode"
-    provided = re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower()) if menu.options.tamper else []
-    if tamper_name not in provided:
-      menu.options.tamper = (menu.options.tamper + "," + tamper_name) if menu.options.tamper else tamper_name
-
-  if is_decoded:
-    return _urllib.parse.quote(decoded_payload), encoded_with
-  else:
-    return payload, encoded_with
+  try:
+    decoded = strip_encoding(payload, description)
+  except Exception:
+    return payload, ""
+  settings.VALUE_ENCODING = description
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "The value stands for '" + decoded + "'."
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+  return decoded, encoded_with
 
 """
 Recognise the payload.

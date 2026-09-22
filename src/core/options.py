@@ -150,6 +150,9 @@ def validate():
       raise SystemExit(settings.EXIT_FAILURE)
     checks.set_anticsrf_token(menu.options.csrf_token)
 
+  checks.parse_param_encoding()
+  checks.absorb_encoding_tampers()
+
   if menu.options.second_url and menu.options.second_req:
     err_msg = "The option '--second-url' is incompatible with the option '--second-req'."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))

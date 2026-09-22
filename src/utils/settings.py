@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "155"
+REVISION = "156"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1396,6 +1396,8 @@ JSON_LIKE_RECOGNITION_REGEX = r"(?s)\A(\s*\[)*\s*\{.*'[^']+'\s*:\s*('[^']+'|\d+)
 
 # Base64 format recognition
 BASE64_RECOGNITION_REGEX = r'^[A-Za-z0-9+/]+[=]{0,2}$'
+# The same alphabet as it is written where a value has to survive a URL or a filename (RFC 4648).
+BASE64_URLSAFE_RECOGNITION_REGEX = r'^[A-Za-z0-9\-_]+[=]{0,2}$'
 
 # Hex encoded characters recognition
 HEX_RECOGNITION_REGEX = r'^(0[xX])?[0-9a-fA-F]+$'
@@ -1405,6 +1407,21 @@ ENCODING_MIN_LENGTH = 8
 
 # Minimum printable-character ratio for treating a base64/hex charset match as encoded.
 ENCODING_PLAUSIBILITY_RATIO = 0.85
+
+# How the parameter under test carries its value, where it carries it written in something: the
+# codec, the alphabet and the padding it arrived with, so that it is sent back written the same way.
+VALUE_ENCODING = None
+
+# The encodings a value can be said to be carried in, and what was said with '--param-encoding':
+# a name for each parameter that carries one, or one name standing for every parameter tested.
+ENCODING_BASE64 = "base64"
+ENCODING_BASE64_SAFE = "base64-safe"
+ENCODING_HEX = "hex"
+SUPPORTED_PARAMETER_ENCODINGS = (ENCODING_BASE64, ENCODING_BASE64_SAFE, ENCODING_HEX)
+# What the tamper scripts that used to write a value out encoded are taken to mean now.
+ENCODING_TAMPER_SCRIPTS = {"base64encode": ENCODING_BASE64, "hexencode": ENCODING_HEX}
+PARAMETER_ENCODINGS = {}
+PARAMETER_ENCODING_DEFAULT = None
 
 DIRECTORY_REGEX = r'(?:/[^/]+)+?/\w+\.\w+'
 
@@ -1550,8 +1567,6 @@ TAMPER_MODIFICATION_LETTERS = r'([e-zE-Z])'
 # Tamper scripts dict
 TAMPER_SCRIPTS = {
                   "space2ifs": False,
-                  "base64encode": False,
-                  "hexencode": False,
                   "space2plus": False,
                   "space2htab": False,
                   "space2vtab": False,
