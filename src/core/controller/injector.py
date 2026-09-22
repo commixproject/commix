@@ -147,7 +147,9 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
       # Silent where the caller has just said what it is taking the model again for: the dots
       # carry on under that line instead of repeating it.
       if announce and not announced:
-        warn_msg = settings.TIMING_BASELINE_MSG
+        # Named for the model it is filling: this one is taken from the payload's own shape, and a
+        # line reading the same as the one before it looks like the same work being done twice.
+        warn_msg = settings.TIMING_PAYLOAD_BASELINE_MSG
         warn_msg += "." if settings.VERBOSITY_LEVEL != 0 else ", please wait..."
         # The open line says what is being tested, so it is closed rather than written over - and
         # this one is left open in its turn, for the dots below to be counted off on it.
@@ -879,14 +881,14 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
 
         revalidations = 0
         """
-        The delay is shared by every worker, so what one of them raised another must not quietly put
-        back: this remembers what this worker escalated to, and it only restores when that is still
-        the value in force. Restoring regardless undid another worker's escalation mid-search, and
-        with several workers the raise never stuck at all.
+        The delay this character started with, to go back to once it has had its attempts.
+
+        Raising it is how a position that answered unreliably is asked again, and it is that
+        position's business alone: left standing, the first bad character sets the pace every one
+        after it is read at, and on a target that wobbles once the run never comes back down.
         """
         with timesec_lock:
           original_timesec = timesec
-        my_escalation = None
         while True:
           try:
             validated = _validate_char_boundary(ascii_char)
@@ -910,16 +912,18 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
           max_revalidations = settings.MAX_LENGTH_REVALIDATIONS * (3 if was_jittery else 1)
           if revalidations >= max_revalidations:
             conn_error_flag = True
+            # Put back unconditionally: the delay was raised for this character, and leaving it
+            # raised because another character raised it too is how one bad position sets the
+            # pace for everything after it.
             with timesec_lock:
-              if my_escalation is None or timesec == my_escalation:
-                timesec = settings.CALIBRATED_TIMESEC = original_timesec
+              timesec = settings.CALIBRATED_TIMESEC = original_timesec
             break
           revalidations += 1
           settings.print_data_to_stdout(settings.print_error_msg("Invalid character detected. Retrying."))
           if settings.ADJUST_TIME_DELAY_CHOICE is not False:
             with timesec_lock:
               timesec = settings.CALIBRATED_TIMESEC = _escalated_delay(timesec)
-              new_timesec = my_escalation = timesec
+              new_timesec = timesec
             warn_msg = "Increasing time delay to " + str(new_timesec) + " second" + ("s" if new_timesec > 1 else "") + "."
             settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
           ascii_char, from_full_range = _bisect_chars(force_full=True)

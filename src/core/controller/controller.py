@@ -103,6 +103,26 @@ def basic_level_checks():
   settings.IDENTIFIED_EVAL_PROBE = False
 
 """
+Take the state one parameter's testing leaves behind back to what it was before.
+
+What was learned about one parameter is not the next one's: a technique that answered for it, and a
+value of its own that turned out not to be needed, would otherwise still be standing when the next
+parameter is judged - and the verdict on that parameter read off them.
+"""
+def reset_parameter_state():
+  # The other technique states are put back as each technique starts; this one is reached as a
+  # fallback from the file-based technique instead, so nothing else clears it.
+  settings.TEMPFILE_BASED_STATE = False
+  # Whether a parameter needs the value it was given is asked of that parameter alone.
+  settings.TESTABLE_VALUE_OPTIMIZED = False
+  # Narrowed below for one parameter at a time, and put back here so the next one is tested with
+  # the techniques the run was given rather than with what the last parameter settled on.
+  if settings.TECHNIQUES_BEFORE_NARROWING is None:
+    settings.TECHNIQUES_BEFORE_NARROWING = menu.options.tech
+  else:
+    menu.options.tech = settings.TECHNIQUES_BEFORE_NARROWING
+
+"""
 Initializing HTTP Headers parameters injection status
 """
 def init_http_header_injection_status():
@@ -657,23 +677,45 @@ def check_parameter_dynamism(url, http_request_method, check_parameter):
     if not response or isinstance(response, bool):
       return None
     try:
-      return response.read()
+      return checks.comparable_page(checks.process_page_content(response, action="decode"))
     except Exception:
       return None
 
-  real_body = _body(settings.TESTABLE_VALUE)
-  # The same value asked for twice: whatever differs between these two is the page moving on its
-  # own, and a parameter is only dynamic where it changes the response by more than that.
-  repeat_body = _body(settings.TESTABLE_VALUE)
+  """
+  The page as the target answers it with the value it was given, and how much it moves between two
+  such answers, are the target's own - not this parameter's. Both were taken once, when the target
+  was first reached, so what is left to ask here is what the page looks like with something else in
+  the parameter's place: one request, against a baseline every parameter shares.
+  """
+  real_body = settings.ORIGINAL_PAGE_COMPARABLE or None
+  noise = settings.PAGE_NOISE_RATIO
+  if real_body is None:
+    real_body = _body(settings.TESTABLE_VALUE)
+    # The same value asked for twice: whatever differs between these two is the page moving on its
+    # own, and a parameter is only dynamic where it changes the response by more than that.
+    repeat_body = _body(settings.TESTABLE_VALUE)
+    if real_body is None or repeat_body is None:
+      return
+    noise = difflib.SequenceMatcher(None, real_body, repeat_body).ratio()
+
   placeholder_body = _body(placeholder)
-  if real_body is None or repeat_body is None or placeholder_body is None:
+  if placeholder_body is None:
     return
 
-  noise = difflib.SequenceMatcher(None, real_body, repeat_body).ratio()
   changed = difflib.SequenceMatcher(None, real_body, placeholder_body).ratio()
   if changed >= min(noise, settings.STABILITY_SIMILARITY_THRESHOLD):
     warn_msg = param_label + " does not appear to be dynamic."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    """
+    A page that is mostly layout answers this question badly: what a command prints is a handful of
+    characters against kilobytes of markup, and the two answers come back all but identical whether
+    the parameter reaches a shell or not. Said out loud, because the verdict is what '--skip-static'
+    acts on - and because comparing the text alone is what settles it.
+    """
+    if not menu.options.text_only and checks.page_text_percent(settings.ORIGINAL_PAGE) < settings.LOW_TEXT_PERCENT:
+      warn_msg = "Target's page contains only " + str(round(checks.page_text_percent(settings.ORIGINAL_PAGE), 1)) + "% text, "
+      warn_msg += "which might result in unreliable comparison results. Consider using switch '--text-only'."
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     return False
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = param_label + " appears to be dynamic."
@@ -726,14 +768,20 @@ def attempt_skip_testable_value(url, http_request_method, check_parameter):
 
   placeholder = ''.join(random.choice(string.ascii_uppercase) for _ in range(3))
   try:
+    # Both requests are paced before their clocks start: what is compared here is how long the
+    # target takes over either value, not how long this run was told to wait between requests.
+    real_request = build(settings.TESTABLE_VALUE)
+    headers.apply_request_policy()
     start = time.time()
-    real_response = _urllib.request.urlopen(build(settings.TESTABLE_VALUE), timeout=settings.TIMEOUT)
+    real_response = headers.send_raw(real_request, policy=False)
     real_body = real_response.read()
     real_status = real_response.getcode()
     real_time = time.time() - start
 
+    placeholder_request = build(placeholder)
+    headers.apply_request_policy()
     start = time.time()
-    placeholder_response = _urllib.request.urlopen(build(placeholder), timeout=settings.TIMEOUT)
+    placeholder_response = headers.send_raw(placeholder_request, policy=False)
     placeholder_body = placeholder_response.read()
     placeholder_status = placeholder_response.getcode()
     placeholder_time = time.time() - start
@@ -781,6 +829,7 @@ def injection_process(url, check_parameter, http_request_method, filename, times
     return
 
   settings.NOT_TESTABLE_PARAMETERS = False
+  reset_parameter_state()
   # Bound here rather than where the techniques run: the parameter may be skipped before reaching
   # them, and the loop over operating systems below reads this either way.
   end_detection = False
@@ -855,8 +904,13 @@ def injection_process(url, check_parameter, http_request_method, filename, times
       _time_warmup_done = True
       if time_techniques_resumed:
         url_time_response = 0
+      elif settings.ESTIMATED_TIMESEC is not None:
+        # How long the target takes to answer is the target's own, not this parameter's: measured
+        # once, and read by every parameter after it.
+        timesec, url_time_response = settings.ESTIMATED_TIMESEC, settings.URL_TIME_RESPONSE
       else:
         timesec, url_time_response = requests.estimate_response_time(url, timesec, http_request_method)
+        settings.ESTIMATED_TIMESEC = timesec
 
     # Load modules
     modules_handler.load_modules(url, http_request_method, filename)
@@ -943,7 +997,11 @@ def injection_process(url, check_parameter, http_request_method, filename, times
       # once the user provides the path of web server's root directory.
       if menu.options.web_root and settings.USER_APPLIED_TECHNIQUE and not "f" in menu.options.tech:
         menu.options.web_root = checks.normalize_target_dir(menu.options.web_root)
-        if checks.procced_with_file_based_technique():
+        # Asked once and held for the run, since the technique list it narrows is put back for
+        # every parameter - the question is about the document root, which does not change.
+        if settings.FILE_BASED_NARROWING_CHOICE is None:
+          settings.FILE_BASED_NARROWING_CHOICE = checks.procced_with_file_based_technique()
+        if settings.FILE_BASED_NARROWING_CHOICE:
           menu.options.tech = "f"
 
       # Whether a stored finding already answers what this technique would ask.
@@ -1358,13 +1416,13 @@ def perform_checks(url, http_request_method, filename):
   if menu.options.auth_url and menu.options.auth_data:
     authentication.authentication_process(http_request_method)
     try:
-      response = _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
+      response = headers.send_raw(url)
       try:
         main_content = response.read()
       finally:
         response.close()
 
-      response = _urllib.request.urlopen(menu.options.auth_url, timeout=settings.TIMEOUT)
+      response = headers.send_raw(menu.options.auth_url)
       try:
         auth_content = response.read()
       finally:

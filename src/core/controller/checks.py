@@ -16,6 +16,7 @@ For more see the file 'readme/COPYING' for copying permission.
 import io
 import re
 import codecs
+import difflib
 import os
 import sys
 import json
@@ -854,9 +855,13 @@ def ignore_anticsrf_parameter(parameter):
   if any(parameter.lower().count(token) for token in settings.CSRF_TOKEN_PARAMETER_INFIXES):
     if not explicitly_testable(parameter):
       offer_anticsrf_token(parameter)
-      if (len(parameter.split("="))) == 2:
-        info_msg = "Ignoring the parameter '" + parameter.split("=")[0]
-        info_msg += "' that appears to hold anti-CSRF token '" + parameter.split("=")[1] +  "'."
+      # Split where the name ends rather than at every '=' it holds: a value carrying one of its
+      # own - a token written in base64, most of them - is still that parameter's value, and a
+      # parameter skipped without a word said is one nobody knows went untested.
+      name, separator, value = parameter.partition("=")
+      if separator:
+        info_msg = "Ignoring the parameter '" + name
+        info_msg += "' that appears to hold anti-CSRF token '" + value +  "'."
         settings.print_data_to_stdout(settings.print_info_msg(info_msg))
       return True
 
@@ -1114,6 +1119,105 @@ def decode_page_body(body, response=None, percent_decode=True):
     except (UnicodeDecodeError, LookupError, TypeError):
       continue
   return ""
+
+"""
+The page with everything that is not its text taken out: scripts, styles, comments and the tags
+themselves.
+
+What a target prints from a command it ran is text, and a page is mostly not. A few characters of
+output against kilobytes of layout is a difference too small to read as one - which is how a
+parameter that plainly reaches a shell comes back as one that changes nothing.
+"""
+def filtered_page_content(page, only_text=True):
+  if not isinstance(page, str):
+    return page
+  page = re.sub(r"(?si)<script.+?</script>|<!--.+?-->|<style.+?</style>" + (r"|<[^>]+>|\t|\n|\r" if only_text else ""), settings.SINGLE_WHITESPACE, page)
+  page = re.sub(settings.SINGLE_WHITESPACE + r"{2,}", settings.SINGLE_WHITESPACE, page)
+  return page.strip()
+
+# The alphanumeric run at either end of a marking, which would otherwise start or stop mid-word.
+def _trim_alphanum(value):
+  while value and value[-1].isalnum():
+    value = value[:-1]
+  while value and value[0].isalnum():
+    value = value[1:]
+  return value
+
+"""
+Note where a page differs from itself between two identical requests, by what sits either side of
+the part that moved - a timestamp, a counter, a token - so the same region can be taken out of
+every sample compared later on.
+"""
+def find_dynamic_content(first_page, second_page):
+  settings.DYNAMIC_MARKINGS = []
+  if not first_page or not second_page:
+    return
+  try:
+    blocks = list(difflib.SequenceMatcher(None, first_page, second_page).get_matching_blocks())
+  except (MemoryError, TypeError, ValueError):
+    return
+  # What is too short to anchor on is not a region, it is a coincidence.
+  blocks = [block for block in blocks if block[2] > 2 * settings.DYNAMICITY_BOUNDARY_LENGTH]
+  if not blocks:
+    return
+  blocks.insert(0, None)
+  blocks.append(None)
+  for index in range(len(blocks) - 1):
+    before, after = blocks[index], blocks[index + 1]
+    prefix = first_page[before[0]:before[0] + before[2]] if before else None
+    suffix = first_page[after[0]:after[0] + after[2]] if after else None
+    if prefix is None and after[0] == 0:
+      continue
+    if suffix is None and (before[0] + before[2] >= len(first_page)):
+      continue
+    if prefix and suffix:
+      prefix = prefix[-settings.DYNAMICITY_BOUNDARY_LENGTH:]
+      suffix = suffix[:settings.DYNAMICITY_BOUNDARY_LENGTH]
+      for page in (first_page, second_page):
+        match = re.search(r"(?s)" + re.escape(prefix) + r"(.+?)" + re.escape(suffix), page)
+        if match:
+          infix = match.group(1)
+          if infix[:1].isalnum():
+            prefix = _trim_alphanum(prefix)
+          if infix[-1:].isalnum():
+            suffix = _trim_alphanum(suffix)
+          break
+    marking = (prefix or None, suffix or None)
+    if marking not in settings.DYNAMIC_MARKINGS:
+      settings.DYNAMIC_MARKINGS.append(marking)
+
+"""
+Take the regions that move on their own out of a page, so what is left is the part a parameter
+could be responsible for.
+"""
+def remove_dynamic_content(page):
+  if not page:
+    return page
+  for prefix, suffix in settings.DYNAMIC_MARKINGS:
+    if prefix is None and suffix is None:
+      continue
+    elif prefix is None:
+      page = re.sub(r"(?s)^.+?" + re.escape(suffix), suffix.replace("\\", r"\\"), page)
+    elif suffix is None:
+      page = re.sub(r"(?s)" + re.escape(prefix) + r".+$", prefix.replace("\\", r"\\"), page)
+    else:
+      page = re.sub(r"(?s)" + re.escape(prefix) + r".+?" + re.escape(suffix), prefix.replace("\\", r"\\") + suffix.replace("\\", r"\\"), page)
+  return page
+
+"""
+The page as it is worth comparing: without the regions that move by themselves, and - where
+'--text-only' was given - without the layout they sit in either.
+"""
+def comparable_page(page):
+  if menu.options.text_only:
+    page = filtered_page_content(page)
+  return remove_dynamic_content(page)
+
+# How much of the page is the text a command's output would show up in.
+def page_text_percent(page):
+  if not page:
+    return 100.0
+  return 100.0 * len(filtered_page_content(page)) / len(page)
 
 def process_page_content(response, action):
   try:
@@ -1942,6 +2046,10 @@ def set_target_os(identified):
   previous = settings.TARGET_OS
   settings.TARGET_OS = identified
   settings.IDENTIFIED_TARGET_OS = True
+  # Kept for the next run against this target, which then has nothing left to work out here.
+  if not menu.options.ignore_session and settings.TARGET_NETLOC:
+    from src.utils import session_handler
+    session_handler.import_target_os(settings.TARGET_NETLOC, identified)
   if menu.options.os:
     user_os = settings.OS.WINDOWS if menu.options.os.lower() == settings.OS.WINDOWS else settings.OS.UNIX
     if user_os != identified and identified_os():
@@ -3355,8 +3463,12 @@ def is_empty(multi_parameters, http_request_method):
         if re.findall(r'>(.*)<', empty)[0] == "" or \
            re.findall(r'>(.*)<', empty)[0] == settings.SINGLE_WHITESPACE:
           empty_parameters.append(re.findall(r'</(.*)>', empty)[0])
-      elif len(empty.split("=")[1]) == 0:
-        empty_parameters.append(empty.split("=")[0])
+      else:
+        # What follows the first '=' is the value, however many more it holds: read to the next
+        # one instead and a value that starts with one reads as no value at all.
+        name, separator, value = empty.partition("=")
+        if separator and len(value) == 0:
+          empty_parameters.append(name)
     except IndexError:
       pass
 

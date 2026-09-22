@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "154"
+REVISION = "155"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -649,6 +649,10 @@ RESPONSE_TIME_SAMPLES = 3
 
 # Pre-injection baseline - the target's own round-trip time before any delay logic runs.
 URL_TIME_RESPONSE = 0
+
+# The delay settled on for this target, kept so every parameter after the first reads it rather
+# than measuring the same target again.
+ESTIMATED_TIMESEC = None
 # (url, http_request_method) the response-time baseline is sampled from, filled in on first use.
 BASELINE_TARGET = None
 # Last reported minimum safe delay, so the same floor is announced only once.
@@ -676,8 +680,14 @@ RESPONSE_DELAYS = False
 
 TESTABLE_VALUE = ""
 
-# Whether TESTABLE_VALUE has already been swapped for a disposable placeholder this scan.
+# Whether TESTABLE_VALUE has already been swapped for a disposable placeholder for this parameter.
 TESTABLE_VALUE_OPTIMIZED = False
+
+# The techniques the run was given, kept for the parameters that follow one tested with fewer.
+TECHNIQUES_BEFORE_NARROWING = None
+
+# Whether the file-based technique was accepted for a run given a document root but other techniques.
+FILE_BASED_NARROWING_CHOICE = None
 
 # The HTTP header name.
 HTTP_HEADER = ""
@@ -719,6 +729,9 @@ SUFFIXES_LVL3 = SUFFIXES_LVL2 + ["'", "\"", " #", "//", "\\\\"]
 
 # A quote closes only its own kind.
 QUOTES = ("'", "\"")
+
+# Boundary lists already put in the order a shape of value asks for, kept rather than sorted again.
+BOUNDARY_ORDER_CACHE = {}
 
 # Bad combination of prefix and separator
 JUNK_COMBINATION = [SEPARATORS_LVL1[i] + SEPARATORS_LVL1[j] for i in range(len(SEPARATORS_LVL1)) for j in range(len(SEPARATORS_LVL1))]
@@ -1866,6 +1879,9 @@ CONCURRENCY_PROBE_FLOOR = 0.05
 
 # Said while the target's own response times are still being sampled, so a delay can be told apart.
 TIMING_BASELINE_MSG = "Time-related response comparison requires a larger statistical model"
+# The second model, taken from the payload's own shape: what it costs to ask is part of the time an
+# answer takes, and the threshold a delay is read against has to stand above that too.
+TIMING_PAYLOAD_BASELINE_MSG = "Time-related response comparison requires a larger statistical model for the payload in hand"
 
 # Retries for the false-positive/unexploitable-point re-verification during detection.
 FALSE_POSITIVE_RETRIES = 3
@@ -1903,6 +1919,22 @@ RANDOMIZE_PARAMETERS_LIST = []
 # The target's own first page, and the values its '<select>' menus offer - a parameter that is a
 # menu is randomized by picking one of its own options, rather than by inventing a value.
 ORIGINAL_PAGE = ""
+
+# Whether the target's page came back the same twice, and how alike the two samples were.
+PAGE_STABLE = None
+PAGE_NOISE_RATIO = 1.0
+
+# The target's page as it is worth comparing: its text, with the regions that move by themselves out.
+ORIGINAL_PAGE_COMPARABLE = ""
+
+# Where the page was found to move on its own, as what sits either side of each such region.
+DYNAMIC_MARKINGS = []
+
+# How much of the text either side of a moving region is kept to anchor on.
+DYNAMICITY_BOUNDARY_LENGTH = 20
+
+# Below this share of text, a page tells a comparison of whole pages next to nothing.
+LOW_TEXT_PERCENT = 20
 RANDOM_POOL = {}
 RANDOM_POOL_READ = False
 
@@ -2249,8 +2281,8 @@ RUN_WIDE_STATE = frozenset((
   "USER_APPLIED_TECHNIQUE", "USER_APPLIED_WEB_ROOT", "USER_APPLIED_INTERPRETER",
   "USER_APPLIED_TIMESEC", "USER_APPLIED_TMP_PATH",
   # Answered once by the user, and not worth asking again for every target.
-  "ADJUST_TIME_DELAY_CHOICE", "IGNORE_IDENTIFIED_TARGET_OS", "RECOGNISE_OS",
-  "THREADED_TIME_RETRIEVAL_CHOICE", "USE_BIN_SUBDIR_CHOICE", "WAF_EVASION_CONSENT",
+  "ADJUST_TIME_DELAY_CHOICE", "FILE_BASED_NARROWING_CHOICE", "IGNORE_IDENTIFIED_TARGET_OS",
+  "RECOGNISE_OS", "THREADED_TIME_RETRIEVAL_CHOICE", "USE_BIN_SUBDIR_CHOICE", "WAF_EVASION_CONSENT",
   # Counted or noted for the run as a whole.
   "CRAWLED_SKIPPED_URLS_NUM", "CRAWLED_URLS_INJECTED", "CRAWLED_URLS_NUM", "CRAWLING",
   "CRAWLING_PHASE", "ENUMERATION_DONE", "FILE_ACCESS_DONE", "HANDLER", "HREF_SKIPPED",
@@ -2269,7 +2301,7 @@ Options a target's own testing can change - a stored session replaces them, a te
 directory - and which the next target is entitled to see as the user left them.
 """
 RESTORED_OPTIONS = ("cookie", "data", "tamper", "os", "web_root", "tmp_path", "timesec",
-                    "auth_cred", "auth_type", "level")
+                    "auth_cred", "auth_type", "level", "tech")
 
 _TARGET_STATE_BASELINE = {}
 _OPTIONS_BASELINE = {}

@@ -62,9 +62,11 @@ def is_url_content_stable(url, response=None, fetch_time=None, http_request_meth
       response.read = (lambda _b: lambda *a, **kw: _b)(raw_body)
       settings.ORIGINAL_PAGE = checks.decode_page_body(raw_body, response)
     else:
-      first_response = _urllib.request.urlopen(_build_request(), timeout=settings.TIMEOUT)
+      first_response = headers.send_raw(_build_request())
       try:
-        first_response_content = first_response.read().strip()
+        raw_body = first_response.read()
+        first_response_content = raw_body.strip()
+        settings.ORIGINAL_PAGE = checks.decode_page_body(raw_body, first_response)
       finally:
         first_response.close()
       fetch_time = time.time()
@@ -75,9 +77,11 @@ def is_url_content_stable(url, response=None, fetch_time=None, http_request_meth
     if remaining:
       time.sleep(remaining)
 
-    second_response = _urllib.request.urlopen(_build_request(), timeout=settings.TIMEOUT)
+    second_response = headers.send_raw(_build_request())
     try:
-      second_response_content = second_response.read().strip()
+      raw_second_body = second_response.read()
+      second_response_content = raw_second_body.strip()
+      second_page = checks.decode_page_body(raw_second_body, second_response)
     finally:
       second_response.close()
 
@@ -89,6 +93,21 @@ def is_url_content_stable(url, response=None, fetch_time=None, http_request_meth
         settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
       if ratio < settings.STABILITY_SIMILARITY_THRESHOLD:
         status = "dynamic"
+    settings.PAGE_STABLE = status == "stable"
+
+    """
+    The two samples are of the same request, so whatever differs between them is the page moving on
+    its own. Noted as regions to leave out, and the pair compared again without them and without
+    the layout around the text - which is the comparison every later one is read against.
+    """
+    checks.find_dynamic_content(settings.ORIGINAL_PAGE, second_page)
+    settings.ORIGINAL_PAGE_COMPARABLE = checks.comparable_page(settings.ORIGINAL_PAGE)
+    settings.PAGE_NOISE_RATIO = difflib.SequenceMatcher(None, settings.ORIGINAL_PAGE_COMPARABLE,
+                                                        checks.comparable_page(second_page)).ratio()
+    if settings.VERBOSITY_LEVEL != 0 and settings.DYNAMIC_MARKINGS:
+      debug_msg = "Marked " + str(len(settings.DYNAMIC_MARKINGS)) + " region"
+      debug_msg += "s"[len(settings.DYNAMIC_MARKINGS) == 1:] + " of the page as moving on its own."
+      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
 
   except Exception:
     msg = "Unable to determine target URL content stability due to retrieval errors."
@@ -156,8 +175,10 @@ def quick_response_time_sample(url, http_request_method):
       request = _urllib.request.Request(url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.TESTABLE_VALUE), method=http_request_method)
     headers.do_check(request)
     _attach_injection_point_placeholder(request)
+    # Paced before the clock starts, so the delay this run keeps is not measured as the target's.
+    headers.apply_request_policy()
     start = time.time()
-    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+    response = headers.send_raw(request, policy=False)
     response.read(1)
     response.close()
     return time.time() - start
@@ -182,9 +203,11 @@ def _measure_response_time_with_auth_handling(url, http_request_method):
 
   headers.do_check(request)
   _attach_injection_point_placeholder(request)
+  # Paced before the clock starts, so the delay this run keeps is not measured as the target's.
+  headers.apply_request_policy()
   start = time.time()
   try:
-    response = _urllib.request.urlopen(request, timeout=settings.TIMEOUT)
+    response = headers.send_raw(request, policy=False)
     response.read(1)
     response.close()
   except _http_client.InvalidURL as err_msg:

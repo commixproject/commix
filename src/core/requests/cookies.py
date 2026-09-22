@@ -171,8 +171,10 @@ Ignoring the Google analytics cookie parameter.
 """
 def ignore_google_analytics_cookie(cookie):
   if re.search(settings.GOOGLE_ANALYTICS_COOKIE_REGEX, cookie):
-    if (len(cookie.split("="))) == 2:
-      info_msg = "Ignoring the Google analytics cookie parameter '" + cookie.split("=")[0] + "'."
+    # Named by what comes before the first '=', so a value holding one of its own is still a value.
+    name, separator, _ = cookie.partition("=")
+    if separator:
+      info_msg = "Ignoring the Google analytics cookie parameter '" + name + "'."
       settings.print_data_to_stdout(settings.print_info_msg(info_msg))
     return True
 

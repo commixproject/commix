@@ -777,6 +777,54 @@ def restore_waf_status(url):
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
 """
+Store the operating system the target answered as, so a later run against it does not have to work
+that out again - kept for the same reason the WAF/IPS finding above is.
+"""
+def import_target_os(url, target_os):
+  try:
+    with _session_connection() as conn:
+      table = table_name(url) + "_os"
+      conn.execute("CREATE TABLE IF NOT EXISTS \"" + table + "\" (target_os VARCHAR);")
+      conn.execute("DELETE FROM \"" + table + "\";")
+      conn.execute("INSERT INTO \"" + table + "\" (target_os) VALUES (?)", (str(target_os),))
+      conn.commit()
+  except (sqlite3.OperationalError, sqlite3.DatabaseError):
+    pass
+
+"""
+Retrieve the operating system stored for this target. Returns None where nothing is stored yet.
+"""
+def check_stored_target_os(url):
+  try:
+    with _session_connection() as conn:
+      table = table_name(url) + "_os"
+      if not table_exists(conn, table):
+        return None
+      row = conn.execute("SELECT target_os FROM \"" + table + "\" LIMIT 1;").fetchone()
+      return row[0] if row else None
+  except (sqlite3.OperationalError, sqlite3.DatabaseError):
+    return None
+
+"""
+Restore a stored operating system before testing starts, so the shell that answered last time is
+the one tested for first rather than being asked about again.
+"""
+def restore_target_os(url):
+  if menu.options.ignore_session or menu.options.flush_session or menu.options.os or menu.options.skip_heuristics:
+    return
+  if settings.IDENTIFIED_TARGET_OS:
+    return
+  stored = check_stored_target_os(url)
+  if not stored or stored == "None":
+    return
+  settings.TARGET_OS = settings.OS.WINDOWS if stored.lower() == settings.OS.WINDOWS else settings.OS.UNIX
+  settings.IDENTIFIED_TARGET_OS = True
+  settings.OS_IDENTIFICATION_PENDING = False
+  info_msg = "Previous session identified the target operating system as '"
+  info_msg += ("Windows" if settings.TARGET_OS == settings.OS.WINDOWS else "Unix-like") + "'."
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
+"""
 Store a confirmed testable-value placeholder, so a resumed session can reuse
 it instead of re-probing whether the parameter's real value is required.
 """

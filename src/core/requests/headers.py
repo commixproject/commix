@@ -283,14 +283,35 @@ def send_safe_request():
     settings.SENDING_SAFE_REQUEST = False
 
 """
-Checking the HTTP Headers & HTTP/S Request.
+What holds for a request whatever it was sent for: the pacing that was asked for, the count it is
+part of, and the proxy rotation and safe visit that go by that count.
 """
-def check_http_traffic(request):
+def apply_request_policy():
   settings.LAST_HTTP_ERROR = None
   count_request()
   # Delay in seconds between each HTTP request, plus whatever backing off the target has earned -
   # and, where '--jitter' was given, a different fraction of a second on top of every one of them.
   time.sleep(int(settings.DELAY) + settings.ADAPTIVE_DELAY + (random.uniform(0, menu.options.jitter) if menu.options.jitter else 0))
+
+"""
+Send a request the caller reads or times itself, rather than through the opener the rest of the run
+goes out over - and have it paced and counted like any other request all the same.
+
+A caller that measures the answer applies the policy first and starts its clock afterwards, so that
+what it times is the target rather than the delay this run was told to keep.
+"""
+def send_raw(request, timeout=None, policy=True):
+  if policy:
+    apply_request_policy()
+  with settings.REQUESTS_LOCK:
+    settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
+  return _urllib.request.urlopen(request, timeout=timeout or settings.TIMEOUT)
+
+"""
+Checking the HTTP Headers & HTTP/S Request.
+"""
+def check_http_traffic(request):
+  apply_request_policy()
   if request.type == 'https':
     http_client = _http_client.HTTPSConnection
   else:

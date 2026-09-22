@@ -156,8 +156,12 @@ def do_GET_check(url, http_request_method):
     else:
       # Find the host part
       url_part = get_url_part(url)
-      # Find the parameter part
-      parameters = url.split("?")[1]
+      # Find the parameter part - everything past the first '?', since a value of its own can carry
+      # one too: a parameter holding a URL takes the rest of the query with it otherwise.
+      parameters = url.split("?", 1)[1]
+      # A fragment is never sent to the target, so it belongs to no parameter's value - and a
+      # payload placed after it would be tested where nothing can read it.
+      parameters = parameters.split("#", 1)[0]
       # Split parameters
       try:
         multi_parameters = parameters.split(settings.URL_PARAM_DELIMITER)
@@ -260,7 +264,7 @@ def vuln_GET_param(url):
   # Allow a value with a space, and escape the delimiter (--pdel).
   elif re.search(re.escape(settings.URL_PARAM_DELIMITER) + r"(.*)=.*" + settings.INJECT_TAG, url) or \
        re.search(r"\?(.*)=.*" + settings.INJECT_TAG , url):
-    vuln_parameter = extract_vuln_param_from_pairs(url.split("?")[1], settings.URL_PARAM_DELIMITER, check_base64_padding=True)
+    vuln_parameter = extract_vuln_param_from_pairs(url.split("?", 1)[1], settings.URL_PARAM_DELIMITER, check_base64_padding=True)
   else:
     vuln_parameter = url
 

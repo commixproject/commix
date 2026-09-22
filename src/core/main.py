@@ -200,9 +200,17 @@ def init_request(url, http_request_method):
     headers.do_check(request)
     return request
 
-  # One request that does not follow redirects, to see where the target sends us.
+  """
+  One request that does not follow redirects, to see where the target sends us.
+
+  Built the way the run's own requests are, body and all: where the target sends a request carrying
+  nothing is not evidence of where it sends the request that will be tested.
+  """
   def redirect_probe_request(url, http_request_method):
-    request = _urllib.request.Request(url, method=http_request_method)
+    if settings.USER_DEFINED_POST_DATA:
+      request = _urllib.request.Request(url, settings.USER_DEFINED_POST_DATA.encode(), method=http_request_method)
+    else:
+      request = _urllib.request.Request(url, method=http_request_method)
     headers.do_check(request)
     return request
 
@@ -222,6 +230,14 @@ def init_request(url, http_request_method):
   from_http_error = None
   response = None
   redirect_url = None
+
+  """
+  Settled before anything is sent, so that the probe below carries what every request after it will
+  - the user's own headers among them. A probe made without them says where the target sends some
+  other request, not the one this run is going to make.
+  """
+  host_from_target = menu.options.host is None
+  defined_http_headers(url)
 
   try:
     if settings.VERBOSITY_LEVEL != 0:
@@ -264,11 +280,13 @@ def init_request(url, http_request_method):
       if from_http_error:
         url = redirect_url
 
+  # The header names where we started, and a redirect has moved us since.
+  if host_from_target:
+    menu.options.host = _urllib.parse.urlparse(url).netloc
+
   # Build the real request (full data) now that the final URL is known.
   request = perform_init_request(url, http_request_method)
 
-  # Define HTTP headers
-  defined_http_headers(url)
   # Check the internet connection (--check-internet switch).
   if menu.options.check_internet:
     check_internet(url)
@@ -495,6 +513,7 @@ def scan_parsed_targets(os_checks_num):
       if response is not False:
         filename = logs.logs_filename_creation(url)
         session_handler.restore_waf_status(url)
+        session_handler.restore_target_os(url)
         main(filename, url, http_request_method)
       else:
         err_msg = "Unable to establish a connection with the target URL."
@@ -882,6 +901,7 @@ def run():
         if response is not False:
           filename = logs.logs_filename_creation(url)
           session_handler.restore_waf_status(url)
+          session_handler.restore_target_os(url)
           main(filename, url, http_request_method)
         else:
           err_msg = "Unable to establish a connection with the target URL."
@@ -1077,6 +1097,7 @@ def run():
               if response is not False:
                 filename = logs.logs_filename_creation(form_url)
                 session_handler.restore_waf_status(form_url)
+                session_handler.restore_target_os(form_url)
                 main(filename, form_url, settings.HTTPMETHOD.POST)
             except KeyboardInterrupt:
               checks.handle_early_interrupt(filename, form_url)
@@ -1146,6 +1167,7 @@ def run():
                   if response is not False:
                     filename = logs.logs_filename_creation(url)
                     session_handler.restore_waf_status(url)
+                    session_handler.restore_target_os(url)
                     main(filename, url, http_request_method)
                 except KeyboardInterrupt:
                   checks.handle_early_interrupt(filename, url)

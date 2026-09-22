@@ -22,7 +22,6 @@ from src.core.parse import cmdline as menu
 from src.utils import logs
 from src.utils import settings
 from src.utils import common
-from src.core.compat import xrange
 from src.utils import session_handler
 from src.core.requests import requests
 from src.core.controller import checks
@@ -79,9 +78,36 @@ def _boundary_combinations(whitespaces, prefixes, suffixes, separators, keep_out
           yield whitespace, prefix, suffix, separator
 
 """
+Put the boundaries the parameter's own value asks for first.
+
+A value written as a number is rarely quoted in the command it ends up in, and one written as a
+word often is - so which of the two shapes is tried first is worth taking from the value rather
+than from the order the lists happen to carry. Worked out once per shape, for every parameter that
+has it.
+"""
+def _order_by_value_shape(prefixes, suffixes):
+  value = (settings.TESTABLE_VALUE or "").strip()
+  if value.isdigit():
+    quoted_last = True
+  elif value.isalpha():
+    quoted_last = False
+  else:
+    return prefixes, suffixes
+  key = (quoted_last, tuple(prefixes), tuple(suffixes))
+  if key not in settings.BOUNDARY_ORDER_CACHE:
+    # Sorted rather than split, so that what is not being moved keeps the order it was written in.
+    quoted = lambda candidate: any(quote in candidate for quote in settings.QUOTES)
+    settings.BOUNDARY_ORDER_CACHE[key] = (
+      sorted(prefixes, key=lambda candidate: quoted(candidate) == quoted_last),
+      sorted(suffixes, key=lambda candidate: quoted(candidate) == quoted_last)
+    )
+  return settings.BOUNDARY_ORDER_CACHE[key]
+
+"""
 Put a boundary combo another technique already confirmed for this parameter first.
 """
 def _prioritize_confirmed_boundary(prefixes, suffixes, separators, whitespaces):
+  prefixes, suffixes = _order_by_value_shape(prefixes, suffixes)
   _boundary = settings.CONFIRMED_BOUNDARY.get(settings.CHECKING_PARAMETER)
   if _boundary:
     _b_prefix, _b_suffix, _b_separator, _b_whitespace = _boundary
@@ -728,9 +754,11 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
     else:
       # Answered yes, the retrieval still measures whether the answers can be told apart under that
       # concurrency - which needs a payload, and so cannot be settled here.
+      # Declined unless asked for: reading a delay is reading one request against the others, and
+      # requests that overlap are what the reading is least able to survive.
       msg = "Multi-threading is considered unsafe for time-related data retrieval. "
-      msg += "Do you want to continue using threads anyway? [Y/n] "
-      settings.THREADED_TIME_RETRIEVAL_CHOICE = common.read_input(msg, default="Y", check_batch=True) in settings.CHOICE_YES
+      msg += "Do you want to continue using threads anyway? [y/N] "
+      settings.THREADED_TIME_RETRIEVAL_CHOICE = common.read_input(msg, default="N", check_batch=True) in settings.CHOICE_YES
 
   counter = 1
   num_of_chars = 1
@@ -776,7 +804,6 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
     settings.DETECTION_PHASE = True
     settings.EXPLOITATION_PHASE = False
     # If a previous session is available for this specific technique.
-    exec_time_statistic = []
     resumed = False
     stored_row = settings.STORED_TECHNIQUES.get(technique) if settings.LOAD_SESSION else None
     if stored_row:
@@ -814,12 +841,11 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
         TAG = ''.join(random.choice(string.ascii_uppercase) for num_of_chars in range(6))
         # Whether anything in this pass answered late, which is what a further pass could re-judge.
         answered_late = False
-        # Per pass: the anomaly below reads the sample by position, so one pass's timings appended
-        # to the last one's put the peak it looks for at an index that means nothing.
-        exec_time_statistic = []
         # The output file for file-based injection technique.
         interpreter = menu.options.interpreter
         tag_length = len(TAG) + 4
+        # A length no answer can have, which is what the control below asks about.
+        control_length = int(tag_length) + 100
         OUTPUT_TEXTFILE = ""  # only used by TEMP_FILE_BASED, set just below
         if technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
           OUTPUT_TEXTFILE = injector.select_output_filename(technique, tmp_path, TAG)
@@ -827,9 +853,33 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
         # back through two interpreters takes about a second before any delay is asked for, while the
         # model it is judged against was built from plain requests. Sampled once with a length that
         # cannot hold, so an answer that was never held back is not read as a delayed one.
+        """
+        Asked only once an answer has been held back: the same question about a length no answer
+        can have. A target that waits for that one too is a slow target rather than one running
+        what it was given, and the pair is what tells them apart.
+        """
+        def _control_answers_on_time():
+          if interpreter:
+            if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
+              control = payloads.decision_alter_interpreter(separator, TAG, control_length, timesec, http_request_method)
+            else:
+              control = payloads.decision_alter_interpreter(separator, control_length, TAG, OUTPUT_TEXTFILE, timesec, http_request_method)
+          else:
+            if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
+              control = payloads.decision(separator, TAG, control_length, timesec, http_request_method)
+            else:
+              control = payloads.decision(separator, control_length, TAG, OUTPUT_TEXTFILE, timesec, http_request_method)
+          if not control:
+            return False
+          control_time = requests.perform_injection(prefix, suffix, whitespace, control, "", http_request_method, url)[0]
+          if checks.time_related_shell(control_time, timesec):
+            return False
+          checks.record_probe_response_time(control_time)
+          return True
+
         if not settings.PAYLOAD_BASELINE_SAMPLED:
           settings.PAYLOAD_BASELINE_SAMPLED = True
-          impossible = int(tag_length) + 100
+          impossible = control_length
           if interpreter:
             if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
               probe = payloads.decision_alter_interpreter(separator, TAG, impossible, timesec, http_request_method)
@@ -849,7 +899,12 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
             except Exception:
               pass
 
-        for output_length in range(1, int(tag_length)):
+        """
+        The length the tag really has is the one question worth asking: a target running what it
+        was given holds its answer back for that length and for no other. Every other length is a
+        request spent proving what the control above proves in one, and only once it is needed.
+        """
+        for output_length in (len(TAG),):
           try:
             # Tempfile-based decision payload (check if host is vulnerable).
             if interpreter:
@@ -869,95 +924,85 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
             vuln_parameter = ""
             exec_time, vuln_parameter, payload, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
 
-            # Statistical analysis in time responses.
-            exec_time_statistic.append(exec_time)
             # Every combination's timing is read, the later ones included: the attempt budget
             # running low says nothing about whether this particular answer was delayed, and the
             # combination that answers is often among the last to be tried.
-            if True:
-              if checks.time_related_shell(exec_time, timesec):
-                answered_late = True
-                # Time related false positive fixation.
-                false_positive_fixation = False
-                if len(TAG) == output_length:
+            if checks.time_related_shell(exec_time, timesec):
+              answered_late = True
+              # Time related false positive fixation.
+              false_positive_fixation = False
+              if len(TAG) == output_length:
 
-                  # Only where one candidate length is answered late and the rest on time is the
-                  # sample's shape worth reading: an oracle that answers every candidate the same
-                  # way would otherwise be called unstable on every run.
-                  statistical_anomaly = checks.decision_is_length_based()
-                  if statistical_anomaly:
-                    first_few = exec_time_statistic[0:5]
-                    if first_few and max(first_few) - min(first_few) <= max(settings.MIN_VALID_DELAYED_RESPONSE, timesec * 0.5):
-                      if max(xrange(len(exec_time_statistic)), key=lambda x: exec_time_statistic[x]) == len(TAG) - 1:
-                        statistical_anomaly = False
-                        exec_time_statistic = []
+                # Held back for the length the answer really has and let through for one it
+                # cannot have is the shape worth reading: an oracle that answers both the same
+                # way is a slow target rather than one running what it was given.
+                statistical_anomaly = checks.decision_is_length_based() and not _control_answers_on_time()
 
-                  if timesec <= exec_time and not statistical_anomaly:
-                    false_positive_fixation = True
-                  else:
-                    false_positive_warning = True
-
-                # Identified false positive warning message.
-                if false_positive_warning:
-                  timesec, false_positive_fixation = checks.time_delay_due_to_unstable_request(timesec)
-
-                checks.injection_process(injection_type, technique, i=num_of_chars, total=total)
-
-                # Check if false positive fixation is True.
-                if false_positive_fixation:
-                  false_positive_fixation = False
-                  settings.FOUND_EXEC_TIME = exec_time
-                  settings.FOUND_DIFF = exec_time - timesec
-                  if false_positive_warning:
-                    time.sleep(timesec)
-                  randv1 = random.randrange(0, 4)
-                  randv2 = random.randrange(1, 5)
-                  randvcalc = randv1 + randv2
-                  # A single character either way: the answer is read back one character at a time,
-                  # so anything longer costs a request per extra character.
-                  if settings.SKIP_CALC:
-                    randvcalc = random.randrange(0, 10)
-
-                  if settings.TARGET_OS == settings.OS.WINDOWS:
-                    if interpreter:
-                      if settings.SKIP_CALC:
-                        cmd = settings.WIN_PYTHON_INTERPRETER + " -c \"print (" + str(randvcalc) + ")\""
-                      else:
-                        cmd = settings.WIN_PYTHON_INTERPRETER + " -c \"print (" + str(randv1) + " + " + str(randv2) + ")\""
-                    else:
-                      cmd = "powershell.exe -InputFormat none write (" + str(randvcalc) + ")"
-                  else:
-                    if settings.SKIP_CALC:
-                      cmd = "echo " + str(randvcalc)
-                    elif technique == settings.INJECTION_TECHNIQUE.TIME_BASED or technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
-                      cmd = "expr " + str(randv1) + " + " + str(randv2) + ""
-                    else:
-                      cmd = "echo $((" + str(randv1) + " + " + str(randv2) + "))"
-
-                  # Set the original delay time
-                  original_exec_time = exec_time
-
-                  # Check for false positive resutls
-                  if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
-                    exec_time, output = injector.false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timesec, http_request_method, url, vuln_parameter, randvcalc, interpreter, exec_time, url_time_response, false_positive_warning, technique, _false_positive_retry + 1, settings.FALSE_POSITIVE_RETRIES)
-                  else:
-                    exec_time, output = injector.false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, interpreter, exec_time, url_time_response, false_positive_warning, technique, _false_positive_retry + 1, settings.FALSE_POSITIVE_RETRIES)
-
-                  if checks.time_related_shell(exec_time, timesec):
-                    if str(output) == str(randvcalc) and len(TAG) == output_length:
-                      possibly_vulnerable = True
-                      exec_time_statistic = 0
-                  else:
-                    break
-                # False positive
+                if timesec <= exec_time and not statistical_anomaly:
+                  false_positive_fixation = True
                 else:
-                  checks.injection_process(injection_type, technique, i=num_of_chars, total=total)
-                  continue
+                  false_positive_warning = True
+
+              # Identified false positive warning message.
+              if false_positive_warning:
+                timesec, false_positive_fixation = checks.time_delay_due_to_unstable_request(timesec)
+
+              checks.injection_process(injection_type, technique, i=num_of_chars, total=total)
+
+              # Check if false positive fixation is True.
+              if false_positive_fixation:
+                false_positive_fixation = False
+                settings.FOUND_EXEC_TIME = exec_time
+                settings.FOUND_DIFF = exec_time - timesec
+                if false_positive_warning:
+                  time.sleep(timesec)
+                randv1 = random.randrange(0, 4)
+                randv2 = random.randrange(1, 5)
+                randvcalc = randv1 + randv2
+                # A single character either way: the answer is read back one character at a time,
+                # so anything longer costs a request per extra character.
+                if settings.SKIP_CALC:
+                  randvcalc = random.randrange(0, 10)
+
+                if settings.TARGET_OS == settings.OS.WINDOWS:
+                  if interpreter:
+                    if settings.SKIP_CALC:
+                      cmd = settings.WIN_PYTHON_INTERPRETER + " -c \"print (" + str(randvcalc) + ")\""
+                    else:
+                      cmd = settings.WIN_PYTHON_INTERPRETER + " -c \"print (" + str(randv1) + " + " + str(randv2) + ")\""
+                  else:
+                    cmd = "powershell.exe -InputFormat none write (" + str(randvcalc) + ")"
+                else:
+                  if settings.SKIP_CALC:
+                    cmd = "echo " + str(randvcalc)
+                  elif technique == settings.INJECTION_TECHNIQUE.TIME_BASED or technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
+                    cmd = "expr " + str(randv1) + " + " + str(randv2) + ""
+                  else:
+                    cmd = "echo $((" + str(randv1) + " + " + str(randv2) + "))"
+
+                # Set the original delay time
+                original_exec_time = exec_time
+
+                # Check for false positive resutls
+                if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
+                  exec_time, output = injector.false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timesec, http_request_method, url, vuln_parameter, randvcalc, interpreter, exec_time, url_time_response, false_positive_warning, technique, _false_positive_retry + 1, settings.FALSE_POSITIVE_RETRIES)
+                else:
+                  exec_time, output = injector.false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, interpreter, exec_time, url_time_response, false_positive_warning, technique, _false_positive_retry + 1, settings.FALSE_POSITIVE_RETRIES)
+
+                if checks.time_related_shell(exec_time, timesec):
+                  if str(output) == str(randvcalc) and len(TAG) == output_length:
+                    possibly_vulnerable = True
+                else:
+                  break
+              # False positive
               else:
-                # Feed the baseline model even during detection, not just later phases.
-                checks.record_probe_response_time(exec_time)
                 checks.injection_process(injection_type, technique, i=num_of_chars, total=total)
                 continue
+            else:
+              # Feed the baseline model even during detection, not just later phases.
+              checks.record_probe_response_time(exec_time)
+              checks.injection_process(injection_type, technique, i=num_of_chars, total=total)
+              continue
 
           except KeyboardInterrupt:
             if technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED and 'cmd' in locals():
@@ -991,9 +1036,15 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
         # technique this slow is the most expensive way there is to learn the same thing twice.
         if not answered_late:
           break
-    # Yaw, got shellz!
-    # Do some magic tricks!
-    if checks.time_related_shell(exec_time, timesec):
+    """
+    Yaw, got shellz!
+
+    A finding read back from a stored session is not judged again here. What is stored is how long
+    that run's answer took, against the delay that run asked for - and this one asks for its own,
+    floored by the shortest delay held to be safe. Read against each other, a finding made under a
+    shorter delay than the floor is thrown away every time it is resumed.
+    """
+    if resumed or checks.time_related_shell(exec_time, timesec):
       if (len(TAG) == output_length) and (possibly_vulnerable is True or resumed and int(is_vulnerable) == settings.INJECTION_LEVEL):
         found = True
         no_result = False

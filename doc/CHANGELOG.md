@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New switch `--text-only` for comparing pages based only on their textual content.
 * Fixed: Switch `--skip-calc` handling across heuristic, false-positive re-check and out-of-band tests.
 * Added: New switch `--eta` for showing how much of the output is left to retrieve and how long it is expected to take.
 * Added: New switch `--no-truncate` for showing the retrieved output in full.
