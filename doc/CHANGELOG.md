@@ -1,6 +1,5 @@
 ## Version 4.2 (TBA)
-* Replaced: The `base64encode.py` and `hexencode.py` tamper scripts have been replaced with the `--param-encoding` option.
-* Added: New option `--param-encoding` for naming the encoding a parameter carries its value in, so the payload is sent back written the same way.
+* Improved: Replaced the `base64encode.py` and `hexencode.py` tamper scripts with the new `--param-encoding` option for handling encoded parameter values.
 * Added: New switch `--text-only` for comparing pages based only on their textual content.
 * Fixed: Switch `--skip-calc` handling across heuristic, false-positive re-check and out-of-band tests.
 * Added: New switch `--eta` for showing how much of the output is left to retrieve and how long it is expected to take.
