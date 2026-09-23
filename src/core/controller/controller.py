@@ -165,7 +165,7 @@ def heuristic_request(url, http_request_method, check_parameter, payload, whites
     payload = _urllib.parse.unquote(payload)
   payload = checks.perform_payload_modification(payload)
   # Written back the way the parameter's own value arrived, as every later request is.
-  payload = checks.apply_encoding(payload, settings.VALUE_ENCODING)
+  payload = checks.apply_value_encoding(payload)
   if settings.VERBOSITY_LEVEL >= 1:
     settings.print_data_to_stdout(settings.print_payload(payload))
   if menu.options.cookie and settings.INJECT_TAG in menu.options.cookie:
@@ -852,6 +852,9 @@ def injection_process(url, check_parameter, http_request_method, filename, times
   def read_value_as(description):
     nonlocal url
     decoded = checks.strip_encoding(settings.TESTABLE_VALUE, description)
+    # Written out again it has to give back what arrived, or what was read was not the value.
+    if checks.apply_encoding(decoded, description) != settings.TESTABLE_VALUE:
+      raise ValueError("the value is not written in that encoding")
     settings.VALUE_ENCODING = description
     if decoded != settings.TESTABLE_VALUE:
       if menu.options.data:

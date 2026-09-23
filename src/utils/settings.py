@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "157"
+REVISION = "158"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1560,6 +1560,18 @@ MULTI_REQUEST_TARGETS = []
 SKIPPED_OUT_OF_SCOPE = set()
 
 USER_APPLIED_TAMPER = ""
+USER_APPLIED_MODULE = ""
+
+"""
+Registered injection modules: the name '--module' takes -> (import path, handler).
+
+Kept here rather than beside the loader so that the option parser can read it without importing it,
+and so a module is added in one place. A module reuses the shared core building blocks
+(requests/checks/shell_options/handler) instead of reimplementing them - see shellshock.py.
+"""
+MODULES = {
+  "shellshock": ("src.core.modules.shellshock.shellshock", "shellshock_handler"),
+}
 
 # Tamper payload modification letters
 TAMPER_MODIFICATION_LETTERS = r'([e-zE-Z])'
@@ -2309,7 +2321,8 @@ RUN_WIDE_STATE = frozenset((
   "URL_RELOAD", "USER_DEFINED_PHP_DIR", "USER_DEFINED_PYTHON_DIR", "USER_DEFINED_PYTHON_INTERPRETER",
   "VERBOSITY_LEVEL", "WIN_PHP_DIR", "WIN_PYTHON_INTERPRETER",
   "USER_APPLIED_AUTH_CRED", "USER_APPLIED_AUTH_TYPE", "USER_APPLIED_CMD", "USER_APPLIED_COOKIE",
-  "USER_APPLIED_DATA", "USER_APPLIED_LEVEL", "USER_APPLIED_RETRIES", "USER_APPLIED_TAMPER",
+  "USER_APPLIED_DATA", "USER_APPLIED_LEVEL", "USER_APPLIED_MODULE", "USER_APPLIED_RETRIES",
+  "USER_APPLIED_TAMPER",
   "USER_APPLIED_TECHNIQUE", "USER_APPLIED_WEB_ROOT", "USER_APPLIED_INTERPRETER",
   "USER_APPLIED_TIMESEC", "USER_APPLIED_TMP_PATH",
   # Answered once by the user, and not worth asking again for every target.

@@ -20,12 +20,8 @@ from src.utils import settings
 A module should reuse the shared core building blocks (requests/checks/shell_options/handler) instead of reimplementing them - see shellshock.py as the reference implementation.
 """
 
-"""
-Registered modules: CLI flag name (matching the menu.options attribute) -> (import path, handler).
-"""
-MODULES = {
-  "shellshock": ("src.core.modules.shellshock.shellshock", "shellshock_handler"),
-}
+# The registry lives in settings, so the option parser can read it without importing this.
+MODULES = settings.MODULES
 
 """
 Load modules

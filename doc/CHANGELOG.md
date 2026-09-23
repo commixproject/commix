@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Revised: The shellshock module is now selected with `--module`, which takes the name of any registered injection module.
 * Improved: Enhanced HTTP error handling and response stability detection, with clearer handling of target-side errors, unstable content, and non-testable HTTP responses.
 * Improved: Replaced the `base64encode.py` and `hexencode.py` tamper scripts with the new `--param-encoding` option for handling encoded parameter values.
 * Added: New switch `--text-only` for comparing pages based only on their textual content.

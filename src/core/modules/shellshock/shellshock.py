@@ -206,7 +206,7 @@ def shellshock_handler(url, http_request_method, filename):
   no_result = True
 
   injection_type = "results-based command injection"
-  # Not an injection technique like the others - it's the '--shellshock' module.
+  # Not an injection technique like the others - it's the 'shellshock' module.
   technique = "shellshock module"
 
   try:

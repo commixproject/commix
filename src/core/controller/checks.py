@@ -1802,7 +1802,7 @@ def check_CGI_scripts(url):
       settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
 
       while True:
-        message = "Do you want to test for the Shellshock vulnerability, using the '--shellshock' module? [Y/n] "
+        message = "Do you want to test for the Shellshock vulnerability, using the 'shellshock' module? [Y/n] "
         shellshock_check = common.read_input(message, default="Y", check_batch=True)
         if shellshock_check in settings.CHOICE_YES:
           menu.options.shellshock = True
@@ -1818,7 +1818,7 @@ def check_CGI_scripts(url):
 
   if not script_found:
     if settings.VERBOSITY_LEVEL != 0:
-      debug_msg = "No known CGI script found, skipping the '--shellshock' module."
+      debug_msg = "No known CGI script found, skipping the 'shellshock' module."
       settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
     menu.options.shellshock = False
 
@@ -1925,7 +1925,7 @@ def user_defined_os():
 Define the target operating system.
 """
 def define_target_os():
-  # If "--shellshock" option is provided then, by default is a Linux/Unix operating system.
+  # The shellshock module only applies to a Linux/Unix operating system.
   if menu.options.shellshock:
     return
   else:
@@ -2153,6 +2153,28 @@ def validate_tamper_scripts():
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit(settings.EXIT_FAILURE)
   return provided_scripts
+
+"""
+Turn '--module' into the switch each named module is read through.
+
+Run before the target is touched, for the same reason the tamper scripts are: a module that does
+not exist is the user's to correct, not something to find out a connection test later.
+"""
+def validate_modules():
+  if not menu.options.module:
+    return []
+  raw_modules = re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.module.lower())
+  provided_modules = list(dict.fromkeys(module.strip() for module in raw_modules if module.strip()))
+  for module in provided_modules:
+    if module not in settings.MODULES:
+      err_msg = "The '" + module + "' module does not exist. Available module"
+      err_msg += "s"[len(settings.MODULES) == 1:] + ": "
+      err_msg += ", ".join("'" + name + "'" for name in sorted(settings.MODULES)) + "."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit(settings.EXIT_FAILURE)
+    setattr(menu.options, module, True)
+  settings.USER_APPLIED_MODULE = menu.options.module
+  return provided_modules
 
 """
 Resolve '--type' into the techniques that show a result that way.
@@ -3381,6 +3403,18 @@ def named_encoding(parameter, value):
   return encoding_from_name(encoding, value) if encoding else None
 
 """
+A payload written out in the encoding the parameter carries, ready for the wire.
+
+The payload writes its spaces the way a carrier that percent-decodes them wants; a value the target
+reads back out of base64 or hex is not percent-decoded, so they go back to being spaces before it
+is written out - otherwise the command the target runs is full of '%20' where its spaces were.
+"""
+def apply_value_encoding(payload):
+  if not settings.VALUE_ENCODING:
+    return payload
+  return apply_encoding(_urllib.parse.unquote(payload), settings.VALUE_ENCODING)
+
+"""
 Write a value out the way the one it stands in for was written.
 """
 def apply_encoding(value, description):
@@ -3405,7 +3439,12 @@ def strip_encoding(value, description):
     return bytearray.fromhex(body).decode(settings.DEFAULT_CODEC)
   body = value.rstrip("=")
   padded = body + "=" * (-len(body) % 4)
-  raw = base64.urlsafe_b64decode(padded) if description.get("urlsafe") else base64.b64decode(padded)
+  # Strictly: a character outside the alphabet is quietly dropped otherwise, and what comes back
+  # is not what the value stood for but what was left of it.
+  if description.get("urlsafe"):
+    raw = base64.urlsafe_b64decode(padded)
+  else:
+    raw = base64.b64decode(padded, validate=True)
   return raw.decode(settings.DEFAULT_CODEC)
 
 """

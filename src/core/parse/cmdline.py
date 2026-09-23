@@ -634,11 +634,11 @@ file_access.add_option("--file-dest",
 modules = OptionGroup(parser, "Modules",
                         "These options can be used increase the detection and/or injection capabilities.")
 
-modules.add_option("--shellshock",
-                action="store_true",
-                dest="shellshock",
+modules.add_option("--module",
+                action="store",
+                dest="module",
                 default=False,
-                help="The 'shellshock' injection module.")
+                help="Use a specific injection module.")
 
 # Injection options
 optimization = OptionGroup(parser, "Optimization",
@@ -1020,6 +1020,17 @@ except SystemExit:
   if _basic_help:
     settings.print_data_to_stdout("\n" + Style.BRIGHT + Style.UNDERLINE + "To see the full list of options run with '-hh'." + Style.RESET_ALL + "\n")
   raise
+
+# Every registered module gets a switch of its own to be read through, whether or not '--module'
+# named it - the heuristic turns one on by itself where the target looks like it calls for it.
+# Resolved here rather than with the other option checks, because the startup that runs before
+# those already reads them; a name that matches nothing is left for validate_modules() to report.
+for _module_name in settings.MODULES:
+  setattr(options, _module_name, False)
+if options.module:
+  for _named in str(options.module).lower().split(settings.PARAMETER_SPLITTING_REGEX):
+    if _named.strip() in settings.MODULES:
+      setattr(options, _named.strip(), True)
 
 # Remember whether '--web-root' was explicitly supplied on the CLI
 settings.USER_APPLIED_WEB_ROOT = bool(options.web_root)

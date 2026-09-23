@@ -1040,7 +1040,7 @@ def check_os(server_header):
       checks.set_target_os(named)
 
       if settings.TARGET_OS == settings.OS.WINDOWS and menu.options.shellshock:
-        err_msg = "The shellshock module ('--shellshock') is not available for Windows targets."
+        err_msg = "The 'shellshock' module is not available for Windows targets."
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
         raise SystemExit(settings.EXIT_FAILURE)
       break
@@ -1187,7 +1187,7 @@ def _perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http
   payload = checks.perform_payload_modification(payload)
   # A parameter the target carries encoded is written back the way it arrived, the whole value at
   # once rather than the injected part alone - which is what makes the value it reads a valid one.
-  payload = checks.apply_encoding(payload, settings.VALUE_ENCODING)
+  payload = checks.apply_value_encoding(payload)
 
   # Check if defined "--verbose" option.
   if settings.VERBOSITY_LEVEL != 0:
