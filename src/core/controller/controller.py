@@ -710,16 +710,6 @@ def check_parameter_dynamism(url, http_request_method, check_parameter):
   if changed >= min(noise, settings.STABILITY_SIMILARITY_THRESHOLD):
     warn_msg = param_label + " does not appear to be dynamic."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-    """
-    A page that is mostly layout answers this question badly: what a command prints is a handful of
-    characters against kilobytes of markup, and the two answers come back all but identical whether
-    the parameter reaches a shell or not. Said out loud, because the verdict is what '--skip-static'
-    acts on - and because comparing the text alone is what settles it.
-    """
-    if not menu.options.text_only and checks.page_text_percent(settings.ORIGINAL_PAGE) < settings.LOW_TEXT_PERCENT:
-      warn_msg = "Target's page contains only " + str(round(checks.page_text_percent(settings.ORIGINAL_PAGE), 1)) + "% text, "
-      warn_msg += "which might result in unreliable comparison results. Consider using switch '--text-only'."
-      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     return False
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = param_label + " appears to be dynamic."
@@ -1634,6 +1624,21 @@ def do_check(url, http_request_method, filename):
           err_msg += " switch '--random-agent'"
         err_msg += "."
         err_msg += checks.tamper_shell_feature_note()
+        """
+        A page that is mostly layout answers the comparison badly: what a command prints is a
+        handful of characters against kilobytes of markup, so the two answers come back all but
+        identical either way. Worth raising only here - before this, nothing has gone wrong yet.
+        """
+        if not menu.options.text_only and settings.ORIGINAL_PAGE:
+          percent = checks.page_text_percent(settings.ORIGINAL_PAGE)
+          if settings.DYNAMIC_MARKINGS:
+            err_msg += " You can give it a go with the switch '--text-only', where the target page"
+            err_msg += " has a low percentage of textual content (~" + ("%.2f" % percent)
+            err_msg += "% of page content is text)."
+          elif percent < settings.LOW_TEXT_PERCENT:
+            err_msg += " Please retry with the switch '--text-only', as this case looks like a"
+            err_msg += " candidate for it: a low percentage of textual content (~" + ("%.2f" % percent)
+            err_msg += "% of page content is text), together with no parameter found to be dynamic."
         if settings.MULTI_TARGETS:
           err_msg += " Skipping to the next target."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))

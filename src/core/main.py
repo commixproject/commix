@@ -191,22 +191,12 @@ The init (URL) request.
 """
 def init_request(url, http_request_method):
 
-  # The first request to the target, built the way every later one will be.
-  def perform_init_request(url, http_request_method):
-    if settings.USER_DEFINED_POST_DATA:
-      request = _urllib.request.Request(url, settings.USER_DEFINED_POST_DATA.encode(), method=http_request_method)
-    else:
-      request = _urllib.request.Request(url, method=http_request_method)
-    headers.do_check(request)
-    return request
-
   """
-  One request that does not follow redirects, to see where the target sends us.
-
-  Built the way the run's own requests are, body and all: where the target sends a request carrying
-  nothing is not evidence of where it sends the request that will be tested.
+  A request built the way the run's own requests are, body and all - used both for the first one to
+  the target and for the redirect probe, where a request carrying nothing is not evidence of where
+  the target sends the one that will be tested.
   """
-  def redirect_probe_request(url, http_request_method):
+  def build_request(url, http_request_method):
     if settings.USER_DEFINED_POST_DATA:
       request = _urllib.request.Request(url, settings.USER_DEFINED_POST_DATA.encode(), method=http_request_method)
     else:
@@ -260,7 +250,7 @@ def init_request(url, http_request_method):
     opener = _urllib.request.build_opener(*probe_handlers)
     # Install globally so later bare urlopen() calls respect it too.
     _urllib.request.install_opener(opener)
-    probe_request = redirect_probe_request(url, http_request_method)
+    probe_request = build_request(url, http_request_method)
     if menu.options.proxy and not menu.options.tor and not menu.options.ignore_proxy:
       proxy.apply_to_request(probe_request)
     response = opener.open(probe_request, timeout=settings.TIMEOUT)
@@ -285,7 +275,7 @@ def init_request(url, http_request_method):
     menu.options.host = _urllib.parse.urlparse(url).netloc
 
   # Build the real request (full data) now that the final URL is known.
-  request = perform_init_request(url, http_request_method)
+  request = build_request(url, http_request_method)
 
   # Check the internet connection (--check-internet switch).
   if menu.options.check_internet:
@@ -517,6 +507,7 @@ def scan_parsed_targets(os_checks_num):
         filename = logs.logs_filename_creation(url)
         session_handler.restore_waf_status(url)
         session_handler.restore_target_os(url)
+        session_handler.restore_target_arch(url)
         main(filename, url, http_request_method)
       else:
         err_msg = "Unable to establish a connection with the target URL."
@@ -906,6 +897,7 @@ def run():
           filename = logs.logs_filename_creation(url)
           session_handler.restore_waf_status(url)
           session_handler.restore_target_os(url)
+          session_handler.restore_target_arch(url)
           main(filename, url, http_request_method)
         else:
           err_msg = "Unable to establish a connection with the target URL."
@@ -1102,6 +1094,7 @@ def run():
                 filename = logs.logs_filename_creation(form_url)
                 session_handler.restore_waf_status(form_url)
                 session_handler.restore_target_os(form_url)
+                session_handler.restore_target_arch(form_url)
                 main(filename, form_url, settings.HTTPMETHOD.POST)
             except KeyboardInterrupt:
               checks.handle_early_interrupt(filename, form_url)
@@ -1172,6 +1165,7 @@ def run():
                     filename = logs.logs_filename_creation(url)
                     session_handler.restore_waf_status(url)
                     session_handler.restore_target_os(url)
+                    session_handler.restore_target_arch(url)
                     main(filename, url, http_request_method)
                 except KeyboardInterrupt:
                   checks.handle_early_interrupt(filename, url)

@@ -70,6 +70,7 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
     if settings.TIME_RELATED_ATTACK and settings.VERBOSITY_LEVEL == 0 and fresh:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     target_arch, arch_fresh = execute_cmd(cmd)
+    checks.set_target_arch(target_arch)
     fresh = fresh or arch_fresh
   else:
     target_arch = None
@@ -168,9 +169,9 @@ def do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, h
       powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique)
       settings.ENUMERATION_DONE = True
 
-  if menu.options.hostname:
-    checks.print_enumenation().hostname_msg()
-    hostname(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique)
+  if menu.options.sys_info:
+    checks.print_enumenation().os_info_msg()
+    system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique)
     settings.ENUMERATION_DONE = True
 
   if menu.options.current_user:
@@ -178,14 +179,14 @@ def do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, h
     current_user(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique)
     settings.ENUMERATION_DONE = True
 
+  if menu.options.hostname:
+    checks.print_enumenation().hostname_msg()
+    hostname(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique)
+    settings.ENUMERATION_DONE = True
+
   if menu.options.is_root or menu.options.is_admin:
     checks.print_enumenation().check_privs_msg()
     check_current_user_privs(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique)
-    settings.ENUMERATION_DONE = True
-
-  if menu.options.sys_info:
-    checks.print_enumenation().os_info_msg()
-    system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique)
     settings.ENUMERATION_DONE = True
 
   if menu.options.users or menu.options.privileges:

@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "158"
+REVISION = "159"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -891,6 +891,15 @@ DISTRO_INFO = "echo $(lsb_release -sir)"
 RECOGNISE_HP = "uname -m"
 WIN_RECOGNISE_HP = "echo %PROCESSOR_ARCHITECTURE%"
 
+# What the target answered the hardware platform question with, kept as it came back.
+TARGET_ARCH = ""
+
+"""
+The word sizes a hardware platform name stands for, whichever way the target spells it.
+"""
+ARCH_64 = ("x86_64", "amd64", "x64", "aarch64", "arm64", "ppc64", "ppc64le", "s390x", "riscv64", "ia64", "sparc64", "mips64")
+ARCH_32 = ("i386", "i486", "i586", "i686", "x86", "armv6l", "armv7l", "arm", "ppc", "s390", "mips", "sparc")
+
 # File System access options
 # Read file
 FILE_READ = "cat "
@@ -918,7 +927,6 @@ SYS_USERS = "awk -F ':' '{print $1}{print $3}{print $6}' " + PASSWD_FILE
 
 # Exports users of localgroup
 WIN_SYS_USERS = "powershell.exe -InputFormat none write-host (([string]$(net user)[4..($(net user).length-3)]))"
-DEFAULT_WIN_USERS = ["Administrator", "DefaultAccount", "Guest"]
 
 # What the target says instead of a list when the account running it may not ask for one. Seeing a
 # built-in name is not the test - they can be renamed or removed - so this is what tells a refusal
@@ -1180,7 +1188,6 @@ SCHEME = ""
 # TOR HTTP Proxy
 TOR_HTTP_PROXY_IP = "127.0.0.1"
 TOR_HTTP_PROXY_PORT = "8118"
-CHECK_TOR_PAGE = "https://check.torproject.org/"
 # Answered as JSON, so that what is read back is a stated fact rather than a phrase on a page.
 CHECK_TOR_API_PAGE = "https://check.torproject.org/api/ip"
 
@@ -1799,7 +1806,6 @@ class END_LINE:
   ESCAPED_LF = "\\n"
 
 # List of end lines
-END_LINES_LIST = [attr for attr in dir(END_LINE) if not callable(getattr(END_LINE, attr)) and not attr.startswith("__")]
 
 # Check for updates on start up.
 CHECK_FOR_UPDATES_ON_START = True

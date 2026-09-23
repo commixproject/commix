@@ -715,7 +715,7 @@ def retry_on_undesired_content(request, response):
     if retried is None:
       try:
         retried = headers.resend(request)
-      except Exception as err_msg:
+      except Exception:
         return ReReadableResponse(response, body)
     if retried is None or isinstance(retried, bool):
       return ReReadableResponse(response, body)

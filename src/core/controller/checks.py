@@ -38,7 +38,6 @@ from src.utils import logs
 from src.core.parse import cmdline as menu
 from src.utils import settings
 from src.thirdparty.odict import OrderedDict
-from src.core.convert import hexdecode
 from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import parameters
@@ -2097,6 +2096,41 @@ def set_target_os(identified):
       settings.WEB_ROOT = settings.DEFAULT_WEB_ROOT = ""
 
 """
+Remember the hardware platform the target answered with, so that what was already asked for once
+does not have to be asked for again by whatever needs it next.
+"""
+def set_target_arch(identified):
+  if not identified:
+    return
+  identified = str(identified).strip()
+  if not identified:
+    return
+  settings.TARGET_ARCH = identified
+  # Kept for the next run against this target, the way the operating system is.
+  if not menu.options.ignore_session and settings.TARGET_NETLOC:
+    from src.utils import session_handler
+    session_handler.import_target_arch(settings.TARGET_NETLOC, identified)
+
+"""
+The word size of the target's hardware platform - 64, 32, or None where it has not been established
+or is a name that says neither. Read from what the target answered, never guessed from the host.
+"""
+def target_word_size():
+  name = (settings.TARGET_ARCH or "").strip().lower()
+  if not name:
+    return None
+  if name in settings.ARCH_64:
+    return 64
+  if name in settings.ARCH_32:
+    return 32
+  # A name that was never in either list still says which it is, where it says so plainly.
+  if "64" in name:
+    return 64
+  if re.search(r"\b(i[3-6]86|x86|arm(v[0-7]l?)?)\b", name):
+    return 32
+  return None
+
+"""
 Decision if the user-defined operating system name,
 is different than the one identified by heuristics.
 """
@@ -2997,16 +3031,6 @@ def tamper_shell_spans(payload, transform, nested=False, literal=False):
   return re.sub(SHELL_SPAN_HELD_REGEX, lambda x: held[int(x.group(1))], walked)
 
 """
-base64encode/hexencode consume the whole payload as one blob, so they can't coexist with
-space2plus rewriting whitespace inside it first - fatal (not a skippable warning like the rest).
-"""
-def tamper_check_space2plus_conflict(tamper_name):
-  if len(settings.WHITESPACES) != 0 and settings.WHITESPACES[0] == _urllib.parse.quote_plus(settings.SINGLE_WHITESPACE):
-    err_msg = "Tamper script '" + tamper_name + "' is unlikely to work when combined with the tamper script 'space2plus'."
-    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit(settings.EXIT_FAILURE)
-
-"""
 Whether to answer the detected WAF/IPS with evasion, asked once and kept for the rest of the run.
 A tamper script provided by the user is left alone - the combination is their call, not ours.
 """
@@ -3439,12 +3463,7 @@ def strip_encoding(value, description):
     return bytearray.fromhex(body).decode(settings.DEFAULT_CODEC)
   body = value.rstrip("=")
   padded = body + "=" * (-len(body) % 4)
-  # Strictly: a character outside the alphabet is quietly dropped otherwise, and what comes back
-  # is not what the value stood for but what was left of it.
-  if description.get("urlsafe"):
-    raw = base64.urlsafe_b64decode(padded)
-  else:
-    raw = base64.b64decode(padded, validate=True)
+  raw = base64.urlsafe_b64decode(padded) if description.get("urlsafe") else base64.b64decode(padded)
   return raw.decode(settings.DEFAULT_CODEC)
 
 """
@@ -4114,28 +4133,6 @@ Run the standard enumeration checks via the given execute_cmd(cmd) -> output cal
 def run_enumeration(execute_cmd, filename, url):
   ran = False
 
-  if menu.options.hostname:
-    ran = True
-    print_enumenation().hostname_msg()
-    shell = execute_cmd(settings.HOSTNAME)
-    if shell:
-      print_hostname(shell, filename, False)
-
-  if menu.options.current_user:
-    ran = True
-    print_enumenation().current_user_msg()
-    shell = execute_cmd(settings.CURRENT_USER)
-    if shell:
-      print_current_user(shell, filename, False)
-
-  if menu.options.is_root:
-    ran = True
-    print_enumenation().check_privs_msg()
-    cmd = remove_parenthesis(''.join(re.findall(r"\$(.*)", settings.IS_ROOT)))
-    shell = execute_cmd(cmd)
-    if shell:
-      print_current_user_privs(shell, filename, False)
-
   if menu.options.sys_info:
     ran = True
     print_enumenation().os_info_msg()
@@ -4145,7 +4142,30 @@ def run_enumeration(execute_cmd, filename, url):
       if distro_name:
         target_os = target_os + settings.SINGLE_WHITESPACE + distro_name
       target_arch = execute_cmd(settings.RECOGNISE_HP)
+      set_target_arch(target_arch)
       print_os_info(target_os, target_arch, filename, False)
+
+  if menu.options.current_user:
+    ran = True
+    print_enumenation().current_user_msg()
+    shell = execute_cmd(settings.CURRENT_USER)
+    if shell:
+      print_current_user(shell, filename, False)
+
+  if menu.options.hostname:
+    ran = True
+    print_enumenation().hostname_msg()
+    shell = execute_cmd(settings.HOSTNAME)
+    if shell:
+      print_hostname(shell, filename, False)
+
+  if menu.options.is_root:
+    ran = True
+    print_enumenation().check_privs_msg()
+    cmd = remove_parenthesis(''.join(re.findall(r"\$(.*)", settings.IS_ROOT)))
+    shell = execute_cmd(cmd)
+    if shell:
+      print_current_user_privs(shell, filename, False)
 
   if menu.options.users:
     ran = True
@@ -5097,13 +5117,6 @@ def shell_success(option):
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
 """
-Payload generation message.
-"""
-def gen_payload_msg(payload):
-  info_msg = "Generating the '" + payload + "' shellcode. "
-  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-  
-"""
 Error msg if the attack vector is available only for Windows targets.
 """
 def windows_only_attack_vector():
@@ -5302,11 +5315,6 @@ def terminate_payload(payload, separator, keep_output=False):
   if keep_output and separator == settings.PIPE_SEPARATOR:
     return payload
   return payload + separator + (settings.NO_OPERATION if separator in settings.BINARY_SEPARATORS else "")
-
-def append_custom_marker(payload, separator):
-  if settings.CUSTOM_INJECTION_MARKER:
-    return payload + separator
-  return payload
 
 """
 Rewrite LF characters in a file-based payload for header-based injection modes, or CRLF-normalize for non-Windows targets - the shared "new line fixation" logic in fb_payloads.py.

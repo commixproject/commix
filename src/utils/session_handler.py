@@ -840,6 +840,47 @@ def restore_target_os(url):
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
 """
+Store the hardware platform the target answered with, in a table of its own - an existing session's
+'_os' table would not gain a column, so the two are kept apart.
+"""
+def import_target_arch(url, target_arch):
+  try:
+    with _session_connection() as conn:
+      table = table_name(url) + "_arch"
+      conn.execute("CREATE TABLE IF NOT EXISTS \"" + table + "\" (target_arch VARCHAR);")
+      conn.execute("DELETE FROM \"" + table + "\";")
+      conn.execute("INSERT INTO \"" + table + "\" (target_arch) VALUES (?)", (str(target_arch),))
+      conn.commit()
+  except (sqlite3.OperationalError, sqlite3.DatabaseError):
+    pass
+
+"""
+Retrieve the hardware platform stored for this target. Returns None where nothing is stored yet.
+"""
+def check_stored_target_arch(url):
+  try:
+    with _session_connection() as conn:
+      table = table_name(url) + "_arch"
+      if not table_exists(conn, table):
+        return None
+      row = conn.execute("SELECT target_arch FROM \"" + table + "\" LIMIT 1;").fetchone()
+      return row[0] if row else None
+  except (sqlite3.OperationalError, sqlite3.DatabaseError):
+    return None
+
+"""
+Restore a stored hardware platform, so what the target already answered is not asked for again.
+"""
+def restore_target_arch(url):
+  if menu.options.ignore_session or menu.options.flush_session:
+    return
+  if settings.TARGET_ARCH:
+    return
+  stored = check_stored_target_arch(url)
+  if stored and stored != "None":
+    settings.TARGET_ARCH = stored
+
+"""
 Store a confirmed testable-value placeholder, so a resumed session can reuse
 it instead of re-probing whether the parameter's real value is required.
 """

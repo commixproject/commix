@@ -1529,22 +1529,6 @@ def fetch_output_response(url, OUTPUT_TEXTFILE, timesec, technique):
   return None
 
 """
-What the written file holds, or nothing where it cannot be read.
-"""
-def read_output_file(output):
-  try:
-    response = checks.get_response(output)
-    if type(response) is bool and response is not True or response is None:
-      return ""
-    shell = checks.process_page_content(response, action="encode").rstrip().lstrip()
-    if settings.TARGET_OS == settings.OS.WINDOWS:
-      shell = [newline.replace(settings.END_LINE.CR, "") for newline in shell]
-      shell = [empty for empty in shell if empty]
-    return shell
-  except (_urllib.error.HTTPError, _urllib.error.URLError):
-    return ""
-
-"""
 Evaluate test results.
 """
 def injection_test_results(response, TAG, randvcalc, technique, payload=None):

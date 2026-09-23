@@ -13,7 +13,6 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
-import re
 import json
 import socket
 from src.thirdparty.six.moves import urllib as _urllib
@@ -22,18 +21,6 @@ from src.thirdparty.socks import socks
 from src.core.parse import cmdline as menu
 from src.utils import settings
 from src.core.requests import proxy
-
-"""
-Check if Tor HTTP proxy is defined.
-"""
-
-def tor_connection_error():
-  err_msg = "Could not establish a Tor connection. "
-  err_msg += "Please ensure Tor is running and reachable"
-  err_msg += " and that any provided options (e.g. '--tor-port') are correct."
-  settings.print_data_to_stdout(settings.print_error_msg(err_msg))
-  raise SystemExit(settings.EXIT_FAILURE)
-
 
 # The first of the given ports that something on the loopback address is listening on.
 def find_local_port(ports):
