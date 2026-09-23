@@ -16,6 +16,8 @@ For more see the file 'readme/COPYING' for copying permission.
 import io
 import re
 import time
+import calendar
+import email.utils
 import threading
 import difflib
 import statistics
@@ -94,6 +96,17 @@ def is_url_content_stable(url, response=None, fetch_time=None, http_request_meth
       if ratio < settings.STABILITY_SIMILARITY_THRESHOLD:
         status = "dynamic"
     settings.PAGE_STABLE = status == "stable"
+
+    # Said before the work it decides, so the answer is given with the reason for it still on screen.
+    if not settings.PAGE_STABLE and not settings.UNSTABLE_PROMPTED:
+      settings.UNSTABLE_PROMPTED = True
+      warn_msg = "Target URL content is not stable. "
+      warn_msg += "Dynamic content is excluded from comparisons, but remaining response changes may "
+      warn_msg += "cause false negatives when no injectable parameter is identified."
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+      message = "How do you want to proceed? [(C)ontinue/(q)uit] "
+      if common.read_input(message, default="C", check_batch=True) in settings.CHOICE_QUIT:
+        raise SystemExit(settings.EXIT_FAILURE)
 
     """
     The two samples are of the same request, so whatever differs between them is the page moving on
@@ -407,6 +420,62 @@ def _finish_response_time_estimate(diff, timesec):
   return timesec, url_time_response
 
 """
+Seconds to wait, read from a 'Retry-After' header given either as a number of them or as a date.
+None where the target sent no such header, or sent one that cannot be read.
+"""
+def retry_after_seconds(err):
+  try:
+    value = (err.headers.get("Retry-After") or "").strip()
+  except Exception:
+    return None
+  if not value:
+    return None
+  if value.isdigit():
+    return float(value)
+  try:
+    parsed = email.utils.parsedate(value)
+    return max(0.0, calendar.timegm(parsed) - time.time()) if parsed else None
+  except Exception:
+    return None
+
+"""
+What a status says about the target rather than about the request. Returns what request_failed()
+should answer, or None where the status is nothing more than the interference it warns about.
+"""
+def _answered_with_status(code, err):
+  code = str(code)
+
+  # The first answer being '404' is a wrong URL far more often than a target worth testing.
+  if code == settings.NOT_FOUND_ERROR and settings.INIT_TEST is True:
+    return checks.page_not_found(err)
+
+  # The payload is in the request line and the target will not take one that long. Where it can be
+  # moved into a body instead, that is the way past it - shortening what is sent is the other.
+  if code == settings.REQUEST_URI_TOO_LONG and int(code) not in settings.WARNED_HTTP_ERROR_CODES:
+    settings.WARNED_HTTP_ERROR_CODES.add(int(code))
+    warn_msg = "The target answered '" + checks.http_error_code_label(code, err) + "', so the "
+    warn_msg += "request line is longer than it accepts. "
+    if not settings.USER_DEFINED_POST_DATA:
+      warn_msg += "Try sending the parameters in the body ('--data'), or a tamper script that "
+      warn_msg += "shortens the payload ('--tamper')."
+    else:
+      warn_msg += "Try a tamper script that shortens the payload ('--tamper')."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    return None
+
+  # A body the target will not read is worth sending again the way it will.
+  if menu.options.chunked and not settings.CHUNKED_UNSUPPORTED and \
+     code in (settings.NOT_ALLOWED, settings.LENGTH_REQUIRED):
+    settings.CHUNKED_UNSUPPORTED = True
+    menu.options.chunked = False
+    warn_msg = "Turning off HTTP chunked transfer encoding, as the target answered '"
+    warn_msg += checks.http_error_code_label(code, err) + "' to a chunked body."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    return True
+
+  return None
+
+"""
 Exceptions regarding requests failure(s)
 """
 def request_failed(err_msg):
@@ -426,6 +495,16 @@ def request_failed(err_msg):
   # Pacing is answered on its own: being told to slow down holds whether or not a WAF is looked for.
   if str(getattr(err_msg, "code", None)) in settings.WAF_BLOCK_HTTP_CODES:
     stability.adapt_delay(blocked=True)
+    # Where the target said how long to wait, that beats guessing at it - waited out once here,
+    # while the delay between requests is what keeps the pace afterwards.
+    requested = retry_after_seconds(err_msg)
+    if requested is not None and not settings.TIME_RELATED_ATTACK:
+      waited = min(requested, settings.RATE_LIMIT_MAX_DELAY)
+      if settings.VERBOSITY_LEVEL != 0:
+        debug_msg = "Waiting the " + str(round(waited, 1)) + " second"
+        debug_msg += "s"[waited == 1:] + " the target asked for ('Retry-After')."
+        settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+      time.sleep(waited)
 
   if not settings.FOLLOW_REDIRECT and getattr(err_msg, "code", None) in (301, 302, 303, 307):
     stability.mark_url_valid()
@@ -496,7 +575,11 @@ def request_failed(err_msg):
         err_msg += " or re-run by providing option '--ignore-code=" + settings.UNAUTHORIZED_ERROR +"'. "
       if settings.CRAWLING:
         err_msg += "Skipping to the next target."
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      # Said once: every request that follows is answered the same way, and repeating it buries
+      # whatever else the run has to report.
+      if int(settings.UNAUTHORIZED_ERROR) not in settings.WARNED_HTTP_ERROR_CODES:
+        settings.WARNED_HTTP_ERROR_CODES.add(int(settings.UNAUTHORIZED_ERROR))
+        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     if not settings.CRAWLING:
       if menu.options.auth_type and menu.options.auth_cred:
         raise SystemExit(settings.EXIT_FAILURE)
@@ -519,11 +602,17 @@ def request_failed(err_msg):
       return True
     elif [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]:
       status_code = [err_code for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]
-      if not checks.ignored_http_error_code(status_code[0]) and int(status_code[0]) not in settings.WARNED_HTTP_ERROR_CODES:
-        warn_msg = "The web server responded with an HTTP error code '" + checks.http_error_code_label(status_code[0], err_msg)
+      code = status_code[0]
+      if not checks.ignored_http_error_code(code):
+        # What the code says about the target, before it is written off as interference.
+        handled = _answered_with_status(code, err_msg)
+        if handled is not None:
+          return handled
+      if not checks.ignored_http_error_code(code) and int(code) not in settings.WARNED_HTTP_ERROR_CODES:
+        warn_msg = "The web server responded with an HTTP error code '" + checks.http_error_code_label(code, err_msg)
         warn_msg += "' which could interfere with the results of the tests."
         settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-        settings.WARNED_HTTP_ERROR_CODES.add(int(status_code[0]))
+        settings.WARNED_HTTP_ERROR_CODES.add(int(code))
       if not settings.NOT_FOUND_ERROR in str(err_msg).lower():
         return False
       return True

@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Improved: Enhanced HTTP error handling and response stability detection, with clearer handling of target-side errors, unstable content, and non-testable HTTP responses.
 * Improved: Replaced the `base64encode.py` and `hexencode.py` tamper scripts with the new `--param-encoding` option for handling encoded parameter values.
 * Added: New switch `--text-only` for comparing pages based only on their textual content.
 * Fixed: Switch `--skip-calc` handling across heuristic, false-positive re-check and out-of-band tests.

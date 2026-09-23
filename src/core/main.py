@@ -333,6 +333,9 @@ def url_response(url, http_request_method):
       checks.apply_waf_transport_evasion()
       _conn_start = time.time()
       response = examine_request(request, url)
+  # Found unusable rather than merely unanswered, so the phases behind this are not spent on it.
+  if settings.TARGET_UNUSABLE:
+    return False, url
   if response is not False and response is not None:
     _conn_end = time.time()
     settings.INIT_CONNECTION_TIME = _conn_end - _conn_start

@@ -1623,6 +1623,43 @@ def ignored_http_error_code(code):
     return False
 
 """
+Stop spending the phases behind this check on a target that has already answered that it cannot
+serve them. One place for every reason a target is unusable, so a new reason is a call rather than
+a special case of its own further down.
+"""
+def target_unusable(reason, advice=""):
+  settings.TARGET_UNUSABLE = True
+  err_msg = reason
+  if advice:
+    err_msg += settings.SINGLE_WHITESPACE + advice
+  # One bad target must not end a run that has others waiting.
+  if settings.MULTI_TARGETS or settings.CRAWLING:
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg + " Skipping to the next target."))
+    return False
+  settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+  raise SystemExit(settings.EXIT_FAILURE)
+
+"""
+A target whose first answer is '404' is a wrong URL far more often than a finding, so the run stops
+to let it be corrected - asked once, and never in the middle of testing.
+"""
+def page_not_found(err=None):
+  if settings.IGNORE_NOT_FOUND or settings.NOT_FOUND_PROMPTED:
+    return settings.IGNORE_NOT_FOUND
+  settings.NOT_FOUND_PROMPTED = True
+  err_msg = "Page not found (" + settings.NOT_FOUND_ERROR + ")."
+  settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+  if settings.MULTI_TARGETS or settings.CRAWLING:
+    settings.TARGET_UNUSABLE = True
+    return False
+  message = "It is not recommended to continue in this kind of cases. "
+  message += "Do you want to quit and make sure that everything is set up properly? [Y/n] "
+  if common.read_input(message, default="Y", check_batch=True) not in settings.CHOICE_NO:
+    raise SystemExit(settings.EXIT_FAILURE)
+  settings.IGNORE_NOT_FOUND = True
+  return True
+
+"""
 Ignore the error and continue testing; the choice is remembered for this code.
 """
 def continue_tests(err):
@@ -2421,6 +2458,13 @@ def warm_up_response_baseline(url, http_request_method, close=True):
   if close and settings.VERBOSITY_LEVEL == 0:
     settings.print_data_to_stdout(" (done)")
   if len(settings.RESPONSE_TIMES) < settings.MIN_TIME_RESPONSES:
+    # Nothing came back at all, so there is no baseline to read a delay against - and a technique
+    # that measures against an empty model would call every answer whatever it started out expecting.
+    if not settings.RESPONSE_TIMES:
+      settings.close_progress_line()
+      return target_unusable("The target answered none of the " + str(settings.MIN_TIME_RESPONSES) +
+                             " requests the response-time model asks for, so a time-related result "
+                             "would have nothing to be read against.")
     warn_msg = "The target answered " + str(len(settings.RESPONSE_TIMES)) + " of the "
     warn_msg += str(settings.MIN_TIME_RESPONSES) + " requests the response-time model asks for. "
     warn_msg += "Time-related results are read against what was collected."

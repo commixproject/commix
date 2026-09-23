@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "156"
+REVISION = "157"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1712,6 +1712,8 @@ FORBIDDEN_ERROR = "403"
 NOT_FOUND_ERROR = "404"
 NOT_ALLOWED = "405"
 NOT_ACCEPTABLE_ERROR = "406"
+LENGTH_REQUIRED = "411"
+REQUEST_URI_TOO_LONG = "414"
 TOO_MANY_REQUESTS = "429"
 UNAVAILABLE_FOR_LEGAL_REASONS = "451"
 INTERNAL_SERVER_ERROR = "500"
@@ -1725,6 +1727,8 @@ HTTP_ERROR_CODES = [  BAD_REQUEST,
                       NOT_FOUND_ERROR,
                       NOT_ALLOWED,
                       NOT_ACCEPTABLE_ERROR,
+                      LENGTH_REQUIRED,
+                      REQUEST_URI_TOO_LONG,
                       TOO_MANY_REQUESTS,
                       UNAVAILABLE_FOR_LEGAL_REASONS,
                       INTERNAL_SERVER_ERROR,
@@ -1761,6 +1765,19 @@ TRANSIENT_HTTP_ERROR_CODES = (INTERNAL_SERVER_ERROR, BAD_GATEWAY, SERVICE_UNAVAI
 
 # The status the last request came back with, where that status was an error - see headers.resend().
 LAST_HTTP_ERROR = None
+
+# Set once the target has been found unusable, so the phases behind the check are not spent on it.
+TARGET_UNUSABLE = False
+# Asked at most once per run, and remembered where the answer was to carry on regardless.
+NOT_FOUND_PROMPTED = False
+IGNORE_NOT_FOUND = False
+# Asked at most once per run, where the two samples of the page did not come back the same.
+UNSTABLE_PROMPTED = False
+
+# Where honouring a 'Retry-After' stops, so a target naming an hour cannot park the run for one.
+RATE_LIMIT_MAX_DELAY = 60.0
+# Turned off for the run once the target answers that it will not read a chunked body.
+CHUNKED_UNSUPPORTED = False
 
 # End line
 class END_LINE:
@@ -2297,6 +2314,7 @@ RUN_WIDE_STATE = frozenset((
   "USER_APPLIED_TIMESEC", "USER_APPLIED_TMP_PATH",
   # Answered once by the user, and not worth asking again for every target.
   "ADJUST_TIME_DELAY_CHOICE", "FILE_BASED_NARROWING_CHOICE", "IGNORE_IDENTIFIED_TARGET_OS",
+  "IGNORE_NOT_FOUND", "NOT_FOUND_PROMPTED", "UNSTABLE_PROMPTED",
   "RECOGNISE_OS", "THREADED_TIME_RETRIEVAL_CHOICE", "USE_BIN_SUBDIR_CHOICE", "WAF_EVASION_CONSENT",
   # Counted or noted for the run as a whole.
   "CRAWLED_SKIPPED_URLS_NUM", "CRAWLED_URLS_INJECTED", "CRAWLED_URLS_NUM", "CRAWLING",
