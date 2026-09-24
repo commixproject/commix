@@ -40,6 +40,24 @@ from src.core.controller import checks
 from src.thirdparty.six.moves import urllib as _urllib
 
 """
+Keep the page the target answered with, off the response already in hand.
+
+Read once and handed back for whatever reads it next: what a parameter is compared against, what the
+forms are parsed out of, and what the proof is written from all want the same page, and none of them
+is worth a second request.
+"""
+def capture_original_page(response):
+  if response is None or isinstance(response, bool):
+    return None
+  try:
+    raw_body = response.read()
+  except Exception:
+    return None
+  response.read = (lambda _b: lambda *a, **kw: _b)(raw_body)
+  settings.ORIGINAL_PAGE = checks.decode_page_body(raw_body, response)
+  return raw_body
+
+"""
 Check if the content of the given URL is stable over time.
 """
 def is_url_content_stable(url, response=None, fetch_time=None, http_request_method=None):
@@ -59,10 +77,8 @@ def is_url_content_stable(url, response=None, fetch_time=None, http_request_meth
 
   try:
     if response is not None:
-      raw_body = response.read()
+      raw_body = capture_original_page(response)
       first_response_content = raw_body.strip()
-      response.read = (lambda _b: lambda *a, **kw: _b)(raw_body)
-      settings.ORIGINAL_PAGE = checks.decode_page_body(raw_body, response)
     else:
       first_response = headers.send_raw(_build_request())
       try:
@@ -100,9 +116,11 @@ def is_url_content_stable(url, response=None, fetch_time=None, http_request_meth
     # Said before the work it decides, so the answer is given with the reason for it still on screen.
     if not settings.PAGE_STABLE and not settings.UNSTABLE_PROMPTED:
       settings.UNSTABLE_PROMPTED = True
-      warn_msg = "Target URL content is not stable. "
-      warn_msg += "Dynamic content is excluded from comparisons, but remaining response changes may "
-      warn_msg += "cause false negatives when no injectable parameter is identified."
+      # What happened, what is done about it, and what to reach for when the results read wrong.
+      warn_msg = "Target URL content is not stable (i.e. content differs). Page comparison is based "
+      warn_msg += "on a sequence matcher, with the parts that move on their own left out. If no "
+      warn_msg += "dynamic nor injectable parameter is detected, or in case of junk results, give "
+      warn_msg += "it a go with the switch '--text-only'."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       message = "How do you want to proceed? [(C)ontinue/(q)uit] "
       if common.read_input(message, default="C", check_batch=True) in settings.CHOICE_QUIT:
@@ -127,8 +145,10 @@ def is_url_content_stable(url, response=None, fetch_time=None, http_request_meth
     settings.print_data_to_stdout(settings.print_warning_msg(msg))
     return
 
-  msg = "Target URL content is " + status + "."
-  settings.print_data_to_stdout(settings.print_info_msg(msg))
+  # Only where it is: the other answer was already given, with what it costs, by the warning above.
+  if settings.PAGE_STABLE:
+    msg = "Target URL content is stable."
+    settings.print_data_to_stdout(settings.print_info_msg(msg))
 
 
 """
@@ -1011,6 +1031,13 @@ def application_identification(url, response=None):
       settings.TARGET_APPLICATION = match.group(0).upper()
 
   if settings.TARGET_APPLICATION:
+    # The version, where the header names one. Read as digits and dots only: a packaged build writes
+    # its packaging after the version ("5.5.9-1ubuntu4.6"), which is the distribution's and not the
+    # application's.
+    version = re.search(re.escape(settings.TARGET_APPLICATION) + r"[\-\_\/\ ]([\d\.]+)", x_powered_by, re.IGNORECASE)
+    if version:
+      settings.TARGET_APPLICATION_VERSION = version.group(1).rstrip(".")
+
     # The application and the language an evaluated string is tried in are the same question, so
     # they are answered once and said once, rather than naming the same language twice over.
     checks.note_evaluated_language(settings.TARGET_APPLICATION, x_powered_by)
@@ -1037,6 +1064,7 @@ def check_os(server_header):
     if match:
       # What the banner spells out, rather than the family it puts the target in.
       named = match.group(0)
+      settings.IDENTIFIED_SERVER_OS = named
       checks.set_target_os(named)
 
       if settings.TARGET_OS == settings.OS.WINDOWS and menu.options.shellshock:
@@ -1076,6 +1104,11 @@ def server_identification(response):
     match = re.search(banner, server_banner, re.IGNORECASE)
     if match:
       settings.SERVER_BANNER = match.group(0)
+      # The version, where the banner names one - the matched name carries it only for the servers
+      # whose pattern asks for it, so it is read off the banner itself.
+      version = re.search(re.escape(settings.SERVER_BANNER.split("/")[0]) + r"[\-\_\/\ ]([\d\.]+)", server_banner, re.IGNORECASE)
+      if version:
+        settings.SERVER_VERSION = version.group(1).rstrip(".")
 
       # Which document root this server keeps. It runs on the first connection, before the target's
       # operating system has been worked out, so the banner itself has to answer for it - an Apache

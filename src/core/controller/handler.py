@@ -25,6 +25,7 @@ from src.utils import common
 from src.utils import session_handler
 from src.core.requests import requests
 from src.core.controller import checks
+from src.core.controller import proof
 from src.thirdparty.six.moves import urllib as _urllib
 from src.core.controller import shell_options
 from src.thirdparty.six.moves import html_parser as _html_parser
@@ -341,6 +342,12 @@ def pseudo_terminal_shell(injector, separator, maxlen, TAG, cmd, prefix, suffix,
     else:
       shell = _stored_shell
     return shell
+
+  # The executor that reaches this point, kept for '--proof' to run its own experiment at the end.
+  # A technique that answers in time is given the boundary instead, so the proof can time one
+  # request of its own rather than the extraction wrapper built on top of it.
+  proof.register(technique, vuln_parameter, http_request_method, execute_cmd,
+                 boundary=(separator, prefix, suffix, whitespace, url, timesec))
 
   return pseudo_terminal_shell_generic(url, filename, technique, no_result, execute_cmd, cleanup, separator=separator)
 
@@ -745,6 +752,8 @@ def oob_pseudo_terminal_shell(separator, prefix, suffix, whitespace, vuln_parame
       session_handler.store_cmd(url, cmd, shell, vuln_parameter)
     return shell
 
+  # Reached without going through pseudo_terminal_shell(), so '--proof' is told about it here too.
+  proof.register(technique, vuln_parameter, http_request_method, execute_cmd)
   return pseudo_terminal_shell_generic(url, filename, technique, False, execute_cmd, separator=separator)
 
 """

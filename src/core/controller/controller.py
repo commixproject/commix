@@ -621,12 +621,14 @@ def check_parameter_in_http_header(check_parameter, place):
   return inject_http_headers
 
 """
-Warn if changing the parameter never changes the response; classic/dynamic_code require reflection.
+Whether changing the parameter changes the response at all.
+
+Asked only where the answer decides something, which is under '--skip-static' alone: no technique
+here reads a page by comparing it, so on every other run this would be a request per parameter
+spent on a remark.
 """
 def check_parameter_dynamism(url, http_request_method, check_parameter):
-  if settings.LOAD_SESSION or not settings.TESTABLE_VALUE:
-    return
-  if menu.options.tech and "r" not in menu.options.tech and "e" not in menu.options.tech:
+  if settings.LOAD_SESSION or not settings.TESTABLE_VALUE or not menu.options.skip_static:
     return
 
   marker = settings.TESTABLE_VALUE + settings.INJECT_TAG
@@ -711,9 +713,10 @@ def check_parameter_dynamism(url, http_request_method, check_parameter):
     warn_msg = param_label + " does not appear to be dynamic."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     return False
-  if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = param_label + " appears to be dynamic."
-    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+  # Said plainly, not held back for '-v': the run asked for this check, so its answer is news
+  # either way.
+  info_msg = param_label + " appears to be dynamic."
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   return True
 
 """
@@ -885,7 +888,7 @@ def injection_process(url, check_parameter, http_request_method, filename, times
 
   is_dynamic = check_parameter_dynamism(url, http_request_method, check_parameter)
   if is_dynamic is False and menu.options.skip_static and not checks.explicitly_testable(check_parameter):
-    info_msg = "Skipping the parameter '" + check_parameter + "' that does not appear to be dynamic."
+    info_msg = "Skipping static parameter '" + check_parameter + "'."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
     return
 
@@ -1613,6 +1616,11 @@ def do_check(url, http_request_method, filename):
           untested = checks.untested_techniques()
           if untested:
             err_msg += " That would also test the " + untested + "."
+        # A client forced with '--oob-transport' that the target does not have answers nothing, which
+        # is the same silence a parameter that is not injectable produces.
+        if menu.options.oob_transport and settings.OOB_CHANNEL is not None and settings.OOB_STATE is not True:
+          err_msg += " Out-of-band testing was held to the '" + str(menu.options.oob_transport) + "' client by "
+          err_msg += "'--oob-transport' and nothing came back, which is also how a target without that client answers."
         if not menu.options.eval_sink:
           err_msg += " Code injection was not tested; the '--eval' option tests for it."
         err_msg += " If you suspect that there is some kind of protection mechanism involved, maybe you could try to"

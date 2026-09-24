@@ -207,7 +207,12 @@ Remove all injection tags from provided data
 def remove_tags(data):
   if not data:
     data = ""
-  return data.replace(settings.INJECT_TAG,"").replace(settings.CUSTOM_INJECTION_MARKER_CHAR,"").replace(settings.ASTERISK_MARKER, "").replace(settings.RANDOM_TAG, "") 
+  data = data.replace(settings.INJECT_TAG,"").replace(settings.ASTERISK_MARKER, "").replace(settings.RANDOM_TAG, "")
+  # The marker character is one only where the run found it in the user's own input - anywhere else
+  # it is an ordinary character, and a command such as "ls *.php" has to reach the target intact.
+  if settings.CUSTOM_INJECTION_MARKER is not None:
+    data = data.replace(settings.CUSTOM_INJECTION_MARKER_CHAR, "")
+  return data
 
 """
 Process data with custom injection marker character ('*')
@@ -493,6 +498,10 @@ def quit(filename, url, hard_exit):
   for action_fn in list(settings.PENDING_POST_DETECTION_ACTIONS):
     action_fn()
   settings.PENDING_POST_DETECTION_ACTIONS = []
+  # Asked for with '--proof': run after everything the detection had to say, so the evidence stands
+  # on its own rather than in the middle of the run's own reporting.
+  from src.core.controller import proof
+  proof.prove(filename, url)
   # Recurses into quit() when the shell exits; the rest runs there.
   if settings.PENDING_OS_SHELL_ENTRY:
     entry = settings.PENDING_OS_SHELL_ENTRY
@@ -1525,6 +1534,36 @@ def finding_parameter_line(vuln_parameter, http_request_method):
 Print one block per row, grouped by parameter - rows start with
 (technique, injection_type, vuln_parameter, payload, http_request_method).
 """
+"""
+What the target was worked out to be, said once and where the findings are.
+
+Only what is already in hand: every line here was settled by the requests detection had to send
+anyway - the banners came back with the first response, and which shell answered is what a payload
+that executed established. So nothing is asked of the target for it, and a line whose answer was
+never learned is left out rather than filled in with a guess.
+"""
+def target_fingerprint_summary():
+  # What the payloads were written for, and the one line of the three that a finding proves rather
+  # than a banner claims - so it leads, the way the rest of the run reports what it established.
+  technology = []
+  if settings.SERVER_BANNER:
+    technology.append(" ".join(filter(None, (settings.SERVER_BANNER.split("/")[0], settings.SERVER_VERSION))))
+  if settings.TARGET_APPLICATION:
+    technology.append(" ".join(filter(None, (settings.TARGET_APPLICATION, settings.TARGET_APPLICATION_VERSION))))
+  shell_identified = settings.IDENTIFIED_TARGET_OS or menu.options.os
+  # The operating system is left to the enumeration that asks the target for it by name - said here
+  # it would only be the coarser of two answers to the same question.
+  if not technology and not shell_identified:
+    return
+
+  settings.print_data_to_stdout(
+    settings.print_info_msg("Fetching the target environment.")
+  )
+  if technology:
+    settings.print_data_to_stdout(settings.print_retrieved_data("Web application technology", ", ".join(technology)))
+  if shell_identified:
+    settings.print_data_to_stdout(settings.print_retrieved_data("command shell", target_shell_label()))
+
 def _injection_points_summary(header_msg, rows, decode_payload=False):
   settings.print_data_to_stdout(Style.BRIGHT + header_msg + Style.RESET_ALL)
   prev_parameter = None
@@ -1540,6 +1579,7 @@ def _injection_points_summary(header_msg, rows, decode_payload=False):
       payload = str(url_decode(payload))
     for line in finding_summary_lines(technique, injection_type, payload):
       settings.print_data_to_stdout(line)
+  target_fingerprint_summary()
 
 """
 Print a summary of the injection points restored from a stored session.

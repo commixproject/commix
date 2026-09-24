@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "160"
+REVISION = "161"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -410,7 +410,8 @@ RANDOM_STRING_GENERATOR = ''.join(random.choice(string.ascii_uppercase + string.
 RANDOM_VAR_GENERATOR = ''.join(random.choice(string.ascii_uppercase[4:]) for _ in range(3))
 
 # Path to text resources folder
-TXT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'txt'))
+DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'data'))
+TXT_DIR = os.path.join(DATA_DIR, 'txt')
 
 START_TIME = time.time()
 
@@ -1334,6 +1335,8 @@ CRAWL_EXCLUDE_EXTENSIONS = [
 ]
 
 TARGET_APPLICATION = ""
+# The version the application named for itself, where it named one.
+TARGET_APPLICATION_VERSION = ""
 # Unsupported target application(s) [1]
 # [1] https://github.com/commixproject/commix/wiki/Target-applications
 UNSUPPORTED_TARGET_APPLICATION = [
@@ -1505,6 +1508,10 @@ LAST_OUTPUT_FILE_CONTENT = None
 MAX_INVALID_URL_ANSWERS = 3
 # Findings confirmed this run, for the end-of-run summary.
 CONFIRMED_INJECTION_POINTS = []
+
+# One entry per technique that proved a point, with the executor that reaches it - see proof.py.
+PROOF_EXECUTORS = []
+PROOF_DONE = False
 # (prefix, suffix, separator, whitespace) confirmed by one technique, tried first by the others.
 CONFIRMED_BOUNDARY = {}
 # Whether the "keep testing others" prompt already fired for this target.
@@ -2214,6 +2221,11 @@ MAX_PAGE_SIZE = 100 * 1024 * 1024
 
 # The web server named by the 'Server' header, and the ones that are recognised.
 SERVER_BANNER = ""
+# The version that server named for itself, where it named one.
+SERVER_VERSION = ""
+# The distribution a banner spelled out, kept as the banner wrote it rather than as the family it
+# puts the target in - "Ubuntu" is a name for a banner, "Unix-like" is what it makes of the target.
+IDENTIFIED_SERVER_OS = ""
 SERVER_BANNERS = [
     "Microsoft-IIS",
     # Ahead of the bare "Apache" below: Tomcat names itself with it, and keeps its own document root.

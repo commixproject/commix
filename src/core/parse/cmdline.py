@@ -810,6 +810,12 @@ injection.add_option("--os",
                 default=False,
                 help="Force back-end operating system (e.g. 'Windows' or 'Unix-like').")
 
+injection.add_option("--proof",
+                action="store_true",
+                dest="proof",
+                default=False,
+                help="Prove exploitation of the detected injection point(s).")
+
 injection.add_option("--tamper",
                 action="store",
                 dest="tamper",

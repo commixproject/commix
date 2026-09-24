@@ -30,9 +30,11 @@ setup(
       },
       license='GNU General Public License v3 (GPLv3)',
       python_requires='>=3.7',
-      packages=find_packages(),
+      # The data files live beside the code rather than inside it, so they are named here to be
+      # installed along with it.
+      packages=find_packages() + ["data", "data.txt"],
       include_package_data=True,
-      package_data={"": ["*.txt"]},
+      package_data={"": ["*.txt"], "data.txt": ["*.txt", "*.tx_"]},
       zip_safe=False,
     classifiers=[
           'Development Status :: 5 - Production/Stable',

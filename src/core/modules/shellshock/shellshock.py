@@ -195,6 +195,9 @@ def _post_exploitation(url, cve, check_header, filename, technique, no_result):
 
   # Opens later, at quit(), same as the main flow.
   execute_cmd = _command_executor(url, cve, check_header, filename, log_execution=True)
+  # The module has its own executor and never reaches pseudo_terminal_shell(), so it registers here.
+  from src.core.controller import proof
+  proof.register(technique, check_header, settings.HTTPMETHOD.GET, execute_cmd)
   handler.pseudo_terminal_shell_generic(url, filename, technique, no_result, execute_cmd, on_found_declined=lambda: None)
 
 """

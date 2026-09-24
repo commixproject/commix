@@ -726,8 +726,16 @@ def main(filename, url, http_request_method):
                                                    )
       try:
         try:
-          # Skip stability probing on resume unless content-reflection techniques ('r'/'e') are in scope.
-          if not settings.LIKELY_RESUME and (not menu.options.tech or "r" in menu.options.tech or "e" in menu.options.tech):
+          # The page the target answered with, kept off the response already in hand.
+          requests.capture_original_page(response)
+          """
+          The second sample, and the regions it marks as moving on their own, are what a parameter
+          is compared against - so they are worth a request only where something compares one.
+          Nothing in the detection does: a technique reads its own output back out of the response,
+          and the comparison serves the dynamism check alone, which only decides anything under
+          '--skip-static'.
+          """
+          if not settings.LIKELY_RESUME and menu.options.skip_static:
             requests.is_url_content_stable(settings.INIT_CONNECTION_URL or url, response, settings.INIT_CONNECTION_FETCH_TIME, http_request_method)
             info_msg = "Performing heuristic (passive) test on the target URL."
             settings.print_data_to_stdout(settings.print_info_msg(info_msg))
