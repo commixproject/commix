@@ -4904,6 +4904,15 @@ def announce_leftover_file(technique):
     settings.LEFTOVER_FILES.append(written)
 
 """
+Drop a file from the leftovers, once it has actually been taken off the target - otherwise the run
+ends by naming a file it has just removed.
+"""
+def forget_leftover_file(name):
+  for left in list(settings.LEFTOVER_FILES):
+    if left == name or left.endswith("/" + name) or left.endswith("\\" + name):
+      settings.LEFTOVER_FILES.remove(left)
+
+"""
 Finalize injection process
 """
 def finalize(exit_loops, no_result, i, total, injection_type, technique, shell):

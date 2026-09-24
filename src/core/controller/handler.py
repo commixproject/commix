@@ -172,9 +172,11 @@ def delete_previous_shell(separator, TAG, prefix, suffix, whitespace, http_reque
       info_msg = "The file ('" + OUTPUT_TEXTFILE + "') used for command execution was already deleted from the target."
       settings.print_data_to_stdout(settings.print_info_msg(info_msg))
       return
-    msg = "Do you want to delete from the target the file ('" + OUTPUT_TEXTFILE + "') used for command execution? [y/N] "
-    if common.read_input(msg, default="N", check_batch=True) not in settings.CHOICE_YES:
-      return
+    # '--cleanup' is the answer already given: the file goes without being asked about.
+    if not menu.options.cleanup:
+      msg = "Do you want to delete from the target the file ('" + OUTPUT_TEXTFILE + "') used for command execution? [y/N] "
+      if common.read_input(msg, default="N", check_batch=True) not in settings.CHOICE_YES:
+        return
     if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Cleaning up the target operating system (i.e. deleting file '" + OUTPUT_TEXTFILE + "')."
       settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
@@ -198,6 +200,7 @@ def delete_previous_shell(separator, TAG, prefix, suffix, whitespace, http_reque
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       return
     session_handler.mark_file_deleted(url, technique, vuln_parameter, http_request_method)
+    checks.forget_leftover_file(OUTPUT_TEXTFILE)
 
 
 """
@@ -304,6 +307,10 @@ def pseudo_terminal_shell(injector, separator, maxlen, TAG, cmd, prefix, suffix,
     if technique == settings.INJECTION_TECHNIQUE.FILE_BASED or technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
       # Registered here, actually asked/run later at quit().
       settings.PENDING_FILE_CLEANUPS[OUTPUT_TEXTFILE] = lambda: delete_previous_shell(separator, TAG, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, technique)
+
+  # Registered on the way in, not only where the shell loop ends - a run that never opened one still
+  # put the file there, and the shell offer being declined is not a reason to leave it behind.
+  cleanup()
 
   # Run one command through the confirmed injection point, reusing a stored answer where there is one.
   def execute_cmd(cmd):

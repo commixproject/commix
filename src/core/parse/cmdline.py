@@ -905,6 +905,12 @@ misc.add_option("--no-logging",
                 default=False,
                 help="Disable logging to a file.")
 
+misc.add_option("--cleanup",
+                action="store_true",
+                dest="cleanup",
+                default=False,
+                help="Clean up the target from files commix left on it.")
+
 misc.add_option("--purge",
                 action="store_true",
                 dest="purge",
