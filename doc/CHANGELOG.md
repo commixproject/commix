@@ -1,5 +1,5 @@
 ## Version 4.2 (TBA)
-* Changed: Text resource files were moved from the `src/txt` to the `data/txt` directory.
+* Revised: Text resource files were moved from the `src/txt` to the `data/txt` directory.
 * Added: Summary of the identified command shell, web application technology and operating system, printed after the injection point(s).
 * Added: New switch `--proof` for demonstrating exploitation of each injection point found, with the evidence written beside the run's other output.
 * Added: New switch `--cleanup` for removing the file a technique left on the target, without being asked about it.
