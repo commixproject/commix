@@ -44,6 +44,7 @@ from src.core.requests import parameters
 from src.core.requests import stability
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.six.moves import http_client as _http_client
+from src.thirdparty.six.moves import html_parser as _html_parser
 from src.thirdparty.colorama import Style
 from src.thirdparty.flatten_json.flatten_json import flatten, unflatten_list
 
@@ -1307,6 +1308,46 @@ def get_header(headers, key):
       value = headers[name]
       break
   return value
+
+"""
+The shell or interpreter error a page is reporting, where it is reporting one.
+"""
+def extract_error_message(page):
+  if not isinstance(page, str) or not any(hint in page for hint in settings.SHELL_ERROR_HINTS):
+    return None
+  try:
+    import html
+    unescape = html.unescape
+  except ImportError:
+    unescape = _html_parser.HTMLParser().unescape
+  # The markup a message is wrapped in is the page's, not the shell's - and a message split across
+  # tags is one the shell wrote in one piece. Lines are left alone, so the regexes stay within one.
+  page = re.sub(r"[^\S\n]+", settings.SINGLE_WHITESPACE, re.sub(r"<[^>]{0,128}>", settings.SINGLE_WHITESPACE, unescape(page)))
+  for regex in settings.SHELL_ERROR_REGEXES:
+    match = re.search(regex, page)
+    if match:
+      candidate = match.group("result").strip().rstrip(".")
+      if candidate:
+        return candidate
+  return None
+
+"""
+Say what the target answered with, where it answered with a shell or interpreter error.
+
+Evidence that the payload reached a shell and was not understood there, which is a different answer
+from a parameter that never reached one - and the run it belongs to is the one that ends "not
+injectable" while a different separator would have worked.
+"""
+def parse_errors(page):
+  message = extract_error_message(page)
+  if message is None:
+    return
+  settings.SHELL_ERROR_SEEN = True
+  if not menu.options.parse_errors or message in settings.PARSED_ERRORS:
+    return
+  settings.PARSED_ERRORS.add(message)
+  warn_msg = "Parsed error message from the target's response: '" + message + "'."
+  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
 Checks regarding a recognition of generic "your ip has been blocked" messages.

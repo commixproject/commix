@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "161"
+REVISION = "162"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -2061,6 +2061,48 @@ BROWSER_VERIFICATION = None
 BLOCKED_IP_REGEX = r"(?i)(\A|\b)ip\b.*\b(banned|blocked|block list|firewall)"
 
 BLOCKED_IP_DETECTED = None
+
+"""
+Regular expressions used for parsing shell and interpreter errors out of a response ('--parse-errors').
+
+Each one is a signature rather than a guess at what an error looks like, because what makes these
+worth printing is that they cannot be anything else: a page saying them ran what it was given and
+could not make sense of it, which is a different answer from a parameter that never reached a shell.
+"""
+SHELL_ERROR_REGEXES = (
+  # POSIX shells, naming themselves before whatever they could not do.
+  r"(?P<result>[\w./\\-]{0,64}sh: [^\n]{0,192}?(?:command not found|not found|[Ss]yntax error|unexpected|[Uu]nterminated|[Pp]ermission denied|[Nn]o such file or directory|cannot (?:open|create|execute))[^\n]{0,96})",
+  # Windows command interpreter.
+  r"(?P<result>'[^'\n]{1,64}' is not recognized as an internal or external command[^\n]{0,64})",
+  r"(?P<result>The syntax of the command is incorrect\.)",
+  r"(?P<result>The system cannot find the (?:path|file) specified\.)",
+  # PHP, reporting from the function the payload landed in.
+  r"(?P<result>(?:Warning|Notice|Fatal error|Parse error)[^\n]{0,192}?(?:shell_exec|passthru|proc_open|pcntl_exec|popen|system|exec|eval)\(\)[^\n]{0,160})",
+  r"(?P<result>[^\n]{0,96}?has been disabled for security reasons[^\n]{0,32})",
+  # What an interpreter says about code it could not parse, whichever one it is.
+  r"(?P<result>[^\n]{0,64}?syntax error, unexpected [^\n]{1,128})",
+  r"(?P<result>[^\n]{0,96}?syntax error at [^\n]{1,96} line \d+[^\n]{0,64})",
+  r"(?P<result>(?:Syntax|Name|Type|Value|Import|ModuleNotFound|Attribute|Indentation|Reference|OS|FileNotFound|Permission)Error\s*:\s*[^\n]{1,160})",
+  r"(?P<result>Can't locate [^\n]{1,96} in @INC[^\n]{0,64})",
+)
+
+"""
+What has to be on a page before it is worth taking apart for the above.
+
+The set above is run over a page with its markup taken out, and doing that to every response a run
+makes is work worth skipping - so a page is first looked at as it arrived, for the plain text that
+every one of those signatures has to contain. Substrings rather than one alternation of them,
+because a pattern of this many branches costs more to not match than these do to be looked for.
+"""
+SHELL_ERROR_HINTS = ("sh:", "syntax error", "Error", "not recognized as an internal",
+                     "syntax of the command", "cannot find the", "disabled for security reasons",
+                     "exec", "passthru", "proc_open", "popen", "system()", "eval()", "@INC")
+
+# Said once each, so a page answering the same way to every payload is not reported once per request.
+PARSED_ERRORS = set()
+
+# Whether one was seen at all, which is worth saying even where they were not printed.
+SHELL_ERROR_SEEN = False
 
 # Prefix for Google analytics cookie names
 GOOGLE_ANALYTICS_COOKIE_REGEX = r"(?i)\A(_ga|_gid|_gat|_gcl_au|__utm[abcz])"

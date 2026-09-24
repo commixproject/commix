@@ -506,6 +506,8 @@ def check_http_traffic(request):
       checks.browser_verification(page)
       # Checks regarding recognition of generic "your ip has been blocked" messages.
       checks.blocked_ip(page)
+      # Whatever shell or interpreter the page is reporting an error from.
+      checks.parse_errors(page)
       stability.reset_connection_error_budget()
       return response
 
@@ -526,6 +528,8 @@ def check_http_traffic(request):
       checks.captcha_check(page)
       checks.browser_verification(page)
       checks.blocked_ip(page)
+      # A shell error is at least as likely to come back as a 500 as it is with a 200.
+      checks.parse_errors(page)
 
       if (not settings.PERFORM_CRACKING and \
       not settings.IS_JSON and \

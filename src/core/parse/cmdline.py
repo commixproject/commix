@@ -161,6 +161,12 @@ general.add_option("--abort-on-empty",
                 default=False,
                 help="Abort data retrieval on empty results.")
 
+general.add_option("--parse-errors",
+                action="store_true",
+                dest="parse_errors",
+                default=False,
+                help="Parse and display shell error messages from responses.")
+
 general.add_option("--report-json",
                 action="store",
                 dest="report_json",

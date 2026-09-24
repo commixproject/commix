@@ -1621,6 +1621,13 @@ def do_check(url, http_request_method, filename):
         if menu.options.oob_transport and settings.OOB_CHANNEL is not None and settings.OOB_STATE is not True:
           err_msg += " Out-of-band testing was held to the '" + str(menu.options.oob_transport) + "' client by "
           err_msg += "'--oob-transport' and nothing came back, which is also how a target without that client answers."
+        # A shell that complained about what it was given did run it, so what is missing is the way
+        # the payload was put together rather than a way in.
+        if settings.SHELL_ERROR_SEEN:
+          err_msg += " The target answered with shell errors while being tested, so the payload did reach a shell"
+          if not menu.options.parse_errors:
+            err_msg += " - the '--parse-errors' option shows what it said"
+          err_msg += "."
         if not menu.options.eval_sink:
           err_msg += " Code injection was not tested; the '--eval' option tests for it."
         err_msg += " If you suspect that there is some kind of protection mechanism involved, maybe you could try to"
