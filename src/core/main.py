@@ -847,6 +847,7 @@ def run():
       # to be probed over.
       checks.validate_tamper_scripts()
       checks.validate_modules()
+      checks.validate_test_selection()
       checks.apply_injection_type()
       checks.validate_techniques()
       checks.validate_options()

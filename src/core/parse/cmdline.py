@@ -753,6 +753,18 @@ injection.add_option("--skip-technique",
                 dest="skip_tech",
                 help="Specify injection technique(s) to skip.")
 
+injection.add_option("--test-filter",
+                action="store",
+                dest="test_filter",
+                default=None,
+                help="Test only the given payload boundaries (e.g. ';').")
+
+injection.add_option("--test-skip",
+                action="store",
+                dest="test_skip",
+                default=None,
+                help="Skip the given payload boundaries (e.g. '%0a').")
+
 injection.add_option("--oob",
                 action="store_true",
                 dest="oob",

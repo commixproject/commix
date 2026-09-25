@@ -2333,6 +2333,64 @@ def validate_modules():
   return provided_modules
 
 """
+Compile what '--test-filter'/'--test-skip' were given, once, before any of it is tested against.
+
+Taken as a pattern where it reads as one, and as the plain text it is where it does not - a filter
+of "';" is what somebody wanting that boundary would write, and it is not a regular expression that
+compiles. A lone '*' or '+' is read the way it is written in a shell rather than as the repetition
+of nothing, which is what it would otherwise be.
+"""
+def validate_test_selection():
+  for option, name in ((menu.options.test_filter, "TEST_FILTER"), (menu.options.test_skip, "TEST_SKIP")):
+    if not option:
+      continue
+    compiled = []
+    # Several of them are given the way every other list this tool takes is given, by comma - no
+    # boundary has one in it, so nothing is lost by reading it that way.
+    for part in (item for item in re.split(settings.PARAMETER_SPLITTING_REGEX, option) if item):
+      # Which techniques run is already '--technique' and '--skip-technique', and a name given here
+      # would either repeat them or quietly contradict them - said rather than taken either way.
+      if re.search(r"[A-Za-z]{2,}", part) and any(part.strip().lower() in known for known in settings.TECHNIQUE_ORDER):
+        err_msg = "The option '" + ("--test-filter" if name == "TEST_FILTER" else "--test-skip") + "' selects payload "
+        err_msg += "boundaries, and '" + part.strip() + "' names an injection technique. Use '"
+        err_msg += ("--technique" if name == "TEST_FILTER" else "--skip-technique") + "' for that."
+        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+        raise SystemExit(settings.EXIT_FAILURE)
+      pattern = re.sub(r"([^.])([*+])", r"\g<1>.\g<2>", part.strip("*+"))
+      try:
+        candidate = re.compile(pattern, re.IGNORECASE)
+        # A boundary is made of the characters a pattern is written in - '|' and '||' are separators
+        # here before they are alternations, and read as the latter they match every boundary there
+        # is rather than the one asked for. Anything that matches nothing at all is meant literally.
+        if candidate.search(""):
+          raise re.error("matches everything")
+      except re.error:
+        candidate = re.compile(re.escape(part), re.IGNORECASE)
+      compiled.append(candidate)
+    setattr(settings, name, compiled or None)
+
+"""
+Whether a boundary is one of those this run was told to try.
+
+Only the boundary itself: which techniques run is what '--technique' and '--skip-technique' decide,
+and these say what each of the running ones puts on the wire.
+"""
+def test_selected(whitespace, prefix, suffix, separator):
+  if settings.TEST_FILTER is None and settings.TEST_SKIP is None:
+    return True
+  boundary = prefix + separator + suffix
+  # Both the way a boundary is held and the way it can be typed: the separators include a newline
+  # and a carriage return, which nobody is going to put on a command line as themselves.
+  label = boundary + settings.SINGLE_WHITESPACE + whitespace
+  label += settings.SINGLE_WHITESPACE + _urllib.parse.quote(boundary, safe="")
+  label += settings.SINGLE_WHITESPACE + _urllib.parse.quote(whitespace, safe="")
+  if settings.TEST_FILTER is not None and not any(pattern.search(label) for pattern in settings.TEST_FILTER):
+    return False
+  if settings.TEST_SKIP is not None and any(pattern.search(label) for pattern in settings.TEST_SKIP):
+    return False
+  return True
+
+"""
 Resolve '--type' into the techniques that show a result that way.
 
 The type is what a finding is reported as, so asking for one is a fair way to ask for the

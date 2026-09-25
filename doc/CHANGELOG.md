@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New options `--test-filter` and `--test-skip` for choosing which payload boundaries a technique is tried with.
 * Added: New options `--save` and `-c` for keeping the options a run was given in a configuration file, and running from one.
 * Added: New option `--har` for logging the run's HTTP traffic in the archive format proxies and browsers read.
 * Added: New option `--results-file` for collecting the findings of every target tested into a CSV file.

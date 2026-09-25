@@ -1616,6 +1616,16 @@ def do_check(url, http_request_method, filename):
           untested = checks.untested_techniques()
           if untested:
             err_msg += " That would also test the " + untested + "."
+        # A selection that leaves few boundaries, or none, is not something a target did - and what
+        # was never sent cannot have been answered.
+        if menu.options.test_filter or menu.options.test_skip:
+          err_msg += " Only the payload boundaries "
+          if menu.options.test_filter:
+            err_msg += "matching '" + str(menu.options.test_filter) + "'"
+            err_msg += " and " if menu.options.test_skip else ""
+          if menu.options.test_skip:
+            err_msg += "not matching '" + str(menu.options.test_skip) + "'"
+          err_msg += " were sent, so this says nothing about the ones that were not."
         # A client forced with '--oob-transport' that the target does not have answers nothing, which
         # is the same silence a parameter that is not injectable produces.
         if menu.options.oob_transport and settings.OOB_CHANNEL is not None and settings.OOB_STATE is not True:
@@ -1658,6 +1668,11 @@ def do_check(url, http_request_method, filename):
           err_msg += " Skipping to the next target."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       if not settings.MULTI_TARGETS:
+        # What the run produced is written even where it found nothing: the traffic it sent and the
+        # report of it are the output of a run that came up empty just as much as of one that did not,
+        # and a run that found nothing is the one whose traffic is worth reading.
+        checks.finish_target()
+        logs.print_logs_notification(filename, url)
         common.show_http_error_codes()
         raise SystemExit(settings.EXIT_FAILURE)
     elif settings.MULTI_TARGETS:

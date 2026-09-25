@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "163"
+REVISION = "164"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -2104,6 +2104,16 @@ What the current target has been found vulnerable at, for the CSV '--results-fil
 Gathered per target and written when it is finished with, so that one row stands for a parameter
 rather than for each technique that answered through it.
 """
+"""
+What '--test-filter' and '--test-skip' were given, compiled once.
+
+Kept here rather than read from the option each time, because what the option holds is what the user
+typed and what a boundary is measured against is a pattern - working that out per combination, over
+every technique, is the same answer arrived at thousands of times.
+"""
+TEST_FILTER = None
+TEST_SKIP = None
+
 RESULTS_FILE_ROWS = {}
 
 # What the file is called where a run over several targets was not given a name for it.
@@ -2410,7 +2420,7 @@ RUN_WIDE_STATE = frozenset((
   "LAST_LOGGED_PARAMETER", "LAST_SELECTED_MODULE", "LIKELY_RESUME", "LOGGED_FINDINGS_HEADER",
   "MULTI_REQUEST_TARGETS", "MULTI_TARGETS", "OS_CHECKS_NUM", "PROGRESS_LINE_OPEN", "READLINE_ERROR",
   "SESSION_FILE", "SHOW_LOGS_MSG", "TAMPER_SCRIPTS", "SITEMAP_CHECK", "SKIPPED_OUT_OF_SCOPE", "SKIP_VULNERABLE_HOST",
-  "RESULTS_FILE_FORMAT", "RESULTS_FILE_STARTED",
+  "RESULTS_FILE_FORMAT", "RESULTS_FILE_STARTED", "TEST_FILTER", "TEST_SKIP",
   "STDIN_PARSING", "TAMPER_WARNING_SHOWN", "TIME_RELATED_ATTACK_WARNING", "TOTAL_OF_REQUESTS", "EVAL_SUGGESTED", "COMMAND_SUGGESTED",
   "VALIDATION_RUN", "VISIBLE_CONNECTION_ERRORS", "WARNED_HTTP_ERROR_CODES",
   # Set by the connection to whichever target is in hand, before this reset can be reached.

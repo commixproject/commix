@@ -76,6 +76,10 @@ def _boundary_combinations(whitespaces, prefixes, suffixes, separators, keep_out
           if boundary in tried:
             continue
           tried.add(boundary)
+          # Asked of every boundary rather than of the technique as a whole, which is the point of
+          # the two options: '--technique' already chooses between techniques.
+          if not checks.test_selected(whitespace, effective, suffix, separator):
+            continue
           yield whitespace, prefix, suffix, separator
 
 """
