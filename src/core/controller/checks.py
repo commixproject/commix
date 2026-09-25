@@ -1642,7 +1642,7 @@ def target_fingerprint_summary():
     settings.print_info_msg("Fetching the target environment.")
   )
   if technology:
-    settings.print_data_to_stdout(settings.print_retrieved_data("Web application technology", ", ".join(technology)))
+    settings.print_data_to_stdout(settings.print_retrieved_data("web application technology", ", ".join(technology)))
   if shell_identified:
     settings.print_data_to_stdout(settings.print_retrieved_data("command shell", target_shell_label()))
 
@@ -4124,7 +4124,7 @@ class print_enumenation():
 
   # Not a fetch: the command is the user's own, and it is named rather than described.
   def print_single_os_cmd_msg(self, cmd):
-    info_msg =  "Executing user-supplied command '" + cmd + "'."
+    info_msg =  "Executing operating system command: '" + cmd + "'."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
 """
@@ -5203,11 +5203,9 @@ def tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_met
     from src.core.techniques.tempfile_based import tfb_handler
     path = tmp_path
     setting_writable_dir(path)
-    call_tfb = tfb_handler.exploitation(url, timesec, filename, tmp_path, http_request_method, url_time_response)
-    if call_tfb is False:
-      info_msg = "Resuming the " + settings.INJECTION_TECHNIQUE.FILE_BASED + " tests."
-      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-    return call_tfb
+    # Nothing said where it hands back: the sweep that carries on announces itself as it continues,
+    # and saying so twice over reads as two techniques where there is one.
+    return tfb_handler.exploitation(url, timesec, filename, tmp_path, http_request_method, url_time_response)
   else:
     settings.print_data_to_stdout(settings.END_LINE.CR)
 

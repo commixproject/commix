@@ -128,6 +128,14 @@ Announce the technique about to be tested, re-checking tamper compatibility now 
 def _announce_technique(injection_type, technique):
   settings.CURRENT_TECHNIQUE = technique
   checks.tamper_scripts(stored_tamper_scripts=True)
+  """
+  Where a file-based technique writes, and under what name, is settled before it sends anything -
+  and those questions would come between the title and the first probe, leaving a line that says
+  "please wait" with a prompt under it. So the title is left to that first probe, which is past
+  them, and the technique announces itself once.
+  """
+  if settings.VERBOSITY_LEVEL == 0 and technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
+    return
   checks.testing_technique_title(injection_type, technique)
 
 """
@@ -160,7 +168,19 @@ Exit handler
 def exit_handler(no_result):
   if no_result:
     if settings.VERBOSITY_LEVEL == 0 and settings.LOAD_SESSION == None:
-      if not settings.RESPONSE_DELAYS:
+      """
+      Every combination tried without one is the technique finished, so it is closed the way a
+      technique that found something closes: a parameter that answers nothing would otherwise
+      leave each of its techniques hanging on the dots it got to.
+      """
+      if settings.PROGRESS_LINE_OPEN:
+        settings.RESPONSE_DELAYS = False
+        # Unless what ran out of combinations is the '/tmp/' attempt, which hands the sweep back
+        # rather than ending it: its line is left open for the boundaries the sweep returns to, so
+        # the one technique is announced once and closed once, however many directories it took.
+        if not settings.TEMPFILE_BASED_STATE:
+          settings.print_data_to_stdout(" (done)")
+      elif not settings.RESPONSE_DELAYS:
         settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
       else:
         settings.RESPONSE_DELAYS = False
