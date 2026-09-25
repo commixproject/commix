@@ -20,6 +20,7 @@ import tempfile
 from datetime import date
 from datetime import datetime
 from src.core.parse import cmdline as menu
+from src.utils import har
 from src.utils import common
 from src.utils import settings
 from src.core.requests import reproduce
@@ -215,6 +216,7 @@ def add_finding(filename, injection_type, technique, http_request_method, vuln_p
     add_line(filename, settings.strip_ansi_codes("  " + settings.SUB_CONTENT_SIGN_TYPE + "Reproduce: " + command), group="findings")
     for caveat in caveats:
       add_line(filename, settings.strip_ansi_codes("  " + settings.SUB_CONTENT_SIGN_TYPE + "Note: " + caveat[0].upper() + caveat[1:] + "."), group="findings")
+  results_note(menu.options.url, http_request_method, vuln_parameter, technique, injection_type)
   if report_active():
     finding = {
       "parameter": vuln_parameter,
@@ -229,6 +231,74 @@ def add_finding(filename, injection_type, technique, http_request_method, vuln_p
       if caveats:
         finding["reproduce_caveats"] = caveats
     settings.REPORT_JSON.setdefault("findings", []).append(finding)
+
+"""
+Settle which CSV the findings of a run over several targets are collected in.
+
+A run given a list is one whose answer is the list back with the vulnerable entries marked, so it
+gets the file whether or not one was asked for - named after the time the run started, beside the
+run's other output. A single target has its own log and does not need a sheet of one row, so there
+the file is only what '--results-file' names.
+"""
+def results_file_in_use():
+  if menu.options.results_file or not checks.several_targets():
+    return
+  output_dir = menu.options.output_dir or settings.OUTPUT_DIR
+  menu.options.results_file = os.path.join(output_dir, datetime.now().strftime(settings.RESULTS_FILE_FORMAT).lower())
+
+"""
+Note a finding for the CSV '--results-file' keeps.
+
+One row per place and parameter rather than per finding, because what a run over many targets is
+read for is which of them answered and where - the techniques that got there are a column of it.
+"""
+def results_note(url, place, parameter, technique, injection_type):
+  results_file_in_use()
+  if not menu.options.results_file:
+    return
+  row = settings.RESULTS_FILE_ROWS.setdefault((url, place, parameter), {"techniques": set(), "notes": set()})
+  letter = session_handler.technique_letter(technique)
+  if letter:
+    row["techniques"].add(letter.upper())
+  else:
+    # A module is not one of the techniques '--technique' chooses between, so it has no letter to
+    # put in that column - what found the point is said in words instead of left out.
+    row["notes"].add(checks.summary_technique_label(technique))
+  row["notes"].add(injection_type[0].upper() + injection_type[1:])
+
+"""
+A field as a CSV file can hold it.
+"""
+def _csv_value(value):
+  value = str(value)
+  if any(char in value for char in (",", '"', "\n", "\r")):
+    value = '"' + value.replace('"', '""') + '"'
+  return value
+
+"""
+Write out what this target was found vulnerable at, and start the next one with nothing.
+"""
+def write_results_rows():
+  if not menu.options.results_file or not settings.RESULTS_FILE_ROWS:
+    return
+  rows = settings.RESULTS_FILE_ROWS
+  settings.RESULTS_FILE_ROWS = {}
+  try:
+    exists = os.path.isfile(menu.options.results_file) and os.path.getsize(menu.options.results_file) > 0
+    with open(menu.options.results_file, "a", encoding=settings.DEFAULT_CODEC) as output_file:
+      if not exists:
+        output_file.write("Target URL,Place,Parameter,Technique(s),Note(s)" + settings.END_LINE.LF)
+      for (url, place, parameter), row in rows.items():
+        output_file.write(",".join(_csv_value(field) for field in (
+          url, place, parameter, "".join(sorted(row["techniques"])), "; ".join(sorted(row["notes"]))
+        )) + settings.END_LINE.LF)
+  except (OSError, IOError) as err_msg:
+    write_failure(menu.options.results_file, err_msg)
+    return
+  if not settings.RESULTS_FILE_STARTED:
+    settings.RESULTS_FILE_STARTED = True
+    info_msg = "Findings are being appended to the CSV results file '" + menu.options.results_file + "'."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
 """
 Add any executed command and
@@ -301,6 +371,7 @@ def print_logs_notification(filename, url):
   checks.save_cmd_history()
   add_footer(filename)
   write_report()
+  har.write()
   if settings.SHOW_LOGS_MSG is True and not menu.options.no_logging:
     if not settings.LOAD_SESSION:
       logs_notification(filename)

@@ -583,6 +583,15 @@ def main(filename, url, http_request_method):
       elif "cookie" in test_names:
         settings.INJECTION_LEVEL = settings.USER_APPLIED_LEVEL = settings.COOKIE_INJECTION_LEVEL
 
+    # A marker placed in a header or a cookie picks the injection point out the same way '-p' does,
+    # so it calls for the same level - and without it the place is tested with boundaries that
+    # cannot break out of anything, which reads as a header that is not injectable.
+    if not menu.options.level and settings.CUSTOM_INJECTION_MARKER:
+      if settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS or settings.INJECTION_MARKER_LOCATION.CUSTOM_HTTP_HEADERS:
+        settings.INJECTION_LEVEL = settings.USER_APPLIED_LEVEL = settings.HTTP_HEADER_INJECTION_LEVEL
+      elif settings.INJECTION_MARKER_LOCATION.COOKIE:
+        settings.INJECTION_LEVEL = settings.USER_APPLIED_LEVEL = settings.COOKIE_INJECTION_LEVEL
+
     if not settings.USER_APPLIED_LEVEL :
       settings.INJECTION_LEVEL = settings.USER_APPLIED_LEVEL = session_handler.applied_levels(url, http_request_method)
 

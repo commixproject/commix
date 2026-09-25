@@ -104,6 +104,12 @@ general.add_option("-t",
                 default=None,
                 help="Log all HTTP traffic into a textual file.")
 
+general.add_option("--har",
+                action="store",
+                dest="har",
+                default=None,
+                help="Log all HTTP traffic into a HAR file.")
+
 general.add_option("--eta",
                 action="store_true",
                 dest="eta",
@@ -161,11 +167,29 @@ general.add_option("--abort-on-empty",
                 default=False,
                 help="Abort data retrieval on empty results.")
 
+general.add_option("-c",
+                action="store",
+                dest="config_file",
+                default=None,
+                help="Load options from a configuration INI file.")
+
+general.add_option("--save",
+                action="store",
+                dest="save_config",
+                default=None,
+                help="Save options to a configuration INI file.")
+
 general.add_option("--parse-errors",
                 action="store_true",
                 dest="parse_errors",
                 default=False,
                 help="Parse and display shell error messages from responses.")
+
+general.add_option("--results-file",
+                action="store",
+                dest="results_file",
+                default=None,
+                help="Store findings of every target to a CSV file.")
 
 general.add_option("--report-json",
                 action="store",
@@ -1050,12 +1074,19 @@ if options.module:
     if _named.strip() in settings.MODULES:
       setattr(options, _named.strip(), True)
 
+# A profile stands for the settled part of a run, so it is applied before anything is worked out
+# from the options - and only where the command line left the option alone.
+_from_config = set()
+if options.config_file:
+  from src.core.parse import configfile
+  _from_config = configfile.load(parser, options, options.config_file)
+
 # Remember whether '--web-root' was explicitly supplied on the CLI
 settings.USER_APPLIED_WEB_ROOT = bool(options.web_root)
 
 # Remember whether '--retries' was explicitly supplied, since it carries a default of its own
-settings.USER_APPLIED_RETRIES = any(_ in sys.argv for _ in ("--retries",)) or any(_.startswith("--retries=") for _ in sys.argv)
-settings.USER_APPLIED_TIMEOUT = any(_ in sys.argv for _ in ("--timeout",)) or any(_.startswith("--timeout=") for _ in sys.argv)
+settings.USER_APPLIED_RETRIES = "retries" in _from_config or any(_ in sys.argv for _ in ("--retries",)) or any(_.startswith("--retries=") for _ in sys.argv)
+settings.USER_APPLIED_TIMEOUT = "timeout" in _from_config or any(_ in sys.argv for _ in ("--timeout",)) or any(_.startswith("--timeout=") for _ in sys.argv)
 
 # Remember whether '--auth-cred'/'--auth-type' were explicitly supplied on the CLI
 settings.USER_APPLIED_COOKIE = options.cookie or ""
@@ -1077,6 +1108,12 @@ if not options.version:
 
 # argv input errors
 settings.sys_argv_errors()
+
+# Written after the command line has been checked over, so that a profile is never made out of one
+# that would not have run.
+if options.save_config:
+  from src.core.parse import configfile
+  configfile.save(parser, options, options.save_config)
 
 COMMON_OPTIONS = (
     (("?",), "show this help"),

@@ -265,7 +265,7 @@ def custom_injection_marker_character(url, http_request_method):
   if has_marker(menu.options.host):
     settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.HTTP_HEADERS = settings.HOST_INJECTION = True
   if has_marker(menu.options.header) or has_marker(menu.options.headers):
-     settings.CUSTOM_INJECTION_MARKER = True
+     settings.CUSTOM_INJECTION_MARKER = settings.INJECTION_MARKER_LOCATION.CUSTOM_HTTP_HEADERS = True
   if settings.CUSTOM_HEADER_CHECK and settings.CUSTOM_HEADER_CHECK != settings.ACCEPT:
     if settings.CUSTOM_HEADER_CHECK not in settings.TESTABLE_PARAMETERS_LIST:
       settings.CUSTOM_INJECTION_MARKER = True
@@ -386,6 +386,7 @@ quit(), which always raises - so with several targets this never used to be reac
 """
 def finish_target():
   close_oob_channel()
+  logs.write_results_rows()
   for cleanup_fn in list(settings.PENDING_FILE_CLEANUPS.values()):
     cleanup_fn()
   settings.PENDING_FILE_CLEANUPS.clear()
@@ -488,14 +489,54 @@ def technique_selected(tech_letter, eval_sink=False):
   return len(menu.options.tech) == 0 or tech_letter in menu.options.tech
 
 """
+Whether this run is working through several targets rather than the one it was pointed at.
+
+Wider than the flag a target list sets, because a crawl and a page of forms are the same thing
+arrived at differently: the run was given somewhere to look rather than something to test, and what
+it finds is a set of findings rather than one.
+"""
+def several_targets():
+  return bool(settings.MULTI_TARGETS or settings.CRAWLING or menu.options.crawldepth or
+              menu.options.forms or menu.options.sitemap_url or menu.options.bulkfile)
+
+"""
+Whether what was found on this target is to be acted on, or only reported.
+
+Worth asking where there is another target waiting: a list is gone through to find out which of its
+entries are vulnerable, and being dropped into a shell on the first one - or made to sit through an
+enumeration of it - is not what that run was started for. A single target is what the run is about,
+so nothing is asked there and the answer is yes.
+"""
+def exploit_this_target():
+  if not several_targets() or not settings.CONFIRMED_INJECTION_POINTS:
+    return True
+  while True:
+    message = "Do you want to exploit this injection point? [Y/n] "
+    exploit = common.read_input(message, default="Y", check_batch=True)
+    if exploit in settings.CHOICE_YES:
+      return True
+    elif exploit in settings.CHOICE_NO:
+      return False
+    elif exploit in settings.CHOICE_QUIT:
+      raise SystemExit()
+    else:
+      common.invalid_option(exploit)
+      pass
+
+"""
 Quit - hard_exit ends the process immediately (os._exit), otherwise SystemExit unwinds normally.
 """
 def quit(filename, url, hard_exit):
+  exploit = exploit_this_target()
   if settings.CONFIRMED_INJECTION_POINTS:
     confirmed_injection_points_summary()
-    suggest_os_shell()
+    if exploit:
+      suggest_os_shell()
     settings.CONFIRMED_INJECTION_POINTS = []
   # Post-detection actions run once, after detection finishes.
+  if not exploit:
+    settings.PENDING_POST_DETECTION_ACTIONS = []
+    settings.PENDING_OS_SHELL_ENTRY = None
   for action_fn in list(settings.PENDING_POST_DETECTION_ACTIONS):
     action_fn()
   settings.PENDING_POST_DETECTION_ACTIONS = []

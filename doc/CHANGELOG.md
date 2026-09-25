@@ -1,4 +1,7 @@
 ## Version 4.2 (TBA)
+* Added: New options `--save` and `-c` for keeping the options a run was given in a configuration file, and running from one.
+* Added: New option `--har` for logging the run's HTTP traffic in the archive format proxies and browsers read.
+* Added: New option `--results-file` for collecting the findings of every target tested into a CSV file.
 * Added: New switch `--parse-errors` for parsing known shell and interpreter error signatures from responses.
 * Revised: Text resource files were moved from the `src/txt` to the `data/txt` directory.
 * Added: Summary of the identified command shell, web application technology and operating system, printed after the injection point(s).

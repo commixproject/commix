@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "162"
+REVISION = "163"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -2098,6 +2098,20 @@ SHELL_ERROR_HINTS = ("sh:", "syntax error", "Error", "not recognized as an inter
                      "syntax of the command", "cannot find the", "disabled for security reasons",
                      "exec", "passthru", "proc_open", "popen", "system()", "eval()", "@INC")
 
+"""
+What the current target has been found vulnerable at, for the CSV '--results-file' keeps.
+
+Gathered per target and written when it is finished with, so that one row stands for a parameter
+rather than for each technique that answered through it.
+"""
+RESULTS_FILE_ROWS = {}
+
+# What the file is called where a run over several targets was not given a name for it.
+RESULTS_FILE_FORMAT = "results-%m%d%Y_%I%M%p.csv"
+
+# Written the first time a row is, and only then - an existing file is added to, not started again.
+RESULTS_FILE_STARTED = False
+
 # Said once each, so a page answering the same way to every payload is not reported once per request.
 PARSED_ERRORS = set()
 
@@ -2396,6 +2410,7 @@ RUN_WIDE_STATE = frozenset((
   "LAST_LOGGED_PARAMETER", "LAST_SELECTED_MODULE", "LIKELY_RESUME", "LOGGED_FINDINGS_HEADER",
   "MULTI_REQUEST_TARGETS", "MULTI_TARGETS", "OS_CHECKS_NUM", "PROGRESS_LINE_OPEN", "READLINE_ERROR",
   "SESSION_FILE", "SHOW_LOGS_MSG", "TAMPER_SCRIPTS", "SITEMAP_CHECK", "SKIPPED_OUT_OF_SCOPE", "SKIP_VULNERABLE_HOST",
+  "RESULTS_FILE_FORMAT", "RESULTS_FILE_STARTED",
   "STDIN_PARSING", "TAMPER_WARNING_SHOWN", "TIME_RELATED_ATTACK_WARNING", "TOTAL_OF_REQUESTS", "EVAL_SUGGESTED", "COMMAND_SUGGESTED",
   "VALIDATION_RUN", "VISIBLE_CONNECTION_ERRORS", "WARNED_HTTP_ERROR_CODES",
   # Set by the connection to whichever target is in hand, before this reset can be reached.

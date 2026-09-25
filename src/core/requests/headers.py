@@ -23,6 +23,7 @@ except ImportError:
   from base64 import encodestring as encodebytes
 from socket import error as SocketError
 from src.thirdparty.six.moves import http_client as _http_client
+from src.utils import har
 from src.utils import logs
 from src.core.parse import cmdline as menu
 from src.utils import settings
@@ -420,6 +421,7 @@ def check_http_traffic(request):
   response = False
   unauthorized = False
   pending_error = None
+  started = time.time()
   while stability.should_keep_retrying(succeeded, unauthorized):
     if any((settings.REVERSE_TCP, settings.BIND_TCP)):
       succeeded = True
@@ -508,6 +510,7 @@ def check_http_traffic(request):
       checks.blocked_ip(page)
       # Whatever shell or interpreter the page is reporting an error from.
       checks.parse_errors(page)
+      har.collect(request, code, getattr(response, "reason", ""), response.info(), _raw_body, started, time.time())
       stability.reset_connection_error_budget()
       return response
 
@@ -530,6 +533,8 @@ def check_http_traffic(request):
       checks.blocked_ip(page)
       # A shell error is at least as likely to come back as a 500 as it is with a 200.
       checks.parse_errors(page)
+      # An error code is an answer like any other, and the one worth having in the file most.
+      har.collect(request, code, getattr(err, "reason", ""), err.info(), page, started, time.time())
 
       if (not settings.PERFORM_CRACKING and \
       not settings.IS_JSON and \
