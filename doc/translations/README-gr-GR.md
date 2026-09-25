@@ -34,15 +34,17 @@ To **commix** (συντομογραφία [**comm**]and [**i**]njection e[**x**]
 
 ## Χαρακτηριστικά
 
-* **Τέσσερις τεχνικές εισαγωγής** - classic (βάσει αποτελεσμάτων), time-based (τυφλή), file-based (τυφλή, με παραλλαγή tempfile-based για στόχους με περιορισμένη εγγραφή) και out-of-band (OAST) μέσω HTTP/S και DNS.
-* **Εισαγωγή κώδικα** - ο διακόπτης `--eval` ελέγχει τη συμβολοσειρά που ο στόχος αποτιμά ως κώδικα, σε PHP ή Python, με τις ίδιες τέσσερις τεχνικές.
-* **Ευρεία επιφάνεια εισαγωγής** - παράμετροι GET/POST, κεφαλίδες HTTP, cookies και σώματα αιτημάτων JSON/XML, καθώς και η μονάδα `shellshock` για στόχους CGI.
-* **Διαδραστικά κελύφη** - `os_shell` στον στόχο, ενσωματωμένες λειτουργίες `reverse_tcp` και `bind_tcp`, και μεταφορά αρχείων (`download`/`upload`) μέσα από το κέλυφος.
-* **Απαρίθμηση και πρόσβαση σε αρχεία** - τρέχων χρήστης, όνομα υπολογιστή, δικαιώματα, πληροφορίες συστήματος, χρήστες και κατακερματισμοί κωδικών· ανάγνωση και εγγραφή αρχείων στον στόχο.
-* **Παράκαμψη φίλτρων και WAF** - Πολλαπλά συνδυάσιμα scripts παραποίησης (tamper), με ντετερμινιστική σειρά εφαρμογής.
-* **Ευέλικτη στόχευση** - μεμονωμένο URL, ανίχνευση ιστότοπου (crawl), φόρμες HTML, sitemap, αρχείο καταγραφής proxy, αρχείο πολλαπλών στόχων, αρχείο ακατέργαστου αιτήματος HTTP ή είσοδος από `stdin`.
-* **Σαρώσεις με δυνατότητα συνέχισης** - τα αποτελέσματα αποθηκεύονται ανά στόχο σε αρχείο συνεδρίας και μπορούν να εξαχθούν σε JSON.
-* **Ευρεία υποστήριξη back-end** - PHP, Python, Perl, Ruby, ASP.NET, JSP και CGI.
+* **Τέσσερις τεχνικές injection** – results-based (classic), time-based (blind), file-based (blind, με παραλλαγή βασισμένη σε προσωρινό αρχείο για targets με περιορισμούς εγγραφής) και out-of-band (OAST) μέσω HTTP/S και DNS. Επιλέγονται με `--technique` ή βάσει του τύπου που αναφέρουν με `--type`.
+* **Code injection** – το `--eval` ελέγχει strings που εκτελούνται ως κώδικας από το target, σε PHP ή Python, χρησιμοποιώντας τις ίδιες τέσσερις τεχνικές.
+* **Ευρεία κάλυψη injection επιφανειών** – GET/POST parameters, HTTP headers, cookies και JSON/XML request bodies, καθώς και το `shellshock` module για CGI targets.
+* **Interactive shells** – `os_shell` στο target, ενσωματωμένα modes `reverse_tcp` και `bind_tcp`, καθώς και `download`/`upload` αρχείων μέσω του established shell.
+* **Απόδειξη εκμετάλλευσης** – το `--proof` επαληθεύει εκ νέου κάθε εύρημα με δικό του πείραμα και αποθηκεύει το transcript δίπλα στο output του run. Το `--parse-errors` εμφανίζει τα error messages του shell όταν ένα payload έφτασε στο shell αλλά δεν έγινε κατανοητό.
+* **Enumeration και πρόσβαση σε αρχεία** – current user, hostname, privileges, system information, users και password hashes, καθώς και ανάγνωση και εγγραφή αρχείων στο target host.
+* **Filter και WAF evasion** – πολλαπλά συνδυάσιμα tamper scripts, τα οποία εφαρμόζονται με deterministic σειρά.
+* **Ευέλικτο targeting** – υποστήριξη για single URL, crawl, HTML forms, sitemap, proxy log, bulk file, raw HTTP request file ή δεδομένα μέσω piped `stdin`.
+* **Resumable scans και machine-readable output** – τα αποτελέσματα αποθηκεύονται ανά target σε session file και μπορούν να εξαχθούν σε JSON, CSV που περιλαμβάνει όλα τα tested targets ή HAR log με το HTTP traffic του run. Οι επιλογές ενός run μπορούν επίσης να αποθηκευτούν ως profile και να επαναχρησιμοποιηθούν.
+* **Ευρεία υποστήριξη back-ends** – PHP, Python, Perl, Ruby, ASP.NET, JSP και CGI, με υποστήριξη τόσο για Unix-like όσο και για Windows targets. Δείτε το [Windows and Unix-like targets at a glance](https://github.com/commixproject/commix/wiki/Techniques#windows-and-unix-like-targets-at-a-glance) για τις διαφορές στα payloads.
+
 
 ## Εγκατάσταση
 

@@ -38,10 +38,11 @@ Anda dapat mengunjungi [koleksi dari tangkapan layar](https://github.com/commixp
 * **Injeksi kode** - `--eval` menguji string yang dievaluasi target sebagai kode, dalam PHP atau Python, dengan empat teknik yang sama.
 * **Permukaan injeksi yang luas** - parameter GET/POST, header HTTP, cookie, dan body permintaan JSON/XML, serta modul `shellshock` untuk target CGI.
 * **Shell interaktif** - `os_shell` pada target, mode bawaan `reverse_tcp` dan `bind_tcp`, serta transfer berkas (`download`/`upload`) melalui shell yang telah terbentuk.
+* **Bukti eksploitasi** - `--proof` membuktikan kembali setiap temuan dengan percobaannya sendiri dan menulis transkripnya di samping keluaran pemindaian, dan `--parse-errors` melaporkan pesan galat dari shell itu sendiri ketika sebuah payload mencapai shell tetapi tidak dipahami.
 * **Enumerasi dan akses berkas** - pengguna saat ini, nama host, hak akses, informasi sistem, daftar pengguna dan hash kata sandi; membaca dan menulis berkas pada target.
 * **Pengelakan filter dan WAF** - Beberapa skrip tamper yang dapat dikombinasikan, diterapkan dalam urutan yang deterministik.
 * **Penentuan target yang fleksibel** - satu URL, penelusuran situs, formulir HTML, sitemap, log proxy, berkas berisi banyak target, berkas permintaan HTTP mentah, atau masukan `stdin`.
-* **Pemindaian yang dapat dilanjutkan** - hasil disimpan per target dalam berkas sesi dan dapat diekspor ke JSON.
+* **Pemindaian yang dapat dilanjutkan dan keluaran terbaca mesin** - hasil disimpan per target dalam berkas sesi dan dapat diekspor sebagai JSON, sebagai CSV yang mencakup setiap target yang diuji, atau sebagai catatan HAR dari lalu lintas HTTP pemindaian. Opsi yang digunakan sebuah pemindaian dapat disimpan sebagai profil dan digunakan kembali.
 * **Dukungan back-end yang luas** - PHP, Python, Perl, Ruby, ASP.NET, JSP dan CGI.
 
 ## Instalasi

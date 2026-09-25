@@ -38,10 +38,11 @@ Wiki'deki bazı özellikleri gösteren [ekran görüntüleri koleksiyonunu](http
 * **Kod enjeksiyonu** - `--eval`, hedefin kod olarak değerlendirdiği dizgeyi PHP veya Python olarak, aynı dört teknikle sınar.
 * **Geniş enjeksiyon yüzeyi** - GET/POST parametreleri, HTTP başlıkları, çerezler ve JSON/XML istek gövdeleri; ayrıca CGI hedefleri için `shellshock` modülü.
 * **Etkileşimli kabuklar** - hedef üzerinde `os_shell`, yerleşik `reverse_tcp` ve `bind_tcp` modları ve kurulan kabuk üzerinden dosya aktarımı (`download`/`upload`).
+* **Sömürü kanıtı** - `--proof` her bulguyu kendi deneyiyle yeniden kanıtlar ve dökümü taramanın diğer çıktılarının yanına yazar, `--parse-errors` ise bir yükün bir kabuğa ulaştığı ancak anlaşılmadığı durumlarda kabuğun kendi hata mesajlarını bildirir.
 * **Numaralandırma ve dosya erişimi** - geçerli kullanıcı, makine adı, yetkiler, sistem bilgileri, kullanıcılar ve parola özetleri; hedefte dosya okuma ve yazma.
 * **Filtre ve WAF atlatma** - birlikte kullanılabilen çok sayıda tamper betiği, belirlenimci bir sırayla uygulanır.
 * **Esnek hedefleme** - tek bir URL, site taraması, HTML formları, sitemap, proxy günlüğü, çoklu hedef dosyası, ham HTTP istek dosyası veya `stdin` girdisi.
-* **Kaldığı yerden devam eden taramalar** - sonuçlar hedef bazında bir oturum dosyasında saklanır ve JSON olarak dışa aktarılabilir.
+* **Kaldığı yerden devam eden taramalar ve makine tarafından okunabilir çıktı** - sonuçlar hedef bazında bir oturum dosyasında saklanır ve JSON olarak, test edilen her hedefi kapsayan bir CSV olarak veya taramanın HTTP trafiğinin HAR kaydı olarak dışa aktarılabilir. Bir taramanın çalıştırıldığı seçenekler profil olarak kaydedilip yeniden kullanılabilir.
 * **Geniş arka uç desteği** - PHP, Python, Perl, Ruby, ASP.NET, JSP ve CGI.
 
 ## Kurulum
