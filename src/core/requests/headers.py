@@ -35,6 +35,7 @@ from src.core.requests import anticsrf
 from src.core.requests import redirection
 from src.core.requests import keepalive
 from src.core.requests import stability
+from src.core.requests import hooks
 from src.thirdparty.six.moves import urllib as _urllib
 
 """
@@ -304,6 +305,7 @@ what it times is the target rather than the delay this run was told to keep.
 def send_raw(request, timeout=None, policy=True):
   if policy:
     apply_request_policy()
+  hooks.preprocess(request)
   with settings.REQUESTS_LOCK:
     settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
   return _urllib.request.urlopen(request, timeout=timeout or settings.TIMEOUT)
@@ -413,6 +415,9 @@ def check_http_traffic(request):
     proxy.apply_to_request(request)
     opener = _urllib.request.build_opener(connection_handler(context=settings.unverified_context()), redirection.RedirectHandler(), *extra_handlers)
 
+  # Last, so what a script is handed is the request as commix would otherwise have sent it.
+  hooks.preprocess(request)
+
   # Time limit mechanism.
   if menu.options.time_limit and (time.time() - settings.START_TIME > menu.options.time_limit):
     raise SystemExit()
@@ -496,6 +501,11 @@ def check_http_traffic(request):
       code = response.getcode()
       response_headers = response.info()
       page = checks.process_page_content(response, action="encode")
+      # Before anything reads the answer, so what a script hands back is what the run works from -
+      # the page every check below compares, and the body every caller of this response reads.
+      if settings.POSTPROCESS_FUNCTIONS:
+        page, response_headers, code = hooks.postprocess(page, response_headers, code)
+        response.read = (lambda _b: lambda *a, **kw: _b)(page.encode(settings.DEFAULT_CODEC, errors="replace"))
       response_headers[settings.URI_HTTP_HEADER] = response.geturl()
       response_headers = str(response_headers).strip(settings.END_LINE.LF)
       # Handle server-set cookies.
@@ -526,6 +536,10 @@ def check_http_traffic(request):
         page = ''
       response_headers = err.info()
       code = err.code
+      # An error code is an answer too, and the envelope a script is there to unwrap is no less
+      # likely to arrive with one.
+      if settings.POSTPROCESS_FUNCTIONS:
+        page, response_headers, code = hooks.postprocess(page, response_headers, code)
       print_http_response(response_headers, code, page)
       # WAF/CAPTCHA/block pages are usually served as error codes - check the body here too.
       checks.captcha_check(page)

@@ -469,6 +469,18 @@ request.add_option("--retry-on",
                 default=None,
                 help="Retry request on regexp matching content (e.g. 'drop').")
 
+request.add_option("--preprocess",
+                action="store",
+                dest="preprocess",
+                default=None,
+                help="Use given script(s) for preprocessing (request).")
+
+request.add_option("--postprocess",
+                action="store",
+                dest="postprocess",
+                default=None,
+                help="Use given script(s) for postprocessing (response).")
+
 request.add_option("--safe-url",
                 action="store",
                 dest="safe_url",

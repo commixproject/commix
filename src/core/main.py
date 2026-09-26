@@ -39,6 +39,7 @@ from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import requests
 from src.core.requests import redirection
+from src.core.requests import hooks
 from src.core.controller import checks
 from src.core.parse import request as parser
 from src.core.controller import controller
@@ -846,6 +847,7 @@ def run():
       # Before the target is touched: a mistyped option is the user's to correct, not the target's
       # to be probed over.
       checks.validate_tamper_scripts()
+      hooks.load_scripts()
       checks.validate_modules()
       checks.validate_test_selection()
       checks.apply_injection_type()

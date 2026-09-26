@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "165"
+REVISION = "166"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -2114,6 +2114,15 @@ every technique, is the same answer arrived at thousands of times.
 TEST_FILTER = None
 TEST_SKIP = None
 
+"""
+The functions '--preprocess' and '--postprocess' were given, loaded once.
+
+Held as functions rather than as the paths they came from, because a script is read and checked
+before the first target is touched and then called for every request the run makes.
+"""
+PREPROCESS_FUNCTIONS = []
+POSTPROCESS_FUNCTIONS = []
+
 RESULTS_FILE_ROWS = {}
 
 # What the file is called where a run over several targets was not given a name for it.
@@ -2421,6 +2430,7 @@ RUN_WIDE_STATE = frozenset((
   "MULTI_REQUEST_TARGETS", "MULTI_TARGETS", "OS_CHECKS_NUM", "PROGRESS_LINE_OPEN", "READLINE_ERROR",
   "SESSION_FILE", "SHOW_LOGS_MSG", "TAMPER_SCRIPTS", "SITEMAP_CHECK", "SKIPPED_OUT_OF_SCOPE", "SKIP_VULNERABLE_HOST",
   "RESULTS_FILE_FORMAT", "RESULTS_FILE_STARTED", "TEST_FILTER", "TEST_SKIP",
+  "PREPROCESS_FUNCTIONS", "POSTPROCESS_FUNCTIONS",
   "STDIN_PARSING", "TAMPER_WARNING_SHOWN", "TIME_RELATED_ATTACK_WARNING", "TOTAL_OF_REQUESTS", "EVAL_SUGGESTED", "COMMAND_SUGGESTED",
   "VALIDATION_RUN", "VISIBLE_CONNECTION_ERRORS", "WARNED_HTTP_ERROR_CODES",
   # Set by the connection to whichever target is in hand, before this reset can be reached.
