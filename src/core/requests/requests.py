@@ -75,12 +75,21 @@ def is_url_content_stable(url, response=None, fetch_time=None, http_request_meth
     headers.do_check(request)
     return request
 
+  # Retried here too: what differs between the samples is set aside as the page moving on its own.
+  def _sample(request=None, response=None):
+    if request is None:
+      request = _build_request()
+    if response is None:
+      response = headers.send_raw(request)
+    return with_retry_on(request, response)
+
   try:
     if response is not None:
+      response = _sample(response=response)
       raw_body = capture_original_page(response)
       first_response_content = raw_body.strip()
     else:
-      first_response = headers.send_raw(_build_request())
+      first_response = _sample()
       try:
         raw_body = first_response.read()
         first_response_content = raw_body.strip()
@@ -95,7 +104,7 @@ def is_url_content_stable(url, response=None, fetch_time=None, http_request_meth
     if remaining:
       time.sleep(remaining)
 
-    second_response = headers.send_raw(_build_request())
+    second_response = _sample()
     try:
       raw_second_body = second_response.read()
       second_response_content = raw_second_body.strip()
@@ -166,6 +175,7 @@ def crawler_request(url, http_request_method):
     response = headers.check_http_traffic(request)
     if response is None:
       response = headers.resend(request)
+    response = with_retry_on(request, response)
     if type(response) is not bool and settings.FOLLOW_REDIRECT and response is not None:
       if response.geturl() != url:
         href = redirection.do_check(url, response.geturl())
@@ -727,6 +737,11 @@ def retry_on_undesired_content(request, response):
     # raising as requests are spent: a page that always asks to be retried would otherwise be
     # asked again for as long as the run lasts.
     if not re.search(menu.options.retry_on, content, re.I) or attempts >= menu.options.retries:
+      # Nothing left to retry with, so this page is what everything downstream reads as the answer.
+      if attempts and not settings.RETRY_ON_EXHAUSTED and re.search(menu.options.retry_on, content, re.I):
+        settings.RETRY_ON_EXHAUSTED = True
+        warn_msg = "The target still answers with a page matching '" + menu.options.retry_on + "', after the retries were spent."
+        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       return ReReadableResponse(response, body)
     attempts += 1
     warn_msg = "Forced retry of the request, because of undesired page content."
@@ -741,6 +756,14 @@ def retry_on_undesired_content(request, response):
       return ReReadableResponse(response, body)
     response = retried
 
+"""
+The answer, retried while it says what '--retry-on' names - whichever path the request went out over.
+"""
+def with_retry_on(request, response):
+  if menu.options.retry_on and response is not None and not isinstance(response, bool):
+    return retry_on_undesired_content(request, response)
+  return response
+
 def get_request_response(request):
 
   response = headers.check_http_traffic(request)
@@ -750,10 +773,7 @@ def get_request_response(request):
     except Exception as err_msg:
       response = request_failed(err_msg)
 
-  if menu.options.retry_on and response is not None and not isinstance(response, bool):
-    response = retry_on_undesired_content(request, response)
-
-  return response
+  return with_retry_on(request, response)
 
 """
 The page a second-order injection shows up on, which is not the page the payload was sent to.
@@ -887,7 +907,7 @@ def header_injection(url, payload, http_request_method, set_header):
     payload = checks.normalize_newlines(payload)
     set_header(request, payload)
     try:
-      return headers.send_request(request)
+      return with_retry_on(request, headers.send_request(request))
     except ValueError:
       pass
 

@@ -49,7 +49,13 @@ def active():
 A header list in the shape the format asks for.
 """
 def _headers(items):
-  return [{"name": str(name), "value": str(value)} for name, value in items]
+  # A header commix built from bytes is the bytes it will send, and str() of those is the way Python
+  # writes them down rather than what goes on the wire.
+  def _text(value):
+    if isinstance(value, bytes):
+      return value.decode(settings.DEFAULT_CODEC, errors="replace")
+    return str(value)
+  return [{"name": _text(name), "value": _text(value)} for name, value in items]
 
 """
 A body as text, or as base64 where it is not text at all.

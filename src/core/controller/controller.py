@@ -1634,7 +1634,7 @@ def do_check(url, http_request_method, filename):
         # A shell that complained about what it was given did run it, so what is missing is the way
         # the payload was put together rather than a way in.
         if settings.SHELL_ERROR_SEEN:
-          err_msg += " The target answered with shell errors while being tested, so the payload did reach a shell"
+          err_msg += " The target answered with shell or interpreter errors while being tested, so the payload did reach one"
           if not menu.options.parse_errors:
             err_msg += " - the '--parse-errors' option shows what it said"
           err_msg += "."

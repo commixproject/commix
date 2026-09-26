@@ -45,6 +45,12 @@ Only while it is over the limit, and only characters that are legal in a query u
 the target reads is unchanged and a query of ordinary length is encoded exactly as it would be.
 """
 def encoded_query(query):
+  # Asked for by '--skip-urlencode': the payload was deliberately left as written, and encoding the
+  # query it sits in puts back exactly what that option took off. Only what a request cannot carry
+  # as itself is still encoded - a space, a control character, anything outside ASCII - since that
+  # is about the request being valid rather than about the payload being recognisable.
+  if menu.options.skip_urlencode:
+    return _urllib.parse.quote(query, safe=settings.SKIP_URLENCODE_SAFE_CHARS)
   safe = settings.query_safe_chars() + settings.URL_PARAM_DELIMITER
   given_back = 0
   while True:
@@ -308,7 +314,29 @@ def send_raw(request, timeout=None, policy=True):
   hooks.preprocess(request)
   with settings.REQUESTS_LOCK:
     settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
-  return _urllib.request.urlopen(request, timeout=timeout or settings.TIMEOUT)
+  response = _urllib.request.urlopen(request, timeout=timeout or settings.TIMEOUT)
+  # Spent from the count the retry budget is measured against, so the budget is grown with it.
+  with settings.REQUESTS_LOCK:
+    stability.expand_retry_budget()
+  return response
+
+"""
+Never let the client frame a body commix has already framed.
+
+'--chunked' writes the chunks itself, in sizes chosen to cut through what a filter looks for, and
+the header that says so is what makes the client offer to do the same - so a body sent through any
+path that does not go by the connection class below arrives wrapped in a second layer of framing.
+The server unwraps one and hands the other to the application as the body, which then reads the
+chunk sizes as though they were the value.
+"""
+_original_request = _http_client.HTTPConnection.request
+
+def _request_without_reframing(self, method, url, body=None, headers={}, **kwargs):
+  if menu.options.chunked:
+    kwargs["encode_chunked"] = False
+  return _original_request(self, method, url, body, headers, **kwargs)
+
+_http_client.HTTPConnection.request = _request_without_reframing
 
 """
 Checking the HTTP Headers & HTTP/S Request.
@@ -563,6 +591,12 @@ def check_http_traffic(request):
         settings.HTTP_ERROR_CODES_SUM.append(err.code)
         # Nothing is returned for it, so this is what tells a caller the request did reach the target.
         settings.LAST_HTTP_ERROR = err
+        # Except where the run was told to ignore this code: then it is the target's answer rather
+        # than a failure, and the body of it is where the result of a payload would be. Read back
+        # from what was already taken off it, since the body itself is only readable once.
+        if checks.ignored_http_error_code(err.code):
+          err.read = (lambda _b: lambda *a, **kw: _b)(page.encode(settings.DEFAULT_CODEC, errors="replace"))
+          return err
         if settings.VERBOSITY_LEVEL >= 2:
           parts = str(err).split(": ")
           if len(parts) > 1 and len(parts[1]) == 0:
@@ -610,7 +644,10 @@ Send again a request check_http_traffic() came back from empty-handed - which it
 """
 def resend(request):
   error = settings.LAST_HTTP_ERROR
-  if error is not None and str(getattr(error, "code", "")) not in settings.TRANSIENT_HTTP_ERROR_CODES:
+  # A code the run was told to ignore is an answer, not a failure to retry past - repeated until the
+  # retries run out, a target that always answers with one is reported as unreachable instead.
+  if error is not None and (checks.ignored_http_error_code(getattr(error, "code", None)) or
+                            str(getattr(error, "code", "")) not in settings.TRANSIENT_HTTP_ERROR_CODES):
     raise error
   # A long enough delay can push the target into erroring out, and that error arrives at the delay asked for - which is the measurement, so repeating it only pays the delay twice.
   if error is not None and settings.TIME_RELATED_ATTACK:
@@ -688,6 +725,12 @@ def do_check(request):
   if settings.TAMPER_SCRIPTS["xforwardedfor"]:
     from src.tamper import xforwardedfor
     xforwardedfor.tamper(request)
+
+  # Carries the two halves the payload reads back through '$_SERVER' - drawn with it, so the names
+  # in the payload and the headers on this request are the same pair.
+  if settings.TAMPER_SCRIPTS["phpserverheaders"]:
+    from src.tamper import phpserverheaders
+    phpserverheaders.apply_headers(request)
 
   # Check if defined any HTTP Authentication credentials.
   # HTTP Authentication: Basic, Digest, Bearer Access Authentication.

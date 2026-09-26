@@ -183,7 +183,7 @@ general.add_option("--parse-errors",
                 action="store_true",
                 dest="parse_errors",
                 default=False,
-                help="Parse and display shell error messages from responses.")
+                help="Parse and display shell/interpreter errors from responses.")
 
 general.add_option("--results-file",
                 action="store",

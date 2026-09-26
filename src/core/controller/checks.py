@@ -233,7 +233,11 @@ def process_custom_injection_data(data):
       lines.append(line)
     
     # Remove duplicates, then rejoin lines
-    data = settings.END_LINE.ESCAPED_LF.join(list(dict.fromkeys(lines))).rstrip(settings.END_LINE.ESCAPED_LF)
+    # Taken off as the sequence it is, not as the set of characters it is written with: rstrip()
+    # reads its argument as a set, so a value ending in 'n' or a backslash lost them here.
+    data = settings.END_LINE.ESCAPED_LF.join(list(dict.fromkeys(lines)))
+    while data.endswith(settings.END_LINE.ESCAPED_LF):
+      data = data[:-len(settings.END_LINE.ESCAPED_LF)]
 
   return data
 

@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "166"
+REVISION = "167"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -469,6 +469,15 @@ the length of what it stands for. These four are legal in a query unencoded, so 
 shortens it without changing what the target reads - taken in turn, and only while it is still
 over length, so a request that was never near the limit is encoded exactly as any other.
 """
+"""
+What '--skip-urlencode' still leaves encoded: nothing that a URL can carry as itself.
+
+Every printable ASCII character bar the space, which a request line cannot hold - so a payload
+written with separators, quotes and brackets arrives spelled the way it was written, while a
+non-ASCII byte is still encoded and the request stays a valid one.
+"""
+SKIP_URLENCODE_SAFE_CHARS = "".join(chr(_) for _ in range(33, 127))
+
 URLENCODE_CHAR_LIMIT = 2000
 URLENCODE_FAILSAFE_CHARS = "()|,"
 
@@ -1592,6 +1601,7 @@ TAMPER_MODIFICATION_LETTERS = r'([e-zE-Z])'
 
 # Tamper scripts dict
 TAMPER_SCRIPTS = {
+                  "phpserverheaders": False,
                   "space2ifs": False,
                   "space2plus": False,
                   "space2htab": False,
@@ -1839,6 +1849,9 @@ TIMEOUT = 30
 
 # Retries when the connection timeouts (Default: 3).
 MAX_RETRIES = 3
+
+# Said once per target, where the retries ran out on a page '--retry-on' still matches.
+RETRY_ON_EXHAUSTED = False
 
 # Failed writes to the web root, at most, before the temporary directory is offered instead. A
 # smaller set of boundaries than this is gone through in full first, rather than stopped one short.
