@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New switches `--mine-params` and `--mine-endpoints` for finding the parameters a target reads but names nowhere, and the endpoints only its own scripts name.
 * Added: New tamper script `phpserverheaders.py` that moves the function and the command out of the payload and into HTTP headers it reads back through `$_SERVER`.
 * Added: New options `--preprocess` and `--postprocess` for reshaping a request before it is sent and a response before the run reads it, which a tamper script cannot reach.
 * Added: New options `--test-filter` and `--test-skip` for choosing which payload boundaries a technique is tried with.

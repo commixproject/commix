@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "167"
+REVISION = "168"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1542,6 +1542,29 @@ USER_AGENT_LIST = os.path.join(TXT_DIR, "user-agents.txt")
 
 # Path to file containing mobile User-Agent strings
 MOBILE_USER_AGENT_LIST = os.path.join(TXT_DIR, "mobile-user-agents.txt")
+
+# The candidate names '--mine-params' works through, and how many of them go in one request.
+PARAMETER_MINING_LIST = os.path.join(TXT_DIR, "common-parameters.txt")
+PARAMETER_MINING_BUCKET = 25
+
+# Long enough that a name carrying it cannot be one the target has a use for.
+MINING_DECOY_LENGTH = 8
+
+# How much text a candidate has to add to a page, past what the page moves on its own, to count.
+MINING_MINIMUM_INSERT = 16
+
+# How many answers to names the target cannot know are read before one it might know is asked for.
+MINING_NOISE_SAMPLES = 3
+
+# How many times over a name has to answer differently before it is taken as one the target reads.
+MINING_CONFIRMATIONS = 2
+
+# What a mined parameter is given to carry, having no value of its own to go by.
+MINED_PARAMETER_VALUE = "1"
+
+# What '--mine-endpoints' reads per page, and how much of each script.
+MAX_MINED_SCRIPTS = 20
+MAX_MINED_SCRIPT_SIZE = 1 * 1024 * 1024
 
 # Path to file with default username values
 USERNAMES_TXT_FILE = os.path.join(TXT_DIR, "default_usernames.txt")

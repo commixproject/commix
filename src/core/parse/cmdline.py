@@ -892,6 +892,18 @@ detection.add_option("--level",
                 default=False,
                 help="Level of tests to perform (1-3, Default: " + str(settings.DEFAULT_INJECTION_LEVEL) + ").")
 
+detection.add_option("--mine-params",
+                action="store_true",
+                dest="mine_params",
+                default=False,
+                help="Mine for hidden (unlinked) parameters to test.")
+
+detection.add_option("--mine-endpoints",
+                action="store_true",
+                dest="mine_endpoints",
+                default=False,
+                help="Mine for endpoints named in the scripts a page loads.")
+
 detection.add_option("--skip-calc",
                 action="store_true",
                 dest="skip_calc",

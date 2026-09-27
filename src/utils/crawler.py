@@ -310,6 +310,13 @@ def do_process(url, http_request_method):
                     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
               else:
                 identified_hrefs = store_hrefs(href, identified_hrefs, redirection=False)
+    # Named in the scripts a page loads, which nothing on the page links to.
+    if menu.options.mine_endpoints:
+      from src.core.requests import mining
+      for href in mining.mine_endpoints(url, content, http_request_method):
+        if checks.in_scope(href):
+          identified_hrefs = store_hrefs(href, identified_hrefs, redirection=False)
+
     if menu.options.forms:
       for form in soup('form'):
         action_url = _urllib.parse.urljoin(url, form.get("action") or url)

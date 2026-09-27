@@ -38,6 +38,7 @@ from src.core import options
 from src.core.requests import proxy
 from src.core.requests import headers
 from src.core.requests import requests
+from src.core.requests import mining
 from src.core.requests import redirection
 from src.core.requests import hooks
 from src.core.controller import checks
@@ -789,6 +790,12 @@ def main(filename, url, http_request_method):
       err_msg = "You must specify the target URL."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit(settings.EXIT_FAILURE)
+
+    # Named nowhere by the target and answered to all the same, so tested like any other parameter.
+    if menu.options.mine_params:
+      mined = mining.mine_parameters(url, http_request_method)
+      if mined:
+        url = url + ("&" if "?" in url else "?") + "&".join(name + "=" + settings.MINED_PARAMETER_VALUE for name in mined)
 
     # Retrieve everything from the supported enumeration options.
     if menu.options.enum_all:
