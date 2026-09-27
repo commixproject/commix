@@ -18,11 +18,11 @@ jobs:
       fail-fast: false
       matrix:
         # Pairs are listed explicitly rather than crossed: Python 3.7 is published for x64 images
-        # only - Linux up to 22.04, and the x64 macOS runners - so it cannot be installed on
-        # 'ubuntu-latest' (24.04) or on 'macos-latest' (arm64).
+        # only - Linux up to 22.04 and Intel macOS runners - so it cannot be installed on
+        # 'ubuntu-latest' (24.04) or ARM64 macOS runners.
         include:
-          - { os: ubuntu-22.04,   python-version: '3.7' }
-          - { os: macos-13,       python-version: '3.7' }
+          - { os: ubuntu-22.04, python-version: '3.7' }
+          - { os: macos-15-intel, python-version: '3.7' }
           - { os: windows-latest, python-version: '3.7' }
           - { os: ubuntu-latest,  python-version: '3.12' }
           - { os: macos-latest,   python-version: '3.12' }
