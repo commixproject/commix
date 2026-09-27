@@ -3899,6 +3899,19 @@ def is_empty(multi_parameters, http_request_method):
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       return False
 
+"""
+A payload as it is written inside a document's string, which quotes the way a JSON string does.
+"""
+def graphql_escape_payload(payload):
+  return payload.replace("\\", "\\\\").replace("\"", "\\\"")
+
+# Check if a GraphQL document, which is a body that names an operation and carries a selection set.
+def is_GraphQL_check(parameter):
+  try:
+    return bool(re.search(settings.GRAPHQL_RECOGNITION_REGEX, parameter.replace(settings.INJECT_TAG, "")))
+  except (ValueError, TypeError):
+    return False
+
 # Check if valid SOAP/XML
 def is_XML_check(parameter):
   try:

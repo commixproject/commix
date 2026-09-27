@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "168"
+REVISION = "169"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1408,6 +1408,18 @@ CHUNKED_SPLIT_KEYWORDS = (
 CHUNKED_SPLIT_KEYWORDS_REGEX = "|".join(re.escape(_) for _ in CHUNKED_SPLIT_KEYWORDS)
 
 # Regular expression used for detecting JSON POST data
+# A GraphQL document, as it arrives on its own rather than inside a JSON envelope.
+GRAPHQL_RECOGNITION_REGEX = r'(?s)\A\s*(?:query|mutation|subscription)\b[^{]*\{.*\}\s*\Z'
+
+# An argument the document carries, as the name it is written under and the string it is given.
+GRAPHQL_ARGUMENT_REGEX = r'([A-Za-z_]\w*)\s*:\s*"((?:[^"\\]|\\.)*)"'
+
+# The same argument as a JSON envelope spells it, with the document's own quotes escaped.
+GRAPHQL_ARGUMENT_ESCAPED_REGEX = r'([A-Za-z_]\w*)\s*:\s*\\"((?:[^"\\]|\\.)*?)\\"'
+
+# Whether the POST body is a GraphQL document.
+IS_GRAPHQL = False
+
 JSON_RECOGNITION_REGEX = r'(?s)\A(\s*\[)*\s*\{.*"[^"]+"\s*:\s*("[^"]*"|\d+|true|false|null).*\}\s*(\]\s*)*\Z'
 
 # Regular expression used for detecting JSON-like POST data
@@ -2267,6 +2279,7 @@ ACCEPT_VALUE = "*/*"
 DEFAULT_HTTP_CONTENT_TYPE_VALUE = "application/x-www-form-urlencoded"
 HTTP_CONTENT_TYPE_JSON_HEADER_VALUE = "application/json"
 HTTP_CONTENT_TYPE_XML_HEADER_VALUE = "application/xml"
+HTTP_CONTENT_TYPE_GRAPHQL_HEADER_VALUE = "application/graphql"
 # Only what the response handling can actually decompress is asked for.
 """
 The encodings a response may arrive in.

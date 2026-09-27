@@ -180,6 +180,8 @@ def heuristic_request(url, http_request_method, check_parameter, payload, whites
     # A structured body escapes for itself; a form-encoded one needs the payload encoded for it.
     if settings.IS_JSON:
       body_payload = payload
+    elif settings.IS_GRAPHQL:
+      body_payload = checks.graphql_escape_payload(payload)
     elif settings.IS_XML:
       body_payload = checks.xml_encode_payload(checks.strip_xml_forbidden(payload))
     else:

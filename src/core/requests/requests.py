@@ -864,6 +864,9 @@ def init_injection(payload, http_request_method, url):
         data = checks.json_data(data)
       except ValueError:
         pass
+    elif settings.IS_GRAPHQL:
+      # A document is not URL-encoded either, and escapes for its own string syntax alone.
+      data = checks.process_injectable_value(checks.graphql_escape_payload(payload), menu.options.data)
     elif settings.IS_XML:
       # Likewise here: nothing to decode, and the characters XML cannot carry at all are dropped.
       data = checks.restore_xml_layout(checks.process_injectable_value(checks.xml_encode_payload(checks.strip_xml_forbidden(payload)), menu.options.data))

@@ -323,6 +323,9 @@ def multi_params_get_value(param, all_params):
   if (len(all_params) == 0 or (len(all_params) == 1 and (all_params[0] == "{}" or is_empty_json_object(all_params[0])))):
       checks.no_parameters_found()
 
+  if settings.IS_GRAPHQL:
+    return graphql_value(all_params[param])
+
   if settings.IS_JSON:
     try:
       # Single-parameter case: flatten to get the leaf value.
@@ -418,6 +421,13 @@ def configure_post_data_format(parameter, http_request_method):
       checks.warn_on_duplicate_json_keys(parameter)
     if supplied is not None:
       settings.JSON_FORMATTING = checks.json_formatting(supplied)
+  # Check if GraphQL document.
+  elif checks.is_GraphQL_check(parameter):
+    if not settings.IS_GRAPHQL:
+      data_type = "GraphQL"
+      settings.IS_GRAPHQL = checks.process_data(data_type, http_request_method)
+      settings.POST_DATA_PARAM_DELIMITER = ""
+
   # Check if XML Object.
   elif checks.is_XML_check(parameter):
     if not settings.IS_XML:
@@ -434,10 +444,47 @@ def configure_post_data_format(parameter, http_request_method):
   return parameter
 
 """
+The document cut after each argument it carries, so that the pieces joined again are the document.
+
+Everything between two arguments travels with the one before it, and whatever follows the last one
+travels with it - so every piece holds exactly one argument, which is what the rest of the run tests.
+"""
+def graphql_fragments(document):
+  matches = list(re.finditer(settings.GRAPHQL_ARGUMENT_REGEX, document))
+  if not matches:
+    return [document]
+  fragments = []
+  start = 0
+  for position, match in enumerate(matches):
+    end = len(document) if position == len(matches) - 1 else match.end()
+    fragments.append(document[start:end])
+    start = end
+  return fragments
+
+"""
+The string an argument is given, taken from the piece of the document that carries it.
+"""
+def graphql_value(fragment):
+  match = re.search(settings.GRAPHQL_ARGUMENT_REGEX, fragment)
+  return match.group(2) if match else ""
+
+"""
+The argument a document carried inside a JSON envelope gives, as the body itself spells it.
+
+A payload put at the end of the envelope's 'query' lands past the document's last brace and only
+breaks it, so what is tested is the argument inside rather than the document around it.
+"""
+def graphql_in_json_value(body):
+  match = re.search(settings.GRAPHQL_ARGUMENT_ESCAPED_REGEX, body or "")
+  return match.group(2) if match else None
+
+"""
 Split a POST body into its individual parameter fragments.
 """
 def split_post_parameters(parameter):
-  if settings.IS_XML:
+  if settings.IS_GRAPHQL:
+    multi_parameters = graphql_fragments(parameter)
+  elif settings.IS_XML:
     # Expand self-closing tags; keep menu.options.data in sync.
     expanded_parameter = re.sub(r"<([^\s/>]+)((?:[^>]*[^/>])?)\s*/>", r"<\1\2></\1>", parameter)
     if expanded_parameter != parameter:
@@ -466,7 +513,8 @@ def split_post_parameters(parameter):
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit(settings.EXIT_FAILURE)
 
-  if len([s for s in multi_parameters if "=" in s]) == 0 and not any((settings.IS_JSON, settings.IS_XML)):
+  if len([s for s in multi_parameters if "=" in s]) == 0 and \
+     not any((settings.IS_JSON, settings.IS_XML, settings.IS_GRAPHQL)):
     checks.no_parameters_found()
 
   return multi_parameters, parameter
@@ -477,8 +525,13 @@ Handle a POST body that split into exactly one parameter fragment.
 def handle_single_post_parameter(parameter, multi_parameters, http_request_method):
   if settings.INJECT_TAG not in multi_parameters[0]:
     # Grab the value of parameter.
-    if settings.IS_JSON:
+    if settings.IS_GRAPHQL:
+      value = graphql_value(multi_parameters[0])
+    elif settings.IS_JSON:
       value = multi_params_get_value(0, checks.check_similarities([multi_parameters[0]]))
+      inline = graphql_in_json_value(parameter)
+      if inline:
+        value = inline
     elif settings.IS_XML:
       # Grab the value of parameter (unwrap CDATA).
       value = unwrap_cdata(''.join(re.findall(r'>(.*)</', parameter, re.S)))
@@ -649,6 +702,16 @@ def vuln_POST_param(parameter, url):
     if settings.CUSTOM_INJECTION_MARKER:
       settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
       settings.TESTABLE_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.TESTABLE_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
+
+  # GraphQL data format.
+  elif settings.IS_GRAPHQL:
+    for name, value in re.findall(settings.GRAPHQL_ARGUMENT_REGEX, parameter):
+      if settings.INJECT_TAG in value:
+        vuln_parameter = name
+        settings.TESTABLE_VALUE = value.split(settings.INJECT_TAG)[0]
+        break
+    if vuln_parameter is None:
+      return parameter
 
   # XML data format.
   elif settings.IS_XML:

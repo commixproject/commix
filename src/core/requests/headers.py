@@ -716,6 +716,8 @@ def do_check(request):
       request.add_unredirected_header(settings.CONTENT_TYPE, settings.HTTP_CONTENT_TYPE_JSON_HEADER_VALUE)
     elif re.search(settings.XML_RECOGNITION_REGEX, menu.options.data):
       request.add_unredirected_header(settings.CONTENT_TYPE, settings.HTTP_CONTENT_TYPE_XML_HEADER_VALUE)
+    elif re.search(settings.GRAPHQL_RECOGNITION_REGEX, menu.options.data):
+      request.add_unredirected_header(settings.CONTENT_TYPE, settings.HTTP_CONTENT_TYPE_GRAPHQL_HEADER_VALUE)
 
   # Default value for "Accept-Encoding" HTTP header
   if not (menu.options.requestfile or menu.options.logfile):
