@@ -34,14 +34,16 @@ Vous pouvez consulter la [**collection de captures d'écran**](https://github.co
 
 ## Fonctionnalités
 
-* **Cinq techniques d'injection** - classic (basée sur les résultats), boolean-based (à l'aveugle, en lisant la réponse sur la page), time-based (à l'aveugle), file-based (à l'aveugle, avec une variante tempfile-based pour les cibles à écriture restreinte) et out-of-band (OAST) via HTTP/S et DNS.
+* **Cinq techniques d'injection** - results-based (classic), boolean-based (à l'aveugle, en lisant la réponse sur la page), time-based (à l'aveugle), file-based (à l'aveugle, avec une variante tempfile-based pour les cibles à écriture restreinte) et out-of-band (OAST) via HTTP/S et DNS. Choisies avec `--technique`, ou selon le type sous lequel elles sont rapportées avec `--type`.
 * **Injection de code** - `--eval` teste la chaîne que la cible évalue comme du code, en PHP ou Python, avec les quatre mêmes techniques.
 * **Large surface d'injection** - paramètres GET/POST, en-têtes HTTP, cookies et corps de requête JSON/XML, ainsi que le module `shellshock` pour les cibles CGI.
 * **Shells interactifs et post-exploitation** - un `os_shell` sur la cible, les modes intégrés `reverse_tcp` et `bind_tcp`, le transfert de fichiers (`download`/`upload`) via le shell établi, et l'énumération de l'utilisateur courant, du nom d'hôte, des privilèges, des informations système, des utilisateurs et des empreintes de mots de passe. Chaque découverte peut être prouvée à nouveau avec `--proof`, qui mène une expérience qui lui est propre et écrit la transcription à côté de la sortie de l'analyse.
 * **Contournement des filtres et des WAF** - Plusieurs scripts de falsification (tamper) combinables, appliqués dans un ordre déterministe.
 * **Ciblage flexible** - une URL unique, une exploration du site, des formulaires HTML, un sitemap, un journal de proxy, un fichier de cibles multiples, un fichier de requête HTTP brute ou une entrée `stdin`.
 * **Analyses reprenables et sortie exploitable par machine** - les résultats sont stockés par cible dans un fichier de session et peuvent être exportés en JSON, sous forme de CSV couvrant toutes les cibles testées, ou sous forme de journal HAR du trafic HTTP de l'analyse. Les options fournies à une analyse peuvent être enregistrées comme profil et réutilisées.
-* **Large prise en charge des back-ends** - PHP, Python, Perl, Ruby, ASP.NET, JSP et CGI.
+* **Large prise en charge des back-ends** - PHP, Python, Perl, Ruby, ASP.NET, JSP et CGI, et fonctionne aussi bien contre des cibles de type Unix que Windows - voir
+[Windows and Unix-like targets at a glance](https://github.com/commixproject/commix/wiki/Techniques#windows-and-unix-like-targets-at-a-glance)
+pour la façon dont les charges utiles diffèrent.
 
 ## Installation
 

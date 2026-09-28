@@ -34,14 +34,16 @@ Puede visitar la **[colección de capturas de pantalla](https://github.com/commi
 
 ## Características
 
-* **Cinco técnicas de inyección** - classic (basada en resultados), boolean-based (a ciegas, leyendo la respuesta en la página), time-based (a ciegas), file-based (a ciegas, con una variante tempfile-based para objetivos con escritura restringida) y out-of-band (OAST) sobre HTTP/S y DNS.
+* **Cinco técnicas de inyección** - results-based (classic), boolean-based (a ciegas, leyendo la respuesta en la página), time-based (a ciegas), file-based (a ciegas, con una variante tempfile-based para objetivos con escritura restringida) y out-of-band (OAST) sobre HTTP/S y DNS. Se eligen con `--technique`, o según el tipo con el que se informan con `--type`.
 * **Inyección de código** - `--eval` prueba la cadena que el objetivo evalúa como código, en PHP o Python, con las mismas cuatro técnicas.
 * **Amplia superficie de inyección** - parámetros GET/POST, cabeceras HTTP, cookies y cuerpos de petición JSON/XML, además del módulo `shellshock` para objetivos CGI.
 * **Shells interactivas y post-explotación** - una `os_shell` en el objetivo, los modos integrados `reverse_tcp` y `bind_tcp`, transferencia de archivos (`download`/`upload`) a través de la shell establecida, y enumeración del usuario actual, nombre del host, privilegios, información del sistema, usuarios y hashes de contraseñas. Cada hallazgo puede volver a demostrarse con `--proof`, que ejecuta un experimento propio y escribe la transcripción junto a la salida del análisis.
 * **Evasión de filtros y WAF** - Múltiples scripts de manipulación (tamper) combinables, aplicados en un orden determinista.
 * **Objetivos flexibles** - una única URL, un rastreo del sitio, formularios HTML, un sitemap, un registro de proxy, un archivo con varios objetivos, un archivo con una petición HTTP en bruto o entrada por `stdin`.
 * **Análisis reanudables y salida legible por máquina** - los resultados se almacenan por objetivo en un archivo de sesión y pueden exportarse como JSON, como un CSV que abarca todos los objetivos analizados, o como un registro HAR del tráfico HTTP del análisis. Las opciones con las que se ejecutó un análisis pueden guardarse como perfil y reutilizarse.
-* **Amplio soporte de back-end** - PHP, Python, Perl, Ruby, ASP.NET, JSP y CGI.
+* **Amplio soporte de back-end** - PHP, Python, Perl, Ruby, ASP.NET, JSP y CGI, y funciona tanto contra objetivos tipo Unix como Windows - consulte
+[Windows and Unix-like targets at a glance](https://github.com/commixproject/commix/wiki/Techniques#windows-and-unix-like-targets-at-a-glance)
+para ver en qué se diferencian las cargas útiles.
 
 ## Instalación
 

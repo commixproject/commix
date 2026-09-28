@@ -34,14 +34,16 @@ Anda dapat mengunjungi [koleksi dari tangkapan layar](https://github.com/commixp
 
 ## Fitur
 
-* **Lima teknik injeksi** - classic (berbasis hasil), boolean-based (buta, membaca jawabannya dari halaman), time-based (buta), file-based (buta, dengan varian tempfile-based untuk target yang terbatas hak tulisnya) dan out-of-band (OAST) melalui HTTP/S dan DNS.
+* **Lima teknik injeksi** - results-based (classic), boolean-based (buta, membaca jawabannya dari halaman), time-based (buta), file-based (buta, dengan varian tempfile-based untuk target yang terbatas hak tulisnya) dan out-of-band (OAST) melalui HTTP/S dan DNS. Dipilih dengan `--technique`, atau berdasarkan tipe yang mereka laporkan dengan `--type`.
 * **Injeksi kode** - `--eval` menguji string yang dievaluasi target sebagai kode, dalam PHP atau Python, dengan empat teknik yang sama.
 * **Permukaan injeksi yang luas** - parameter GET/POST, header HTTP, cookie, dan body permintaan JSON/XML, serta modul `shellshock` untuk target CGI.
 * **Shell interaktif dan pasca-eksploitasi** - `os_shell` pada target, mode bawaan `reverse_tcp` dan `bind_tcp`, transfer berkas (`download`/`upload`) melalui shell yang telah terbentuk, serta enumerasi pengguna saat ini, nama host, hak akses, informasi sistem, daftar pengguna dan hash kata sandi. Setiap temuan dapat dibuktikan kembali dengan `--proof`, yang menjalankan percobaannya sendiri dan menulis transkripnya di samping keluaran pemindaian.
 * **Pengelakan filter dan WAF** - Beberapa skrip tamper yang dapat dikombinasikan, diterapkan dalam urutan yang deterministik.
 * **Penentuan target yang fleksibel** - satu URL, penelusuran situs, formulir HTML, sitemap, log proxy, berkas berisi banyak target, berkas permintaan HTTP mentah, atau masukan `stdin`.
 * **Pemindaian yang dapat dilanjutkan dan keluaran terbaca mesin** - hasil disimpan per target dalam berkas sesi dan dapat diekspor sebagai JSON, sebagai CSV yang mencakup setiap target yang diuji, atau sebagai catatan HAR dari lalu lintas HTTP pemindaian. Opsi yang digunakan sebuah pemindaian dapat disimpan sebagai profil dan digunakan kembali.
-* **Dukungan back-end yang luas** - PHP, Python, Perl, Ruby, ASP.NET, JSP dan CGI.
+* **Dukungan back-end yang luas** - PHP, Python, Perl, Ruby, ASP.NET, JSP dan CGI, serta bekerja terhadap target Unix maupun Windows - lihat
+[Windows and Unix-like targets at a glance](https://github.com/commixproject/commix/wiki/Techniques#windows-and-unix-like-targets-at-a-glance)
+untuk perbedaan muatannya.
 
 ## Instalasi
 
