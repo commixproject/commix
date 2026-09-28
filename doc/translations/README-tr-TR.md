@@ -9,10 +9,10 @@
 </div>
 
 <p align="center">
-  <a href="https://github.com/commixproject/commix/actions/workflows/builds.yml"><img alt="Builds Tests" src="https://github.com/commixproject/commix/actions/workflows/builds.yml/badge.svg"></a>
-  <a href="https://www.python.org/downloads/"><img alt="Python 3.7+" src="https://img.shields.io/badge/python-3.7+-yellow.svg"></a>
-  <a href="https://github.com/commixproject/commix/blob/master/LICENSE.txt"><img alt="GPLv3 License" src="https://img.shields.io/badge/license-GPLv3-red.svg"></a>
-  <a href="https://x.com/commixproject"><img alt="X" src="https://img.shields.io/badge/x-@commixproject-blue.svg"></a>
+  <a href="https://github.com/commixproject/commix/actions/workflows/builds.yml"><img alt="Builds Tests" src="https://img.shields.io/github/actions/workflow/status/commixproject/commix/builds.yml?branch=master&label=Builds%20Tests&style=for-the-badge&logo=githubactions&logoColor=white"></a>
+  <a href="https://www.python.org/downloads/"><img alt="Python 3.7+" src="https://img.shields.io/badge/Python-3.7%2B-3776AB.svg?style=for-the-badge&logo=python&logoColor=white"></a>
+  <a href="https://github.com/commixproject/commix/blob/master/LICENSE.txt"><img alt="GPLv3 License" src="https://img.shields.io/badge/License-GPLv3-6A1B9A.svg?style=for-the-badge&logo=gnu&logoColor=white"></a>
+  <a href="https://x.com/commixproject"><img alt="Follow @commixproject" src="https://img.shields.io/badge/Follow-@commixproject-000000.svg?style=for-the-badge&logo=x&logoColor=white"></a>
 </p>
 
 **Commix** ([comm]and [i]njection e[x]ploiter'ın kısaltması), **[Anastasios Stasinopoulos](https://github.com/stasinopoulos)** (**[@ancst](https://x.com/ancst)**) tarafından yazılan ve **[Komut](https://owasp.org/www-community/attacks/Command_Injection)** (ve **[kod](https://owasp.org/www-community/attacks/Code_Injection)**) enjeksiyonu güvenlik açıklarının tespitini ve istismarını otomatikleştiren açık kaynaklı bir sızma testi aracıdır.
@@ -34,12 +34,10 @@ Wiki'deki bazı özellikleri gösteren [ekran görüntüleri koleksiyonunu](http
 
 ## Özellikler
 
-* **Dört enjeksiyon tekniği** - classic (sonuç tabanlı), time-based (kör), file-based (kör, yazma kısıtlı hedefler için tempfile-based varyantıyla birlikte) ve HTTP/S ile DNS üzerinden out-of-band (OAST).
+* **Beş enjeksiyon tekniği** - classic (sonuç tabanlı), boolean-based (kör, yanıtı sayfadan okuyarak), time-based (kör), file-based (kör, yazma kısıtlı hedefler için tempfile-based varyantıyla birlikte) ve HTTP/S ile DNS üzerinden out-of-band (OAST).
 * **Kod enjeksiyonu** - `--eval`, hedefin kod olarak değerlendirdiği dizgeyi PHP veya Python olarak, aynı dört teknikle sınar.
 * **Geniş enjeksiyon yüzeyi** - GET/POST parametreleri, HTTP başlıkları, çerezler ve JSON/XML istek gövdeleri; ayrıca CGI hedefleri için `shellshock` modülü.
-* **Etkileşimli kabuklar** - hedef üzerinde `os_shell`, yerleşik `reverse_tcp` ve `bind_tcp` modları ve kurulan kabuk üzerinden dosya aktarımı (`download`/`upload`).
-* **Sömürü kanıtı** - `--proof` her bulguyu kendi deneyiyle yeniden kanıtlar ve dökümü taramanın diğer çıktılarının yanına yazar, `--parse-errors` ise bir yükün bir kabuğa ulaştığı ancak anlaşılmadığı durumlarda kabuğun kendi hata mesajlarını bildirir.
-* **Numaralandırma ve dosya erişimi** - geçerli kullanıcı, makine adı, yetkiler, sistem bilgileri, kullanıcılar ve parola özetleri; hedefte dosya okuma ve yazma.
+* **Etkileşimli kabuklar ve sömürü sonrası** - hedef üzerinde `os_shell`, yerleşik `reverse_tcp` ve `bind_tcp` modları, kurulan kabuk üzerinden dosya aktarımı (`download`/`upload`) ve geçerli kullanıcı, makine adı, yetkiler, sistem bilgileri, kullanıcılar ile parola özetlerinin numaralandırılması. Her bulgu `--proof` ile yeniden kanıtlanabilir; bu, kendi deneyini çalıştırır ve dökümü taramanın diğer çıktılarının yanına yazar.
 * **Filtre ve WAF atlatma** - birlikte kullanılabilen çok sayıda tamper betiği, belirlenimci bir sırayla uygulanır.
 * **Esnek hedefleme** - tek bir URL, site taraması, HTML formları, sitemap, proxy günlüğü, çoklu hedef dosyası, ham HTTP istek dosyası veya `stdin` girdisi.
 * **Kaldığı yerden devam eden taramalar ve makine tarafından okunabilir çıktı** - sonuçlar hedef bazında bir oturum dosyasında saklanır ve JSON olarak, test edilen her hedefi kapsayan bir CSV olarak veya taramanın HTTP trafiğinin HAR kaydı olarak dışa aktarılabilir. Bir taramanın çalıştırıldığı seçenekler profil olarak kaydedilip yeniden kullanılabilir.
@@ -68,11 +66,11 @@ Seçeneklerinizi görmek ve yardım almak için aşağıdaki komutu girin:
 
 Tek bir enjekte edilebilir parametreyi test edip hedefte bir kabuk açmak için:
 
-    $ python3 commix.py --url="http://www.target.com/vuln.php?addr=127.0.0.1" --os-shell
+    $ python3 commix.py --url="http://commix-testbed/scenarios/regular/GET/classic.php?addr=127.0.0.1" --os-shell
 
 Yanıtın hiçbir şey döndürmediği durumlarda çalıştırmayı bant dışı yöntemle kanıtlamak için:
 
-    $ python3 commix.py --url="http://www.target.com/vuln.php" --data="addr=127.0.0.1" --oob
+    $ python3 commix.py --url="http://commix-testbed/scenarios/regular/POST/blind.php" --data="addr=127.0.0.1" --oob
 
 > [!NOTE]
 > `--oob` ile yapılan bant dışı (OAST) tespit, varsayılan olarak herkese açık `oast.fun` interactsh

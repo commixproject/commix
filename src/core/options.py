@@ -33,6 +33,17 @@ An option the run cannot act on is the user's own to correct, and one that contr
 says so here rather than after a connection has been opened and a payload sent.
 """
 def validate():
+  # A content oracle is the whole of this technique's answer, so one without the other is a mistake
+  # worth naming before a target is touched.
+  if checks.boolean_oracle_given():
+    given = [name for name, value in (("--string", menu.options.string), ("--not-string", menu.options.not_string),
+                                      ("--regexp", menu.options.regexp), ("--code", menu.options.code)) if value]
+    if len(given) > 1:
+      err_msg = "The options " + ", ".join("'" + _ + "'" for _ in given) + " cannot be used together. "
+      err_msg += "Only one of them says what a true answer looks like."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit(settings.EXIT_FAILURE)
+
   # Check for missing mandatory option(s).
   if not settings.STDIN_PARSING and not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, \
               menu.options.requestfile, menu.options.sitemap_url, menu.options.wizard, \
@@ -295,6 +306,42 @@ def validate():
     err_msg = "The value of the '--jitter' option must not be negative."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit(settings.EXIT_FAILURE)
+
+  """
+  A number that cannot mean what it says is worth stopping for.
+
+  Left to run, none of these fails where it was given: a negative delay, a zero-length ceiling or a
+  timeout of nothing reaches a technique that then finds nothing, and what gets reported is a target
+  that is not injectable rather than a value that could never have worked.
+  """
+  for option, value, minimum in (("--delay", menu.options.delay, 0),
+                                 ("--time-sec", menu.options.timesec, 0),
+                                 ("--retries", menu.options.retries, 0),
+                                 ("--crawl", menu.options.crawldepth, 0),
+                                 ("--time-limit", menu.options.time_limit, 0),
+                                 ("--timeout", menu.options.timeout, 1),
+                                 ("--maxlen", menu.options.maxlen, 1),
+                                 ("--threads", menu.options.threads, 1)):
+    if value is None or value >= minimum:
+      continue
+    err_msg = "The value of the '" + option + "' option must "
+    err_msg += "not be negative." if minimum == 0 else "be " + str(minimum) + " or greater."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit(settings.EXIT_FAILURE)
+
+  # Said now rather than where it is matched against: an oracle that cannot compile is one the run
+  # would carry on without, reporting a target that never answered the question it was given.
+  if menu.options.regexp:
+    try:
+      re.compile(menu.options.regexp)
+    except re.error as err:
+      err_msg = "The value of the '--regexp' option is not a valid regular expression (" + str(err) + ")."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit(settings.EXIT_FAILURE)
+
+  # The ceiling every technique bisects under, not only the ones that wait for their answer.
+  if menu.options.maxlen:
+    settings.MAXLEN = menu.options.maxlen
 
   # Check if defined "--timesec" option.
   if menu.options.timesec != 0:

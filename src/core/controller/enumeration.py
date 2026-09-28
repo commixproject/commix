@@ -51,6 +51,7 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
   if not settings.TIME_RELATED_ATTACK and settings.TARGET_OS == settings.OS.WINDOWS and interpreter:
     cmd = "cmd /c " + cmd
   execute_cmd = execution.make_execute_cmd(injector, separator, maxlen, TAG, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, interpreter, filename, url_time_response, technique, OUTPUT_TEXTFILE)
+  checks.print_enumenation().fetching_part("kernel name", technique)
   target_os, fresh = execute_cmd(cmd)
 
   if settings.TIME_RELATED_ATTACK and settings.VERBOSITY_LEVEL == 0 and fresh:
@@ -61,6 +62,7 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
       cmd = settings.DISTRO_INFO
       if not settings.TIME_RELATED_ATTACK and settings.USE_BACKTICKS:
         cmd = checks.remove_command_substitution(cmd)
+      checks.print_enumenation().fetching_part("distribution", technique)
       distro_name, distro_fresh = execute_cmd(cmd)
       fresh = fresh or distro_fresh
       if distro_name:
@@ -69,6 +71,7 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
     cmd = settings.WIN_RECOGNISE_HP if settings.TARGET_OS == settings.OS.WINDOWS else settings.RECOGNISE_HP
     if settings.TIME_RELATED_ATTACK and settings.VERBOSITY_LEVEL == 0 and fresh:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+    checks.print_enumenation().fetching_part("hardware platform", technique)
     target_arch, arch_fresh = execute_cmd(cmd)
     checks.set_target_arch(target_arch)
     fresh = fresh or arch_fresh

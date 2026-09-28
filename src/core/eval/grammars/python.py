@@ -164,6 +164,14 @@ def delay(timesec, condition):
   return "__import__(\"time\").sleep(" + str(timesec) + "*(" + condition + "))"
 
 """
+Stop the page where the condition does not hold, so what comes back says which it was.
+"""
+def halt(condition):
+  # Empty string rather than a number: the value is spliced into whatever the target was building,
+  # and only a string leaves that expression intact for the page to render as it normally would.
+  return "('' if (" + condition + ") else __import__(\"sys\").exit())"
+
+"""
 Evaluate one expression and then another, within a single expression.
 
 A tuple, whose elements are evaluated left to right, with the second one's value taken - there is

@@ -89,17 +89,34 @@ def url_match(url):
 Restore a value the session stored, unless this run was given one of its own on the command line -
 what the user asked for now outranks what a previous run happened to be using.
 """
-def restore_option(stored, applied, label):
+def restore_option(stored, applied, label, placeholder=None):
   if not stored or stored == "None":
+    return None
+  # A value the previous run shortened to a placeholder of its own is that same value, written the
+  # way that run was sending it. The difference is commix's own doing, so there is nothing to report
+  # and nothing to restore: what was given now stands.
+  if placeholder and placeholder in stored:
     return None
   # What was stored carries the marker saying where the injection point is, and what is given now
   # does not - so the two are compared by what they hold rather than by how they are written.
   if applied and checks.remove_tags(applied) != checks.remove_tags(stored):
     warn_msg = ("The stored session was found using the " + label + " '" + checks.remove_tags(stored) + "', which differs "
                 "from the one provided now ('" + applied + "'). Keeping the one provided now.")
-    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    say_once_about_session(warn_msg)
     return None
   return stored
+
+"""
+Said once for the run.
+
+Every technique that resumes reads the same stored row back, so a single fact about that session
+would otherwise be reported once per technique - four times over for a target that resumed four.
+"""
+def say_once_about_session(warn_msg):
+  if warn_msg in settings.REPLAY_NOTICES_SAID:
+    return
+  settings.REPLAY_NOTICES_SAID.add(warn_msg)
+  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
 Say when a stored finding was made with something other than what this run was given.
@@ -113,7 +130,7 @@ def announce_replay_conflict(stored, applied, label, switch):
   warn_msg = ("The stored session was found using the " + label + " '" + str(stored) + "', which "
               "differs from the '" + switch + "' value provided now ('" + str(applied) + "'). "
               "Using the stored value to replay this technique consistently.")
-  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  say_once_about_session(warn_msg)
 
 """
 How a stored technique is selected today: the technique letter it is reached by, and whether it
@@ -142,7 +159,7 @@ def technique_letter(technique_info):
     return technique_info.split()[2][0]
   if technique_info == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
     return settings.INJECTION_TECHNIQUE.FILE_BASED[0]
-  if technique_info in (settings.INJECTION_TECHNIQUE.CLASSIC, settings.INJECTION_TECHNIQUE.TIME_BASED, settings.INJECTION_TECHNIQUE.FILE_BASED, settings.INJECTION_TECHNIQUE.OOB):
+  if technique_info in (settings.INJECTION_TECHNIQUE.RESULTS_BASED, settings.INJECTION_TECHNIQUE.BOOLEAN_BASED, settings.INJECTION_TECHNIQUE.TIME_BASED, settings.INJECTION_TECHNIQUE.FILE_BASED, settings.INJECTION_TECHNIQUE.OOB):
     return technique_info[0]
   return None
 
@@ -256,6 +273,13 @@ def _ensure_columns(conn, table, columns):
 Store details of a successful injection point into the session database.
 Includes various metadata such as technique, payload, timing, vulnerability status, HTTP method, headers, and cookies.
 """
+def _stored_tmp_path(technique):
+  # A finding that fell back to a temporary directory has to record which one, or the resumed run
+  # has no name for the file its stored payload reads back.
+  if technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
+    return menu.options.tmp_path or settings.TMP_PATH or ""
+  return menu.options.tmp_path or ""
+
 def import_injection_points(url, technique, injection_type, filename, separator, shell, vuln_parameter, prefix, suffix, TAG, interpreter, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable):
   
   try:
@@ -289,7 +313,7 @@ def import_injection_points(url, technique, injection_type, filename, separator,
                 str(prefix), str(suffix), str(TAG), str(interpreter), str(payload), str(settings.HTTP_HEADER),
                 str(http_request_method), int(url_time_response), int(timesec), int(exec_time),
                 int(output_length), str(is_vulnerable), str(menu.options.data), str(menu.options.cookie),
-                str(menu.options.tamper or ""), str(settings.TARGET_OS), str(settings.WEB_ROOT or ""), str(menu.options.tmp_path or ""),
+                str(menu.options.tamper or ""), str(settings.TARGET_OS), str(settings.WEB_ROOT or ""), str(_stored_tmp_path(technique)),
                 str(menu.options.second_url or ""), str(menu.options.second_req or ""), str(settings.CSRF_TOKEN_ORIGINAL or ""),
                 str(menu.options.csrf_url or ""), str(menu.options.csrf_method or ""), str(menu.options.csrf_data or ""),
                 json.dumps(settings.VALUE_ENCODING) if settings.VALUE_ENCODING else "")
@@ -574,10 +598,12 @@ def apply_stored_technique(row):
 
   if http_header:
     settings.HTTP_HEADER = http_header
-  cookie = restore_option(cookie, settings.USER_APPLIED_COOKIE, "cookie")
+  # The short stand-in the previous run put in place of the parameter's own value, if it used one.
+  placeholder = check_stored_testable_value(url, vuln_parameter, http_request_method)
+  cookie = restore_option(cookie, settings.USER_APPLIED_COOKIE, "cookie", placeholder)
   if cookie:
     menu.options.cookie = cookie
-  data = restore_option(data, settings.USER_APPLIED_DATA, "POST data")
+  data = restore_option(data, settings.USER_APPLIED_DATA, "POST data", placeholder)
   if data:
     settings.IGNORE_USER_DEFINED_POST_DATA = False
     menu.options.data = data
@@ -588,7 +614,7 @@ def apply_stored_technique(row):
       warn_msg = ("The stored session was found using tamper script(s) '" + tamper + "', "
                   "which differs from the '--tamper' value provided now ('" + menu.options.tamper +
                   "'). Using the stored value to replay this technique consistently.")
-      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+      say_once_about_session(warn_msg)
     menu.options.tamper = tamper
   if target_os and target_os != "None":
     if menu.options.os and menu.options.os.lower() != target_os:

@@ -9,10 +9,10 @@
 </div>
 
 <p align="center">
-  <a href="https://github.com/commixproject/commix/actions/workflows/builds.yml"><img alt="Builds Tests" src="https://github.com/commixproject/commix/actions/workflows/builds.yml/badge.svg"></a>
-  <a href="https://www.python.org/downloads/"><img alt="Python 3.7+" src="https://img.shields.io/badge/python-3.7+-yellow.svg"></a>
-  <a href="https://github.com/commixproject/commix/blob/master/LICENSE.txt"><img alt="GPLv3 License" src="https://img.shields.io/badge/license-GPLv3-red.svg"></a>
-  <a href="https://x.com/commixproject"><img alt="X" src="https://img.shields.io/badge/x-@commixproject-blue.svg"></a>
+  <a href="https://github.com/commixproject/commix/actions/workflows/builds.yml"><img alt="Builds Tests" src="https://img.shields.io/github/actions/workflow/status/commixproject/commix/builds.yml?branch=master&label=Builds%20Tests&style=for-the-badge&logo=githubactions&logoColor=white"></a>
+  <a href="https://www.python.org/downloads/"><img alt="Python 3.7+" src="https://img.shields.io/badge/Python-3.7%2B-3776AB.svg?style=for-the-badge&logo=python&logoColor=white"></a>
+  <a href="https://github.com/commixproject/commix/blob/master/LICENSE.txt"><img alt="GPLv3 License" src="https://img.shields.io/badge/License-GPLv3-6A1B9A.svg?style=for-the-badge&logo=gnu&logoColor=white"></a>
+  <a href="https://x.com/commixproject"><img alt="Follow @commixproject" src="https://img.shields.io/badge/Follow-@commixproject-000000.svg?style=for-the-badge&logo=x&logoColor=white"></a>
 </p>
 
 **Commix** (abréviation de [**comm**]and [**i**]njection e[**x**]ploiter) est un outil open source de test d'intrusion, écrit par [**Anastasios Stasinopoulos**](https://github.com/stasinopoulos) ([**@ancst**](https://x.com/ancst)), qui automatise la détection et l'exploitation des vulnérabilités de type [**command**](https://owasp.org/www-community/attacks/Command_Injection) (et [**code**](https://owasp.org/www-community/attacks/Code_Injection)) injection.
@@ -34,12 +34,10 @@ Vous pouvez consulter la [**collection de captures d'écran**](https://github.co
 
 ## Fonctionnalités
 
-* **Quatre techniques d'injection** - classic (basée sur les résultats), time-based (à l'aveugle), file-based (à l'aveugle, avec une variante tempfile-based pour les cibles à écriture restreinte) et out-of-band (OAST) via HTTP/S et DNS.
+* **Cinq techniques d'injection** - classic (basée sur les résultats), boolean-based (à l'aveugle, en lisant la réponse sur la page), time-based (à l'aveugle), file-based (à l'aveugle, avec une variante tempfile-based pour les cibles à écriture restreinte) et out-of-band (OAST) via HTTP/S et DNS.
 * **Injection de code** - `--eval` teste la chaîne que la cible évalue comme du code, en PHP ou Python, avec les quatre mêmes techniques.
 * **Large surface d'injection** - paramètres GET/POST, en-têtes HTTP, cookies et corps de requête JSON/XML, ainsi que le module `shellshock` pour les cibles CGI.
-* **Shells interactifs** - un `os_shell` sur la cible, les modes intégrés `reverse_tcp` et `bind_tcp`, et le transfert de fichiers (`download`/`upload`) via le shell établi.
-* **Preuve d'exploitation** - `--proof` prouve à nouveau chaque découverte au moyen d'une expérience qui lui est propre et écrit la transcription à côté de la sortie de l'analyse, et `--parse-errors` rapporte les messages d'erreur du shell lui-même lorsqu'une charge utile a atteint un shell sans y être comprise.
-* **Énumération et accès aux fichiers** - utilisateur courant, nom d'hôte, privilèges, informations système, utilisateurs et empreintes de mots de passe ; lecture et écriture de fichiers sur la cible.
+* **Shells interactifs et post-exploitation** - un `os_shell` sur la cible, les modes intégrés `reverse_tcp` et `bind_tcp`, le transfert de fichiers (`download`/`upload`) via le shell établi, et l'énumération de l'utilisateur courant, du nom d'hôte, des privilèges, des informations système, des utilisateurs et des empreintes de mots de passe. Chaque découverte peut être prouvée à nouveau avec `--proof`, qui mène une expérience qui lui est propre et écrit la transcription à côté de la sortie de l'analyse.
 * **Contournement des filtres et des WAF** - Plusieurs scripts de falsification (tamper) combinables, appliqués dans un ordre déterministe.
 * **Ciblage flexible** - une URL unique, une exploration du site, des formulaires HTML, un sitemap, un journal de proxy, un fichier de cibles multiples, un fichier de requête HTTP brute ou une entrée `stdin`.
 * **Analyses reprenables et sortie exploitable par machine** - les résultats sont stockés par cible dans un fichier de session et peuvent être exportés en JSON, sous forme de CSV couvrant toutes les cibles testées, ou sous forme de journal HAR du trafic HTTP de l'analyse. Les options fournies à une analyse peuvent être enregistrées comme profil et réutilisées.
@@ -71,13 +69,13 @@ $ python3 commix.py -h
 Tester un seul paramètre injectable, puis ouvrir un shell sur la cible :
 
 ```
-$ python3 commix.py --url="http://www.target.com/vuln.php?addr=127.0.0.1" --os-shell
+$ python3 commix.py --url="http://commix-testbed/scenarios/regular/GET/classic.php?addr=127.0.0.1" --os-shell
 ```
 
 Prouver l'exécution hors bande, lorsque la réponse ne renvoie rien :
 
 ```
-$ python3 commix.py --url="http://www.target.com/vuln.php" --data="addr=127.0.0.1" --oob
+$ python3 commix.py --url="http://commix-testbed/scenarios/regular/POST/blind.php" --data="addr=127.0.0.1" --oob
 ```
 
 > [!NOTE]

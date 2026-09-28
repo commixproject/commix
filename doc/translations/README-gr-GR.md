@@ -9,12 +9,11 @@
 </div>
 
 <p align="center">
-  <a href="https://github.com/commixproject/commix/actions/workflows/builds.yml"><img alt="Builds Tests" src="https://github.com/commixproject/commix/actions/workflows/builds.yml/badge.svg"></a>
-  <a href="https://www.python.org/downloads/"><img alt="Python 3.7+" src="https://img.shields.io/badge/python-3.7+-yellow.svg"></a>
-  <a href="https://github.com/commixproject/commix/blob/master/LICENSE.txt"><img alt="GPLv3 License" src="https://img.shields.io/badge/license-GPLv3-red.svg"></a>
-  <a href="https://x.com/commixproject"><img alt="X" src="https://img.shields.io/badge/x-@commixproject-blue.svg"></a>
+  <a href="https://github.com/commixproject/commix/actions/workflows/builds.yml"><img alt="Builds Tests" src="https://img.shields.io/github/actions/workflow/status/commixproject/commix/builds.yml?branch=master&label=Builds%20Tests&style=for-the-badge&logo=githubactions&logoColor=white"></a>
+  <a href="https://www.python.org/downloads/"><img alt="Python 3.7+" src="https://img.shields.io/badge/Python-3.7%2B-3776AB.svg?style=for-the-badge&logo=python&logoColor=white"></a>
+  <a href="https://github.com/commixproject/commix/blob/master/LICENSE.txt"><img alt="GPLv3 License" src="https://img.shields.io/badge/License-GPLv3-6A1B9A.svg?style=for-the-badge&logo=gnu&logoColor=white"></a>
+  <a href="https://x.com/commixproject"><img alt="Follow @commixproject" src="https://img.shields.io/badge/Follow-@commixproject-000000.svg?style=for-the-badge&logo=x&logoColor=white"></a>
 </p>
-
 To **commix** (συντομογραφία [**comm**]and [**i**]njection e[**x**]ploiter) είναι πρόγραμμα ανοιχτού κώδικα, γραμμένο από τον **[Anastasios Stasinopoulos](https://github.com/stasinopoulos)** (**[@ancst](https://x.com/ancst)**), που αυτοματοποιεί την εύρεση και εκμετάλλευση ευπαθειών τύπου **[command](https://owasp.org/www-community/attacks/Command_Injection)** (και **[code](https://owasp.org/www-community/attacks/Code_Injection)**) injection.
 
 ![Screenshot](https://commixproject.com/images/background.png)
@@ -34,12 +33,10 @@ To **commix** (συντομογραφία [**comm**]and [**i**]njection e[**x**]
 
 ## Χαρακτηριστικά
 
-* **Τέσσερις τεχνικές injection** – results-based (classic), time-based (blind), file-based (blind, με παραλλαγή βασισμένη σε προσωρινό αρχείο για targets με περιορισμούς εγγραφής) και out-of-band (OAST) μέσω HTTP/S και DNS. Επιλέγονται με `--technique` ή βάσει του τύπου που αναφέρουν με `--type`.
+* **Πέντε τεχνικές injection** – results-based (classic), boolean-based (blind, με την απάντηση να διαβάζεται από τη σελίδα), time-based (blind), file-based (blind, με παραλλαγή βασισμένη σε προσωρινό αρχείο για targets με περιορισμούς εγγραφής) και out-of-band (OAST) μέσω HTTP/S και DNS. Επιλέγονται με `--technique` ή βάσει του τύπου που αναφέρουν με `--type`.
 * **Code injection** – το `--eval` ελέγχει strings που εκτελούνται ως κώδικας από το target, σε PHP ή Python, χρησιμοποιώντας τις ίδιες τέσσερις τεχνικές.
 * **Ευρεία κάλυψη injection επιφανειών** – GET/POST parameters, HTTP headers, cookies και JSON/XML request bodies, καθώς και το `shellshock` module για CGI targets.
-* **Interactive shells** – `os_shell` στο target, ενσωματωμένα modes `reverse_tcp` και `bind_tcp`, καθώς και `download`/`upload` αρχείων μέσω του established shell.
-* **Απόδειξη εκμετάλλευσης** – το `--proof` επαληθεύει εκ νέου κάθε εύρημα με δικό του πείραμα και αποθηκεύει το transcript δίπλα στο output του run. Το `--parse-errors` εμφανίζει τα error messages του shell όταν ένα payload έφτασε στο shell αλλά δεν έγινε κατανοητό.
-* **Enumeration και πρόσβαση σε αρχεία** – current user, hostname, privileges, system information, users και password hashes, καθώς και ανάγνωση και εγγραφή αρχείων στο target host.
+* **Interactive shells και post-exploitation** – `os_shell` στο target, ενσωματωμένα modes `reverse_tcp` και `bind_tcp`, `download`/`upload` αρχείων μέσω του established shell, καθώς και enumeration για current user, hostname, privileges, system information, users και password hashes. Κάθε εύρημα μπορεί να επαληθευτεί εκ νέου με το `--proof`, το οποίο εκτελεί δικό του πείραμα και αποθηκεύει το transcript δίπλα στο output του run.
 * **Filter και WAF evasion** – πολλαπλά συνδυάσιμα tamper scripts, τα οποία εφαρμόζονται με deterministic σειρά.
 * **Ευέλικτο targeting** – υποστήριξη για single URL, crawl, HTML forms, sitemap, proxy log, bulk file, raw HTTP request file ή δεδομένα μέσω piped `stdin`.
 * **Resumable scans και machine-readable output** – τα αποτελέσματα αποθηκεύονται ανά target σε session file και μπορούν να εξαχθούν σε JSON, CSV που περιλαμβάνει όλα τα tested targets ή HAR log με το HTTP traffic του run. Οι επιλογές ενός run μπορούν επίσης να αποθηκευτούν ως profile και να επαναχρησιμοποιηθούν.
@@ -68,11 +65,11 @@ To **commix** (συντομογραφία [**comm**]and [**i**]njection e[**x**]
 
 Έλεγχος μιας ευπαθούς παραμέτρου και άμεση πρόσβαση σε κέλυφος στον στόχο :
 
-    $ python3 commix.py --url="http://www.target.com/vuln.php?addr=127.0.0.1" --os-shell
+    $ python3 commix.py --url="http://commix-testbed/scenarios/regular/GET/classic.php?addr=127.0.0.1" --os-shell
 
 Απόδειξη εκτέλεσης εκτός ζώνης, όταν η απόκριση δεν επιστρέφει τίποτα :
 
-    $ python3 commix.py --url="http://www.target.com/vuln.php" --data="addr=127.0.0.1" --oob
+    $ python3 commix.py --url="http://commix-testbed/scenarios/regular/POST/blind.php" --data="addr=127.0.0.1" --oob
 
 > [!NOTE]
 > Η ανίχνευση εκτός ζώνης (OAST) με την επιλογή `--oob` χρησιμοποιεί από προεπιλογή τον δημόσιο

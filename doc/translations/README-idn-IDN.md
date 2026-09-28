@@ -9,10 +9,10 @@
 </div>
 
 <p align="center">
-  <a href="https://github.com/commixproject/commix/actions/workflows/builds.yml"><img alt="Builds Tests" src="https://github.com/commixproject/commix/actions/workflows/builds.yml/badge.svg"></a>
-  <a href="https://www.python.org/downloads/"><img alt="Python 3.7+" src="https://img.shields.io/badge/python-3.7+-yellow.svg"></a>
-  <a href="https://github.com/commixproject/commix/blob/master/LICENSE.txt"><img alt="GPLv3 License" src="https://img.shields.io/badge/license-GPLv3-red.svg"></a>
-  <a href="https://x.com/commixproject"><img alt="X" src="https://img.shields.io/badge/x-@commixproject-blue.svg"></a>
+  <a href="https://github.com/commixproject/commix/actions/workflows/builds.yml"><img alt="Builds Tests" src="https://img.shields.io/github/actions/workflow/status/commixproject/commix/builds.yml?branch=master&label=Builds%20Tests&style=for-the-badge&logo=githubactions&logoColor=white"></a>
+  <a href="https://www.python.org/downloads/"><img alt="Python 3.7+" src="https://img.shields.io/badge/Python-3.7%2B-3776AB.svg?style=for-the-badge&logo=python&logoColor=white"></a>
+  <a href="https://github.com/commixproject/commix/blob/master/LICENSE.txt"><img alt="GPLv3 License" src="https://img.shields.io/badge/License-GPLv3-6A1B9A.svg?style=for-the-badge&logo=gnu&logoColor=white"></a>
+  <a href="https://x.com/commixproject"><img alt="Follow @commixproject" src="https://img.shields.io/badge/Follow-@commixproject-000000.svg?style=for-the-badge&logo=x&logoColor=white"></a>
 </p>
 
 **Commix** (kependekan dari [**comm**]and [**i**]njection e[**x**]ploiter) adalah alat pengujian penetrasi open source, yang ditulis oleh **[Anastasios Stasinopoulos](https://github.com/stasinopoulos)** (**[@ancst](https://x.com/ancst)**), yang mengotomatiskan deteksi dan eksploitasi kerentanan **[command](https://owasp.org/www-community/attacks/Command_Injection)** (dan **[code](https://owasp.org/www-community/attacks/Code_Injection)**) injection.
@@ -34,12 +34,10 @@ Anda dapat mengunjungi [koleksi dari tangkapan layar](https://github.com/commixp
 
 ## Fitur
 
-* **Empat teknik injeksi** - classic (berbasis hasil), time-based (buta), file-based (buta, dengan varian tempfile-based untuk target yang terbatas hak tulisnya) dan out-of-band (OAST) melalui HTTP/S dan DNS.
+* **Lima teknik injeksi** - classic (berbasis hasil), boolean-based (buta, membaca jawabannya dari halaman), time-based (buta), file-based (buta, dengan varian tempfile-based untuk target yang terbatas hak tulisnya) dan out-of-band (OAST) melalui HTTP/S dan DNS.
 * **Injeksi kode** - `--eval` menguji string yang dievaluasi target sebagai kode, dalam PHP atau Python, dengan empat teknik yang sama.
 * **Permukaan injeksi yang luas** - parameter GET/POST, header HTTP, cookie, dan body permintaan JSON/XML, serta modul `shellshock` untuk target CGI.
-* **Shell interaktif** - `os_shell` pada target, mode bawaan `reverse_tcp` dan `bind_tcp`, serta transfer berkas (`download`/`upload`) melalui shell yang telah terbentuk.
-* **Bukti eksploitasi** - `--proof` membuktikan kembali setiap temuan dengan percobaannya sendiri dan menulis transkripnya di samping keluaran pemindaian, dan `--parse-errors` melaporkan pesan galat dari shell itu sendiri ketika sebuah payload mencapai shell tetapi tidak dipahami.
-* **Enumerasi dan akses berkas** - pengguna saat ini, nama host, hak akses, informasi sistem, daftar pengguna dan hash kata sandi; membaca dan menulis berkas pada target.
+* **Shell interaktif dan pasca-eksploitasi** - `os_shell` pada target, mode bawaan `reverse_tcp` dan `bind_tcp`, transfer berkas (`download`/`upload`) melalui shell yang telah terbentuk, serta enumerasi pengguna saat ini, nama host, hak akses, informasi sistem, daftar pengguna dan hash kata sandi. Setiap temuan dapat dibuktikan kembali dengan `--proof`, yang menjalankan percobaannya sendiri dan menulis transkripnya di samping keluaran pemindaian.
 * **Pengelakan filter dan WAF** - Beberapa skrip tamper yang dapat dikombinasikan, diterapkan dalam urutan yang deterministik.
 * **Penentuan target yang fleksibel** - satu URL, penelusuran situs, formulir HTML, sitemap, log proxy, berkas berisi banyak target, berkas permintaan HTTP mentah, atau masukan `stdin`.
 * **Pemindaian yang dapat dilanjutkan dan keluaran terbaca mesin** - hasil disimpan per target dalam berkas sesi dan dapat diekspor sebagai JSON, sebagai CSV yang mencakup setiap target yang diuji, atau sebagai catatan HAR dari lalu lintas HTTP pemindaian. Opsi yang digunakan sebuah pemindaian dapat disimpan sebagai profil dan digunakan kembali.
@@ -67,11 +65,11 @@ Untuk mendapatkan daftar semua opsi dan beralih gunakan:
 
 Menguji satu parameter yang dapat diinjeksi, lalu masuk ke shell pada target:
 
-    $ python3 commix.py --url="http://www.target.com/vuln.php?addr=127.0.0.1" --os-shell
+    $ python3 commix.py --url="http://commix-testbed/scenarios/regular/GET/classic.php?addr=127.0.0.1" --os-shell
 
 Membuktikan eksekusi secara out-of-band, ketika respons tidak mengembalikan apa pun:
 
-    $ python3 commix.py --url="http://www.target.com/vuln.php" --data="addr=127.0.0.1" --oob
+    $ python3 commix.py --url="http://commix-testbed/scenarios/regular/POST/blind.php" --data="addr=127.0.0.1" --oob
 
 > [!NOTE]
 > Deteksi out-of-band (OAST) dengan `--oob` secara bawaan menggunakan server interactsh publik

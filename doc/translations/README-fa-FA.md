@@ -9,12 +9,11 @@
 </div>
 
 <p align="center">
-  <a href="https://github.com/commixproject/commix/actions/workflows/builds.yml"><img alt="Builds Tests" src="https://github.com/commixproject/commix/actions/workflows/builds.yml/badge.svg"></a>
-  <a href="https://www.python.org/downloads/"><img alt="Python 3.7+" src="https://img.shields.io/badge/python-3.7+-yellow.svg"></a>
-  <a href="https://github.com/commixproject/commix/blob/master/LICENSE.txt"><img alt="GPLv3 License" src="https://img.shields.io/badge/license-GPLv3-red.svg"></a>
-  <a href="https://x.com/commixproject"><img alt="X" src="https://img.shields.io/badge/x-@commixproject-blue.svg"></a>
+  <a href="https://github.com/commixproject/commix/actions/workflows/builds.yml"><img alt="Builds Tests" src="https://img.shields.io/github/actions/workflow/status/commixproject/commix/builds.yml?branch=master&label=Builds%20Tests&style=for-the-badge&logo=githubactions&logoColor=white"></a>
+  <a href="https://www.python.org/downloads/"><img alt="Python 3.7+" src="https://img.shields.io/badge/Python-3.7%2B-3776AB.svg?style=for-the-badge&logo=python&logoColor=white"></a>
+  <a href="https://github.com/commixproject/commix/blob/master/LICENSE.txt"><img alt="GPLv3 License" src="https://img.shields.io/badge/License-GPLv3-6A1B9A.svg?style=for-the-badge&logo=gnu&logoColor=white"></a>
+  <a href="https://x.com/commixproject"><img alt="Follow @commixproject" src="https://img.shields.io/badge/Follow-@commixproject-000000.svg?style=for-the-badge&logo=x&logoColor=white"></a>
 </p>
-
 **کامیکس** (مخفف [**کام**]ند ا[**ی**]نجکشن ا[**کس**]پلویتر) یک ابزار متن‌باز تست‌نفوذ است که توسط **[آناستاسیوس استاسینوپولوس](https://github.com/stasinopoulos)** (**[@ancst](https://x.com/ancst)**) نوشته شده است که فرایند کشف و بهره‌برداری از آسیپ پذیری های **[کامند](https://owasp.org/www-community/attacks/Command_Injection)** (و **[کد](https://owasp.org/www-community/attacks/Code_Injection)**) اینجکشن را خودکار می‌کند.
 
 
@@ -34,12 +33,10 @@
 
 ## ویژگی‌ها
 
-* **چهار تکنیک تزریق** - classic (مبتنی بر نتیجه)، time-based (کور)، file-based (کور، به همراه گونه tempfile-based برای هدف‌هایی با محدودیت نوشتن) و out-of-band (OAST) روی HTTP/S و DNS.
+* **پنج تکنیک تزریق** - classic (مبتنی بر نتیجه)، boolean-based (کور، با خواندن پاسخ از صفحه)، time-based (کور)، file-based (کور، به همراه گونه tempfile-based برای هدف‌هایی با محدودیت نوشتن) و out-of-band (OAST) روی HTTP/S و DNS.
 * **تزریق کد** - سوئیچ `--eval` رشته‌ای را که هدف به عنوان کد ارزیابی می‌کند، در PHP یا Python و با همان چهار تکنیک آزمایش می‌کند.
 * **سطح تزریق گسترده** - پارامترهای GET/POST، سرآیندهای HTTP، کوکی‌ها و بدنه درخواست‌های JSON/XML، به‌علاوه ماژول `shellshock` برای هدف‌های CGI.
-* **پوسته‌های تعاملی** - یک `os_shell` روی هدف، حالت‌های داخلی `reverse_tcp` و `bind_tcp`، و انتقال فایل (`download`/`upload`) از طریق پوسته برقرارشده.
-* **اثبات بهره‌برداری** - `--proof` هر یافته را با آزمایشی از آنِ خود دوباره اثبات می‌کند و رونوشت آن را کنار خروجی اجرا می‌نویسد، و `--parse-errors` پیام‌های خطای خودِ پوسته را گزارش می‌دهد، جایی که یک بار مخرب به پوسته رسیده اما فهمیده نشده است.
-* **شمارش و دسترسی به فایل** - کاربر جاری، نام میزبان، سطوح دسترسی، اطلاعات سیستم، کاربران و درهم‌سازی گذرواژه‌ها؛ خواندن و نوشتن فایل روی هدف.
+* **پوسته‌های تعاملی و پس از بهره‌برداری** - یک `os_shell` روی هدف، حالت‌های داخلی `reverse_tcp` و `bind_tcp`، انتقال فایل (`download`/`upload`) از طریق پوسته برقرارشده، و شمارش کاربر جاری، نام میزبان، سطوح دسترسی، اطلاعات سیستم، کاربران و درهم‌سازی گذرواژه‌ها. هر یافته را می‌توان با `--proof` دوباره اثبات کرد، که آزمایشی از آنِ خود اجرا می‌کند و رونوشت آن را کنار خروجی اجرا می‌نویسد.
 * **دور زدن فیلترها و WAF** - چندین اسکریپت tamper قابل ترکیب، که با ترتیبی قطعی اعمال می‌شوند.
 * **هدف‌گذاری انعطاف‌پذیر** - یک URL، پویش سایت، فرم‌های HTML، sitemap، گزارش پروکسی، فایل چندهدفی، فایل درخواست خام HTTP یا ورودی `stdin`.
 * **پویش‌های قابل ازسرگیری و خروجی ماشین‌خوان** - نتایج به تفکیک هدف در یک فایل نشست ذخیره می‌شوند و می‌توان آن‌ها را به‌صورت JSON، به‌صورت یک CSV دربرگیرندهٔ همهٔ هدف‌های آزموده‌شده، یا به‌صورت یک گزارش HAR از ترافیک HTTP اجرا خروجی گرفت. گزینه‌هایی که یک اجرا با آن‌ها انجام شده است را می‌توان به‌عنوان نمایه ذخیره و دوباره استفاده کرد.
@@ -67,11 +64,11 @@
 
 آزمودن یک پارامتر آسیب‌پذیر و سپس گرفتن پوسته روی هدف:
 
-    $ python3 commix.py --url="http://www.target.com/vuln.php?addr=127.0.0.1" --os-shell
+    $ python3 commix.py --url="http://commix-testbed/scenarios/regular/GET/classic.php?addr=127.0.0.1" --os-shell
 
 اثبات اجرا به روش خارج از باند، هنگامی که پاسخ چیزی برنمی‌گرداند:
 
-    $ python3 commix.py --url="http://www.target.com/vuln.php" --data="addr=127.0.0.1" --oob
+    $ python3 commix.py --url="http://commix-testbed/scenarios/regular/POST/blind.php" --data="addr=127.0.0.1" --oob
 
 > [!NOTE]
 > شناسایی خارج از باند (OAST) با `--oob` به‌صورت پیش‌فرض از سرور عمومی interactsh با نشانی

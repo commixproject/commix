@@ -817,6 +817,7 @@ injection.add_option("--oob-timeout",
 
 injection.add_option("--maxlen",
                 action="store",
+                type="int",
                 dest="maxlen",
                 default=settings.MAXLEN,
                 help="Set the max length of output for time-related injection techniques (Default: " + str(settings.MAXLEN) + " chars).")
@@ -891,6 +892,31 @@ detection.add_option("--level",
                 dest="level",
                 default=False,
                 help="Level of tests to perform (1-3, Default: " + str(settings.DEFAULT_INJECTION_LEVEL) + ").")
+
+detection.add_option("--string",
+                action="store",
+                dest="string",
+                default=None,
+                help="String to match in the page when the injected condition is true.")
+
+detection.add_option("--not-string",
+                action="store",
+                dest="not_string",
+                default=None,
+                help="String to match in the page when the injected condition is false.")
+
+detection.add_option("--regexp",
+                action="store",
+                dest="regexp",
+                default=None,
+                help="Regexp to match in the page when the injected condition is true.")
+
+detection.add_option("--code",
+                action="store",
+                dest="code",
+                type="int",
+                default=None,
+                help="HTTP code to match when the injected condition is true.")
 
 detection.add_option("--mine-params",
                 action="store_true",

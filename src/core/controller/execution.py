@@ -23,14 +23,16 @@ from src.core.controller import checks
 Select the injector module for the given technique.
 """
 def select_injector(technique):
-  if technique == settings.INJECTION_TECHNIQUE.CLASSIC:
-    from src.core.techniques.classic import cb_injector as injector
+  if technique == settings.INJECTION_TECHNIQUE.RESULTS_BASED:
+    from src.core.techniques.results_based import rb_injector as injector
   elif technique == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
     from src.core.eval import eb_injector as injector
   elif technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
     from src.core.techniques.time_based import tb_injector as injector
   elif technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
     from src.core.techniques.file_based import fb_injector as injector
+  elif technique == settings.INJECTION_TECHNIQUE.BOOLEAN_BASED:
+    from src.core.techniques.boolean_based import bb_injector as injector
   elif technique == settings.INJECTION_TECHNIQUE.OOB:
     from src.core.techniques.oob import oob_injector as injector
   else:
@@ -76,7 +78,7 @@ def make_simple_execute_cmd(injector, separator, maxlen, TAG, prefix, suffix, wh
   to say, and calling a results-based one with the time-related argument list raises TypeError.
   """
   def execute_cmd(cmd):
-    if technique == settings.INJECTION_TECHNIQUE.OOB:
+    if technique in (settings.INJECTION_TECHNIQUE.OOB, settings.INJECTION_TECHNIQUE.BOOLEAN_BASED):
       return injector.injection(separator, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter)
     if settings.TIME_RELATED_ATTACK and not results_based_injector:
       try:

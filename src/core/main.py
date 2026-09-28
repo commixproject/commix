@@ -361,7 +361,7 @@ def init_injection(url):
   settings.PENDING_OS_SHELL_ENTRY = None
   settings.LOGS_NOTIFICATION_SHOWN = False
   settings.INJECTION_CHECKER = False
-  settings.CLASSIC_STATE = False
+  settings.RESULTS_BASED_STATE = False
   settings.EVAL_BASED_STATE = False
   settings.TIME_BASED_STATE = False
   settings.FILE_BASED_STATE = False

@@ -123,6 +123,11 @@ def to_number(expr):
 def delay(timesec, condition):
   return "sleep(" + str(timesec) + "*(" + condition + "))"
 
+# Stop the page where the condition does not hold, so what comes back says which it was.
+def halt(condition):
+  # Empty string rather than a number, so what the target was building is left as it was.
+  return "((" + condition + ")?\"\":exit())"
+
 # Evaluate one expression and then another, within a single expression.
 def sequence(first, second):
   return first + "." + second

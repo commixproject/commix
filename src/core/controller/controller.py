@@ -35,7 +35,8 @@ from src.core.techniques.time_based import tb_handler
 from src.core.techniques.oob import oob_handler
 from src.core.techniques.file_based import fb_handler
 from src.core.techniques.tempfile_based import tfb_handler
-from src.core.techniques.classic import cb_handler
+from src.core.techniques.results_based import rb_handler
+from src.core.techniques.boolean_based import bb_handler
 from src.core.eval import eb_handler
 
 """
@@ -251,7 +252,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
     wanted = "Windows" if settings.TARGET_OS == settings.OS.WINDOWS else "Unix-like"
     shaped = [pair for pair in shaped if pair[1] == wanted] or shaped
 
-  settings.CLASSIC_STATE = True
+  settings.RESULTS_BASED_STATE = True
   try:
     for whitespace in settings.WHITESPACES:
       if not settings.IDENTIFIED_COMMAND_INJECTION:
@@ -290,7 +291,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
                   settings.SKIP_CODE_INJECTIONS = True
               break
 
-    settings.CLASSIC_STATE = False
+    settings.RESULTS_BASED_STATE = False
     return url
 
   except (_urllib.error.URLError, _urllib.error.HTTPError) as err_msg:
@@ -523,17 +524,17 @@ def run_technique(injection_type, technique, state_name, skip_flag_name, tech_le
 """
 Check if it's exploitable via classic command injection technique.
 """
-def classic_command_injection_technique(url, timesec, filename, http_request_method):
+def results_based_command_injection_technique(url, timesec, filename, http_request_method):
   injection_type = settings.INJECTION_TYPE.RESULTS_BASED_CI
-  technique = settings.INJECTION_TECHNIQUE.CLASSIC
+  technique = settings.INJECTION_TECHNIQUE.RESULTS_BASED
   # Prove the injection by what the response carries back.
   def exploit():
-    result = cb_handler.exploitation(url, timesec, filename, http_request_method, injection_type, technique)
+    result = rb_handler.exploitation(url, timesec, filename, http_request_method, injection_type, technique)
     if result is not False:
       settings.IDENTIFIED_COMMAND_INJECTION = True
       settings.SKIP_CODE_INJECTIONS = True
     return result
-  run_technique(injection_type, technique, "CLASSIC_STATE", "SKIP_COMMAND_INJECTIONS", "r", exploit)
+  run_technique(injection_type, technique, "RESULTS_BASED_STATE", "SKIP_COMMAND_INJECTIONS", "r", exploit)
 
 """
 Check if it's exploitable via dynamic code evaluation technique.
@@ -548,6 +549,24 @@ def dynamic_code_evaluation_technique(url, timesec, filename, http_request_metho
       settings.SKIP_COMMAND_INJECTIONS = True
     return result
   run_technique(injection_type, technique, "EVAL_BASED_STATE", "SKIP_CODE_INJECTIONS", "r", exploit, eval_sink=True)
+
+"""
+Check if it's exploitable via boolean-based blind command injection technique.
+"""
+def boolean_based_technique(url, timesec, filename, http_request_method):
+  injection_type = settings.INJECTION_TYPE.BLIND
+  technique = settings.INJECTION_TECHNIQUE.BOOLEAN_BASED
+  # Prove the injection by what the page says, where the target branches on the command it ran.
+  def exploit():
+    result = bb_handler.exploitation(url, timesec, filename, http_request_method, injection_type, technique)
+    if result is not False:
+      settings.IDENTIFIED_COMMAND_INJECTION = True
+    return result
+  eval_sink = bool(menu.options.eval_sink)
+  if eval_sink:
+    injection_type = settings.INJECTION_TYPE.BLIND_CE
+  run_technique(injection_type, technique, "BOOLEAN_BASED_STATE",
+                "SKIP_CODE_INJECTIONS" if eval_sink else "SKIP_COMMAND_INJECTIONS", "b", exploit, eval_sink=eval_sink)
 
 """
 Check if it's exploitable via time-based command injection technique.
@@ -1061,7 +1080,7 @@ def injection_process(url, check_parameter, http_request_method, filename, times
         # A resumed finding is already confirmed, so re-verifying the slow ones adds nothing
         # when a results-based technique is stored too.
         return settings.LOAD_SESSION and not settings.USER_APPLIED_TECHNIQUE and any(
-          _ in settings.STORED_TECHNIQUES for _ in (settings.INJECTION_TECHNIQUE.CLASSIC, settings.INJECTION_TECHNIQUE.DYNAMIC_CODE))
+          _ in settings.STORED_TECHNIQUES for _ in (settings.INJECTION_TECHNIQUE.RESULTS_BASED, settings.INJECTION_TECHNIQUE.DYNAMIC_CODE))
 
       # Test the parameter by how long the target takes to answer.
       def _run_time_based():
@@ -1085,12 +1104,16 @@ def injection_process(url, check_parameter, http_request_method, filename, times
 
       end_detection = False
       techniques = [
-        lambda: classic_command_injection_technique(url, timesec, filename, http_request_method),
+        lambda: results_based_command_injection_technique(url, timesec, filename, http_request_method),
         lambda: dynamic_code_evaluation_technique(url, timesec, filename, http_request_method),
         _run_time_based,
         _run_file_based,
         lambda: oob_command_injection_technique(url, timesec, filename, http_request_method),
       ]
+      # Ahead of the delay-based one, being the cheaper way to ask the same question - and tried like
+      # any other technique, since the page it reads its answer off is there whether or not the run
+      # named what a true answer looks like.
+      techniques.insert(2, lambda: boolean_based_technique(url, timesec, filename, http_request_method))
       # Work through the techniques in turn, carrying on past the ones that find nothing.
       def _run_techniques():
         technique_idx = 0

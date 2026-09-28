@@ -31,7 +31,7 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
     if technique == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
       injector = execution.select_injector(technique)
     else:
-      injector = execution.select_injector(settings.INJECTION_TECHNIQUE.CLASSIC)
+      injector = execution.select_injector(settings.INJECTION_TECHNIQUE.RESULTS_BASED)
       results_based_injector = True
       if settings.TIME_RELATED_ATTACK:
         whitespace = settings.WHITESPACES[0]

@@ -22,7 +22,7 @@ The "classic" technique on result-based OS command injection.
 """
 The "classic" injection technique handler.
 """
-def cb_injection_handler(url, timesec, filename, http_request_method, injection_type, technique):
+def rb_injection_handler(url, timesec, filename, http_request_method, injection_type, technique):
   return handler.do_results_based_process(url, timesec, filename, http_request_method, injection_type, technique)
 
 """
@@ -30,6 +30,6 @@ The exploitation function.
 (call the injection handler)
 """
 def exploitation(url, timesec, filename, http_request_method, injection_type, technique):
-  return cb_injection_handler(url, timesec, filename, http_request_method, injection_type, technique)
+  return rb_injection_handler(url, timesec, filename, http_request_method, injection_type, technique)
 
 # eof

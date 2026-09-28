@@ -127,8 +127,9 @@ def check_waf(url, http_request_method):
 Check injection technique(s) status.
 """
 def injection_techniques_status():
-  if settings.CLASSIC_STATE is not True and \
+  if settings.RESULTS_BASED_STATE is not True and \
      settings.EVAL_BASED_STATE is not True and \
+     settings.BOOLEAN_BASED_STATE is not True and \
      settings.TIME_BASED_STATE is not True and \
      settings.FILE_BASED_STATE is not True and \
      settings.TEMPFILE_BASED_STATE is not True and \
@@ -436,6 +437,16 @@ def time_based_payloads():
 """
 The payload builder the file-based technique uses, chosen the same way: the file it writes and reads
 back is the technique's, and the sink only decides how the command that fills it is reached.
+"""
+def boolean_based_payloads():
+  if menu.options.eval_sink:
+    from src.core.eval.payloads import boolean_based as payloads
+  else:
+    from src.core.techniques.boolean_based import bb_payloads as payloads
+  return payloads
+
+"""
+The payload builder the file-based technique uses, chosen the same way.
 """
 def file_based_payloads():
   if menu.options.eval_sink:
@@ -1182,12 +1193,12 @@ What a target prints from a command it ran is text, and a page is mostly not. A 
 output against kilobytes of layout is a difference too small to read as one - which is how a
 parameter that plainly reaches a shell comes back as one that changes nothing.
 """
-def filtered_page_content(page, only_text=True):
+def filtered_page_content(page, only_text=True, split=settings.SINGLE_WHITESPACE):
   if not isinstance(page, str):
     return page
-  page = re.sub(r"(?si)<script.+?</script>|<!--.+?-->|<style.+?</style>" + (r"|<[^>]+>|\t|\n|\r" if only_text else ""), settings.SINGLE_WHITESPACE, page)
-  page = re.sub(settings.SINGLE_WHITESPACE + r"{2,}", settings.SINGLE_WHITESPACE, page)
-  return page.strip()
+  page = re.sub(r"(?si)<script.+?</script>|<!--.+?-->|<style.+?</style>" + (r"|<[^>]+>|\t|\n|\r" if only_text else ""), split, page)
+  page = re.sub(re.escape(split) + r"{2,}", split, page)
+  return page.strip().strip(split)
 
 # The alphanumeric run at either end of a marking, which would otherwise start or stop mid-word.
 def _trim_alphanum(value):
@@ -3905,6 +3916,174 @@ A payload as it is written inside a document's string, which quotes the way a JS
 def graphql_escape_payload(payload):
   return payload.replace("\\", "\\\\").replace("\"", "\\\"")
 
+"""
+Whether the run was given a way to tell a true answer from a false one off the page itself.
+"""
+def boolean_oracle_given():
+  return any((menu.options.string, menu.options.not_string, menu.options.regexp, menu.options.code))
+
+"""
+Whether the page says the injected condition held.
+
+The answer a target gives where it branches on the command rather than printing what it returned -
+the page it renders, or the status it answers with, stands in for the output a blind sink withholds.
+"""
+def boolean_oracle(page, code=None):
+  if menu.options.string:
+    return menu.options.string in (page or "")
+  if menu.options.not_string:
+    return menu.options.not_string not in (page or "")
+  if menu.options.regexp:
+    try:
+      return bool(re.search(menu.options.regexp, page or ""))
+    except re.error:
+      return None
+  if menu.options.code is not None:
+    return str(code) == str(menu.options.code)
+  # Nothing was named, so the answer is read against the two pages a known question came back with:
+  # whichever of them this response is closer to is the answer it carries. Calibrated rather than
+  # compared to a threshold, because what a condition changes can be a couple of characters of a
+  # page that is otherwise thousands - a difference no ratio of the whole would notice.
+  if settings.BOOLEAN_TRUE_PAGE is None or settings.BOOLEAN_FALSE_PAGE is None or page is None:
+    return None
+  current = comparable_page(page)
+  to_true = difflib.SequenceMatcher(None, settings.BOOLEAN_TRUE_PAGE, current).ratio()
+  to_false = difflib.SequenceMatcher(None, settings.BOOLEAN_FALSE_PAGE, current).ratio()
+  if to_true == to_false:
+    return None
+  return to_true > to_false
+
+"""
+Learn what a yes and a no look like on this target, from two questions whose answers are known.
+
+False where the two are indistinguishable: a page that reads the same either way carries no answer,
+and everything bisected on it would be noise.
+"""
+def calibrate_boolean_oracle(page_true, page_false, code_true=None, code_false=None):
+  settings.BOOLEAN_TRUE_PAGE = settings.BOOLEAN_FALSE_PAGE = None
+  settings.BOOLEAN_TRUE_RAW = settings.BOOLEAN_FALSE_RAW = None
+  settings.BOOLEAN_TRUE_CODE, settings.BOOLEAN_FALSE_CODE = code_true, code_false
+  if page_true is None or page_false is None:
+    return False
+  true_page, false_page = comparable_page(page_true), comparable_page(page_false)
+  if not true_page or true_page == false_page:
+    return False
+  settings.BOOLEAN_TRUE_PAGE, settings.BOOLEAN_FALSE_PAGE = true_page, false_page
+  settings.BOOLEAN_TRUE_RAW, settings.BOOLEAN_FALSE_RAW = page_true, page_false
+  return True
+
+"""
+Text one answer carries and the other does not, quoted back as the option that would name it.
+
+Worked out from the two pages a known question came back with, so that a finding made by calibration
+can be reached again without it - the next run is told what a true answer looks like instead of
+having to learn it. Where the two answers differ by a word that also appears elsewhere on the page,
+the word alone would match either of them, so it is grown outwards into the text around it until it
+is text only that answer carries: 'up' is on both pages, 'Host is up' on one.
+
+Nothing is offered where the difference is not the target's to make: a payload that prints its own
+marker is answered by a word this run invented, which would mean nothing to the next one.
+"""
+def inferred_boolean_oracle():
+  if settings.BOOLEAN_PRINTED_STATE:
+    return ""
+  true_raw, false_raw = settings.BOOLEAN_TRUE_RAW, settings.BOOLEAN_FALSE_RAW
+  if not true_raw or not false_raw:
+    return ""
+
+  # The shortest window around the difference that the other answer has no copy of.
+  def unique_around(page, other, start, end):
+    for margin in settings.BOOLEAN_STRING_HINT_MARGINS:
+      low, high = max(0, start - margin), min(len(page), end + margin)
+      # A window that opens inside a tag is snapped back to the start of it, so what is quoted does
+      # not begin with half an element.
+      reach = max(0, low - settings.BOOLEAN_STRING_HINT_MAXLEN)
+      opened = page.rfind("<", reach, low)
+      if opened > page.rfind(">", reach, low):
+        low = opened
+      head, tail = page[low:start], page[start:high]
+      """
+      The markup around a difference is often the difference.
+
+      A scenario page that lists its own source carries both branches as text, so the words alone
+      are on both answers and only the rendered one is wrapped in its tag. The window is therefore
+      quoted as it stands first, and only cut back to the words inside it when that is not enough.
+      """
+      shapes = [head + tail]
+      if ">" in head or "<" in tail:
+        shapes.append((head.rsplit(">", 1)[1] if ">" in head else head) +
+                      (tail.split("<", 1)[0] if "<" in tail else tail))
+      for shape in shapes:
+        candidate = shape.strip().split(settings.END_LINE.LF)[0].strip(" \"'\t\r")
+        candidate = candidate[:settings.BOOLEAN_STRING_HINT_MAXLEN].strip()
+        if len(candidate) < 2 or not candidate.isprintable():
+          continue
+        if candidate in other or candidate not in page:
+          continue
+        return candidate
+    return ""
+
+  # A status code that differs is the cheapest answer of all, and the one least likely to move.
+  true_code, false_code = settings.BOOLEAN_TRUE_CODE, settings.BOOLEAN_FALSE_CODE
+  if true_code and false_code and str(true_code) != str(false_code) and str(true_code) not in settings.WAF_BLOCK_HTTP_CODES:
+    return "--code=" + str(true_code)
+
+  # What the page shows, before anything with markup in it: a line of it reads as something a person
+  # looking at the page would point at, and a single word of it survives a target that renders the
+  # same answer a little differently.
+  def lines(page):
+    return set(filtered_page_content(page, split=settings.END_LINE.LF).split(settings.END_LINE.LF))
+
+  def words(page):
+    return set(filtered_page_content(page).split())
+
+  def usable(candidate, page, other):
+    candidate = candidate.strip()
+    return candidate and candidate in page and candidate not in other
+
+  # A sentence first, being the one worth reading back; then a single word.
+  for pattern, sentence, extract in ((r"\A[\w.,! ]+\Z", True, lines), (r"\A\w{2,}\Z", False, words)):
+    only = extract(true_raw) - extract(false_raw)
+    for candidate in sorted((_.strip() for _ in only if _.strip()), key=len):
+      if not re.match(pattern, candidate):
+        continue
+      if sentence and not (settings.SINGLE_WHITESPACE in candidate and len(candidate) > settings.CANDIDATE_SENTENCE_MIN_LENGTH):
+        continue
+      if usable(candidate, true_raw, false_raw):
+        return "--string=" + quoted_value(candidate)
+
+  for candidate in sorted((_.strip() for _ in words(false_raw) - words(true_raw) if _.strip()), key=len):
+    if re.match(r"\A\w+\Z", candidate) and usable(candidate, false_raw, true_raw):
+      return "--not-string=" + quoted_value(candidate)
+
+  """
+  Nothing the page says on its own tells the two apart, so the markup it says it in is tried.
+
+  A page that lists its own source carries the words of both answers as text and differs only in
+  which of them it rendered - so the tag around the difference is the difference, and quoting it is
+  what makes the answer nameable at all.
+  """
+  opcodes = [_ for _ in difflib.SequenceMatcher(None, false_raw, true_raw).get_opcodes() if _[0] != "equal"]
+  for option, page, other, on_true in (("--string", true_raw, false_raw, True),
+                                       ("--not-string", false_raw, true_raw, False)):
+    for _, i1, i2, j1, j2 in opcodes:
+      found = unique_around(page, other, *((j1, j2) if on_true else (i1, i2)))
+      if found:
+        return option + "=" + quoted_value(found)
+  return ""
+
+"""
+The option that says which answer is which on this target, for the finding to be reported with.
+"""
+def boolean_oracle_hint(technique):
+  if technique != settings.INJECTION_TECHNIQUE.BOOLEAN_BASED:
+    return ""
+  # Said only where the run worked it out for itself: a run that was already given one is being
+  # told what it told us.
+  if boolean_oracle_given():
+    return ""
+  return inferred_boolean_oracle()
+
 # Check if a GraphQL document, which is a body that names an operation and carries a selection set.
 def is_GraphQL_check(parameter):
   try:
@@ -4104,12 +4283,29 @@ def print_os_info(target_os, target_arch, filename, newline_first):
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
+Whether this technique reads its answer a piece at a time, rather than off the response it already has.
+
+What it costs is what makes it worth naming: a value read this way spends a length and a byte for
+every character, and several of them asked for in a row are otherwise a run of identical lines with
+nothing to say which value each one is working on.
+"""
+def incremental_retrieval(technique):
+  return technique in (settings.INJECTION_TECHNIQUE.BOOLEAN_BASED,
+                       settings.INJECTION_TECHNIQUE.TIME_BASED,
+                       settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED)
+
+"""
 Print enumeration info msgs
 """
 class print_enumenation():
   # What is about to be asked of the target, named the way the answer will be labelled.
   def _fetching(self, what):
     settings.print_data_to_stdout(settings.print_info_msg("Fetching the " + what + "."))
+
+  # One of several values behind a single heading, named only where each is fetched separately.
+  def fetching_part(self, what, technique):
+    if incremental_retrieval(technique):
+      self._fetching(what)
 
   # Say the powershell version is being fetched.
   def ps_version_msg(self):
@@ -5051,7 +5247,7 @@ def technique_display_name(technique):
   # Reaching an evaluation sink is not a technique of its own - it is the results-based one aimed
   # at different code, and the injection type is what says which sink was reached.
   if technique == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
-    return settings.INJECTION_TECHNIQUE.CLASSIC
+    return settings.INJECTION_TECHNIQUE.RESULTS_BASED
   return technique
 
 """
@@ -5065,7 +5261,9 @@ def announce_vulnerable_finding(filename, injection_type, technique, the_type, h
     if settings.VERBOSITY_LEVEL == 0:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
 
-  info_msg = settings.CHECKING_PARAMETER + " appears to be injectable via " + type_prefix + technique_label(injection_type, technique) + "."
+  info_msg = settings.CHECKING_PARAMETER + " appears to be injectable via " + type_prefix + technique_label(injection_type, technique)
+  oracle_hint = boolean_oracle_hint(technique)
+  info_msg += (" (with " + oracle_hint + ")" if oracle_hint else "") + "."
   settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
   announce_leftover_file(technique)
   decoded_payload = str(url_decode(payload)) if decode_payload else payload
@@ -5225,6 +5423,23 @@ def tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_met
     return tfb_handler.exploitation(url, timesec, filename, tmp_path, http_request_method, url_time_response)
   else:
     settings.print_data_to_stdout(settings.END_LINE.CR)
+
+"""
+Fit what has been resolved so far onto the single line the progress display keeps rewriting.
+"""
+def progress_display_text(chars, furthest, total):
+  if furthest == 0:
+    return ""
+  if menu.options.no_truncate:
+    return "".join(chars[:furthest])
+  width = settings.PROGRESS_DISPLAY_WIDTH
+  start = max(1, furthest - width + 1)
+  text = "".join(chars[start - 1:furthest])
+  if start > 1:
+    text = ".." + text[2:]
+  if furthest - start + 1 == width and furthest < total:
+    text = text[:-2] + ".."
+  return text
 
 """
 Check if to use the "/tmp/" directory for tempfile-based technique.
@@ -5461,6 +5676,21 @@ def windows_probe(chain, cmd, operator, expected, timesec):
           "for /f \"tokens=* eol=\" %i in ('cmd /c " + cmd + "') do cmd /c if %i " + operator +
           settings.SINGLE_WHITESPACE + str(expected) + settings.SINGLE_WHITESPACE +
           windows_sleep(timesec) + windows_tail(chain))
+
+"""
+The same comparison, answering by printing rather than by waiting.
+
+cmd.exe hands no exit status back to a page that shows only what a command printed, so what says yes
+is a marker on the page and what says no is its absence - read as the difference between two pages,
+never for what it spells.
+"""
+def windows_boolean_probe(chain, cmd, operator, expected):
+  if "\"" not in cmd:
+    cmd = "\"" + cmd + "\""
+  return (chain +
+          "for /f \"tokens=* eol=\" %i in ('cmd /c " + cmd + "') do cmd /c if %i " + operator +
+          settings.SINGLE_WHITESPACE + str(expected) + settings.SINGLE_WHITESPACE +
+          "echo " + settings.BOOLEAN_MARKER + windows_tail(chain))
 
 """
 Report whether an interaction carries the result of the sum the payload asked the target to work

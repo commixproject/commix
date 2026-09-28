@@ -61,21 +61,25 @@ understand any of them:
 
 | Technique | Package | Asked for with | Where the answer is read |
 |-----------|---------|----------------|--------------------------|
-| results-based | `techniques/classic/` | `--technique=r` | the page |
+| results-based | `techniques/results_based/` | `--technique=r` | the page |
 | dynamic code evaluation | `eval/` | `--eval=<language>` | the page |
+| boolean-based | `techniques/boolean_based/` | `--technique=b` | which of two pages the answer resembles |
 | time-based | `techniques/time_based/` | `--technique=t` | how long the answer took |
 | file-based | `techniques/file_based/` | `--technique=f` | a file under the web root |
 | tempfile-based | `techniques/tempfile_based/` | under `f`, where the web root cannot be written | a file in a temporary directory |
 | out-of-band | `techniques/oob/` | `--oob` | a request the target makes to a server you control |
 
-`AVAILABLE_TECHNIQUES` is `r`, `t`, `f` and nothing else. Out-of-band is kept out of it on purpose:
-it is a switch, so that the modules can use it too, and those never go through `--technique`. The
-evaluator composes with the three letters rather than replacing them - `EVAL_TECHNIQUE_LETTER` is
-what it went by before `--eval` existed, kept so that stored sessions still read.
+`AVAILABLE_TECHNIQUES` is `r`, `b`, `t`, `f` and nothing else. Out-of-band is kept out of it on
+purpose: it is a switch, so that the modules can use it too, and those never go through
+`--technique`. The evaluator composes with the four letters rather than replacing them -
+`EVAL_TECHNIQUE_LETTER` is what it went by before `--eval` existed, kept so that stored sessions
+still read, and `c` is what results-based was called before it was renamed.
 
-The three blind techniques retrieve a character at a time and bisect on its ordinal. The payload
+Every blind technique retrieves a character at a time and bisects on its ordinal. The payload
 therefore asks a yes/no question, and the technique's own channel - a delay, a file, a request made
-elsewhere - carries the yes.
+elsewhere, the page itself - carries the yes. Only the boolean-based one pays nothing for asking,
+which is also why it alone can overlap its requests: nothing is being measured, so `--threads`
+speeds it up where it would corrupt a technique reading the clock.
 
 ## Building the payload
 

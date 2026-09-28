@@ -460,7 +460,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   else:
     info_msg = "Retrieving the length of execution output"
-    if settings.TEMPFILE_BASED_STATE:
+    if technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED and OUTPUT_TEXTFILE:
       info_msg += " from file '" + OUTPUT_TEXTFILE + "'"
     info_msg += "." if settings.VERBOSITY_LEVEL != 0 else ", please wait..."
     settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_info_msg(info_msg))
@@ -606,7 +606,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
   if _cached_length is None and found_chars is True and output_length > 1:
-    info_msg = "Retrieved length: " + str(output_length)
+    info_msg = "Retrieved: " + str(output_length)
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
   # Every character costs its own requests, so a long output is worth confirming first.
@@ -667,18 +667,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
           furthest = pos
         else:
           chars.append("_")
-      if furthest == 0:
-        return ""
-      if menu.options.no_truncate:
-        return "".join(chars[:furthest])
-      width = settings.PROGRESS_DISPLAY_WIDTH
-      start = max(1, furthest - width + 1)
-      text = "".join(chars[start - 1:furthest])
-      if start > 1:
-        text = ".." + text[2:]
-      if furthest - start + 1 == width and furthest < output_length:
-        text = text[:-2] + ".."
-      return text
+      return checks.progress_display_text(chars, furthest, output_length)
 
     # Rewrite the progress line with the characters resolved so far.
     def _print_progress():
@@ -1143,8 +1132,8 @@ def results_based_injection(separator, TAG, cmd, prefix, suffix, whitespace, htt
 
   # Send one payload and hand back what the target answered.
   def check_injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, interpreter, filename, technique):
-    if technique == settings.INJECTION_TECHNIQUE.CLASSIC or technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
-      from src.core.techniques.classic import cb_payloads as payloads
+    if technique == settings.INJECTION_TECHNIQUE.RESULTS_BASED or technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
+      from src.core.techniques.results_based import rb_payloads as payloads
     elif technique == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
       from src.core.eval.payloads import classic as payloads
     else:
@@ -1179,7 +1168,7 @@ def results_based_injection(separator, TAG, cmd, prefix, suffix, whitespace, htt
 
   response = check_injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, interpreter, filename, technique)
   
-  if technique == settings.INJECTION_TECHNIQUE.CLASSIC or technique == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
+  if technique == settings.INJECTION_TECHNIQUE.RESULTS_BASED or technique == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
     tries = 0
     # A request that keeps failing outright is not the file-based technique's boundary budget, so
     # it does not wait on '--failed-tries' being settled to know how many times to try again.
@@ -1535,7 +1524,7 @@ def injection_test_results(response, TAG, randvcalc, technique, payload=None):
   if type(response) is bool and response is not True or response is None:
     return False
 
-  if technique == settings.INJECTION_TECHNIQUE.CLASSIC:
+  if technique == settings.INJECTION_TECHNIQUE.RESULTS_BASED:
     try:
       import html
       unescape = html.unescape
@@ -1574,7 +1563,7 @@ Command execution results.
 """
 def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, timesec):
 
-  if technique == settings.INJECTION_TECHNIQUE.CLASSIC or technique == settings.INJECTION_TECHNIQUE.TIME_BASED or technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
+  if technique == settings.INJECTION_TECHNIQUE.RESULTS_BASED or technique == settings.INJECTION_TECHNIQUE.TIME_BASED or technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
     try:
       import html
       unescape = html.unescape

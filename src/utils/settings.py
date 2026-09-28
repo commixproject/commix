@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "170"
+REVISION = "171"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -607,7 +607,7 @@ EXPLOITATION_PHASE = False
 NO_OUTPUT = ">/dev/null 2>&1"
 
 # Exploitation techniques states
-CLASSIC_STATE = False
+RESULTS_BASED_STATE = False
 EVAL_BASED_STATE = False
 TIME_BASED_STATE = False
 FILE_BASED_STATE = False
@@ -682,6 +682,31 @@ STABILITY_CHECK_DELAY = 0.5
 
 # Below this similarity ratio, two page fetches count as "dynamic".
 STABILITY_SIMILARITY_THRESHOLD = 0.98
+
+# The two pages a question with a known answer came back with, kept so that every later answer is
+# read against them rather than against a threshold - what a condition changes can be two characters
+# of a page that is otherwise thousands, which no ratio of the whole would notice.
+# What a Windows payload prints when its test holds, made once for the run. cmd.exe carries no exit
+# status back to a page that only shows what a command printed, so the answer has to be printable.
+BOOLEAN_MARKER = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
+
+# Whether the answer is read off a marker the payload printed rather than off the page the target
+# branched into - settled per target, and only where branching was shown to say nothing.
+BOOLEAN_PRINTED_STATE = False
+
+# Said once for the run, where a retrieval is being made a byte at a time on a single thread.
+BOOLEAN_THREADS_SUGGESTED = False
+
+# The two answers as they arrived, kept beside their comparable forms so that what tells them apart
+# can be quoted back as an option the next run can be given.
+BOOLEAN_TRUE_CODE = None
+BOOLEAN_FALSE_CODE = None
+
+BOOLEAN_TRUE_RAW = None
+BOOLEAN_FALSE_RAW = None
+
+BOOLEAN_TRUE_PAGE = None
+BOOLEAN_FALSE_PAGE = None
 
 # One-time "reflected value(s) found" notice already shown this run.
 REFLECTIVE_VALUE_FOUND = False
@@ -997,11 +1022,11 @@ def resolve_language(name):
 
 # Available injection techniques. Out-of-band is not one of them - it is the '--oob' switch, so that
 # it can serve the modules too, which never go through '--technique'.
-AVAILABLE_TECHNIQUES = ['r','t','f']
+AVAILABLE_TECHNIQUES = ['r','b','t','f']
 # The letter that used to name the evaluation sink before '--eval' did, the technique that reaches
 # that sink today, and the one whose technique carries whichever sink it is given.
 EVAL_TECHNIQUE_LETTER = 'e'
-EVAL_CAPABLE_TECHNIQUES = ('r', 't', 'f')
+EVAL_CAPABLE_TECHNIQUES = ('r', 'b', 't', 'f')
 OOB_TECHNIQUE_LETTER = 'o'
 # The languages the evaluation sink knows how to reach, and the word standing for all of them.
 SUPPORTED_EVAL_LANGUAGES = _eval.supported()
@@ -1084,24 +1109,25 @@ LEGACY_INJECTION_TYPES = {
 
 # Supported injection techniques
 class INJECTION_TECHNIQUE(object):
-  CLASSIC = "results-based command injection technique"
+  RESULTS_BASED = "results-based command injection technique"
   DYNAMIC_CODE = "dynamic code evaluation technique"
+  BOOLEAN_BASED = "boolean-based command injection technique"
   TIME_BASED = "time-based command injection technique"
   FILE_BASED = "file-based injection technique"
   TEMP_FILE_BASED = "tempfile-based injection technique"
   OOB = "out-of-band command injection technique"
 
 # Canonical order techniques are tested and reported in.
-TECHNIQUE_ORDER = [INJECTION_TECHNIQUE.CLASSIC, INJECTION_TECHNIQUE.DYNAMIC_CODE, INJECTION_TECHNIQUE.TIME_BASED, INJECTION_TECHNIQUE.FILE_BASED, INJECTION_TECHNIQUE.TEMP_FILE_BASED, INJECTION_TECHNIQUE.OOB]
+TECHNIQUE_ORDER = [INJECTION_TECHNIQUE.RESULTS_BASED, INJECTION_TECHNIQUE.DYNAMIC_CODE, INJECTION_TECHNIQUE.BOOLEAN_BASED, INJECTION_TECHNIQUE.TIME_BASED, INJECTION_TECHNIQUE.FILE_BASED, INJECTION_TECHNIQUE.TEMP_FILE_BASED, INJECTION_TECHNIQUE.OOB]
 
 # The techniques each injection type is reached by - '--type' names the type, and the run tests
 # every technique that shows a result that way.
-AVAILABLE_TYPES = {"c" : "r", "b" : "tf"}
+AVAILABLE_TYPES = {"c" : "r", "b" : "btf"}
 
 # The technique letter follows the first letter of its name, so a renamed technique renames its
 # letter with it - and a session written before the rename still has to find its way to the same one.
 LEGACY_TECHNIQUE_NAMES = {
-  "classic command injection technique" : INJECTION_TECHNIQUE.CLASSIC
+  "classic command injection technique" : INJECTION_TECHNIQUE.RESULTS_BASED
 }
 LEGACY_TECHNIQUE_LETTERS = {"c" : "r"}
 
@@ -1148,6 +1174,10 @@ OOB_HTTP_GRACE = 4
 # interval. The likeliest boundary comes first, so this usually ends the sweep after a few probes.
 OOB_EAGER_POLLS = 3
 SHELLSHOCK_OOB = False
+
+# Set where the module is confirmed but the target hands nothing back, so the output is read off the
+# page the way the boolean-based technique reads it - a false answer stops the script before it runs.
+SHELLSHOCK_BOOLEAN = False
 
 # The tamper-count warning is per run, not per technique announcement.
 TAMPER_WARNING_SHOWN = False
@@ -1417,6 +1447,11 @@ GRAPHQL_ARGUMENT_REGEX = r'([A-Za-z_]\w*)\s*:\s*"((?:[^"\\]|\\.)*)"'
 # The same argument as a JSON envelope spells it, with the document's own quotes escaped.
 GRAPHQL_ARGUMENT_ESCAPED_REGEX = r'([A-Za-z_]\w*)\s*:\s*\\"((?:[^"\\]|\\.)*?)\\"'
 
+# What a page has to say for an injected condition to have held, where the run was given a way to
+# tell - the answer a blind technique reads when the target branches on the command rather than
+# printing it.
+BOOLEAN_BASED_STATE = None
+
 # Whether the POST body is a GraphQL document.
 IS_GRAPHQL = False
 
@@ -1508,6 +1543,10 @@ LOAD_SESSION = None
 # Whether a stored technique likely exists for the current target (host + method).
 LIKELY_RESUME = False
 # Cache stored techniques per parameter.
+# What has already been said about a stored session this run, so that a fact noticed once per
+# resumed technique is still only reported once.
+REPLAY_NOTICES_SAID = set()
+
 STORED_TECHNIQUES = {}
 # Pending file/tempfile-based cleanups, asked at quit() - keyed by output file path.
 PENDING_FILE_CLEANUPS = {}
@@ -1998,6 +2037,15 @@ RESULTS_BASED_VERIFY_ROUNDS = 2
 PARTIAL_VALUE_MARKER = "\x02COMMIX_PARTIAL\x02"
 
 # Max characters shown at once in the live progress line.
+# Below this a line is a label rather than a sentence, and says too little to name an answer by.
+CANDIDATE_SENTENCE_MIN_LENGTH = 10
+
+# Long enough to be distinctive, short enough to be typed back by hand.
+BOOLEAN_STRING_HINT_MAXLEN = 40
+
+# How far either side of a difference to reach for the context that makes it unique, smallest first.
+BOOLEAN_STRING_HINT_MARGINS = (10, 18, 26, 34)
+
 PROGRESS_DISPLAY_WIDTH = 60
 
 # How much of the estimate on screen is kept when a fresh one is worked out, so that one slow
@@ -2480,7 +2528,7 @@ RUN_WIDE_STATE = frozenset((
   "SESSION_FILE", "SHOW_LOGS_MSG", "TAMPER_SCRIPTS", "SITEMAP_CHECK", "SKIPPED_OUT_OF_SCOPE", "SKIP_VULNERABLE_HOST",
   "RESULTS_FILE_FORMAT", "RESULTS_FILE_STARTED", "TEST_FILTER", "TEST_SKIP",
   "PREPROCESS_FUNCTIONS", "POSTPROCESS_FUNCTIONS",
-  "STDIN_PARSING", "TAMPER_WARNING_SHOWN", "TIME_RELATED_ATTACK_WARNING", "TOTAL_OF_REQUESTS", "EVAL_SUGGESTED", "COMMAND_SUGGESTED",
+  "BOOLEAN_THREADS_SUGGESTED", "REPLAY_NOTICES_SAID", "STDIN_PARSING", "TAMPER_WARNING_SHOWN", "TIME_RELATED_ATTACK_WARNING", "TOTAL_OF_REQUESTS", "EVAL_SUGGESTED", "COMMAND_SUGGESTED",
   "VALIDATION_RUN", "VISIBLE_CONNECTION_ERRORS", "WARNED_HTTP_ERROR_CODES",
   # Set by the connection to whichever target is in hand, before this reset can be reached.
   "HOSTNAME", "SCHEME", "TARGET_NETLOC", "TARGET_URL",
