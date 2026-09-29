@@ -197,16 +197,15 @@ def delete_previous_shell(separator, TAG, prefix, suffix, whitespace, http_reque
       info_msg = "The file ('" + OUTPUT_TEXTFILE + "') used for command execution was already deleted from the target."
       settings.print_data_to_stdout(settings.print_info_msg(info_msg))
       return
-    # '--cleanup' is the answer already given: the file goes without being asked about.
-    if not menu.options.cleanup:
-      # Left behind, the file is a working command channel for whoever finds it next - so the
-      # answer that tidies up is the one offered, and '--batch' takes it.
-      msg = "Do you want to delete from the target the file ('" + OUTPUT_TEXTFILE + "') used for command execution? [Y/n] "
-      if common.read_input(msg, default="Y", check_batch=True) not in settings.CHOICE_YES:
-        return
-    if settings.VERBOSITY_LEVEL != 0:
-      debug_msg = "Cleaning up the target operating system (i.e. deleting file '" + OUTPUT_TEXTFILE + "')."
-      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+    """
+    Removed without being asked about.
+
+    The file is a working command channel for whoever finds it next, and leaving one behind on a
+    target is not something to make the operator opt out of - so what the run put there, the run
+    takes away.
+    """
+    info_msg = "Cleaning up the file ('" + OUTPUT_TEXTFILE + "') used for command execution."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
     from src.core.techniques.file_based import fb_injector as injector
     if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
       if settings.TARGET_OS == settings.OS.WINDOWS:

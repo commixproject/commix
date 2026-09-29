@@ -820,7 +820,7 @@ injection.add_option("--maxlen",
                 type="int",
                 dest="maxlen",
                 default=settings.MAXLEN,
-                help="Set the max length of output for time-related injection techniques (Default: " + str(settings.MAXLEN) + " chars).")
+                help="Set the max length of output for the techniques that retrieve it one character at a time (Default: " + str(settings.MAXLEN) + " chars).")
 
 injection.add_option("--time-sec",
                 default=0,
@@ -1002,12 +1002,6 @@ misc.add_option("--no-logging",
                 dest="no_logging",
                 default=False,
                 help="Disable logging to a file.")
-
-misc.add_option("--cleanup",
-                action="store_true",
-                dest="cleanup",
-                default=False,
-                help="Clean up the target from files commix left on it.")
 
 misc.add_option("--purge",
                 action="store_true",

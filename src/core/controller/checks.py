@@ -1119,7 +1119,7 @@ def heuristic_charset(page):
   except Exception:
     return None
 
-def decode_page_body(body, response=None, percent_decode=True):
+def decode_page_body(body, response=None, percent_decode=True, entity_decode=True):
   """
   A page already read from its response, as text: decompressed if it was compressed, and read in
   the encoding it declares.
@@ -1164,12 +1164,13 @@ def decode_page_body(body, response=None, percent_decode=True):
   for would be searched for in text the target never sent.
   """
   if isinstance(body, bytes) and "text/" in content_type:
-    if b"&#" in body:
+    if entity_decode and b"&#" in body:
       body = re.sub(b"(?i)&#x([0-9a-f]{1,2});", lambda _: codecs.decode(_.group(1) if len(_.group(1)) == 2 else b"0" + _.group(1), "hex"), body)
       body = re.sub(b"&#(\\d{1,3});", lambda _: bytes(bytearray([int(_.group(1))])) if int(_.group(1)) < 256 else _.group(0), body)
     if percent_decode and b"%" in body:
       body = re.sub(b"(?i)%([0-9a-f]{2})", lambda _: codecs.decode(_.group(1), "hex"), body)
-    body = re.sub(b"&([^;]+);", lambda _: bytes(bytearray([settings.HTML_ENTITIES[_.group(1).decode("ascii", errors="replace")]])) if settings.HTML_ENTITIES.get(_.group(1).decode("ascii", errors="replace"), 256) < 256 else _.group(0), body)
+    if entity_decode:
+      body = re.sub(b"&([^;]+);", lambda _: bytes(bytearray([settings.HTML_ENTITIES[_.group(1).decode("ascii", errors="replace")]])) if settings.HTML_ENTITIES.get(_.group(1).decode("ascii", errors="replace"), 256) < 256 else _.group(0), body)
     page_encoding = page_encoding or heuristic_charset(body)
     if (page_encoding or "").lower() == "utf-8-sig":
       page_encoding = "utf-8"
@@ -4037,9 +4038,31 @@ def inferred_boolean_oracle():
   def words(page):
     return set(filtered_page_content(page).split())
 
-  def usable(candidate, page, other):
+  """
+  Where the two answers actually part company, as spans of each page.
+
+  A page is not only its answer: a run that took a moment longer, a counter, a length printed in a
+  corner will all differ between two requests without saying anything about what was asked. Text is
+  only worth quoting when it sits where the answer changed, so a candidate has to overlap one of
+  these to count - otherwise the page's own furniture can stand in for the answer and be offered as
+  the way to recognise it.
+  """
+  opcodes = [_ for _ in difflib.SequenceMatcher(None, false_raw, true_raw).get_opcodes() if _[0] != "equal"]
+  changed_true = [(j1, j2) for _, _, _, j1, j2 in opcodes]
+  changed_false = [(i1, i2) for _, i1, i2, _, _ in opcodes]
+
+  def overlaps_change(candidate, page, regions):
+    at = page.find(candidate)
+    while at != -1:
+      if any(at < high and low < at + len(candidate) for low, high in regions):
+        return True
+      at = page.find(candidate, at + 1)
+    return False
+
+  def usable(candidate, page, other, regions):
     candidate = candidate.strip()
-    return candidate and candidate in page and candidate not in other
+    return (candidate and candidate in page and candidate not in other
+            and overlaps_change(candidate, page, regions))
 
   # A sentence first, being the one worth reading back; then a single word.
   for pattern, sentence, extract in ((r"\A[\w.,! ]+\Z", True, lines), (r"\A\w{2,}\Z", False, words)):
@@ -4049,11 +4072,11 @@ def inferred_boolean_oracle():
         continue
       if sentence and not (settings.SINGLE_WHITESPACE in candidate and len(candidate) > settings.CANDIDATE_SENTENCE_MIN_LENGTH):
         continue
-      if usable(candidate, true_raw, false_raw):
+      if usable(candidate, true_raw, false_raw, changed_true):
         return "--string=" + quoted_value(candidate)
 
   for candidate in sorted((_.strip() for _ in words(false_raw) - words(true_raw) if _.strip()), key=len):
-    if re.match(r"\A\w+\Z", candidate) and usable(candidate, false_raw, true_raw):
+    if re.match(r"\A\w+\Z", candidate) and usable(candidate, false_raw, true_raw, changed_false):
       return "--not-string=" + quoted_value(candidate)
 
   """
@@ -4063,7 +4086,6 @@ def inferred_boolean_oracle():
   which of them it rendered - so the tag around the difference is the difference, and quoting it is
   what makes the answer nameable at all.
   """
-  opcodes = [_ for _ in difflib.SequenceMatcher(None, false_raw, true_raw).get_opcodes() if _[0] != "equal"]
   for option, page, other, on_true in (("--string", true_raw, false_raw, True),
                                        ("--not-string", false_raw, true_raw, False)):
     for _, i1, i2, j1, j2 in opcodes:

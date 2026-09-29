@@ -732,7 +732,16 @@ def retry_on_undesired_content(request, response):
       body = response.read()
     except Exception:
       return response
-    content = checks.decode_page_body(body, response)
+    """
+    Matched against the answer as the target sent it, undecoded.
+
+    Every other reader of a page wants it decoded, so that output the target wrote as entities is
+    still found - but this pattern is written against what the response looks like, and decoding
+    would let a page that merely mentions the pattern in escaped form match every time. A page
+    documenting its own '--retry-on' value would then be retried until the budget was gone, on the
+    answers that carried the result as much as on the ones that refused.
+    """
+    content = checks.decode_page_body(body, response, percent_decode=False, entity_decode=False)
     # Bounded by the retries the run was given, not by the budget the connection layer keeps
     # raising as requests are spent: a page that always asks to be retried would otherwise be
     # asked again for as long as the run lasts.

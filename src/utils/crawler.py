@@ -25,6 +25,20 @@ from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.beautifulsoup.beautifulsoup import BeautifulSoup
 
 
+"""
+Empty at import, and emptied again before each crawl.
+
+A run that reaches these without having crawled - a sitemap handed in on its own, which never starts
+a crawl - would otherwise find them missing rather than empty, and fail on the name instead of
+reporting that there was nothing usable in it.
+"""
+crawled_hrefs = []
+sitemap_loc = []
+visited_sitemaps = []
+visited_hrefs = []
+new_crawled_hrefs = []
+crawled_forms = []
+
 # Clear what the last crawl left behind, so this one starts from nothing.
 def init_global_vars():
   global crawled_hrefs
