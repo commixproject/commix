@@ -1124,6 +1124,27 @@ option = parser.get_option("-h")
 option.help = option.help.capitalize().replace("Show this help message and exit", "Show help and exit.")
 # Listed by its short form alone, the way every other switch is, while '--help' keeps working.
 option._long_opts = []
+"""
+Spellings that are not commix's own, taken as the option they were meant to be.
+
+A command line is more often pasted than typed. A browser's "copy as cURL" writes '--data-raw', and
+a hand that has used another tool writes the name it remembers - each of them naming something
+commix has, under a name it does not. Rewritten here rather than refused, because refusing teaches
+nothing the person did not already mean.
+"""
+ALIASED_OPTIONS = (
+  ("--data-raw", "--data"),
+  ("--auth-creds", "--auth-cred"),
+  ("--drop-cookie", "--drop-set-cookie"),
+)
+
+for _index, _argument in enumerate(sys.argv):
+  for _alias, _option in ALIASED_OPTIONS:
+    # Both the form that carries its value and the form whose value is the next argument.
+    if _argument == _alias or _argument.startswith(_alias + "="):
+      sys.argv[_index] = _argument.replace(_alias, _option, 1)
+      break
+
 # The language is optional: '--eval' on its own stands for every one that is supported, and the
 # parser needs a value either way.
 for _index, _argument in enumerate(sys.argv):
