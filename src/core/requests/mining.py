@@ -13,14 +13,12 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
-import os
 import re
 import random
 import string
 import difflib
 
 from src.utils import settings
-from src.core.parse import cmdline as menu
 from src.thirdparty.six.moves import urllib as _urllib
 
 """

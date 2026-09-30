@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "172"
+REVISION = "173"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -804,6 +804,21 @@ SINGLE_WHITESPACE = " "
 
 # The default whitespace, as a space - encoded with the rest of the payload at the end.
 WHITESPACES = [SINGLE_WHITESPACE]
+
+"""
+The one whitespace a run with several targets uses, chosen for what carries the payload.
+
+Where the carrier is URL-decoded by the target, the encoded form is what survives being spliced into
+it. A JSON or XML body is not decoded, and there '%20' arrives as three characters rather than as the
+space the command needs - so a body of that shape keeps the space it was written with.
+"""
+def single_whitespace_for(data=None):
+  from src.thirdparty.six.moves import urllib as _urllib
+  from src.core.controller import checks
+  body = data if data is not None else USER_DEFINED_POST_DATA
+  if body and (checks.is_JSON_check(body) or checks.is_XML_check(body)):
+    return SINGLE_WHITESPACE
+  return _urllib.parse.quote(SINGLE_WHITESPACE)
 
 # Reference: http://www.w3.org/Protocols/HTTP/Object_Headers.html#uri
 URI_HTTP_HEADER = "URI"

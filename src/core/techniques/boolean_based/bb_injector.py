@@ -13,7 +13,6 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
-from src.utils import settings
 from src.core.requests import requests
 from src.core.controller import checks
 

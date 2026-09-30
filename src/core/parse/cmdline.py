@@ -258,6 +258,24 @@ target.add_option("--forms",
                 default=False,
                 help="Parse and test forms on target URL (requires '--crawl').")
 
+target.add_option("--openapi",
+                action="store",
+                dest="openapi",
+                default=None,
+                help="Derive target(s) from an OpenAPI (Swagger) specification (file/URL).")
+
+target.add_option("--openapi-base",
+                action="store",
+                dest="openapi_base",
+                default=None,
+                help="Base URL for a specification that names no host of its own.")
+
+target.add_option("--openapi-tags",
+                action="store",
+                dest="openapi_tags",
+                default=None,
+                help="Only derive target(s) from operations carrying these tag(s).")
+
 target.add_option("-x",
                 dest="sitemap_url",
                 help="Parse target(s) from remote sitemap(.xml) file.")

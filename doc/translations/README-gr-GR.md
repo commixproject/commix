@@ -38,7 +38,7 @@ To **commix** (συντομογραφία [**comm**]and [**i**]njection e[**x**]
 * **Ευρεία κάλυψη injection επιφανειών** – GET/POST parameters, HTTP headers, cookies και JSON/XML request bodies, καθώς και το `shellshock` module για CGI targets.
 * **Interactive shells και post-exploitation** – `os_shell` στο target, ενσωματωμένα modes `reverse_tcp` και `bind_tcp`, `download`/`upload` αρχείων μέσω του established shell, καθώς και enumeration για current user, hostname, privileges, system information, users και password hashes. Κάθε εύρημα μπορεί να επαληθευτεί εκ νέου με το `--proof`, το οποίο εκτελεί δικό του πείραμα και αποθηκεύει το transcript δίπλα στο output του run.
 * **Filter και WAF evasion** – πολλαπλά συνδυάσιμα tamper scripts, τα οποία εφαρμόζονται με deterministic σειρά.
-* **Ευέλικτο targeting** – υποστήριξη για single URL, crawl, HTML forms, sitemap, proxy log, bulk file, raw HTTP request file ή δεδομένα μέσω piped `stdin`.
+* **Ευέλικτο targeting** – υποστήριξη για single URL, crawl, HTML forms, sitemap, OpenAPI (Swagger) description, proxy log, bulk file, raw HTTP request file ή δεδομένα μέσω piped `stdin`.
 * **Resumable scans και machine-readable output** – τα αποτελέσματα αποθηκεύονται ανά target σε session file και μπορούν να εξαχθούν σε JSON, CSV που περιλαμβάνει όλα τα tested targets ή HAR log με το HTTP traffic του run. Οι επιλογές ενός run μπορούν επίσης να αποθηκευτούν ως profile και να επαναχρησιμοποιηθούν.
 * **Ευρεία υποστήριξη back-ends** – PHP, Python, Perl, Ruby, ASP.NET, JSP και CGI, με υποστήριξη τόσο για Unix-like όσο και για Windows targets. Δείτε το [Windows and Unix-like targets at a glance](https://github.com/commixproject/commix/wiki/Techniques#windows-and-unix-like-targets-at-a-glance) για τις διαφορές στα payloads.
 

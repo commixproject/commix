@@ -400,7 +400,6 @@ Read a command's output a byte at a time, over the module's injection point.
 """
 def _boolean_cmd_exec(url, cmd, cve, check_header):
   from src.core.techniques.boolean_based import bb_handler as bb
-  from src.core.techniques.boolean_based import bb_payloads as payloads
 
   settings.BOOLEAN_PRINTED_STATE = False
 

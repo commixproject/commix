@@ -345,6 +345,11 @@ def check_http_method(url):
     http_request_method = settings.HTTPMETHOD.GET
   elif menu.options.method:
     http_request_method = menu.options.method.upper()
+  # A target that arrived carrying a method of its own - a request file, a proxy log, an operation a
+  # specification describes - is asked the way it says to ask it. Worked out from whether it has a
+  # body instead, every method that is neither GET nor POST would be sent as one of those two.
+  elif settings.HTTP_METHOD:
+    http_request_method = settings.HTTP_METHOD.upper()
   elif isinstance(url, str) and settings.INJECT_TAG in url:
     http_request_method = settings.HTTPMETHOD.GET
   else:

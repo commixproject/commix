@@ -379,7 +379,7 @@ def init_injection(url):
 
   # A whitespace chosen by a tamper suits the target it was chosen for, not the next one: start
   # from the default and let the tampers in use pick again, for this target's operating system.
-  settings.WHITESPACES = [_urllib.parse.quote(settings.SINGLE_WHITESPACE)]
+  settings.WHITESPACES = [settings.single_whitespace_for()]
   if menu.options.tamper:
     checks.perform_payload_modification(payload="")
 
@@ -886,6 +886,11 @@ def run():
         raise SystemExit(settings.EXIT_FAILURE)
       elif menu.options.requestfile or menu.options.logfile:
         parser.logfile_parser()
+
+      # A specification names its own targets, so it is read the way a request file is read.
+      if menu.options.openapi:
+        from src.core.parse import openapi
+        openapi.openapi_parser()
 
       # Check if ".git" exists and check for updated version!
       if os.path.isdir("./.git") and settings.CHECK_FOR_UPDATES_ON_START:

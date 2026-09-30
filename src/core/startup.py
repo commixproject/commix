@@ -82,7 +82,8 @@ def bootstrap():
     # Treat non-interactive stdin as targets only without an explicit target; skip CI log pipes.
     if hasattr(sys.stdin, "fileno") and not any((os.isatty(sys.stdin.fileno()), menu.options.ignore_stdin,
                 "CI" in os.environ,
-                menu.options.url, menu.options.requestfile, menu.options.bulkfile, menu.options.logfile)):
+                menu.options.url, menu.options.requestfile, menu.options.bulkfile, menu.options.logfile,
+                menu.options.sitemap_url, menu.options.openapi)):
       settings.STDIN_PARSING = True
   except Exception as ex:
     if "fileno" in str(ex) and settings.STDIN_PARSING:

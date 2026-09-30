@@ -38,7 +38,7 @@ You can visit the [collection of screenshots](https://github.com/commixproject/c
 * **Broad injection surface** - GET/POST parameters, HTTP headers, cookies, and JSON/XML request bodies, plus the `shellshock` module for CGI targets.
 * **Interactive shells and post-exploitation** - an `os_shell` on the target, built-in `reverse_tcp` and `bind_tcp` modes, file `download`/`upload` over the established shell, and enumeration of the current user, hostname, privileges, system information, users and password hashes. Every finding can be re-proved with `--proof`, which runs an experiment of its own and writes the transcript beside the run's output.
 * **Filter and WAF evasion** - Multiple combinable tamper scripts, applied in a deterministic order.
-* **Flexible targeting** - a single URL, a crawl, HTML forms, a sitemap, a proxy log, a bulk file, a raw HTTP request file, or piped `stdin`.
+* **Flexible targeting** - a single URL, a crawl, HTML forms, a sitemap, an OpenAPI (Swagger) description, a proxy log, a bulk file, a raw HTTP request file, or piped `stdin`.
 * **Resumable scans and machine-readable output** - results are stored per target in a session file, and can be exported as JSON, as a CSV covering every target tested, or as a HAR log of the run's HTTP traffic. The options a run was given can be saved as a profile and reused.
 * **Wide back-end support** - PHP, Python, Perl, Ruby, ASP.NET, JSP and CGI, and works against both Unix-like and Windows targets - see
 [Windows and Unix-like targets at a glance](https://github.com/commixproject/commix/wiki/Techniques#windows-and-unix-like-targets-at-a-glance)

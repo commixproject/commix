@@ -13,7 +13,6 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
-import os
 try:
   import concurrent.futures
   _THREADS_SUPPORTED = True

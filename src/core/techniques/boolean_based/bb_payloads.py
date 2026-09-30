@@ -127,7 +127,6 @@ def get_length(separator, cmd, candidate_length, operator="-eq"):
   word = tb_payloads._output_word(cmd)
   var = settings.RANDOM_VAR_GENERATOR
   compare = _decide(separator, "${#" + var + "}" + settings.SINGLE_WHITESPACE + operator + settings.SINGLE_WHITESPACE + str(candidate_length))
-  inverted = {"-eq": "-ne", "-ge": "-lt", "-le": "-gt"}.get(operator, "-ne")
 
   if not _supported(separator):
     return ""
@@ -152,7 +151,6 @@ def get_char(separator, cmd, num_of_chars, ascii_char, operator="-le"):
   qmarks = "?" * (num_of_chars - 1)
   var = settings.RANDOM_VAR_GENERATOR
   var_ordinal = "$(printf '%d' \"'${" + var + "}\")"
-  inverted = "-gt" if operator == "-le" else "-ne"
   compare = lambda expression, op: _decide(separator, str(ascii_char) + settings.SINGLE_WHITESPACE + op + settings.SINGLE_WHITESPACE + expression)
 
   if not _supported(separator):

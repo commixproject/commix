@@ -46,10 +46,10 @@ def validate():
 
   # Check for missing mandatory option(s).
   if not settings.STDIN_PARSING and not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, \
-              menu.options.requestfile, menu.options.sitemap_url, menu.options.wizard, \
+              menu.options.requestfile, menu.options.sitemap_url, menu.options.openapi, menu.options.wizard, \
               menu.options.update, menu.options.list_tampers)):
     if not menu.options.purge:
-      err_msg = "Missing a mandatory option (-u, -l, -m, -r, -x, --wizard, --update, --list-tampers or --purge). "
+      err_msg = "Missing a mandatory option (-u, -l, -m, -r, -x, --openapi, --wizard, --update, --list-tampers or --purge). "
       err_msg += "Use -h for basic and -hh for advanced help."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit(settings.EXIT_FAILURE)
@@ -343,6 +343,12 @@ def validate():
   if menu.options.maxlen:
     settings.MAXLEN = menu.options.maxlen
 
+  for option, value in (("--openapi-base", menu.options.openapi_base), ("--openapi-tags", menu.options.openapi_tags)):
+    if value and not menu.options.openapi:
+      err_msg = "The '" + option + "' option requires the '--openapi' option."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit(settings.EXIT_FAILURE)
+
   # Check if defined "--timesec" option.
   if menu.options.timesec != 0:
     settings.TIMESEC = menu.options.timesec
@@ -412,7 +418,7 @@ def validate():
 
   # Only a request carrying a body can be split into chunks.
   if menu.options.chunked and not any((menu.options.data, menu.options.requestfile, \
-     menu.options.logfile, menu.options.forms)):
+     menu.options.logfile, menu.options.forms, menu.options.openapi)):
     err_msg = "The '--chunked' switch requires usage of POST data."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit(settings.EXIT_FAILURE)
