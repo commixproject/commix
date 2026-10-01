@@ -364,6 +364,12 @@ request.add_option("--headers",
                 dest="headers",
                 help="Extra headers (e.g. 'Accept-Language: fr\\nETag: 123').")
 
+request.add_option("--hpp",
+                action="store_true",
+                dest="hpp",
+                default=False,
+                help="Use HTTP parameter pollution method.")
+
 request.add_option("--proxy",
                 action="store",
                 dest="proxy",

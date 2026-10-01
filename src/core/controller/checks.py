@@ -190,7 +190,66 @@ def process_non_custom():
 """
 Process the defined injectable value
 """
-def process_injectable_value(payload, data):
+"""
+The same parameter sent twice, with the payload where the application will read it.
+
+A filter and the application behind it do not have to agree about which of two same-named parameters
+counts. Where they disagree, a value that passes inspection can be sent in the occurrence the filter
+reads, and the payload in the one the application reads.
+
+Which that is belongs to the platform, so the banner decides it. A platform that joins the two rather
+than choosing between them is told about instead of worked around: a joined value arrives with the
+separator inside it, and there is no comment in a shell that can swallow one the way there is in a
+query, so nothing sent this way would run.
+"""
+def polluted_parameter(target, payload):
+  if not menu.options.hpp or not payload:
+    return target
+  if settings.IS_JSON or settings.IS_XML:
+    if not settings.HPP_POSITION_SAID:
+      settings.HPP_POSITION_SAID = True
+      warn_msg = "Parameter pollution applies to ordinary GET and POST parameters, not to a structured body."
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    return target
+  # The parameter the payload landed in, named by what sits in front of it.
+  at = target.rfind(payload)
+  if at < 1:
+    return target
+  named = re.search(r"([^&?=\s]+)=$", target[:at])
+  if not named:
+    return target
+  banner = (settings.SERVER_BANNER or "").lower()
+  if any(_ in banner for _ in settings.HPP_CONCATENATES):
+    if not settings.HPP_POSITION_SAID:
+      settings.HPP_POSITION_SAID = True
+      warn_msg = "This target joins same-named parameters rather than choosing between them, which leaves "
+      warn_msg += "the separator inside the command - '--hpp' cannot help here."
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    return target
+  first_wins = any(_ in banner for _ in settings.HPP_FIRST_WINS)
+  name = named.group(1)
+  original = settings.TESTABLE_VALUE if settings.TESTABLE_VALUE.strip() else ""
+  if not settings.HPP_POSITION_SAID:
+    settings.HPP_POSITION_SAID = True
+    info_msg = "Sending '" + name + "' twice, with the payload "
+    info_msg += "first" if first_wins else "last"
+    info_msg += " - which is the one this target reads."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  if first_wins:
+    polluted = payload + "&" + name + "=" + original
+  else:
+    polluted = original + "&" + name + "=" + payload
+  return target[:at] + polluted + target[at + len(payload):]
+
+"""
+Splice the payload into what carries it.
+
+'pollute' is the caller's to say, because only the caller knows what it is handing over. A query
+string and a form body separate their parameters with '&' and can carry the same name twice; a
+cookie separates with ';', and a second '&name=' there is not another cookie but more of the value
+of the first - so a carrier that was not asked to be polluted is left as it is.
+"""
+def process_injectable_value(payload, data, pollute=False):
   if len(settings.TESTABLE_VALUE) == 0:
     settings.TESTABLE_VALUE = settings.SINGLE_WHITESPACE
   # Regenerate the tag if it overlaps the testable value.
@@ -199,9 +258,10 @@ def process_injectable_value(payload, data):
     random_tag = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(10))
   masked = data.replace(settings.TESTABLE_VALUE, random_tag)
   if settings.TESTABLE_VALUE in masked.replace(settings.INJECT_TAG, ""):
-    return masked.replace(settings.INJECT_TAG, "").replace(settings.TESTABLE_VALUE, payload).replace(random_tag, settings.TESTABLE_VALUE)
+    spliced = masked.replace(settings.INJECT_TAG, "").replace(settings.TESTABLE_VALUE, payload).replace(random_tag, settings.TESTABLE_VALUE)
   else:
-    return masked.replace(random_tag + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).replace(random_tag, settings.TESTABLE_VALUE)
+    spliced = masked.replace(random_tag + settings.INJECT_TAG, settings.INJECT_TAG).replace(settings.INJECT_TAG, payload).replace(random_tag, settings.TESTABLE_VALUE)
+  return polluted_parameter(spliced, payload) if pollute else spliced
 
 """
 Remove all injection tags from provided data

@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "174"
+REVISION = "175"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -2408,6 +2408,22 @@ MAX_PAGE_SIZE = 100 * 1024 * 1024
 
 # The web server named by the 'Server' header, and the ones that are recognised.
 SERVER_BANNER = ""
+
+"""
+Which of several same-named parameters an application reads, by the platform serving it.
+
+Sending a parameter twice is only an evasion where the two are read by different things: a filter
+looking at one occurrence, and the application at another. Which one the application takes is the
+platform's to decide, so where the banner says what is serving the page, that is what decides where
+the payload goes - and where it says nothing, the payload goes last, which is what the most commonly
+tested platforms read.
+"""
+HPP_LAST_WINS = ("php", "nginx", "rails", "ruby", "apache")
+HPP_FIRST_WINS = ("jsp", "tomcat", "jetty", "coldfusion", "java")
+HPP_CONCATENATES = ("asp", "asp.net", "aspx", "iis")
+
+# Said once for the run, however many parameters are polluted.
+HPP_POSITION_SAID = False
 # The version that server named for itself, where it named one.
 SERVER_VERSION = ""
 # The distribution a banner spelled out, kept as the banner wrote it rather than as the family it
@@ -2543,7 +2559,7 @@ RUN_WIDE_STATE = frozenset((
   "SESSION_FILE", "SHOW_LOGS_MSG", "TAMPER_SCRIPTS", "SITEMAP_CHECK", "SKIPPED_OUT_OF_SCOPE", "SKIP_VULNERABLE_HOST",
   "RESULTS_FILE_FORMAT", "RESULTS_FILE_STARTED", "TEST_FILTER", "TEST_SKIP",
   "PREPROCESS_FUNCTIONS", "POSTPROCESS_FUNCTIONS",
-  "BOOLEAN_THREADS_SUGGESTED", "REPLAY_NOTICES_SAID", "STDIN_PARSING", "TAMPER_WARNING_SHOWN", "TIME_RELATED_ATTACK_WARNING", "TOTAL_OF_REQUESTS", "EVAL_SUGGESTED", "COMMAND_SUGGESTED",
+  "BOOLEAN_THREADS_SUGGESTED", "HPP_POSITION_SAID", "REPLAY_NOTICES_SAID", "STDIN_PARSING", "TAMPER_WARNING_SHOWN", "TIME_RELATED_ATTACK_WARNING", "TOTAL_OF_REQUESTS", "EVAL_SUGGESTED", "COMMAND_SUGGESTED",
   "VALIDATION_RUN", "VISIBLE_CONNECTION_ERRORS", "WARNED_HTTP_ERROR_CODES",
   # Set by the connection to whichever target is in hand, before this reset can be reached.
   "HOSTNAME", "SCHEME", "TARGET_NETLOC", "TARGET_URL",

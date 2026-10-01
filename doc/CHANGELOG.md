@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New switch `--hpp` for sending a tested parameter twice, with the payload in the occurrence the target reads and a value a filter will accept in the one it inspects.
 * Added: New option `--openapi` for deriving targets from an OpenAPI (Swagger) description, with `--openapi-base` for a specification that names no host of its own and `--openapi-tags` for taking only part of a large API.
 * Added: New boolean-based blind injection technique, reading its answer off the page rather than off a delay, with `--string`, `--not-string`, `--regexp` and `--code` for saying what a true answer looks like.
 * Added: New switches `--mine-params` and `--mine-endpoints` for finding the parameters a target reads but names nowhere, and the endpoints only its own scripts name.

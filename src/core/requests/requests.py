@@ -853,7 +853,7 @@ def init_injection(payload, http_request_method, url):
 
   if settings.INJECT_TAG in url:
     vuln_parameter = parameters.vuln_GET_param(url)
-    target = checks.process_injectable_value(encoded_for_url(payload), url)
+    target = checks.process_injectable_value(encoded_for_url(payload), url, pollute=True)
     if settings.USER_DEFINED_POST_DATA and not settings.IGNORE_USER_DEFINED_POST_DATA:
       request = _urllib.request.Request(target, settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC), method=http_request_method)
     else:
@@ -880,7 +880,7 @@ def init_injection(payload, http_request_method, url):
       # Likewise here: nothing to decode, and the characters XML cannot carry at all are dropped.
       data = checks.restore_xml_layout(checks.process_injectable_value(checks.xml_encode_payload(checks.strip_xml_forbidden(payload)), menu.options.data))
     else:
-      data = checks.process_injectable_value(encoded_for_url(payload), menu.options.data)
+      data = checks.process_injectable_value(encoded_for_url(payload), menu.options.data, pollute=True)
     request = _urllib.request.Request(url, data.encode(settings.DEFAULT_CODEC), method=http_request_method)
 
   headers.do_check(request)
