@@ -18,6 +18,7 @@ import random
 import string
 import time
 
+from src.thirdparty.colorama import Style
 from src.utils import settings
 from src.core.parse import cmdline as menu
 
@@ -52,21 +53,22 @@ def _name(technique):
   from src.core.controller import checks
   try:
     name = checks.short_technique_label(technique).strip()
-    return name[:-len(" technique")] if name.endswith(" technique") else name
+    name = name[:-len(" technique")] if name.endswith(" technique") else name
   except Exception:
-    return str(technique)
+    name = str(technique)
+  return name[:1].upper() + name[1:]
 
 """
-A field, rendered the way the stored-session summary renders one.
+A field, bulleted the same way the injection-point summary bullets one ('  * Technique: ...').
 """
 def _field(label, value):
+  prefix = settings.SUB_CONTENT_SIGN_TYPE + label + ": "
+  indent = " " * (len(label) + 6)
   if isinstance(value, list):
     if not value:
       return ""
-    head = value[0]
-    rest = ["%s%s" % (" " * 21, _) for _ in value[1:]]
-    return "\n".join(["%-20s %s" % (label + ":", head)] + rest)
-  return "%-20s %s" % (label + ":", value)
+    return "\n".join([prefix + value[0]] + [indent + _ for _ in value[1:]])
+  return prefix + str(value)
 
 """
 What the proof had to get through. On a filtered target this is the part that matters: the evidence
@@ -125,8 +127,8 @@ def _challenge(execute_cmd, technique):
   answer = "".join(str(_) for _ in answer) if answer else ""
 
   carried = expected in answer
-  lines = ["the target must work out %d + %d = %s, drawn at random after the scan started" % (first, second, expected),
-           "(the product is in no page, cache or reflection - only something that executes could return it)",
+  lines = ["The target must work out %d + %d = %s, drawn at random after the scan started." % (first, second, expected),
+           "(the product is in no page, cache or reflection - only something that executes could return it.)",
            "sent:      " + cmd,
            "answered:  " + (answer.strip()[:120] if answer.strip() else "(nothing came back)"),
            _cost(started, elapsed)]
@@ -140,7 +142,7 @@ round proves the target worked the arithmetic out - not merely that it can be ma
 """
 def _inferential_challenge(boundary, vuln_parameter, http_request_method, technique):
   if not boundary:
-    return False, ["no boundary was kept for this point, so nothing could be asked of the target"]
+    return False, ["No boundary was kept for this point, so nothing could be asked of the target."]
   separator, prefix, suffix, whitespace, url, timesec = boundary
   from src.core.controller import execution
   from src.core.requests import requests as _requests
@@ -163,8 +165,15 @@ def _inferential_challenge(boundary, vuln_parameter, http_request_method, techni
       payload = payloads.condition_check(separator, condition, base, http_request_method)
     if payload is None:
       return None, None
-    exec_time = _requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter,
-                                            http_request_method, url)[0]
+    # The executor hands back elapsed time only while this flag is set - detection may have since
+    # cleared it, and unset it hands back the raw response instead.
+    previous = settings.TIME_RELATED_ATTACK
+    settings.TIME_RELATED_ATTACK = True
+    try:
+      exec_time = _requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter,
+                                              http_request_method, url)[0]
+    finally:
+      settings.TIME_RELATED_ATTACK = previous
     return payload, exec_time
 
   started = settings.TOTAL_OF_REQUESTS
@@ -174,17 +183,17 @@ def _inferential_challenge(boundary, vuln_parameter, http_request_method, techni
   elapsed = time.time() - began
 
   if true_payload is None or false_payload is None:
-    return False, ["this technique has no conditional-delay payload for the identified target"]
+    return False, ["This technique has no conditional-delay payload for the identified target."]
 
   # The product must be the one that delays, and the product plus one must not - the pair is what
   # rules out a target that is simply slow.
   carried = checks.time_related_shell(true_took, base) and not checks.time_related_shell(false_took, base)
-  lines = ["the target must work out %d + %d and answer whether it is %d, drawn at random after the scan started"
+  lines = ["The target must work out %d + %d and answer whether it is %d, drawn at random after the scan started."
            % (first, second, expected),
-           "(the delay is the answer: held back where the product matches, returned at once where it does not)",
+           "(the delay is the answer: held back where the product matches, returned at once where it does not.)",
            "matches:     %.2fs" % true_took,
            "does not:    %.2fs" % false_took,
-           "(one request each, timed the way every other request in the run is)",
+           "(one request each, timed the way every other request in the run is.)",
            _cost(started, elapsed)]
   return carried, lines
 
@@ -195,7 +204,7 @@ def _control_timing():
   if not settings.RESPONSE_TIMES:
     return []
   average = sum(settings.RESPONSE_TIMES) / float(len(settings.RESPONSE_TIMES))
-  return ["unmodified request: %.3fs on average over %d samples" % (average, len(settings.RESPONSE_TIMES))]
+  return ["unmodified request: %.3fs on average over %d samples." % (average, len(settings.RESPONSE_TIMES))]
 
 """
 The control that rules out coincidence: the answer must not already be somewhere the run could have
@@ -205,11 +214,11 @@ def _control(expected):
   lines = []
   page = settings.ORIGINAL_PAGE or ""
   if page:
-    lines.append("the unmodified page does not contain the answer: " +
-                 ("confirmed" if expected not in page else "NOT confirmed - it is already there"))
+    lines.append("The unmodified page does not contain the answer. (CONFIRMED)" if expected not in page
+                 else "The answer is already there, in the unmodified page. (NOT CONFIRMED)")
   if settings.RESPONSE_TIMES:
     average = sum(settings.RESPONSE_TIMES) / float(len(settings.RESPONSE_TIMES))
-    lines.append("unmodified request: %.3fs on average over %d samples" % (average, len(settings.RESPONSE_TIMES)))
+    lines.append("unmodified request: %.3fs on average over %d samples." % (average, len(settings.RESPONSE_TIMES)))
   return lines
 
 """
@@ -246,7 +255,6 @@ def prove(filename, url):
     else:
       carried, expected, challenge = _challenge(execute_cmd, technique)
     proven += int(carried)
-    fields.append("")
     fields.append(_field("Parameter", str(vuln_parameter) + " (" + str(http_request_method) + ")"))
     fields.append(_field("Technique", _name(technique)))
     fields.append(_field("Challenge", challenge))
@@ -256,13 +264,13 @@ def prove(filename, url):
     if carried:
       through = " through the protection in front of the application" if settings.WAF_ENABLED else ""
       if expected:
-        verdict = ["PROVEN - the target executed what was sent and returned the result" + through]
+        verdict = ["The target executed what was sent and returned the result" + through + ". (PROVEN)"]
       else:
-        verdict = ["PROVEN - the target worked out the value and answered it through the delay" + through]
+        verdict = ["The target worked out the value and answered it through the delay" + through + ". (PROVEN)"]
     else:
-      verdict = ["NOT PROVEN - the answer did not come back through this technique"]
+      verdict = ["The answer did not come back through this technique. (NOT PROVEN)"]
       if settings.WAF_ENABLED:
-        verdict.append("a protection is interfering, so the point may be real with its output channel blocked")
+        verdict.append("A protection is interfering, so the point may be real with its output channel blocked.")
         verdict.append("=> re-test with '--tamper', then prove again")
       else:
         verdict.append("=> treat it as unconfirmed unless a side effect proves otherwise (e.g. '--os-shell')")
@@ -270,21 +278,20 @@ def prove(filename, url):
 
   total = len(settings.PROOF_EXECUTORS)
   if proven == total:
-    header = "commix proved exploitation of the following injection point(s)"
+    header = "Proved exploitation of the following injection point(s)"
   elif proven:
-    header = "commix proved exploitation of " + str(proven) + " of " + str(total) + " reported injection point(s)"
+    header = "Proved exploitation of " + str(proven) + " of " + str(total) + " reported injection point(s)"
   else:
-    header = "commix could NOT prove exploitation of the reported injection point(s)"
+    header = "Could NOT prove exploitation of the reported injection point(s)"
 
-  data = "\n".join(_ for _ in fields if _ != "" or True)
-  settings.print_data_to_stdout(settings.END_LINE.LF + header + ":" + settings.END_LINE.LF +
-                                "---" + settings.END_LINE.LF + data + settings.END_LINE.LF +
-                                "---" + settings.END_LINE.LF)
+  data = settings.END_LINE.LF.join(fields)
+  settings.print_data_to_stdout(Style.BRIGHT + header + ":" + Style.RESET_ALL +
+                                settings.END_LINE.LF + data)
   try:
     path = os.path.join(os.path.dirname(filename) or ".", "proof.txt")
     with open(path, "w") as proof_file:
-      proof_file.write(header + ":" + settings.END_LINE.LF + "---" + settings.END_LINE.LF +
-                       data + settings.END_LINE.LF + "---" + settings.END_LINE.LF)
+      proof_file.write(settings.strip_ansi_codes(header + ":" + settings.END_LINE.LF +
+                       data + settings.END_LINE.LF))
     info_msg = "Proof of exploitation written to '" + path + "'."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   except OSError as err_msg:
