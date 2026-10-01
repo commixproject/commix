@@ -1691,7 +1691,7 @@ def finding_summary_lines(technique, injection_type, payload, title=None):
 The parameter header line of a summary block.
 """
 def finding_parameter_line(vuln_parameter, http_request_method):
-  return settings.SUB_CONTENT_SIGN + "'" + vuln_parameter + "' (" + http_request_method + "):"
+  return settings.SUB_CONTENT_SIGN + "Parameter: " + vuln_parameter + " (" + http_request_method + ")"
 
 """
 Print one block per row, grouped by parameter - rows start with
@@ -1723,12 +1723,12 @@ def target_fingerprint_summary():
     settings.print_info_msg("Fetching the target environment.")
   )
   if technology:
-    settings.print_data_to_stdout(settings.print_retrieved_data("web application technology", ", ".join(technology)))
+    settings.print_data_to_stdout(settings.print_retrieved_data("Web application technology", ", ".join(technology)))
   if shell_identified:
-    settings.print_data_to_stdout(settings.print_retrieved_data("command shell", target_shell_label()))
+    settings.print_data_to_stdout(settings.print_retrieved_data("Command shell", target_shell_label()))
 
 def _injection_points_summary(header_msg, rows, decode_payload=False):
-  settings.print_data_to_stdout(Style.BRIGHT + header_msg + Style.RESET_ALL)
+  settings.print_data_to_stdout(header_msg)
   prev_parameter = None
   for index, row in enumerate(rows):
     if index > 0:
@@ -1736,7 +1736,7 @@ def _injection_points_summary(header_msg, rows, decode_payload=False):
     technique, injection_type, vuln_parameter, payload, http_request_method = row[:5]
     current_parameter = (vuln_parameter, http_request_method)
     if current_parameter != prev_parameter:
-      settings.print_data_to_stdout(settings.SUB_CONTENT_SIGN + "'"  + Style.BRIGHT + vuln_parameter + Style.RESET_ALL + "' (" + http_request_method + "):")
+      settings.print_data_to_stdout(finding_parameter_line(vuln_parameter, http_request_method))
       prev_parameter = current_parameter
     if decode_payload:
       payload = str(url_decode(payload))
@@ -1756,10 +1756,9 @@ Print a summary of every injection point confirmed this run, deferred until quit
 """
 def confirmed_injection_points_summary():
   rows = settings.CONFIRMED_INJECTION_POINTS
-  if len(rows) == 1:
-    header_msg = "Identified the following injection point with a total of " + str(rows[0][5]) + " HTTP(S) requests:"
-  else:
-    header_msg = "Identified the following injection point(s):"
+  # The last row's snapshot of the running total is the total for the whole run, since the counter
+  # only grows - so this reads right whether one technique was confirmed or several.
+  header_msg = "Identified the following injection point with a total of " + str(rows[-1][5]) + " HTTP(S) requests:"
   _injection_points_summary(header_msg, rows)
 
 """
@@ -4304,7 +4303,7 @@ def print_ps_version(ps_version, filename, newline_first):
   settings.PS_ENABLED = True
   # Output PowerShell's version number
   info_msg = "Powershell version: " + ps_version
-  settings.print_data_to_stdout(settings.print_retrieved_data("powershell version", ps_version))
+  settings.print_data_to_stdout(settings.print_retrieved_data("Powershell version", ps_version))
   logs.add_line(filename, info_msg, group="info")
   logs.report_set_info("powershell_version", ps_version)
 
@@ -4316,7 +4315,7 @@ def print_hostname(shell, filename, newline_first):
     if settings.VERBOSITY_LEVEL == 0 and newline_first:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     info_msg = "Hostname: " +  str(shell)
-    settings.print_data_to_stdout(settings.print_retrieved_data("hostname", shell))
+    settings.print_data_to_stdout(settings.print_retrieved_data("Hostname", shell))
     logs.add_line(filename, info_msg, group="info")
     logs.report_set_info("hostname", str(shell))
   else:
@@ -4331,7 +4330,7 @@ def print_current_user(cu_account, filename, newline_first):
     if settings.VERBOSITY_LEVEL == 0 and newline_first:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     info_msg = "Current user: " +  str(cu_account)
-    settings.print_data_to_stdout(settings.print_retrieved_data("current user", cu_account))
+    settings.print_data_to_stdout(settings.print_retrieved_data("Current user", cu_account))
     logs.add_line(filename, info_msg, group="info")
     logs.report_set_info("current_user", str(cu_account))
   else:
@@ -4351,7 +4350,7 @@ def print_current_user_privs(shell, filename, newline_first):
     settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
 
   info_msg = "Current user has elevated privileges: " +  str(priv)
-  settings.print_data_to_stdout(settings.print_retrieved_data("current user has elevated privileges", priv, quoted=False))
+  settings.print_data_to_stdout(settings.print_retrieved_data("Current user has elevated privileges", priv, quoted=False))
   logs.add_line(filename, info_msg, group="info")
   logs.report_set_info("current_user_elevated_privileges", priv == "True")
 """
@@ -4362,7 +4361,7 @@ def print_os_info(target_os, target_arch, filename, newline_first):
     if settings.VERBOSITY_LEVEL == 0 and newline_first:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     info_msg = "Operating system: " +  str(target_os) + settings.SINGLE_WHITESPACE + str(target_arch)
-    settings.print_data_to_stdout(settings.print_retrieved_data("operating system", str(target_os) + settings.SINGLE_WHITESPACE + str(target_arch)))
+    settings.print_data_to_stdout(settings.print_retrieved_data("Operating system", str(target_os) + settings.SINGLE_WHITESPACE + str(target_arch)))
     logs.add_line(filename, info_msg, group="info")
     logs.report_set_info("operating_system", str(target_os) + settings.SINGLE_WHITESPACE + str(target_arch))
   else:
@@ -4467,14 +4466,15 @@ def print_users(sys_users, filename, newline_first, separator, TAG, cmd, prefix,
         else:
           if settings.VERBOSITY_LEVEL == 0 and newline_first:
             settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-          info_msg = "operating system"
+          info_msg = "Operating system"
           info_msg += " user" + ('s', '')[len(sys_users_list) == 1]
           info_msg += " [" + str(len(sys_users_list)) + "]:"
           settings.print_data_to_stdout(info_msg)
           logs.add_line(filename, info_msg, group="users")
+          table = settings.render_table(["Username"], [[name] for name in sys_users_list])
+          settings.print_data_to_stdout(table)
+          logs.add_line(filename, table, group="users")
           for name in sys_users_list:
-            settings.print_data_to_stdout(settings.SUB_CONTENT_SIGN_TYPE + name)
-            logs.add_line(filename, "  * " + name, group="users")
             logs.report_add_enumeration("users", name)
       else:
         no_user_enumeration_permission()
@@ -4508,10 +4508,10 @@ def print_users(sys_users, filename, newline_first, separator, TAG, cmd, prefix,
           if len(sys_users_list) != 0 :
             if settings.VERBOSITY_LEVEL == 0 and newline_first:
               settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-            info_msg = "operating system"
+            info_msg = "Operating system"
             info_msg += " user" + ('s', '')[len(sys_users_list) == 1]
             info_msg += " [" + str(len(sys_users_list)) + "]:"
-            settings.print_data_to_stdout(Style.BRIGHT + info_msg + Style.RESET_ALL)
+            settings.print_data_to_stdout(info_msg)
             logs.add_line(filename, info_msg, group="users")
 
             parsed_users = []
@@ -4524,8 +4524,6 @@ def print_users(sys_users, filename, newline_first, separator, TAG, cmd, prefix,
                 if not fields[2].startswith("/"):
                   raise ValueError()
                 parsed_users.append((fields[0], fields[1], fields[2]))
-                settings.print_data_to_stdout(settings.SUB_CONTENT_SIGN_TYPE + fields[0])
-                logs.add_line(filename, "  * " + fields[0], group="users")
                 logs.report_add_enumeration("users", fields[0])
               except ValueError:
                 if count == 1 :
@@ -4535,22 +4533,29 @@ def print_users(sys_users, filename, newline_first, separator, TAG, cmd, prefix,
                 raw_line = " ".join(str(p) for p in fields)
                 settings.print_data_to_stdout(raw_line)
                 logs.add_line(filename, "      " + raw_line, group="users")
+            if parsed_users:
+              users_table = settings.render_table(["Username"], [[name] for name, _, _ in parsed_users])
+              settings.print_data_to_stdout(users_table)
+              logs.add_line(filename, users_table, group="users")
 
             # Per-user privileges, only when explicitly requested.
             if menu.options.privileges and parsed_users:
               fetch_msg = "Fetching the operating system users' privileges."
               settings.print_data_to_stdout(settings.print_info_msg(fetch_msg))
-              info_msg = "operating system"
+              info_msg = "Operating system"
               info_msg += " user" + ('s', '')[len(parsed_users) == 1]
               info_msg += "' privileges [" + str(len(parsed_users)) + "]:"
-              settings.print_data_to_stdout(Style.BRIGHT + info_msg + Style.RESET_ALL)
+              settings.print_data_to_stdout(info_msg)
               logs.add_line(filename, info_msg, group="privileges")
+              table_rows = []
               for name, uid, homedir in parsed_users:
                 label = classify_uid(uid)
-                note = " (" + label + ", uid=" + uid + ", home directory '" + homedir + "')" if label else " (uid=" + uid + ", home directory '" + homedir + "')"
-                settings.print_data_to_stdout(settings.SUB_CONTENT_SIGN_TYPE + name + note)
-                logs.add_line(filename, "  * " + name + note, group="privileges")
-                logs.report_add_enumeration("privileges", {"name": name, "uid": uid, "home_directory": homedir, "type": label})
+                privileged = int(uid) == 0
+                logs.report_add_enumeration("privileges", {"name": name, "uid": uid, "home_directory": homedir, "type": label, "privileged": privileged})
+                table_rows.append([name, uid, homedir, privileged])
+              privileges_table = settings.render_table(["Username", "UID", "Home Directory", "Privileged"], table_rows)
+              settings.print_data_to_stdout(privileges_table)
+              logs.add_line(filename, privileges_table, group="privileges")
       else:
         warn_msg = "It seems you do not have permission "
         warn_msg += "to read the contents of the file '" + settings.PASSWD_FILE + "'."
@@ -4591,15 +4596,16 @@ def print_passes(sys_passes, filename, newline_first, interpreter):
         warn_msg = "It seems '" + settings.SHADOW_FILE + "' file is not "
         warn_msg += "in the appropriate format. Thus, exporting it as a text file."
         settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-      info_msg = "operating system"
+      info_msg = "Operating system"
       info_msg += " user" + ('s', '')[len(usable) == 1]
       info_msg += " password hashes [" + str(len(usable)) + "]:"
       settings.print_data_to_stdout(info_msg)
       logs.add_line(filename, info_msg, group="passwords")
       for username, digest in usable:
-        settings.print_data_to_stdout(settings.SUB_CONTENT_SIGN_TYPE + username + ":" + digest)
-        logs.add_line(filename, "  * " + username + ":" + digest, group="passwords")
         logs.report_add_enumeration("passwords", {"username": username, "hash": digest})
+      passwords_table = settings.render_table(["Username", "Hash"], [[username, digest] for username, digest in usable])
+      settings.print_data_to_stdout(passwords_table)
+      logs.add_line(filename, passwords_table, group="passwords")
     else:
       warn_msg = "Unable to retrieve the password hashes for the operating system users."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
@@ -4681,7 +4687,7 @@ Print single OS command
 def print_single_os_cmd(cmd, output, filename):
   # One character is an answer too - 'echo A' was reported as having returned nothing.
   if len(output) > 0:
-    settings.print_data_to_stdout(settings.print_retrieved_data("execution output", output))
+    settings.print_data_to_stdout(settings.print_retrieved_data("Execution output", output))
     logs.executed_command(filename, cmd, output)
   else:
     err_msg = common.invalid_cmd_output(cmd)
@@ -4829,7 +4835,7 @@ File read status
 """
 def file_read_status(shell, file_to_read, filename):
   if shell:
-    label = "file contents"
+    label = "File contents"
     settings.print_data_to_stdout(settings.print_retrieved_data(label, shell))
     logs.add_line(filename, "Extracted content of the file '" + file_to_read + "': " + shell, group="file:" + file_to_read)
     logs.report_add_file(file_to_read, shell)
