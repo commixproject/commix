@@ -364,6 +364,12 @@ request.add_option("--headers",
                 dest="headers",
                 help="Extra headers (e.g. 'Accept-Language: fr\\nETag: 123').")
 
+request.add_option("--auth-file",
+                action="store",
+                dest="auth_file",
+                default=None,
+                help="HTTP authentication PEM cert/private key file.")
+
 request.add_option("--hpp",
                 action="store_true",
                 dest="hpp",

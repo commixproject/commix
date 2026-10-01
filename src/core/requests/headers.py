@@ -432,6 +432,7 @@ def check_http_traffic(request):
     digest_handler.add_password(settings.DIGEST_AUTH_REALM, menu.options.url, username, password)
     extra_handlers.append(digest_handler)
 
+
   request = encode_non_ascii_url(request)
 
   # Also route through the configured proxy/Tor, so this fetch is reusable.
@@ -737,8 +738,8 @@ def do_check(request):
   # Check if defined any HTTP Authentication credentials.
   # HTTP Authentication: Basic, Digest, Bearer Access Authentication.
   if menu.options.auth_cred and menu.options.auth_type:
-    if menu.options.auth_type.lower() not in (settings.AUTH_TYPE.BASIC, settings.AUTH_TYPE.DIGEST, settings.AUTH_TYPE.BEARER):
-      err_msg = "HTTP authentication type value must be Basic, Digest or Bearer."
+    if menu.options.auth_type.lower() not in (settings.AUTH_TYPE.BASIC, settings.AUTH_TYPE.DIGEST, settings.AUTH_TYPE.BEARER, settings.AUTH_TYPE.PKI):
+      err_msg = "HTTP authentication type value must be Basic, Digest, Bearer or PKI."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit(settings.EXIT_FAILURE)
     if menu.options.auth_type.lower() == settings.AUTH_TYPE.BEARER:

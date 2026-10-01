@@ -382,7 +382,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "175"
+REVISION = "176"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1202,7 +1202,9 @@ The TLS context for target requests - a target's certificate is routinely self-s
 """
 def unverified_context():
   import ssl
-  return ssl._create_unverified_context()
+  context = ssl._create_unverified_context()
+  from src.core.requests import pki
+  return pki.apply_client_certificate(context)
 
 """
 The TLS context for commix's own infrastructure calls, which are verified.
@@ -1656,6 +1658,8 @@ class AUTH_TYPE(object):
   BASIC = "basic"
   DIGEST = "digest"
   BEARER = "bearer"
+  # Proved by a certificate presented while connecting, rather than by anything sent in a header.
+  PKI = "pki"
 
 # Cached digest realm, discovered from the target's WWW-Authenticate challenge.
 DIGEST_AUTH_REALM = None
@@ -2424,6 +2428,9 @@ HPP_CONCATENATES = ("asp", "asp.net", "aspx", "iis")
 
 # Said once for the run, however many parameters are polluted.
 HPP_POSITION_SAID = False
+
+# Said once for the run, however many connections try to present the certificate.
+PKI_FAILURE_SAID = False
 # The version that server named for itself, where it named one.
 SERVER_VERSION = ""
 # The distribution a banner spelled out, kept as the banner wrote it rather than as the family it
@@ -2559,7 +2566,7 @@ RUN_WIDE_STATE = frozenset((
   "SESSION_FILE", "SHOW_LOGS_MSG", "TAMPER_SCRIPTS", "SITEMAP_CHECK", "SKIPPED_OUT_OF_SCOPE", "SKIP_VULNERABLE_HOST",
   "RESULTS_FILE_FORMAT", "RESULTS_FILE_STARTED", "TEST_FILTER", "TEST_SKIP",
   "PREPROCESS_FUNCTIONS", "POSTPROCESS_FUNCTIONS",
-  "BOOLEAN_THREADS_SUGGESTED", "HPP_POSITION_SAID", "REPLAY_NOTICES_SAID", "STDIN_PARSING", "TAMPER_WARNING_SHOWN", "TIME_RELATED_ATTACK_WARNING", "TOTAL_OF_REQUESTS", "EVAL_SUGGESTED", "COMMAND_SUGGESTED",
+  "BOOLEAN_THREADS_SUGGESTED", "HPP_POSITION_SAID", "PKI_FAILURE_SAID", "REPLAY_NOTICES_SAID", "STDIN_PARSING", "TAMPER_WARNING_SHOWN", "TIME_RELATED_ATTACK_WARNING", "TOTAL_OF_REQUESTS", "EVAL_SUGGESTED", "COMMAND_SUGGESTED",
   "VALIDATION_RUN", "VISIBLE_CONNECTION_ERRORS", "WARNED_HTTP_ERROR_CODES",
   # Set by the connection to whichever target is in hand, before this reset can be reached.
   "HOSTNAME", "SCHEME", "TARGET_NETLOC", "TARGET_URL",

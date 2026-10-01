@@ -209,8 +209,28 @@ def validate():
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit(settings.EXIT_FAILURE)
 
+  """
+  A certificate is the credential, so it is not asked for beside one.
+
+  Given a key file and nothing else, that is what the run authenticates with and the type follows
+  from it. Named as the type with no file to read, there is nothing to present.
+  """
+  if menu.options.auth_file:
+    if not os.path.isfile(os.path.expanduser(menu.options.auth_file)):
+      err_msg = "It seems the '" + menu.options.auth_file + "' file does not exist."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit(settings.EXIT_FAILURE)
+    menu.options.auth_file = os.path.expanduser(menu.options.auth_file)
+    if not menu.options.auth_type:
+      menu.options.auth_type = settings.AUTH_TYPE.PKI
+  elif (menu.options.auth_type or "").lower() == settings.AUTH_TYPE.PKI:
+    err_msg = "The '--auth-type=" + settings.AUTH_TYPE.PKI + "' option requires the '--auth-file' option."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit(settings.EXIT_FAILURE)
+
   # Check if defined "--auth-cred" and/or '--auth-type'.
-  if (menu.options.auth_type and not menu.options.auth_cred) or (menu.options.auth_cred and not menu.options.auth_type):
+  if not menu.options.auth_file and \
+     ((menu.options.auth_type and not menu.options.auth_cred) or (menu.options.auth_cred and not menu.options.auth_type)):
     err_msg = "You must specify both '--auth-cred' and '--auth-type' options."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit(settings.EXIT_FAILURE)
