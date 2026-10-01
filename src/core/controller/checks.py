@@ -1680,11 +1680,11 @@ def finding_title(separator, whitespace, prefix, suffix):
 The detail lines of a summary block - shared by the console summary and the log file.
 """
 def finding_summary_lines(technique, injection_type, payload, title=None):
-  lines = ["  " + settings.SUB_CONTENT_SIGN_TYPE + "Technique: " + summary_technique_label(technique),
-           "  " + settings.SUB_CONTENT_SIGN_TYPE + "Type: " + injection_type[0].upper() + injection_type[1:]]
+  lines = [settings.SUB_CONTENT_SIGN_TYPE + "Technique: " + summary_technique_label(technique),
+           settings.SUB_CONTENT_SIGN_TYPE + "Type: " + injection_type[0].upper() + injection_type[1:]]
   if title:
-    lines.append("  " + settings.SUB_CONTENT_SIGN_TYPE + "Boundary: " + title)
-  lines.append("  " + settings.SUB_CONTENT_SIGN_TYPE + "Payload: " + payload)
+    lines.append(settings.SUB_CONTENT_SIGN_TYPE + "Boundary: " + title)
+  lines.append(settings.SUB_CONTENT_SIGN_TYPE + "Payload: " + payload)
   return lines
 
 """
@@ -4473,7 +4473,7 @@ def print_users(sys_users, filename, newline_first, separator, TAG, cmd, prefix,
           settings.print_data_to_stdout(info_msg)
           logs.add_line(filename, info_msg, group="users")
           for name in sys_users_list:
-            settings.print_data_to_stdout("  " + settings.SUB_CONTENT_SIGN_TYPE + name)
+            settings.print_data_to_stdout(settings.SUB_CONTENT_SIGN_TYPE + name)
             logs.add_line(filename, "  * " + name, group="users")
             logs.report_add_enumeration("users", name)
       else:
@@ -4524,7 +4524,7 @@ def print_users(sys_users, filename, newline_first, separator, TAG, cmd, prefix,
                 if not fields[2].startswith("/"):
                   raise ValueError()
                 parsed_users.append((fields[0], fields[1], fields[2]))
-                settings.print_data_to_stdout("  " + settings.SUB_CONTENT_SIGN_TYPE + fields[0])
+                settings.print_data_to_stdout(settings.SUB_CONTENT_SIGN_TYPE + fields[0])
                 logs.add_line(filename, "  * " + fields[0], group="users")
                 logs.report_add_enumeration("users", fields[0])
               except ValueError:
@@ -4548,7 +4548,7 @@ def print_users(sys_users, filename, newline_first, separator, TAG, cmd, prefix,
               for name, uid, homedir in parsed_users:
                 label = classify_uid(uid)
                 note = " (" + label + ", uid=" + uid + ", home directory '" + homedir + "')" if label else " (uid=" + uid + ", home directory '" + homedir + "')"
-                settings.print_data_to_stdout("  " + settings.SUB_CONTENT_SIGN_TYPE + name + note)
+                settings.print_data_to_stdout(settings.SUB_CONTENT_SIGN_TYPE + name + note)
                 logs.add_line(filename, "  * " + name + note, group="privileges")
                 logs.report_add_enumeration("privileges", {"name": name, "uid": uid, "home_directory": homedir, "type": label})
       else:
@@ -4597,7 +4597,7 @@ def print_passes(sys_passes, filename, newline_first, interpreter):
       settings.print_data_to_stdout(info_msg)
       logs.add_line(filename, info_msg, group="passwords")
       for username, digest in usable:
-        settings.print_data_to_stdout("  " + settings.SUB_CONTENT_SIGN_TYPE + username + ":" + digest)
+        settings.print_data_to_stdout(settings.SUB_CONTENT_SIGN_TYPE + username + ":" + digest)
         logs.add_line(filename, "  * " + username + ":" + digest, group="passwords")
         logs.report_add_enumeration("passwords", {"username": username, "hash": digest})
     else:

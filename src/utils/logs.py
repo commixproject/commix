@@ -213,9 +213,9 @@ def add_finding(filename, injection_type, technique, http_request_method, vuln_p
   command = reproduce.curl_command(menu.options.url, http_request_method, vuln_parameter, payload)
   caveats = reproduce.curl_command_caveats() if command else []
   if command:
-    add_line(filename, settings.strip_ansi_codes("  " + settings.SUB_CONTENT_SIGN_TYPE + "Reproduce: " + command), group="findings")
+    add_line(filename, settings.strip_ansi_codes(settings.SUB_CONTENT_SIGN_TYPE + "Reproduce: " + command), group="findings")
     for caveat in caveats:
-      add_line(filename, settings.strip_ansi_codes("  " + settings.SUB_CONTENT_SIGN_TYPE + "Note: " + caveat[0].upper() + caveat[1:] + "."), group="findings")
+      add_line(filename, settings.strip_ansi_codes(settings.SUB_CONTENT_SIGN_TYPE + "Note: " + caveat[0].upper() + caveat[1:] + "."), group="findings")
   results_note(menu.options.url, http_request_method, vuln_parameter, technique, injection_type)
   if report_active():
     finding = {
