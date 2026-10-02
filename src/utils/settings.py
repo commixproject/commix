@@ -81,7 +81,7 @@ CRITICAL_SIGN = "[" + Back.RED + "critical" + Style.RESET_ALL  + "] "
 PAYLOAD_SIGN = "[" + Fore.CYAN + "payload" + Style.RESET_ALL + "] "
 SUB_CONTENT_SIGN = ""
 #SUB_CONTENT_SIGN_TYPE = "" + Style.BRIGHT + "*" + Style.RESET_ALL + " "
-SUB_CONTENT_SIGN_TYPE = "    "
+SUB_CONTENT_SIGN_TYPE = " * "
 TRAFFIC_SIGN = HTTP_CONTENT_SIGN = ""
 ABORTION_SIGN = ERROR_SIGN
 DEBUG_SIGN = "[" + Back.BLUE + Fore.WHITE + "debug" + Style.RESET_ALL + "] "
