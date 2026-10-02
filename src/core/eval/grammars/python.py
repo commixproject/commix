@@ -169,7 +169,12 @@ Stop the page where the condition does not hold, so what comes back says which i
 def halt(condition):
   # Empty string rather than a number: the value is spliced into whatever the target was building,
   # and only a string leaves that expression intact for the page to render as it normally would.
-  return "('' if (" + condition + ") else __import__(\"sys\").exit())"
+  # Double-quoted like every other literal this grammar writes, and not single-quoted like the rest
+  # of the language's own strings would be: a boundary that never truly broke out of a surrounding
+  # single-quoted string still parses the two quotes right next to each other as one literal ending
+  # and the next beginning, so they vanish from what comes back - reading as a real answer to a
+  # question nothing ever executed. A double quote inside a single-quoted string is nothing to it.
+  return "(\"\" if (" + condition + ") else __import__(\"sys\").exit())"
 
 """
 Evaluate one expression and then another, within a single expression.

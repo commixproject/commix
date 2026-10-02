@@ -340,25 +340,32 @@ def pseudo_terminal_shell(injector, separator, maxlen, TAG, cmd, prefix, suffix,
 
   # Run one command through the confirmed injection point, reusing a stored answer where there is one.
   def execute_cmd(cmd):
-    time.sleep(timesec)
     _stored_shell = session_handler.export_stored_cmd(url, cmd, vuln_parameter)
     if menu.options.ignore_session or not checks.usable_stored_cmd(_stored_shell):
-      # The main command injection exploitation.
-      if settings.TIME_RELATED_ATTACK:
-        if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
-          check_exec_time, shell = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, interpreter, filename, url_time_response, technique)
+      shell = None
+      # Tried first, the created file read through whatever already tells this target's pages true
+      # from false - cheaper than the delay below and, unlike it, safe to ask for concurrently.
+      if technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
+        from src.core.techniques.tempfile_based import tfb_handler as oracle_handler
+        shell = oracle_handler.oracle_extract(separator, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, TAG, cmd)
+      if shell is None:
+        time.sleep(timesec)
+        # The main command injection exploitation.
+        if settings.TIME_RELATED_ATTACK:
+          if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
+            check_exec_time, shell = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, interpreter, filename, url_time_response, technique)
+          else:
+            check_exec_time, shell = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique)
+          # Export injection result
+          checks.time_related_export_injection_results(cmd, separator, shell, check_exec_time)
         else:
-          check_exec_time, shell = injector.injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique)
-        # Export injection result
-        checks.time_related_export_injection_results(cmd, separator, shell, check_exec_time)
-      else:
-        if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
-          response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, technique)
-        else:
-          response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, interpreter, filename, technique)
-        # Command execution results.
-        shell = injector.injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, timesec)
-        shell = "".join(str(p) for p in shell)
+          if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
+            response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, technique)
+          else:
+            response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, interpreter, filename, technique)
+          # Command execution results.
+          shell = injector.injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, timesec)
+          shell = "".join(str(p) for p in shell)
       # Update logs with executed cmds and execution results.
       logs.executed_command(filename, cmd, shell)
       # Storing a known-incomplete result would serve it back as if it were the real output.
@@ -379,14 +386,24 @@ def pseudo_terminal_shell(injector, separator, maxlen, TAG, cmd, prefix, suffix,
 """
 Retry value-skip using the confirmed exploit's own delay signal.
 """
-def probe_skip_testable_value_post_detection(separator, timesec, http_request_method, url, vuln_parameter, whitespace, url_time_response, technique, prefix):
+def probe_skip_testable_value_post_detection(separator, timesec, http_request_method, url, vuln_parameter, whitespace, url_time_response, technique, prefix, TAG=None, OUTPUT_TEXTFILE=None):
   if settings.TESTABLE_VALUE_OPTIMIZED or not settings.TESTABLE_VALUE:
     return url, prefix
-  if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
-    probe_payloads = checks.time_based_payloads()
+  # Asked through the oracle where this boundary already has one calibrated - a plain yes/no costs
+  # nothing to wait for, where the delay-based probe below would otherwise be the first timed
+  # comparison of a run that never needed one anywhere else. The same question calibration already
+  # answered correctly, not a bare "1==1": that shape was never itself calibrated, and a page that
+  # only distinguishes true from false by what a file-read prints would read it as no answer at all.
+  oracle_probe = False
+  if technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED and TAG and OUTPUT_TEXTFILE:
+    from src.core.techniques.tempfile_based import tfb_handler as oracle_handler
+    oracle_probe = oracle_handler.oracle_active(url, vuln_parameter, separator)
+  if oracle_probe:
+    payload = checks.tempfile_based_payloads().oracle_decision(separator, TAG, len(TAG), OUTPUT_TEXTFILE, holds=True)
+  elif technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
+    payload = checks.time_based_payloads().condition_check(separator, "1 -eq 1", timesec, http_request_method)
   else:
-    probe_payloads = checks.tempfile_based_payloads()
-  payload = probe_payloads.condition_check(separator, "1 -eq 1", timesec, http_request_method)
+    payload = checks.tempfile_based_payloads().condition_check(separator, "1 -eq 1", timesec, http_request_method)
   if payload is None:
     return url, prefix
 
@@ -407,7 +424,8 @@ def probe_skip_testable_value_post_detection(separator, timesec, http_request_me
     url = url.replace(marker, placeholder + settings.INJECT_TAG)
   settings.TESTABLE_VALUE = placeholder
   if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Replaying the delay against the random value '" + placeholder + "', to check if the real one is needed."
+    debug_msg = ("Asking the oracle against" if oracle_probe else "Replaying the delay against") + \
+                " the random value '" + placeholder + "', to check if the real one is needed."
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
   """
   Sent inside the boundary the finding was made with, not bare.
@@ -420,9 +438,14 @@ def probe_skip_testable_value_post_detection(separator, timesec, http_request_me
   confirmed = settings.CONFIRMED_BOUNDARY.get(settings.CHECKING_PARAMETER)
   probe_prefix, probe_suffix = (confirmed[0], confirmed[1]) if confirmed else ("", "")
   try:
-    before = stability.requests_sent()
-    exec_time, _, _, _, _ = requests.perform_injection(probe_prefix, probe_suffix, whitespace, payload, vuln_parameter, http_request_method, url)
-    succeeded = not stability.request_was_retried(before) and checks.time_related_shell(exec_time, timesec)
+    if oracle_probe:
+      from src.core.techniques.boolean_based import bb_injector
+      answer, _ = bb_injector.answer(payload, probe_prefix, probe_suffix, whitespace, http_request_method, url, vuln_parameter)
+      succeeded = answer is True
+    else:
+      before = stability.requests_sent()
+      exec_time, _, _, _, _ = requests.perform_injection(probe_prefix, probe_suffix, whitespace, payload, vuln_parameter, http_request_method, url)
+      succeeded = not stability.request_was_retried(before) and checks.time_related_shell(exec_time, timesec)
   except Exception:
     succeeded = False
 
@@ -945,24 +968,37 @@ def oob_pseudo_terminal_shell(separator, prefix, suffix, whitespace, vuln_parame
   return pseudo_terminal_shell_generic(url, filename, technique, False, execute_cmd, separator=separator)
 
 """
+Whether threaded time-related retrieval is safe on this target, and whether the run wants it anyway -
+settled once, the first time anything is actually going to be timed. Asking any earlier would put the
+question to a run that ends up never measuring a delay at all.
+"""
+def _confirm_threaded_time_retrieval(url, http_request_method, resuming_stored):
+  if not (settings.THREADS > 1 and settings.THREADED_TIME_RETRIEVAL_CHOICE is None and not resuming_stored):
+    return
+  if not checks.target_serves_concurrently(url, http_request_method, settings.THREADS):
+    warn_msg = "The target answers one request at a time. Continuing with a single thread."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    settings.THREADED_TIME_RETRIEVAL_CHOICE = False
+  else:
+    # Answered yes, the retrieval still measures whether the answers can be told apart under that
+    # concurrency - which needs a payload, and so cannot be settled here.
+    # Declined unless asked for: reading a delay is reading one request against the others, and
+    # requests that overlap are what the reading is least able to survive.
+    msg = "Multi-threading is considered unsafe for time-related data retrieval. "
+    msg += "Do you want to continue using threads anyway? [y/N] "
+    settings.THREADED_TIME_RETRIEVAL_CHOICE = common.read_input(msg, default="N", check_batch=True) in settings.CHOICE_YES
+
+"""
 The main Time-related exploitation process.
 """
 def do_time_related_process(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path):
 
   resuming_stored = settings.LOAD_SESSION and technique in settings.STORED_TECHNIQUES
-  if settings.THREADS > 1 and settings.THREADED_TIME_RETRIEVAL_CHOICE is None and not resuming_stored:
-    if not checks.target_serves_concurrently(url, http_request_method, settings.THREADS):
-      warn_msg = "The target answers one request at a time. Continuing with a single thread."
-      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-      settings.THREADED_TIME_RETRIEVAL_CHOICE = False
-    else:
-      # Answered yes, the retrieval still measures whether the answers can be told apart under that
-      # concurrency - which needs a payload, and so cannot be settled here.
-      # Declined unless asked for: reading a delay is reading one request against the others, and
-      # requests that overlap are what the reading is least able to survive.
-      msg = "Multi-threading is considered unsafe for time-related data retrieval. "
-      msg += "Do you want to continue using threads anyway? [y/N] "
-      settings.THREADED_TIME_RETRIEVAL_CHOICE = common.read_input(msg, default="N", check_batch=True) in settings.CHOICE_YES
+  # Deferred for TEMP_FILE_BASED, to the same point 'timesec' itself is - asked only once the oracle
+  # this technique tries first has failed to confirm the boundary, and threading is about to mean
+  # something for real.
+  if technique != settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
+    _confirm_threaded_time_retrieval(url, http_request_method, resuming_stored)
 
   counter = 1
   num_of_chars = 1
@@ -970,7 +1006,10 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
   possibly_vulnerable = False
   false_positive_warning = False
   exec_time = 0
-  timesec = checks.time_related_timesec()
+  # Deferred for TEMP_FILE_BASED - adjusting it here would announce a delay this technique tries
+  # first to avoid needing at all. Computed once the oracle attempt below has actually failed.
+  if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
+    timesec = checks.time_related_timesec()
 
   if settings.TIME_RELATED_ATTACK is False:
     settings.TIME_RELATED_ATTACK = None
@@ -1009,6 +1048,9 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
     settings.EXPLOITATION_PHASE = False
     # If a previous session is available for this specific technique.
     resumed = False
+    # Whether this boundary was confirmed through the oracle instead of a delay - carried past the
+    # retry loop below to the one check that decides whether the point counts as found.
+    oracle_confirmed = False
     stored_row = settings.STORED_TECHNIQUES.get(technique) if settings.LOAD_SESSION else None
     if stored_row:
       try:
@@ -1053,6 +1095,32 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
         OUTPUT_TEXTFILE = ""  # only used by TEMP_FILE_BASED, set just below
         if technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
           OUTPUT_TEXTFILE = injector.select_output_filename(technique, tmp_path, TAG)
+          # Tried first, on the first pass only - a boundary the oracle confirms needs no delay to
+          # prove, and one it cannot confirm is no cheaper to ask about twice.
+          if _false_positive_retry == 0:
+            from src.core.techniques.tempfile_based import tfb_handler as oracle_handler
+            # Unresolved on the way in, exactly as the delay-based confirmation below leaves it -
+            # discovered by whichever of the two ends up sending the first request.
+            oracle_payload, vuln_parameter = oracle_handler.try_oracle_confirm(separator, prefix, suffix, whitespace, http_request_method, url, "", OUTPUT_TEXTFILE, TAG)
+            if oracle_payload:
+              payload = oracle_payload
+              output_length = len(TAG)
+              # Nothing here was measured, so there is no false-positive command or its output to
+              # carry forward either - left the way a resumed finding leaves them.
+              cmd = shell = output = ""
+              exec_time = original_exec_time = timesec
+              settings.FOUND_EXEC_TIME = exec_time
+              settings.FOUND_DIFF = exec_time - timesec
+              oracle_confirmed = possibly_vulnerable = True
+              # Closes the "Continuing with..." spinner the same way a delay-based confirmation
+              # closes its own - nothing here was timed, but the line it left open still needs it.
+              checks.injection_process(injection_type, technique, done=True)
+              break
+          # Reached only once the oracle above has not confirmed the boundary - deferred rather
+          # than adjusted at the top of the function, so the notice is not announced for a delay
+          # this technique may end up never needing.
+          _confirm_threaded_time_retrieval(url, http_request_method, resuming_stored)
+          timesec = checks.time_related_timesec()
         # What these payloads cost is part of the answer's time: one that writes a file and reads it
         # back through two interpreters takes about a second before any delay is asked for, while the
         # model it is judged against was built from plain requests. Sampled once with a length that
@@ -1248,7 +1316,7 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
     floored by the shortest delay held to be safe. Read against each other, a finding made under a
     shorter delay than the floor is thrown away every time it is resumed.
     """
-    if resumed or checks.time_related_shell(exec_time, timesec):
+    if resumed or oracle_confirmed or checks.time_related_shell(exec_time, timesec):
       if (len(TAG) == output_length) and (possibly_vulnerable is True or resumed and int(is_vulnerable) == settings.INJECTION_LEVEL):
         found = True
         no_result = False
@@ -1266,7 +1334,7 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
         # An optimisation only, and it costs a timing model and a delayed request to find - so a
         # resumed finding is replayed as it was stored rather than measured again for it.
         if not resumed:
-          url, prefix = probe_skip_testable_value_post_detection(separator, timesec, http_request_method, url, vuln_parameter, whitespace, url_time_response, technique, prefix)
+          url, prefix = probe_skip_testable_value_post_detection(separator, timesec, http_request_method, url, vuln_parameter, whitespace, url_time_response, technique, prefix, TAG, OUTPUT_TEXTFILE)
         # Registered here, run once at quit().
         _register_post_detection_action(lambda: enumeration.stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique))
         _register_post_detection_action(lambda: file_access.stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique))

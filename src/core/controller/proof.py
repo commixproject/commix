@@ -59,11 +59,12 @@ def _name(technique):
   return name[:1].upper() + name[1:]
 
 """
-A field, bulleted the same way the injection-point summary bullets one ('  * Technique: ...').
+A field, bulleted the same way the injection-point summary bullets one ('  * Technique: ...') -
+except the ones the run itself is described by, which sit above any parameter and bullet nothing.
 """
-def _field(label, value):
-  prefix = settings.SUB_CONTENT_SIGN_TYPE + label + ": "
-  indent = " " * (len(label) + 6)
+def _field(label, value, bullet=True):
+  prefix = (settings.SUB_CONTENT_SIGN_TYPE if bullet else "") + label + ": "
+  indent = " " * (len(label) + (6 if bullet else 2))
   if isinstance(value, list):
     if not value:
       return ""
@@ -100,8 +101,8 @@ path the counter sees, and a confident "0 requests" would be worse than saying n
 def _cost(started, elapsed):
   sent = settings.TOTAL_OF_REQUESTS - started
   if sent > 0:
-    return "spent:     %d request%s, %.2fs" % (sent, "s"[sent == 1:], elapsed)
-  return "spent:     %.2fs" % elapsed
+    return "spent: %d request%s, %.2fs" % (sent, "s"[sent == 1:], elapsed)
+  return "spent: %.2fs" % elapsed
 
 """
 Ask the target to work out something nobody could have written down in advance, and show what came
@@ -129,8 +130,8 @@ def _challenge(execute_cmd, technique):
   carried = expected in answer
   lines = ["The target must work out %d + %d = %s, drawn at random after the scan started." % (first, second, expected),
            "(the product is in no page, cache or reflection - only something that executes could return it.)",
-           "sent:      " + cmd,
-           "answered:  " + (answer.strip()[:120] if answer.strip() else "(nothing came back)"),
+           "sent: " + cmd,
+           "answered: " + (answer.strip()[:120] if answer.strip() else "(nothing came back)"),
            _cost(started, elapsed)]
   return carried, expected, lines
 
@@ -161,7 +162,12 @@ def _inferential_challenge(boundary, vuln_parameter, http_request_method, techni
       payload = payloads.windows_condition_check(separator, str(first) + "+" + str(second),
                                                  target_value, base)
     else:
-      condition = "$((" + str(first) + "+" + str(second) + ")) -eq " + str(target_value)
+      sum_expr = str(first) + "+" + str(second)
+      # Shell arithmetic expansion, the way every other shell condition in the run states its own -
+      # but an evaluated language does its addition bare, and '$((...))' is not its syntax at all.
+      if not menu.options.eval_sink:
+        sum_expr = "$((" + sum_expr + "))"
+      condition = sum_expr + " -eq " + str(target_value)
       payload = payloads.condition_check(separator, condition, base, http_request_method)
     if payload is None:
       return None, None
@@ -191,8 +197,8 @@ def _inferential_challenge(boundary, vuln_parameter, http_request_method, techni
   lines = ["The target must work out %d + %d and answer whether it is %d, drawn at random after the scan started."
            % (first, second, expected),
            "(the delay is the answer: held back where the product matches, returned at once where it does not.)",
-           "matches:     %.2fs" % true_took,
-           "does not:    %.2fs" % false_took,
+           "matches: %.2fs" % true_took,
+           "does not: %.2fs" % false_took,
            "(one request each, timed the way every other request in the run is.)",
            _cost(started, elapsed)]
   return carried, lines
@@ -235,17 +241,19 @@ def prove(filename, url):
   # The URL reached at quit() carries the injection marker and whatever the WAF probe appended, so
   # the target reported is the one that was asked for.
   target = menu.options.url or url or ""
-  fields = [_field("Target", target)]
+  fields = [_field("Target", target, bullet=False)]
   if settings.USER_DEFINED_POST_DATA:
-    fields.append(_field("Data", settings.USER_DEFINED_POST_DATA))
+    fields.append(_field("Data", settings.USER_DEFINED_POST_DATA, bullet=False))
   if settings.TARGET_OS:
     platform = "Windows" if settings.TARGET_OS == settings.OS.WINDOWS else "Unix-like"
     if settings.TARGET_ARCH:
       platform += " (" + settings.TARGET_ARCH + ")"
-    fields.append(_field("Back-end", platform))
-  fields.append(_field("Verified", time.strftime("%Y-%m-%d %H:%M:%S")))
+    fields.append(_field("Back-end", platform, bullet=False))
+  fields.append(_field("Verified", time.strftime("%Y-%m-%d %H:%M:%S"), bullet=False))
 
   proven = 0
+  prev_parameter = None
+  first_group = True
   for technique, vuln_parameter, http_request_method, execute_cmd, boundary in settings.PROOF_EXECUTORS:
     # A technique that answers in time is proved on the clock; one that carries output is proved by
     # what came back.
@@ -255,7 +263,16 @@ def prove(filename, url):
     else:
       carried, expected, challenge = _challenge(execute_cmd, technique)
     proven += int(carried)
-    fields.append(_field("Parameter", str(vuln_parameter) + " (" + str(http_request_method) + ")"))
+    # One header per parameter, the same way the injection-point summary groups its own findings -
+    # a technique proved right after another on the same parameter does not restate it.
+    if not first_group:
+      fields.append("")
+    first_group = False
+    current_parameter = (vuln_parameter, http_request_method)
+    if current_parameter != prev_parameter:
+      from src.core.controller import checks
+      fields.append(checks.finding_parameter_line(str(vuln_parameter), str(http_request_method)))
+      prev_parameter = current_parameter
     fields.append(_field("Technique", _name(technique)))
     fields.append(_field("Challenge", challenge))
     control = _control(expected) if expected else _control_timing()
@@ -285,7 +302,7 @@ def prove(filename, url):
     header = "Could NOT prove exploitation of the reported injection point(s)"
 
   data = settings.END_LINE.LF.join(fields)
-  settings.print_data_to_stdout(Style.BRIGHT + header + ":" + Style.RESET_ALL +
+  settings.print_data_to_stdout(header + ":" +
                                 settings.END_LINE.LF + data)
   try:
     path = os.path.join(os.path.dirname(filename) or ".", "proof.txt")

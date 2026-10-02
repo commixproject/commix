@@ -80,8 +80,8 @@ ERROR_BOLD_SIGN = "["  + Style.BRIGHT + Fore.RED + "error" + Style.RESET_ALL  + 
 CRITICAL_SIGN = "[" + Back.RED + "critical" + Style.RESET_ALL  + "] "
 PAYLOAD_SIGN = "[" + Fore.CYAN + "payload" + Style.RESET_ALL + "] "
 SUB_CONTENT_SIGN = ""
-SUB_CONTENT_SIGN_TYPE = "" + Style.BRIGHT + "*" + Style.RESET_ALL + " "
-#SUB_CONTENT_SIGN_TYPE = "[" + Fore.LIGHTRED_EX + "*" + Style.RESET_ALL + "] "
+#SUB_CONTENT_SIGN_TYPE = "" + Style.BRIGHT + "*" + Style.RESET_ALL + " "
+SUB_CONTENT_SIGN_TYPE = "    "
 TRAFFIC_SIGN = HTTP_CONTENT_SIGN = ""
 ABORTION_SIGN = ERROR_SIGN
 DEBUG_SIGN = "[" + Back.BLUE + Fore.WHITE + "debug" + Style.RESET_ALL + "] "
@@ -245,8 +245,9 @@ def reset_terminal_style():
 Something read off the target, written the way the summary blocks already are.
 
 No timestamp and no sign: what was retrieved is the answer, not a step towards it, and it reads
-apart from the running log for that. Quoted, so a value that is empty or padded is still visible,
-and fenced where it runs to more than one line rather than trailing off the first.
+apart from the running log for that. Quoted, so a value that is empty or padded is still visible.
+Long or multi-line content is printed as its own block right under the label, plainly - nothing here
+needs a border of its own to be read correctly.
 """
 def print_retrieved_data(label, retrieved, quoted=True):
   text = str(retrieved)
@@ -254,16 +255,27 @@ def print_retrieved_data(label, retrieved, quoted=True):
     text = text[:-2]
   elif text.endswith(END_LINE.LF):
     text = text[:-1]
-  if END_LINE.LF in text:
-    # Its own lines, so the fence is all the delimiting it needs.
-    body = END_LINE.LF + "---" + END_LINE.LF + text + END_LINE.LF + "---"
-  elif len(text) > MAX_INLINE_VALUE_LENGTH:
-    # One line, but longer than one: fenced so it starts where the eye is, rather than trailing off
-    # the end of the label - still quoted, since nothing else marks where it begins and ends.
-    body = END_LINE.LF + "---" + END_LINE.LF + ("'" + text + "'" if quoted else text) + END_LINE.LF + "---"
+  if END_LINE.LF in text or len(text) > MAX_INLINE_VALUE_LENGTH:
+    body = END_LINE.LF + text
   else:
     body = SINGLE_WHITESPACE + ("'" + text + "'" if quoted else text)
-  return Style.BRIGHT + label + ":" + body + Style.RESET_ALL
+  return label + ":" + body + Style.RESET_ALL
+
+"""
+A plain ASCII table - column widths taken from the widest cell each has, headers included.
+"""
+def render_table(headers, rows):
+  widths = [len(str(header)) for header in headers]
+  for row in rows:
+    for index, cell in enumerate(row):
+      widths[index] = max(widths[index], len(str(cell)))
+  border = "+" + "+".join("-" * (width + 2) for width in widths) + "+"
+  def _row(cells):
+    return "| " + " | ".join(str(cell).ljust(widths[index]) for index, cell in enumerate(cells)) + " |"
+  lines = [border, _row(headers), border]
+  lines.extend(_row(row) for row in rows)
+  lines.append(border)
+  return END_LINE.LF.join(lines)
 
 # Print output of command execution
 def command_execution_output(shell):
@@ -284,7 +296,7 @@ def _stdout_write(data):
 Print data to stdout
 """
 def print_data_to_stdout(data):
-  global PROGRESS_LINE_OPEN
+  global PROGRESS_LINE_OPEN, PROGRESS_DOT_COUNT
   if getattr(_threading.current_thread(), "commix_suppress_output", False):
     return
   with PRINT_LOCK:
@@ -299,11 +311,22 @@ def print_data_to_stdout(data):
     # The marker that says a progress line is finished, which is exactly what closes it: without
     # that, the next line written over the top of it inherits its tail and its "(done)" with it.
     is_done_marker = data == " (done)"
-    is_spinner_style = has_cr or data == "." or is_done_marker
+    is_dot = data == "."
+    is_spinner_style = has_cr or is_dot or is_done_marker
     is_established_closer = data == SINGLE_WHITESPACE
 
     if is_established_closer and not PROGRESS_LINE_OPEN:
       return  # nothing open to close - skip the cosmetic blank line
+
+    # However many requests the step behind it actually took, the dot line itself stops growing
+    # once it would otherwise wrap - a fresh CR-drawn line (a new "please wait", or a rewritten one
+    # that already renders its own bounded text) resets the count rather than inheriting it.
+    if is_dot:
+      if PROGRESS_DOT_COUNT >= MAX_PROGRESS_DOTS:
+        return
+      PROGRESS_DOT_COUNT += 1
+    elif has_cr:
+      PROGRESS_DOT_COUNT = 0
 
     # Spinner continuations can append directly; other output needs a newline first.
     if PROGRESS_LINE_OPEN and not is_spinner_style and not is_established_closer:
@@ -382,7 +405,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "177"
+REVISION = "178"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -697,6 +720,14 @@ BOOLEAN_PRINTED_STATE = False
 # Said once for the run, where a retrieval is being made a byte at a time on a single thread.
 BOOLEAN_THREADS_SUGGESTED = False
 
+# Said once for the run, the first time the tempfile-based technique reads its created file through
+# a calibrated oracle instead of through a delay.
+TEMPFILE_ORACLE_ANNOUNCED = False
+
+# Said once for the run, where no oracle could be calibrated and the created file is read through
+# a delay instead - the other half of the notice above.
+TEMPFILE_TIME_FALLBACK_ANNOUNCED = False
+
 # The two answers as they arrived, kept beside their comparable forms so that what tells them apart
 # can be quoted back as an option the next run can be given.
 BOOLEAN_TRUE_CODE = None
@@ -856,6 +887,11 @@ REQUESTS_LOCK = _threading.Lock()
 
 # Whether the last stdout line is still open (progress refresh / spinner dot).
 PROGRESS_LINE_OPEN = False
+
+# Dots written to the current spinner line, and where that line stops growing further ones.
+# However many requests a step actually costs, the line itself stays one a terminal never wraps.
+PROGRESS_DOT_COUNT = 0
+MAX_PROGRESS_DOTS = 40
 
 DEFAULT_INJECTION_LEVEL = 1
 COOKIE_INJECTION_LEVEL = 2
@@ -2566,7 +2602,7 @@ RUN_WIDE_STATE = frozenset((
   "SESSION_FILE", "SHOW_LOGS_MSG", "TAMPER_SCRIPTS", "SITEMAP_CHECK", "SKIPPED_OUT_OF_SCOPE", "SKIP_VULNERABLE_HOST",
   "RESULTS_FILE_FORMAT", "RESULTS_FILE_STARTED", "TEST_FILTER", "TEST_SKIP",
   "PREPROCESS_FUNCTIONS", "POSTPROCESS_FUNCTIONS",
-  "BOOLEAN_THREADS_SUGGESTED", "HPP_POSITION_SAID", "PKI_FAILURE_SAID", "REPLAY_NOTICES_SAID", "STDIN_PARSING", "TAMPER_WARNING_SHOWN", "TIME_RELATED_ATTACK_WARNING", "TOTAL_OF_REQUESTS", "EVAL_SUGGESTED", "COMMAND_SUGGESTED",
+  "BOOLEAN_THREADS_SUGGESTED", "TEMPFILE_ORACLE_ANNOUNCED", "TEMPFILE_TIME_FALLBACK_ANNOUNCED", "HPP_POSITION_SAID", "PKI_FAILURE_SAID", "REPLAY_NOTICES_SAID", "STDIN_PARSING", "TAMPER_WARNING_SHOWN", "TIME_RELATED_ATTACK_WARNING", "TOTAL_OF_REQUESTS", "EVAL_SUGGESTED", "COMMAND_SUGGESTED",
   "VALIDATION_RUN", "VISIBLE_CONNECTION_ERRORS", "WARNED_HTTP_ERROR_CODES",
   # Set by the connection to whichever target is in hand, before this reset can be reached.
   "HOSTNAME", "SCHEME", "TARGET_NETLOC", "TARGET_URL",

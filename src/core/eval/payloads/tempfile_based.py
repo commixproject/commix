@@ -122,4 +122,53 @@ def fp_result_alter_interpreter(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_
   condition = str(ascii_char) + "==" + settings.EVAL_GRAMMAR.to_number(_contents(OUTPUT_TEXTFILE))
   return _conditional_sleep(condition, timesec, separator)
 
+"""
+Everything below reads the same created file back through a calibrated oracle instead of a delay -
+nothing here waits, so what a condition changes is read off the page itself. The condition is put the
+same way 'halt()' already puts one for this sink's own boolean-based technique: true leaves the page
+as it was building, false stops it where it stood.
+"""
+
+"""
+Every boundary this sink can carry a statement on can carry this - the language answers the same
+question whichever separator broke into its string.
+"""
+def oracle_supported(separator):
+  return True
+
+"""
+Write a command's output into the created file once - nothing here asks a question, so nothing here
+waits.
+"""
+def oracle_write(separator, cmd, OUTPUT_TEXTFILE):
+  return _write(cmd, OUTPUT_TEXTFILE) + _end(separator)
+
+"""
+A question with a known answer, for telling whether this target's own oracle can tell a length that
+matches from one that does not - written and read back in the one expression, since the file's
+contents are not yet known to be readable at all.
+"""
+def oracle_decision(separator, TAG, output_length, OUTPUT_TEXTFILE, holds=True):
+  expected = str(output_length if holds else output_length + 1)
+  condition = settings.EVAL_GRAMMAR.length(_contents(OUTPUT_TEXTFILE)) + "==" + expected
+  payload = settings.EVAL_GRAMMAR.sequence(_write("echo " + TAG, OUTPUT_TEXTFILE), settings.EVAL_GRAMMAR.halt(condition))
+  return payload + _end(separator)
+
+"""
+How many bytes the created file holds, asked as a comparison so that it can be bisected - the file's
+length rather than the command's, read without running the command again.
+"""
+def oracle_get_length(separator, OUTPUT_TEXTFILE, candidate_length, operator="-ge"):
+  condition = settings.EVAL_GRAMMAR.length(_contents(OUTPUT_TEXTFILE)) + COMPARISON.get(operator, ">=") + str(candidate_length)
+  return settings.EVAL_GRAMMAR.halt(condition) + _end(separator)
+
+"""
+Whether the ordinal of the created file's Nth byte is at or above this one, which is what bisects it
+- the language indexes the file's own text, so nothing here rewrites it as ordinals first.
+"""
+def oracle_get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, operator="-le"):
+  ordinal = settings.EVAL_GRAMMAR.ordinal(_contents(OUTPUT_TEXTFILE), num_of_chars - 1)
+  condition = str(ascii_char) + COMPARISON.get(operator, "<=") + ordinal
+  return settings.EVAL_GRAMMAR.halt(condition) + _end(separator)
+
 # eof

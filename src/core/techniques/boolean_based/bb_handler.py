@@ -61,13 +61,26 @@ def confirm(channel):
   return holds is True and fails is False
 
 """
+One question, asked again once before being given up on - a page that reads as neither true nor
+false is more often a transient hiccup, concurrent requests contending for the same target resource
+especially, than a real absence of an answer. The same payload both times, not a freshly-built one:
+rebuilding it would count as a second step to a caller that renders one dot per step, and this is
+still the one step retrying.
+"""
+def _ask(channel, payload):
+  answer = channel.ask(payload)
+  if answer is None:
+    answer = channel.ask(payload)
+  return answer
+
+"""
 The largest N the answer is still yes for, found by halving rather than by counting.
 """
 def _bisect(channel, question, low, high):
   found = None
   while low <= high:
     middle = (low + high) // 2
-    answer = channel.ask(question(middle))
+    answer = _ask(channel, question(middle))
     if answer is None:
       return None
     if answer:
@@ -79,10 +92,15 @@ def _bisect(channel, question, low, high):
 
 """
 How many bytes the command's output is.
+
+Bracketed by doubling first, rather than bisecting the whole of '--maxlen' outright: a short output
+is then found in about as many questions as its own length takes to double past, not in however many
+the ceiling itself would need, and what the search costs reads as the answer's own size instead of a
+constant no output's length would ever explain.
 """
-def output_length(channel, cmd, ceiling=None):
-  ceiling = ceiling or settings.MAXLEN
-  payloads = checks.boolean_based_payloads()
+def output_length(channel, cmd, ceiling=None, payloads=None):
+  ceiling = int(ceiling or settings.MAXLEN)
+  payloads = payloads or checks.boolean_based_payloads()
   info_msg = "Retrieving the length of execution output"
   info_msg += "." if settings.VERBOSITY_LEVEL != 0 else ", please wait..."
   settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_info_msg(info_msg))
@@ -92,7 +110,18 @@ def output_length(channel, cmd, ceiling=None):
     if settings.VERBOSITY_LEVEL == 0:
       settings.print_data_to_stdout(".")
     return asked
-  length = _bisect(channel, question, 0, int(ceiling))
+  low, high = 0, 1
+  while high < ceiling:
+    answer = _ask(channel, question(high))
+    if answer is None:
+      return ""
+    if not answer:
+      break
+    low = high
+    high *= 2
+  else:
+    high = ceiling
+  length = _bisect(channel, question, low, high)
   if length and settings.VERBOSITY_LEVEL == 0:
     settings.print_data_to_stdout(" (done)")
   if length and length > 1:
@@ -102,8 +131,8 @@ def output_length(channel, cmd, ceiling=None):
 """
 One byte of the output, found by bisecting its ordinal.
 """
-def _byte_at(channel, cmd, position):
-  payloads = checks.boolean_based_payloads()
+def _byte_at(channel, cmd, position, payloads=None):
+  payloads = payloads or checks.boolean_based_payloads()
   question = lambda candidate: payloads.get_char(channel.separator, cmd, position, candidate, operator="-le")
   return _bisect(channel, question, min(settings.CHAR_POOL_MULTI), max(settings.CHAR_POOL_MULTI))
 
@@ -119,32 +148,34 @@ on another's, and nothing here is being timed, so requests that overlap cost the
 That is what the time-related techniques cannot do: for them, overlapping requests are the
 measurement.
 """
-def retrieve(channel, cmd, length=None):
-  length = output_length(channel, cmd) if length is None else length
-  if not length:
-    return ""
-  positions = list(range(1, length + 1))
+def retrieve(channel, cmd, length=None, payloads=None):
   workers = settings.THREADS if (settings.THREADS > 1 and _THREADS_SUPPORTED) else 1
-  base = "Retrieving the execution output"
-  # Worth saying here and nowhere else: every byte is a request and none of them is being timed, so
-  # asking for several at once costs the answer nothing - which is not true of the other blind ones.
-  if workers == 1 and length > 1 and not settings.BOOLEAN_THREADS_SUGGESTED:
+  # Said before either un-timed phase below spends a request - the length search included, not
+  # only the byte-by-byte one - since only there is it still useful advice.
+  if workers == 1 and not settings.BOOLEAN_THREADS_SUGGESTED:
     settings.BOOLEAN_THREADS_SUGGESTED = True
     info_msg = "Nothing here is timed, so '--threads' asks for several bytes at once without costing accuracy."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  length = output_length(channel, cmd, payloads=payloads) if length is None else length
+  if not length:
+    return ""
+  positions = list(range(1, length + 1))
+  base = "Retrieving the execution output"
   resolved, lock = {}, threading.Lock()
   eta_bar = progress.ProgressBar(maxvalue=length) if menu.options.eta else None
   if eta_bar is None and length > 1:
     settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_info_msg(base + ": "))
 
-  # What has been resolved from the first byte onward - a later byte is held back until the ones
-  # before it are in, so the line only ever grows and never shows a hole.
+  # Assembled in position order once retrying is done - a position that stayed unresolved is marked
+  # rather than dropped, the same way the time-related techniques mark theirs: a silently shorter
+  # output is indistinguishable from a real value.
   def _so_far():
     out = ""
     for position in positions:
-      if resolved.get(position) is None:
+      ascii_char = resolved.get(position)
+      if position not in resolved:
         break
-      out += chr(resolved[position])
+      out += settings.UNRESOLVED_CHAR if ascii_char is None else chr(ascii_char)
     return out
 
   # Rendered the way the time-related techniques render theirs, and for the same reasons: a byte not
@@ -174,17 +205,41 @@ def retrieve(channel, cmd, length=None):
         settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_info_msg(base + ": " + _display()))
 
   def _resolve(position):
-    resolved[position] = _byte_at(channel, cmd, position)
+    resolved[position] = _byte_at(channel, cmd, position, payloads=payloads)
     _note()
 
   if workers == 1:
     for position in positions:
       _resolve(position)
-      if resolved[position] is None:
-        break
   else:
     with concurrent.futures.ThreadPoolExecutor(max_workers=min(workers, length)) as executor:
       list(executor.map(_resolve, positions))
+
+  # A position with no answer is usually a transient miss - a lagging response, or one worker's
+  # request read as another's - so each one is asked again, alone, whether or not the first pass was
+  # threaded. Every position failing is a systematic failure instead, and asking the same oracle
+  # twice would only spend the requests again.
+  failed_positions = [position for position in positions if resolved.get(position) is None]
+  if failed_positions and len(failed_positions) < len(positions):
+    info_msg = "Re-attempting " + str(len(failed_positions)) + " character"
+    info_msg += "s"[len(failed_positions) == 1:] + " that returned no answer."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    if workers == 1:
+      for position in failed_positions:
+        _resolve(position)
+    else:
+      with concurrent.futures.ThreadPoolExecutor(max_workers=min(workers, len(failed_positions))) as executor:
+        list(executor.map(_resolve, failed_positions))
+    failed_positions = [position for position in failed_positions if resolved.get(position) is None]
+
+  if failed_positions:
+    settings.INCOMPLETE_OUTPUT = True
+    warn_msg = str(len(failed_positions)) + " of " + str(len(positions)) + " character"
+    warn_msg += "s"[len(positions) == 1:] + " could not be extracted (no answer was ever read for "
+    warn_msg += ("them" if len(failed_positions) != 1 else "it") + ", on a second attempt either) - "
+    warn_msg += ("they are" if len(failed_positions) != 1 else "it is") + " marked '"
+    warn_msg += settings.UNRESOLVED_CHAR + "' in the retrieved output below."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
   output = _so_far()
   if settings.VERBOSITY_LEVEL == 0:

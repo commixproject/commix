@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Revised: The file-based technique's temporary-directory variant now reads the created file through a calibrated Boolean-based oracle where possible, falling back to delay-based reading.
 * Added: New option `--auth-file` for authenticating with a client certificate during the TLS handshake instead of using authentication headers.
 * Added: New switch `--hpp` for sending a tested parameter twice, placing the payload in the occurrence read by the target and a filter-accepted value in the one inspected.
 * Added: New option `--openapi` for deriving targets from an OpenAPI (Swagger) description, with `--openapi-base` for a specification that names no host of its own and `--openapi-tags` for taking only part of a large API.

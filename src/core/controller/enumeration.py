@@ -162,6 +162,18 @@ def single_os_cmd_exec(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
 Check the defined options
 """
 def do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique):
+  # Said before the first of these asks the target anything, not after - whether every fetch below
+  # is un-timed is already settled by now, from detection, so there is no need to wait for one of
+  # them to find out for itself.
+  untimed = technique == settings.INJECTION_TECHNIQUE.BOOLEAN_BASED
+  if not untimed and technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
+    from src.core.techniques.tempfile_based import tfb_handler as oracle_handler
+    untimed = oracle_handler.oracle_active(url, vuln_parameter, separator)
+  if untimed and settings.THREADS <= 1 and not settings.BOOLEAN_THREADS_SUGGESTED:
+    settings.BOOLEAN_THREADS_SUGGESTED = True
+    info_msg = "Nothing here is timed, so '--threads' asks for several bytes at once without costing accuracy."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
   # Check if PowerShell is enabled.
   if not menu.options.ps_version and settings.TARGET_OS == settings.OS.WINDOWS:
     checks.ps_check()

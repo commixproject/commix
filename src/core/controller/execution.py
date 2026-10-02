@@ -80,6 +80,14 @@ def make_simple_execute_cmd(injector, separator, maxlen, TAG, prefix, suffix, wh
   def execute_cmd(cmd):
     if technique in (settings.INJECTION_TECHNIQUE.OOB, settings.INJECTION_TECHNIQUE.BOOLEAN_BASED):
       return injector.injection(separator, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter)
+    # Tried first here too - every caller built on this (hostname, '--os-cmd', file read/write,
+    # '--all') otherwise reached straight past the interactive shell's own oracle-first check and
+    # into the delay-based reading beneath it.
+    if technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED and not results_based_injector:
+      from src.core.techniques.tempfile_based import tfb_handler as oracle_handler
+      oracle_shell = oracle_handler.oracle_extract(separator, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, TAG, cmd)
+      if oracle_shell is not None:
+        return postprocess_time(oracle_shell)
     if settings.TIME_RELATED_ATTACK and not results_based_injector:
       try:
         if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:

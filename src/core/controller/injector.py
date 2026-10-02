@@ -309,8 +309,6 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
       lower_limit = checks.current_delay_threshold()
       if lower_limit is not None:
         _adjust_time_delay(exec_time, lower_limit)
-    if settings.VERBOSITY_LEVEL == 0:
-      settings.print_data_to_stdout(".")
     return decision
 
   # Told apart by the difference between a condition that must hold and one that cannot, rather
@@ -486,6 +484,11 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
       """
       def _length_delayed_confirmed(candidate):
         first = _length_delayed(candidate)
+        # One dot for the step, however many of the up-to-three questions above it took to answer -
+        # a caller reading the dot count as the search's own size would otherwise see a step that
+        # needed confirming cost three times what an identical, uncontested one cost.
+        if settings.VERBOSITY_LEVEL == 0:
+          settings.print_data_to_stdout(".")
         if not settings.JITTER_SEEN:
           return first
         if first == _length_delayed(candidate):
@@ -553,7 +556,11 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
             same_mechanism_ok = votes.count(True) >= 2
           else:
             same_mechanism_ok = _boundary_holds(candidate)
-          return same_mechanism_ok and _exact_length_confirmed(candidate)
+          result = same_mechanism_ok and _exact_length_confirmed(candidate)
+          # One dot for the validation attempt, whatever it cost internally to reach.
+          if settings.VERBOSITY_LEVEL == 0:
+            settings.print_data_to_stdout(".")
+          return result
 
         revalidations = 0
         original_timesec = timesec
@@ -593,7 +600,10 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
       # Experimental interpreter path only - its oracle is still exact-match, not bisectable.
       for candidate_length in range(int(minlen), int(maxlen)):
         payload = payloads.cmd_execution_alter_interpreter(separator, cmd, candidate_length, OUTPUT_TEXTFILE, timesec, http_request_method)
-        if _measure_length(payload):
+        found = _measure_length(payload)
+        if settings.VERBOSITY_LEVEL == 0:
+          settings.print_data_to_stdout(".")
+        if found:
           output_length = candidate_length
           found_chars = True
           break
