@@ -45,21 +45,21 @@ def answer(payload, prefix, suffix, whitespace, http_request_method, url, vuln_p
 """
 The page a question came back with, for learning what a yes and a no look like on this target.
 
-The boundary comes back as it was actually sent, which is not always as it was passed in: the
-parameter's own value is folded into the prefix on the way out, and a finding stored without it
-replays as a payload that replaces the value instead of following it.
+The payload comes back as it was actually sent, which is not always as it was passed in: the
+parameter's own value is folded into it on the way out, and a finding reported without that fold
+reads as a payload that replaces the value instead of following it.
 """
 def page_of(payload, prefix, suffix, whitespace, http_request_method, url, vuln_parameter):
-  response, vuln_parameter, _, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
+  response, vuln_parameter, sent_payload, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
   if response is False or response is None:
-    return None, None, vuln_parameter, prefix, suffix
+    return None, None, vuln_parameter, prefix, suffix, sent_payload
   try:
     # The payload's own text is taken back out of the answer: a page that echoes what it was given
     # differs between two questions because of the questions, not because of what ran.
     page = checks.remove_reflected_values(checks.decode_page_body(response.read(), response), payload)
-    return page, response.getcode(), vuln_parameter, prefix, suffix
+    return page, response.getcode(), vuln_parameter, prefix, suffix, sent_payload
   except Exception:
-    return None, None, vuln_parameter, prefix, suffix
+    return None, None, vuln_parameter, prefix, suffix, sent_payload
 
 """
 Run a command and hand back what it printed, read a byte at a time off the page.

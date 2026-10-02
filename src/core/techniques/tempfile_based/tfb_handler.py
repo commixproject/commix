@@ -90,8 +90,8 @@ def _calibrate_file_oracle(separator, prefix, suffix, whitespace, http_request_m
       continue
     # Unresolved on the way in - like the delay-based confirmation this replaces, the parameter is
     # whatever the first request lands on, discovered rather than given.
-    page_true, code_true, vuln_parameter, prefix, suffix = bb_injector.page_of(payload_true, prefix, suffix, whitespace, http_request_method, url, vuln_parameter)
-    page_false, code_false, vuln_parameter, prefix, suffix = bb_injector.page_of(payload_false, prefix, suffix, whitespace, http_request_method, url, vuln_parameter)
+    page_true, code_true, vuln_parameter, prefix, suffix, reported_payload_true = bb_injector.page_of(payload_true, prefix, suffix, whitespace, http_request_method, url, vuln_parameter)
+    page_false, code_false, vuln_parameter, prefix, suffix, _ = bb_injector.page_of(payload_false, prefix, suffix, whitespace, http_request_method, url, vuln_parameter)
     # A false answer that reads exactly like the unmodified page means the payload changed nothing
     # at all, whatever the two probes look like beside each other.
     if checks.comparable_page(page_false or "") == checks.comparable_page(settings.ORIGINAL_PAGE or ""):
@@ -108,10 +108,10 @@ def _calibrate_file_oracle(separator, prefix, suffix, whitespace, http_request_m
     again, vuln_parameter = bb_injector.answer(payload_true, prefix, suffix, whitespace, http_request_method, url, vuln_parameter)
     if again is not True:
       continue
-    return bb_handler.Channel(separator, prefix, suffix, whitespace, http_request_method, url, vuln_parameter), vuln_parameter
+    return bb_handler.Channel(separator, prefix, suffix, whitespace, http_request_method, url, vuln_parameter), vuln_parameter, reported_payload_true
 
   settings.BOOLEAN_PRINTED_STATE = False
-  return None, vuln_parameter
+  return None, vuln_parameter, None
 
 """
 Whether this target and this separator are ones the oracle could apply to at all - the same
@@ -147,7 +147,7 @@ def _channel_for(separator, prefix, suffix, whitespace, http_request_method, url
   cache_key = (url, vuln_parameter, separator)
   channel = _ORACLE_CHANNEL_CACHE.get(cache_key)
   if channel is None and cache_key not in _ORACLE_CHANNEL_CACHE:
-    channel, _ = _calibrate_file_oracle(separator, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, TAG)
+    channel, _, _ = _calibrate_file_oracle(separator, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, TAG)
     _ORACLE_CHANNEL_CACHE[cache_key] = channel
     _announce_channel(channel)
   return channel
@@ -168,14 +168,16 @@ def try_oracle_confirm(separator, prefix, suffix, whitespace, http_request_metho
   previous = settings.TIME_RELATED_ATTACK
   settings.TIME_RELATED_ATTACK = False
   try:
-    channel, vuln_parameter = _calibrate_file_oracle(separator, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, TAG)
+    channel, vuln_parameter, reported_payload = _calibrate_file_oracle(separator, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, TAG)
     _announce_channel(channel)
     if not channel:
       return None, vuln_parameter
     # Seeded here so extraction, later, finds this same channel already calibrated instead of
     # calibrating a second time now that the parameter it landed on is known.
     _ORACLE_CHANNEL_CACHE[(url, vuln_parameter, separator)] = channel
-    return _oracle_payloads().oracle_decision(separator, TAG, len(TAG), OUTPUT_TEXTFILE, holds=True), vuln_parameter
+    # The value actually sent, folded in during calibration - a fresh, unfolded recomputation here
+    # would report a payload that replaces the parameter's value instead of following it.
+    return reported_payload, vuln_parameter
   finally:
     settings.TIME_RELATED_ATTACK = previous
 

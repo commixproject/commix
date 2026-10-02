@@ -1266,7 +1266,7 @@ def _perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http
   # Check if defined custom header with "INJECT_HERE" tag
   elif settings.CUSTOM_HEADER_INJECTION:
     if not vuln_parameter:
-      vuln_parameter = parameters.specify_custom_header_parameter("")
+      vuln_parameter = parameters.specify_custom_header_parameter(settings.CUSTOM_HEADER_NAME.lower())
     exec_time = custom_header_injection(url, payload, http_request_method)
   # Check if defined user-agent with "INJECT_HERE" tag
   elif (menu.options.agent and settings.INJECT_TAG in menu.options.agent) or settings.USER_AGENT_INJECTION:

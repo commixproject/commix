@@ -726,8 +726,8 @@ def do_boolean_based_process(url, timesec, filename, http_request_method, inject
     if not payload:
       return None
     vuln_parameter = ""
-    page_true, code_true, vuln_parameter, prefix, suffix = injector.page_of(payload, prefix, suffix, whitespace, http_request_method, url, vuln_parameter)
-    page_false, code_false, vuln_parameter, prefix, suffix = injector.page_of(payloads.decision(separator, TAG, len(TAG), holds=False), prefix, suffix, whitespace, http_request_method, url, vuln_parameter)
+    page_true, code_true, vuln_parameter, prefix, suffix, reported_payload = injector.page_of(payload, prefix, suffix, whitespace, http_request_method, url, vuln_parameter)
+    page_false, code_false, vuln_parameter, prefix, suffix, _ = injector.page_of(payloads.decision(separator, TAG, len(TAG), holds=False), prefix, suffix, whitespace, http_request_method, url, vuln_parameter)
     if not checks.boolean_oracle_given():
       # A false answer that reads exactly like the page the parameter's own value returns means the
       # payload changed nothing at all, whatever the two probes look like beside each other.
@@ -756,7 +756,7 @@ def do_boolean_based_process(url, timesec, filename, http_request_method, inject
     if again is not True:
       checks.unexploitable_point()
       return None
-    return payload, vuln_parameter, prefix, suffix
+    return reported_payload, vuln_parameter, prefix, suffix
 
   """
   A stored finding says where the injection is, but not what this target's pages look like - and
