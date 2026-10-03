@@ -405,7 +405,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "181"
+REVISION = "182"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1739,6 +1739,7 @@ TAMPER_SCRIPTS = {
                   "ansiquote": False,
                   "ansiquoteoctal": False,
                   "space2ifsraw": False,
+                  "unicodequote": False,
                   "cmd2wildcard": False,
                   "cmd2var": False,
                   "doublequotes": False,
@@ -1842,6 +1843,11 @@ INCOMPATIBLE_TAMPER_SCRIPTS = [
                   ("ansiquoteoctal", "dollarstars"),
                   ("ansiquoteoctal", "singlequotes"),
                   ("ansiquoteoctal", "uninitializedvariable"),
+                  # A literal "'" is the delimiter both scripts need - one is quoting with it, the
+                  # other is folding it away into a character no delimiter is read from.
+                  ("ansiquote", "unicodequote"),
+                  ("ansiquoteoctal", "unicodequote"),
+                  ("singlequotes", "unicodequote"),
                   # "''" is literal inside the double-quoted "tr" ranges that "randomcase" builds.
                   ("randomcase", "singlequotes"),
                   # Both name the same function in the same call, so the second finds the name of
