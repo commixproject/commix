@@ -966,6 +966,12 @@ detection.add_option("--skip-calc",
                 default=False,
                 help="Skip the mathematic calculation during the detection phase.")
 
+detection.add_option("--skip-subst",
+                action="store_true",
+                dest="skip_subst",
+                default=False,
+                help="Confirm the time-based technique with a plain, uncomputed delay, instead of command substitution.")
+
 detection.add_option("--skip-empty",
                 action="store_true",
                 dest="skip_empty",

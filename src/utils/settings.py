@@ -405,7 +405,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "183"
+REVISION = "184"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1979,6 +1979,10 @@ CHECK_FOR_UPDATES_ON_START = True
 # Skip the mathematic calculation (Detection Phase)
 SKIP_CALC = False
 
+# Confirm the time-based technique with a plain, uncomputed delay - no '$(...)' or backtick at all -
+# for a target whose filter blocks command substitution outright but still lets a separator through.
+SKIP_SUBST = False
+
 USE_BACKTICKS = False
 
 METASPLOIT_ERROR_MSG =  "You need to have Metasploit installed. "
@@ -2600,7 +2604,7 @@ RUN_WIDE_STATE = frozenset((
   "LPORT", "MAXLEN", "MAX_RETRIES", "METASPLOIT_PATH", "OOB_IGNORE_TIMEOUT", "OOB_POLL_INTERVAL",
   "OOB_PORT", "OOB_SCHEME", "OOB_SERVER", "OOB_TOKEN", "OOB_TRANSPORT", "PERFORM_CRACKING",
   "POST_CUSTOM_INJECTION_MARKER_CHAR", "PRE_CUSTOM_INJECTION_MARKER_CHAR", "RAW_HTTP_HEADERS",
-  "REPORT_JSON", "RHOST", "SKIP_CALC", "SKIP_PARAMETERS_LIST", "SKIP_TECHNIQUES", "SRVPORT",
+  "REPORT_JSON", "RHOST", "SKIP_CALC", "SKIP_SUBST", "SKIP_PARAMETERS_LIST", "SKIP_TECHNIQUES", "SRVPORT",
   "THREADS", "TIMEOUT", "TMP_PATH", "TOR_HTTP_PROXY_PORT", "URIPATH", "URL_PARAM_DELIMITER",
   "URL_RELOAD", "USER_DEFINED_PHP_DIR", "USER_DEFINED_PYTHON_DIR", "USER_DEFINED_PYTHON_INTERPRETER",
   "VERBOSITY_LEVEL", "WIN_PHP_DIR", "WIN_PYTHON_INTERPRETER",

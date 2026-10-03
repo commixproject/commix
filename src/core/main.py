@@ -551,6 +551,10 @@ def main(filename, url, http_request_method):
     if menu.options.skip_calc:
       settings.SKIP_CALC = True
 
+    # Confirm the time-based technique with a plain, uncomputed delay (Detection phase).
+    if menu.options.skip_subst:
+      settings.SKIP_SUBST = True
+
     # Target URL reload.
     if menu.options.url_reload and menu.options.data:
       settings.URL_RELOAD = True

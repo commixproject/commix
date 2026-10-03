@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New option `--skip-subst` that confirms the time-based technique with a plain, uncomputed delay, instead of command substitution.
 * Added: New tamper script `cmd2redir.py` that rewrites a user-supplied `command path` as `command<>path`, folding away the one space between them for a target that lets no whitespace through at all.
 * Added: New tamper script `unicodequote.py` that replaces single quotes with the fullwidth apostrophe (`U+FF07`), for filters that strip a literal quote before a later Unicode normalization step folds it back into one.
 * Added: New tamper script `space2ifsraw.py` that replaces spaces with `$IFS$9` (no braces, no quotes), for filters that block both at once.
