@@ -405,7 +405,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "182"
+REVISION = "183"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1742,6 +1742,7 @@ TAMPER_SCRIPTS = {
                   "unicodequote": False,
                   "cmd2wildcard": False,
                   "cmd2var": False,
+                  "cmd2redir": False,
                   "doublequotes": False,
                   "singlequotes": False,
                   "caret": False,
@@ -1807,8 +1808,11 @@ WAF_ESCALATION_THRESHOLD = 1
 WAF_EVASION_ESCALATED = False
 
 # Scripts that rewrite the user's command in place, in the order their rewrites are applied. The
-# paths go first, so that what the name-splitting script is handed is a name and not a glob.
-COMMAND_REWRITERS = ("cmd2wildcard", "cmd2var")
+# paths go first, so that what the name-splitting script is handed is a name and not a glob; the
+# space-folding script goes last, since splitting the name across variables (or wildcarding it,
+# though a bare name carries no path to glob) leaves nothing after it that still reads as one of
+# its recognised command names, so it is left to fold away whatever space is still there to find.
+COMMAND_REWRITERS = ("cmd2wildcard", "cmd2var", "cmd2redir")
 
 # Scripts asking more of the target's shell than POSIX gives, and what each one asks for. A run
 # carrying one of these and finding nothing may have found nothing because the shell is a plain one.

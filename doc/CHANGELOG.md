@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New tamper script `cmd2redir.py` that rewrites a user-supplied `command path` as `command<>path`, folding away the one space between them for a target that lets no whitespace through at all.
 * Added: New tamper script `unicodequote.py` that replaces single quotes with the fullwidth apostrophe (`U+FF07`), for filters that strip a literal quote before a later Unicode normalization step folds it back into one.
 * Added: New tamper script `space2ifsraw.py` that replaces spaces with `$IFS$9` (no braces, no quotes), for filters that block both at once.
 * Added: New tamper script `ansiquoteoctal.py` that rewrites command names and paths as ANSI-C quoted octal escapes, for filters that block every letter (including the 'x' `ansiquote`'s hex escapes need).
