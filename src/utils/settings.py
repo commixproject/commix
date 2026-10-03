@@ -405,7 +405,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "180"
+REVISION = "181"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1738,6 +1738,7 @@ TAMPER_SCRIPTS = {
                   "space2brace": False,
                   "ansiquote": False,
                   "ansiquoteoctal": False,
+                  "space2ifsraw": False,
                   "cmd2wildcard": False,
                   "cmd2var": False,
                   "doublequotes": False,
