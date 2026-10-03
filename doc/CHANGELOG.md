@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New tamper script `ansiquoteoctal.py` that rewrites command names and paths as ANSI-C quoted octal escapes, for filters that block every letter (including the 'x' `ansiquote`'s hex escapes need).
 * Revised: The file-based technique's temporary-directory variant now reads the created file through a calibrated Boolean-based oracle where possible, falling back to delay-based reading.
 * Added: New option `--auth-file` for authenticating with a client certificate during the TLS handshake instead of using authentication headers.
 * Added: New switch `--hpp` for sending a tested parameter twice, placing the payload in the occurrence read by the target and a filter-accepted value in the one inspected.

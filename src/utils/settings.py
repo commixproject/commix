@@ -405,7 +405,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "179"
+REVISION = "180"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1737,6 +1737,7 @@ TAMPER_SCRIPTS = {
                   "space2vtab": False,
                   "space2brace": False,
                   "ansiquote": False,
+                  "ansiquoteoctal": False,
                   "cmd2wildcard": False,
                   "cmd2var": False,
                   "doublequotes": False,
@@ -1811,7 +1812,8 @@ COMMAND_REWRITERS = ("cmd2wildcard", "cmd2var")
 # carrying one of these and finding nothing may have found nothing because the shell is a plain one.
 SHELL_FEATURE_TAMPERS = {
                   "space2brace": "brace expansion",
-                  "ansiquote": "ANSI-C quoting"
+                  "ansiquote": "ANSI-C quoting",
+                  "ansiquoteoctal": "ANSI-C quoting"
 }
 
 INCOMPATIBLE_TAMPER_SCRIPTS = [
@@ -1832,6 +1834,13 @@ INCOMPATIBLE_TAMPER_SCRIPTS = [
                   ("ansiquote", "dollarstars"),
                   ("ansiquote", "singlequotes"),
                   ("ansiquote", "uninitializedvariable"),
+                  # Two encodings of the same words, over the same characters.
+                  ("ansiquote", "ansiquoteoctal"),
+                  ("ansiquoteoctal", "backslashes"),
+                  ("ansiquoteoctal", "dollaratsigns"),
+                  ("ansiquoteoctal", "dollarstars"),
+                  ("ansiquoteoctal", "singlequotes"),
+                  ("ansiquoteoctal", "uninitializedvariable"),
                   # "''" is literal inside the double-quoted "tr" ranges that "randomcase" builds.
                   ("randomcase", "singlequotes"),
                   # Both name the same function in the same call, so the second finds the name of

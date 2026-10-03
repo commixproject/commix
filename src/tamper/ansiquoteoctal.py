@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+# encoding: UTF-8
+
+"""
+This file is part of Commix Project (https://commixproject.com).
+Copyright (c) 2014-2026 Anastasios Stasinopoulos (@ancst).
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+For more see the file 'readme/COPYING' for copying permission.
+"""
+
+import re
+from src.utils import settings
+from src.core.controller import checks
+
+r"""
+About: Rewrites the command names and paths in a given payload as ANSI-C quoted octal ($'\143\141\164').
+Notes: This tamper script works against target(s) whose shell reads ANSI-C quoting (e.g. 'bash',
+       'ksh', 'zsh'). Unlike 'ansiquote', the escape itself spells no letter - hex needs the 'x' of
+       '\x63', which a filter blocking every letter would catch as readily as the word it hides.
+References: [1] https://www.yeswehack.com/dojo/dojo-ctf-challenge-winners-36
+"""
+
+__tamper__ = "ansiquoteoctal"
+__priority__ = settings.PRIORITY.HIGH
+
+def dependencies():
+  """
+  Why this script cannot be applied to the target at hand, or nothing where it can.
+
+  The escapes are the whole point of the script, and an evaluated string is read by the language
+  doing the evaluating before ever reaching a shell - which spends '\\143' itself, leaving the
+  shell a payload that says something else.
+  """
+  return checks.tamper_dep_eval_incompatible(__tamper__) or checks.tamper_dep_unix_only(__tamper__)
+
+# A word worth hiding: a command name or a path, which is what a signature is written against.
+ANSI_QUOTE_WORD = r"(?<![\w$'\"\\{#=/.-])(/?[A-Za-z][\w.-]*(?:/[\w.-]+)*|/[\w.-]+(?:/[\w.-]+)*)(?![\w=.'\"-])"
+
+if not settings.TAMPER_SCRIPTS[__tamper__]:
+  settings.TAMPER_SCRIPTS[__tamper__] = True
+
+def _ansi_quote(match):
+  """
+  One word written as the octal the shell reads back as that word, or left as it was.
+
+  A word the shell has to read exactly as it was written is left alone, for the reason
+  'tamper_word_kept' gives. Nothing else here needs to survive being spelled differently, because
+  the shell spends the quoting before anything reads the word.
+  """
+  word = match.group(0)
+  if checks.tamper_word_kept(word, match.string[:match.start()]):
+    return word
+  return "$'" + "".join("\\%03o" % ord(char) for char in word) + "'"
+
+# Every command name and path in one span of shell code, written as octal.
+def _ansi_quote_words(text, nested):
+  return re.sub(ANSI_QUOTE_WORD, _ansi_quote, text)
+
+# Hand the words over as octal, for the target's shell to read back as the words they were.
+def tamper(payload):
+  # A target settled as Windows after this script was accepted: 'cmd.exe' has no ANSI-C quoting.
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    return payload
+  return checks.tamper_shell_spans(payload, _ansi_quote_words)
+
+# eof
