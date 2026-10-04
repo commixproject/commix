@@ -302,7 +302,7 @@ def do_process(url, http_request_method):
     content = checks.process_page_content(response, action="decode")
     match = re.search(r"(?si)<html[^>]*>(.+)</html>", content)
     if match:
-      content = "<html>%s</html>" % match.group(1)
+      content = "<html>" + match.group(1) + "</html>"
     soup = BeautifulSoup(content)
     tags = soup('a')
     if not tags:

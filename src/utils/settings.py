@@ -46,7 +46,7 @@ def sys_argv_checks():
       if tamper_index is None:
         tamper_index = i if '=' in sys.argv[i] else (i + 1 if i + 1 < len(sys.argv) and not sys.argv[i + 1].startswith('-') else None)
       else:
-        sys.argv[tamper_index] = "%s,%s" % (sys.argv[tamper_index], sys.argv[i].split('=')[1] if '=' in sys.argv[i] else (sys.argv[i + 1] if i + 1 < len(sys.argv) and not sys.argv[i + 1].startswith('-') else ""))
+        sys.argv[tamper_index] = sys.argv[tamper_index] + "," + (sys.argv[i].split('=')[1] if '=' in sys.argv[i] else (sys.argv[i + 1] if i + 1 < len(sys.argv) and not sys.argv[i + 1].startswith('-') else ""))
         sys.argv[i] = ""
 
 # argv checks
@@ -405,7 +405,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "187"
+REVISION = "188"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -991,7 +991,7 @@ ARCH_32 = ("i386", "i486", "i586", "i686", "x86", "armv6l", "armv7l", "arm", "pp
 FILE_READ = "cat "
 # Used by "download", so the file's exact bytes survive.
 FILE_READ_B64 = "base64 <"
-WIN_FILE_READ_B64 = "powershell.exe -c \"[Convert]::ToBase64String([IO.File]::ReadAllBytes('{}'))\""
+WIN_FILE_READ_B64 = "powershell.exe -c \"[Convert]::ToBase64String([IO.File]::ReadAllBytes('"
 FILE_WRITE_OPERATOR = " >"
 FILE_APPEND_OPERATOR = " >>"
 WIN_FILE_WRITE_OPERATOR = "powershell.exe Set-Content "

@@ -1104,7 +1104,8 @@ Truncate long option strings so they don't wrap onto a second line.
 def truncate_option_strings(self, *args):
     formatted = parser.formatter._format_option_strings(*args)
     if len(formatted) > settings.MAX_OPTION_LENGTH:
-        formatted = ("%%.%ds.." % (settings.MAX_OPTION_LENGTH - parser.formatter.indent_increment)) % formatted
+        limit = settings.MAX_OPTION_LENGTH - parser.formatter.indent_increment
+        formatted = formatted[:limit] + ".."
     return formatted
 
 parser.formatter._format_option_strings = parser.formatter.format_option_strings

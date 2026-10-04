@@ -50,7 +50,7 @@ def split_post_data(data):
 
     # The extension is ignored by the target, but it is one more thing an inspecting device must parse.
     extension = "".join(random.choice(string.ascii_letters + string.digits) for _ in range(5))
-    chunked_data.append("%x;%s%s" % (chunk_size, extension, settings.END_LINE.CRLF))
+    chunked_data.append(hex(chunk_size)[2:] + ";" + extension + settings.END_LINE.CRLF)
     chunked_data.append(candidate + settings.END_LINE.CRLF)
 
   chunked_data.append("0" + settings.END_LINE.CRLF + settings.END_LINE.CRLF)

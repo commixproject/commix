@@ -1683,11 +1683,11 @@ def do_check(url, http_request_method, filename):
           percent = checks.page_text_percent(settings.ORIGINAL_PAGE)
           if settings.DYNAMIC_MARKINGS:
             err_msg += " You can give it a go with the switch '--text-only', where the target page"
-            err_msg += " has a low percentage of textual content (~" + ("%.2f" % percent)
+            err_msg += " has a low percentage of textual content (~" + str(round(percent, 2))
             err_msg += "% of page content is text)."
           elif percent < settings.LOW_TEXT_PERCENT:
             err_msg += " Please retry with the switch '--text-only', as this case looks like a"
-            err_msg += " candidate for it: a low percentage of textual content (~" + ("%.2f" % percent)
+            err_msg += " candidate for it: a low percentage of textual content (~" + str(round(percent, 2))
             err_msg += "% of page content is text), together with no parameter found to be dynamic."
         if settings.MULTI_TARGETS:
           err_msg += " Skipping to the next target."

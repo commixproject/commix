@@ -142,7 +142,7 @@ def injection_techniques_status():
 Check for quoted values
 """
 def quoted_value(value):
-  return '"{}"'.format(value)
+  return '"' + value + '"'
 
 """
 Payload fixation
@@ -4955,7 +4955,7 @@ when the target cannot produce it (no "base64" available, unreadable file, ...).
 """
 def download_file_bytes(execute_cmd, remote_file):
   if settings.TARGET_OS == settings.OS.WINDOWS:
-    cmd = settings.WIN_FILE_READ_B64.format(remote_file.replace("\\", "\\\\"))
+    cmd = settings.WIN_FILE_READ_B64 + remote_file.replace("\\", "\\\\") + "'))\""
   else:
     cmd = settings.FILE_READ_B64 + quoted_cmd(remote_file)
   encoded = execute_cmd(cmd)

@@ -89,9 +89,9 @@ def _evasion():
     lines.append("statuses a protection returns, seen during the run: " +
                  ", ".join(str(_) for _ in blocked))
   if settings.ADAPTIVE_DELAY:
-    lines.append("requests were spaced out by %.1fs after the target asked for it" % settings.ADAPTIVE_DELAY)
+    lines.append("requests were spaced out by " + str(round(settings.ADAPTIVE_DELAY, 1)) + "s after the target asked for it")
   elif menu.options.delay:
-    lines.append("requests were delayed by %.2fs each" % float(menu.options.delay))
+    lines.append("requests were delayed by " + str(round(float(menu.options.delay), 2)) + "s each")
   return lines
 
 """
@@ -101,8 +101,8 @@ path the counter sees, and a confident "0 requests" would be worse than saying n
 def _cost(started, elapsed):
   sent = settings.TOTAL_OF_REQUESTS - started
   if sent > 0:
-    return "spent: %d request%s, %.2fs" % (sent, "s"[sent == 1:], elapsed)
-  return "spent: %.2fs" % elapsed
+    return "spent: " + str(sent) + " request" + "s"[sent == 1:] + ", " + str(round(elapsed, 2)) + "s"
+  return "spent: " + str(round(elapsed, 2)) + "s"
 
 """
 Ask the target to work out something nobody could have written down in advance, and show what came
@@ -128,7 +128,7 @@ def _challenge(execute_cmd, technique):
   answer = "".join(str(_) for _ in answer) if answer else ""
 
   carried = expected in answer
-  lines = ["The target must work out %d + %d = %s, drawn at random after the scan started." % (first, second, expected),
+  lines = ["The target must work out " + str(first) + " + " + str(second) + " = " + expected + ", drawn at random after the scan started.",
            "(the product is in no page, cache or reflection - only something that executes could return it.)",
            "sent: " + cmd,
            "answered: " + (answer.strip()[:120] if answer.strip() else "(nothing came back)"),
@@ -194,11 +194,11 @@ def _inferential_challenge(boundary, vuln_parameter, http_request_method, techni
   # The product must be the one that delays, and the product plus one must not - the pair is what
   # rules out a target that is simply slow.
   carried = checks.time_related_shell(true_took, base) and not checks.time_related_shell(false_took, base)
-  lines = ["The target must work out %d + %d and answer whether it is %d, drawn at random after the scan started."
-           % (first, second, expected),
+  lines = ["The target must work out " + str(first) + " + " + str(second) + " and answer whether it is " +
+           str(expected) + ", drawn at random after the scan started.",
            "(the delay is the answer: held back where the product matches, returned at once where it does not.)",
-           "matches: %.2fs" % true_took,
-           "does not: %.2fs" % false_took,
+           "matches: " + str(round(true_took, 2)) + "s",
+           "does not: " + str(round(false_took, 2)) + "s",
            "(one request each, timed the way every other request in the run is.)",
            _cost(started, elapsed)]
   return carried, lines
@@ -210,7 +210,7 @@ def _control_timing():
   if not settings.RESPONSE_TIMES:
     return []
   average = sum(settings.RESPONSE_TIMES) / float(len(settings.RESPONSE_TIMES))
-  return ["unmodified request: %.3fs on average over %d samples." % (average, len(settings.RESPONSE_TIMES))]
+  return ["unmodified request: " + str(round(average, 3)) + "s on average over " + str(len(settings.RESPONSE_TIMES)) + " samples."]
 
 """
 The control that rules out coincidence: the answer must not already be somewhere the run could have
@@ -224,7 +224,7 @@ def _control(expected):
                  else "The answer is already there, in the unmodified page. (NOT CONFIRMED)")
   if settings.RESPONSE_TIMES:
     average = sum(settings.RESPONSE_TIMES) / float(len(settings.RESPONSE_TIMES))
-    lines.append("unmodified request: %.3fs on average over %d samples." % (average, len(settings.RESPONSE_TIMES)))
+    lines.append("unmodified request: " + str(round(average, 3)) + "s on average over " + str(len(settings.RESPONSE_TIMES)) + " samples.")
   return lines
 
 """

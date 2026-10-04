@@ -99,7 +99,7 @@ def shield_xml_leaves(text):
   # Set a matched span aside behind a placeholder, so nothing rewrites it.
   def _shield(m):
     shielded.append(m.group(0))
-    return "<\x00SHIELD%d\x00>" % (len(shielded) - 1)
+    return "<\x00SHIELD" + str(len(shielded) - 1) + "\x00>"
   shielded_text = re.sub(r"<(\w[\w:.\-]*)((?:\s+[^<>]*)?)>((?:[^<]|<!\[CDATA\[.*?\]\]>)*)</\1>",
                           _shield, text, flags=re.S)
   return shielded_text, shielded
@@ -111,7 +111,7 @@ def restore_xml_shields(text_or_list, shielded):
   # Put the set-aside spans back where their placeholders are.
   def _restore_one(s):
     for index, value in enumerate(shielded):
-      s = s.replace("<\x00SHIELD%d\x00>" % index, value)
+      s = s.replace("<\x00SHIELD" + str(index) + "\x00>", value)
     return s
   if isinstance(text_or_list, list):
     return [_restore_one(s) for s in text_or_list]

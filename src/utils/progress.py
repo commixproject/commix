@@ -39,14 +39,15 @@ class ProgressBar(object):
   # Seconds as the minutes and seconds they are shown in.
   def _as_clock(self, value):
     minutes = int(value) // 60
-    return "%.2d:%.2d" % (minutes, int(value) - (minutes * 60))
+    seconds = int(value) - (minutes * 60)
+    return str(minutes).zfill(2) + ":" + str(seconds).zfill(2)
 
   # Redraw the bar itself, for what has been retrieved so far.
   def update(self, amount=0):
     self._amount = min(max(amount, self._min), self._max)
     done = float(self._amount - self._min)
     percent = min(100, int(round((done / float(self._span)) * 100.0)))
-    room = max(1, self._width - len("100%% [] %s/%s  (ETA 00:00)" % (self._max, self._max)))
+    room = max(1, self._width - len("100% [] " + str(self._max) + "/" + str(self._max) + "  (ETA 00:00)"))
     hashes = int(round((percent / 100.0) * room))
     if hashes == 0:
       self._bar = "[>" + (" " * (room - 1)) + "]"
@@ -88,8 +89,8 @@ class ProgressBar(object):
   def draw(self, eta=None):
     if not is_tty():
       return
-    settings.print_data_to_stdout("\r%s %d/%d  (ETA %s)" % (self._bar, self._amount, self._max,
-                                                            self._as_clock(eta) if eta is not None else "??:??"))
+    settings.print_data_to_stdout("\r" + str(self._bar) + " " + str(self._amount) + "/" + str(self._max) +
+                                  "  (ETA " + (self._as_clock(eta) if eta is not None else "??:??") + ")")
     if self._amount >= self._max:
       settings.print_data_to_stdout("\r" + (" " * self._width) + "\r")
       # Wiped rather than ended, so what follows starts on this line instead of below a blank one.
