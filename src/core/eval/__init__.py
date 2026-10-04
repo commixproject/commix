@@ -22,8 +22,9 @@ to one - a module here is used by whichever technique carries it.
 
 from src.core.eval.grammars import php
 from src.core.eval.grammars import python
+from src.core.eval.grammars import ruby
 
-LANGUAGES = {php.NAME: php, python.NAME: python}
+LANGUAGES = {php.NAME: php, python.NAME: python, ruby.NAME: ruby}
 
 """
 The languages that can be named with '--eval'.
