@@ -172,6 +172,9 @@ has to reach for here instead.
 def sequence(first, second):
   return "(" + first + "," + second + ")"
 
+# The shell's comparison operators, as this language spells them.
+COMPARISON = {"-le": "<=", "-ge": ">=", "-lt": "<", "-gt": ">", "-eq": "==", "-ne": "!="}
+
 # What ends a statement, where the boundary being tested can carry one.
 TERMINATOR = ";"
 

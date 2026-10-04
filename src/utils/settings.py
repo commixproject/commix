@@ -405,7 +405,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "188"
+REVISION = "189"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1061,9 +1061,7 @@ The short names a language is just as often written as, and what each one means.
 '--eval' and '--interpreter' both take a language, so both read the same table - naming one of them
 'py' should not be an error where naming it 'python' is not.
 """
-LANGUAGE_ALIASES = {"py": "python", "python2": "python", "python3": "python", "php7": "php",
-                    "php8": "php", "pl": "perl", "rb": "ruby", "js": "javascript",
-                    "node": "javascript", "nodejs": "javascript"}
+LANGUAGE_ALIASES = {"py": "python", "pl": "perl", "rb": "ruby", "js": "javascript", "ps": "powershell"}
 
 # The name a language was given by, resolved to the one commix knows it as.
 def resolve_language(name):

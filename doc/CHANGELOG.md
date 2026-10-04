@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: Support for PowerShell code injection through the `--eval=powershell` language.
 * Added: Support for Node code injection through the `--eval=javascript` language.
 * Added: Support for Ruby code injection through the `--eval=ruby` language.
 * Added: New option `--skip-subst` that confirms the time-based technique with a plain, uncomputed delay, instead of command substitution.

@@ -24,8 +24,10 @@ from src.core.eval.grammars import php
 from src.core.eval.grammars import python
 from src.core.eval.grammars import ruby
 from src.core.eval.grammars import javascript
+from src.core.eval.grammars import powershell
 
-LANGUAGES = {php.NAME: php, python.NAME: python, ruby.NAME: ruby, javascript.NAME: javascript}
+LANGUAGES = {php.NAME: php, python.NAME: python, ruby.NAME: ruby, javascript.NAME: javascript,
+             powershell.NAME: powershell}
 
 """
 The languages that can be named with '--eval'.

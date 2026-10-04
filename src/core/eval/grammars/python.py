@@ -185,6 +185,9 @@ no operator here that both sequences and yields the way another language's conca
 def sequence(first, second):
   return "(" + first + "," + second + ")[1]"
 
+# The shell's comparison operators, as this language spells them.
+COMPARISON = {"-le": "<=", "-ge": ">=", "-lt": "<", "-gt": ">", "-eq": "==", "-ne": "!="}
+
 # What ends a statement, where the boundary being tested can carry one.
 TERMINATOR = ";"
 

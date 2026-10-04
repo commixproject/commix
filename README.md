@@ -34,7 +34,7 @@ You can visit the [collection of screenshots](https://github.com/commixproject/c
 ## Features
 
 * **Five injection techniques** - results-based (classic), boolean-based (blind, reading the answer off the page), time-based (blind), file-based (blind, with a tempfile-based variant for write-restricted targets), and out-of-band (OAST) over HTTP/S and DNS. Selected with `--technique`, or by the type they report with `--type`.
-* **Code injection** - `--eval` tests the string a target evaluates as code, in PHP, Python, Ruby or JavaScript, over the same five techniques.
+* **Code injection** - `--eval` tests the string a target evaluates as code, in PHP, Python, Ruby, JavaScript or PowerShell, over the same five techniques.
 * **Broad injection surface** - GET/POST parameters, HTTP headers, cookies, and JSON/XML request bodies, plus the `shellshock` module for CGI targets.
 * **Interactive shells and post-exploitation** - an `os_shell` on the target, built-in `reverse_tcp` and `bind_tcp` modes, file `download`/`upload` over the established shell, and enumeration of the current user, hostname, privileges, system information, users and password hashes. Every finding can be re-proved with `--proof`, which runs an experiment of its own and writes the transcript beside the run's output.
 * **Filter and WAF evasion** - Multiple combinable tamper scripts, applied in a deterministic order.
