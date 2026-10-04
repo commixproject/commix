@@ -35,7 +35,7 @@ Wiki'deki bazı özellikleri gösteren [ekran görüntüleri koleksiyonunu](http
 ## Özellikler
 
 * **Beş enjeksiyon tekniği** - results-based (classic), boolean-based (kör, yanıtı sayfadan okuyarak), time-based (kör), file-based (kör, yazma kısıtlı hedefler için tempfile-based varyantıyla birlikte) ve HTTP/S ile DNS üzerinden out-of-band (OAST). `--technique` ile ya da `--type` ile bildirildikleri türe göre seçilir.
-* **Kod enjeksiyonu** - `--eval`, hedefin kod olarak değerlendirdiği dizgeyi PHP veya Python olarak, aynı dört teknikle sınar.
+* **Kod enjeksiyonu** - `--eval`, hedefin kod olarak değerlendirdiği dizgeyi PHP, Python, Ruby veya JavaScript olarak, aynı beş teknikle sınar.
 * **Geniş enjeksiyon yüzeyi** - GET/POST parametreleri, HTTP başlıkları, çerezler ve JSON/XML istek gövdeleri; ayrıca CGI hedefleri için `shellshock` modülü.
 * **Etkileşimli kabuklar ve sömürü sonrası** - hedef üzerinde `os_shell`, yerleşik `reverse_tcp` ve `bind_tcp` modları, kurulan kabuk üzerinden dosya aktarımı (`download`/`upload`) ve geçerli kullanıcı, makine adı, yetkiler, sistem bilgileri, kullanıcılar ile parola özetlerinin numaralandırılması. Her bulgu `--proof` ile yeniden kanıtlanabilir; bu, kendi deneyini çalıştırır ve dökümü taramanın diğer çıktılarının yanına yazar.
 * **Filtre ve WAF atlatma** - birlikte kullanılabilen çok sayıda tamper betiği, belirlenimci bir sırayla uygulanır.

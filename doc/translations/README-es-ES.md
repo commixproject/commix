@@ -35,7 +35,7 @@ Puede visitar la **[colección de capturas de pantalla](https://github.com/commi
 ## Características
 
 * **Cinco técnicas de inyección** - results-based (classic), boolean-based (a ciegas, leyendo la respuesta en la página), time-based (a ciegas), file-based (a ciegas, con una variante tempfile-based para objetivos con escritura restringida) y out-of-band (OAST) sobre HTTP/S y DNS. Se eligen con `--technique`, o según el tipo con el que se informan con `--type`.
-* **Inyección de código** - `--eval` prueba la cadena que el objetivo evalúa como código, en PHP o Python, con las mismas cuatro técnicas.
+* **Inyección de código** - `--eval` prueba la cadena que el objetivo evalúa como código, en PHP, Python, Ruby o JavaScript, con las mismas cinco técnicas.
 * **Amplia superficie de inyección** - parámetros GET/POST, cabeceras HTTP, cookies y cuerpos de petición JSON/XML, además del módulo `shellshock` para objetivos CGI.
 * **Shells interactivas y post-explotación** - una `os_shell` en el objetivo, los modos integrados `reverse_tcp` y `bind_tcp`, transferencia de archivos (`download`/`upload`) a través de la shell establecida, y enumeración del usuario actual, nombre del host, privilegios, información del sistema, usuarios y hashes de contraseñas. Cada hallazgo puede volver a demostrarse con `--proof`, que ejecuta un experimento propio y escribe la transcripción junto a la salida del análisis.
 * **Evasión de filtros y WAF** - Múltiples scripts de manipulación (tamper) combinables, aplicados en un orden determinista.

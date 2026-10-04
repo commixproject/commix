@@ -35,7 +35,7 @@ Anda dapat mengunjungi [koleksi dari tangkapan layar](https://github.com/commixp
 ## Fitur
 
 * **Lima teknik injeksi** - results-based (classic), boolean-based (buta, membaca jawabannya dari halaman), time-based (buta), file-based (buta, dengan varian tempfile-based untuk target yang terbatas hak tulisnya) dan out-of-band (OAST) melalui HTTP/S dan DNS. Dipilih dengan `--technique`, atau berdasarkan tipe yang mereka laporkan dengan `--type`.
-* **Injeksi kode** - `--eval` menguji string yang dievaluasi target sebagai kode, dalam PHP atau Python, dengan empat teknik yang sama.
+* **Injeksi kode** - `--eval` menguji string yang dievaluasi target sebagai kode, dalam PHP, Python, Ruby, atau JavaScript, dengan lima teknik yang sama.
 * **Permukaan injeksi yang luas** - parameter GET/POST, header HTTP, cookie, dan body permintaan JSON/XML, serta modul `shellshock` untuk target CGI.
 * **Shell interaktif dan pasca-eksploitasi** - `os_shell` pada target, mode bawaan `reverse_tcp` dan `bind_tcp`, transfer berkas (`download`/`upload`) melalui shell yang telah terbentuk, serta enumerasi pengguna saat ini, nama host, hak akses, informasi sistem, daftar pengguna dan hash kata sandi. Setiap temuan dapat dibuktikan kembali dengan `--proof`, yang menjalankan percobaannya sendiri dan menulis transkripnya di samping keluaran pemindaian.
 * **Pengelakan filter dan WAF** - Beberapa skrip tamper yang dapat dikombinasikan, diterapkan dalam urutan yang deterministik.

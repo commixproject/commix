@@ -34,7 +34,7 @@ To **commix** (συντομογραφία [**comm**]and [**i**]njection e[**x**]
 ## Χαρακτηριστικά
 
 * **Πέντε τεχνικές injection** – results-based (classic), boolean-based (blind, με την απάντηση να διαβάζεται από τη σελίδα), time-based (blind), file-based (blind, με παραλλαγή βασισμένη σε προσωρινό αρχείο για targets με περιορισμούς εγγραφής) και out-of-band (OAST) μέσω HTTP/S και DNS. Επιλέγονται με `--technique` ή βάσει του τύπου που αναφέρουν με `--type`.
-* **Code injection** – το `--eval` ελέγχει strings που εκτελούνται ως κώδικας από το target, σε PHP ή Python, χρησιμοποιώντας τις ίδιες τέσσερις τεχνικές.
+* **Code injection** – το `--eval` ελέγχει strings που εκτελούνται ως κώδικας από το target, σε PHP, Python, Ruby ή JavaScript, χρησιμοποιώντας τις ίδιες πέντε τεχνικές.
 * **Ευρεία κάλυψη injection επιφανειών** – GET/POST parameters, HTTP headers, cookies και JSON/XML request bodies, καθώς και το `shellshock` module για CGI targets.
 * **Interactive shells και post-exploitation** – `os_shell` στο target, ενσωματωμένα modes `reverse_tcp` και `bind_tcp`, `download`/`upload` αρχείων μέσω του established shell, καθώς και enumeration για current user, hostname, privileges, system information, users και password hashes. Κάθε εύρημα μπορεί να επαληθευτεί εκ νέου με το `--proof`, το οποίο εκτελεί δικό του πείραμα και αποθηκεύει το transcript δίπλα στο output του run.
 * **Filter και WAF evasion** – πολλαπλά συνδυάσιμα tamper scripts, τα οποία εφαρμόζονται με deterministic σειρά.
