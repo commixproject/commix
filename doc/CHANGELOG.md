@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: Support for Node code injection through the `--eval=javascript` language.
 * Added: Support for Ruby code injection through the `--eval=ruby` language.
 * Added: New option `--skip-subst` that confirms the time-based technique with a plain, uncomputed delay, instead of command substitution.
 * Added: New tamper script `cmd2redir.py` that rewrites a user-supplied `command path` as `command<>path`, folding away the one space between them for a target that lets no whitespace through at all.
