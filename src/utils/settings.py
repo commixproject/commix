@@ -405,7 +405,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "189"
+REVISION = "190"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1753,6 +1753,7 @@ TAMPER_SCRIPTS = {
                   "sleep2ping": False,
                   "phphexname": False,
                   "phpconcat": False,
+                  "phpnoletters": False,
                   "pyhexname": False,
                   "xforwardedfor": False,
                   "dollaratsigns": False,
@@ -1856,6 +1857,8 @@ INCOMPATIBLE_TAMPER_SCRIPTS = [
                   # Both name the same function in the same call, so the second finds the name of
                   # the first already broken up and has nothing left to rewrite.
                   ("phphexname", "phpconcat"),
+                  ("phphexname", "phpnoletters"),
+                  ("phpconcat", "phpnoletters"),
                   # All three replace the user's command outright, so only one of them can have it.
                   ("cmd2wildcard", "rev"),
                   ("cmd2wildcard", "randomcase"),
