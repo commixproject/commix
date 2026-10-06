@@ -405,7 +405,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "190"
+REVISION = "191"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1764,7 +1764,8 @@ TAMPER_SCRIPTS = {
                   "backticks": False,
                   "randomcase": False,
                   "rev": False,
-                  "cmd2loop": False
+                  "cmd2loop": False,
+                  "dashlesstest": False
                  }
 
 # Execution priority for tamper scripts; each script defines its own __priority__.

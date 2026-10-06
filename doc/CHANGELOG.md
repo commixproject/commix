@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New tamper script "dashlesstest.py", that runs `test`'s numeric comparisons without a `-` of their own, for a target that strips a bare `-` outright.
 * Added: New tamper script "phpnoletters.py", that runs `--eval=php` payloads with no ASCII letter in them, reaching PHP's own execution functions through a name built from octal escapes.
 * Added: Support for PowerShell code injection through the `--eval=powershell` language.
 * Added: Support for Node code injection through the `--eval=javascript` language.
