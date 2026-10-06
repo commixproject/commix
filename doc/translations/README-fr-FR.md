@@ -85,7 +85,7 @@ $ python3 commix.py --url="http://commix-testbed/scenarios/regular/POST/blind.ph
 > `oast.fun` : les métadonnées des interactions avec votre cible sortent donc de votre réseau.
 > Pointez `--oob-server` vers une instance auto-hébergée pour les garder en interne. Pour un guide
 > détaillé, consultez la page
-> [**`techniques`**](https://github.com/commixproject/commix/wiki/Techniques) du wiki.
+> [**`out-of-band-technique-blind`**](https://github.com/commixproject/commix/wiki/Techniques#3-out-of-band-technique-blind) du wiki.
 
 Analyser une liste de cibles sans surveillance et enregistrer les résultats dans un fichier :
 

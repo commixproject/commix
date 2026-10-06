@@ -1758,7 +1758,7 @@ def confirmed_injection_points_summary():
   rows = settings.CONFIRMED_INJECTION_POINTS
   # The last row's snapshot of the running total is the total for the whole run, since the counter
   # only grows - so this reads right whether one technique was confirmed or several.
-  header_msg = "Identified the following injection point with a total of " + str(rows[-1][5]) + " HTTP(S) requests:"
+  header_msg = "Identified the following injection point(s) with a total of " + str(rows[-1][5]) + " HTTP(S) requests:"
   _injection_points_summary(header_msg, rows)
 
 """

@@ -210,7 +210,7 @@ def _control_timing():
   if not settings.RESPONSE_TIMES:
     return []
   average = sum(settings.RESPONSE_TIMES) / float(len(settings.RESPONSE_TIMES))
-  return ["unmodified request: " + str(round(average, 3)) + "s on average over " + str(len(settings.RESPONSE_TIMES)) + " samples."]
+  return ["Unmodified request: " + str(round(average, 3)) + "s on average over " + str(len(settings.RESPONSE_TIMES)) + " samples."]
 
 """
 The control that rules out coincidence: the answer must not already be somewhere the run could have
@@ -224,7 +224,7 @@ def _control(expected):
                  else "The answer is already there, in the unmodified page. (NOT CONFIRMED)")
   if settings.RESPONSE_TIMES:
     average = sum(settings.RESPONSE_TIMES) / float(len(settings.RESPONSE_TIMES))
-    lines.append("unmodified request: " + str(round(average, 3)) + "s on average over " + str(len(settings.RESPONSE_TIMES)) + " samples.")
+    lines.append("Unmodified request: " + str(round(average, 3)) + "s on average over " + str(len(settings.RESPONSE_TIMES)) + " samples.")
   return lines
 
 """

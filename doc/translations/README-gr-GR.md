@@ -76,7 +76,7 @@ To **commix** (συντομογραφία [**comm**]and [**i**]njection e[**x**]
 > διακομιστή interactsh `oast.fun`, οπότε μεταδεδομένα των αλληλεπιδράσεων με τον στόχο σας φεύγουν
 > από το δίκτυό σας. Ορίστε την `--oob-server` σε μια δική σας εγκατάσταση, ώστε να παραμείνουν
 > εσωτερικά. Για αναλυτικό οδηγό, συμβουλευτείτε τη σελίδα
-> [**`techniques`**](https://github.com/commixproject/commix/wiki/Techniques) στο wiki.
+> [**`out-of-band-technique-blind`**](https://github.com/commixproject/commix/wiki/Techniques#3-out-of-band-technique-blind) στο wiki.
 
 Σάρωση λίστας στόχων χωρίς επίβλεψη και εγγραφή των αποτελεσμάτων σε αρχείο :
 

@@ -78,7 +78,7 @@ Yanıtın hiçbir şey döndürmediği durumlarda çalıştırmayı bant dışı
 > sunucusunu kullanır; bu nedenle hedefinizle ilgili etkileşim meta verileri ağınızın dışına çıkar.
 > Bunları kurum içinde tutmak için `--oob-server` seçeneğini kendi sunucunuza yönlendirin. Ayrıntılı
 > rehber için wiki'deki
-> [**`techniques`**](https://github.com/commixproject/commix/wiki/Techniques) sayfasına bakın.
+> [**`out-of-band-technique-blind`**](https://github.com/commixproject/commix/wiki/Techniques#3-out-of-band-technique-blind) sayfasına bakın.
 
 Bir hedef listesini gözetimsiz taramak ve sonuçları bir dosyaya yazmak için:
 

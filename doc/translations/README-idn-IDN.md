@@ -78,7 +78,7 @@ Membuktikan eksekusi secara out-of-band, ketika respons tidak mengembalikan apa 
 > `oast.fun`, sehingga metadata interaksi dengan target Anda keluar dari jaringan Anda. Arahkan
 > `--oob-server` ke instansi milik sendiri agar tetap berada di jaringan internal. Untuk panduan
 > lengkap, lihat halaman
-> [**`techniques`**](https://github.com/commixproject/commix/wiki/Techniques) di wiki.
+> [**`out-of-band-technique-blind`**](https://github.com/commixproject/commix/wiki/Techniques#3-out-of-band-technique-blind) di wiki.
 
 Memindai daftar target tanpa pengawasan dan menyimpan hasilnya ke sebuah berkas:
 

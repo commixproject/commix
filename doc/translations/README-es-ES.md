@@ -85,7 +85,7 @@ $ python3 commix.py --url="http://commix-testbed/scenarios/regular/POST/blind.ph
 > interactsh público `oast.fun`, por lo que los metadatos de las interacciones con su objetivo salen
 > de su red. Apunte `--oob-server` a una instancia propia para mantenerlos internos. Para una guía
 > detallada, consulte la página
-> [**`techniques`**](https://github.com/commixproject/commix/wiki/Techniques) del wiki.
+> [**`out-of-band-technique-blind`**](https://github.com/commixproject/commix/wiki/Techniques#3-out-of-band-technique-blind) del wiki.
 
 Analizar una lista de objetivos de forma desatendida y guardar los resultados en un archivo:
 

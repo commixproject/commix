@@ -282,7 +282,7 @@ def pseudo_terminal_shell_generic(url, filename, technique, no_result, execute_c
               # execute_cmd() itself is responsible for logging the executed command.
               shell = execute_cmd(cmd)
               if shell:
-                settings.print_data_to_stdout(settings.command_execution_output(shell))
+                settings.command_execution_output("Execution output", shell)
               else:
                 err_msg = common.invalid_cmd_output(cmd)
                 settings.print_data_to_stdout(settings.print_error_msg(err_msg))

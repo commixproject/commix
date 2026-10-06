@@ -77,7 +77,7 @@
 > `oast.fun` استفاده می‌کند، بنابراین فراداده تعامل‌های مربوط به هدف شما از شبکه‌تان خارج می‌شود.
 > برای آنکه این داده‌ها درون‌سازمانی بماند، `--oob-server` را به نمونه‌ای که خودتان میزبانی می‌کنید
 > اشاره دهید. برای راهنمای کامل، صفحه
-> [**`techniques`**](https://github.com/commixproject/commix/wiki/Techniques) در ویکی را ببینید.
+> [**`out-of-band-technique-blind`**](https://github.com/commixproject/commix/wiki/Techniques#3-out-of-band-technique-blind) در ویکی را ببینید.
 
 پویش فهرستی از هدف‌ها بدون نظارت و نوشتن نتایج در یک فایل:
 

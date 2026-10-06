@@ -58,14 +58,14 @@ class ShellMode(object):
     return "The '" + unsupported.upper() + "' option is not usable for '" + self.name + "' mode. Use the '" + supported.upper() + "' option."
 
 """
-Announce the mode, listing the compatible payloads until one is selected.
+Announce the mode, listing the Compatible payloads until one is selected.
 """
 def _announce(mode, selected_module):
   if selected_module is None:
     info_msg = "Selected mode: '" + mode.name + "'. Type 'set payload <payload>' to select one."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
     menu.print_module_table(
-      "Compatible Payloads",
+      "Compatible payloads",
       [(path, description) for path, (description, _) in mode.modules.items()]
     )
   else:

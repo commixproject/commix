@@ -80,14 +80,13 @@ ERROR_BOLD_SIGN = "["  + Style.BRIGHT + Fore.RED + "error" + Style.RESET_ALL  + 
 CRITICAL_SIGN = "[" + Back.RED + "critical" + Style.RESET_ALL  + "] "
 PAYLOAD_SIGN = "[" + Fore.CYAN + "payload" + Style.RESET_ALL + "] "
 SUB_CONTENT_SIGN = ""
-#SUB_CONTENT_SIGN_TYPE = "" + Style.BRIGHT + "*" + Style.RESET_ALL + " "
 SUB_CONTENT_SIGN_TYPE = " * "
 TRAFFIC_SIGN = HTTP_CONTENT_SIGN = ""
 ABORTION_SIGN = ERROR_SIGN
 DEBUG_SIGN = "[" + Back.BLUE + Fore.WHITE + "debug" + Style.RESET_ALL + "] "
 DEBUG_BOLD_SIGN = "[" + Back.BLUE + Style.BRIGHT + Fore.WHITE + "debug" + Style.RESET_ALL + "] " + Style.BRIGHT
 CHECK_SIGN = DEBUG_SIGN + "Checking for a valid pair of authentication credentials: "
-OS_SHELL_TITLE = Style.BRIGHT + "Command Shell (type '?' for help)" + Style.RESET_ALL
+OS_SHELL_TITLE = Style.BRIGHT + "Command shell (type '?' for help)" + Style.RESET_ALL
 
 RL_INVISIBLE_START = "\001"
 RL_INVISIBLE_END = "\002"
@@ -256,7 +255,7 @@ def print_retrieved_data(label, retrieved, quoted=True):
   elif text.endswith(END_LINE.LF):
     text = text[:-1]
   if END_LINE.LF in text or len(text) > MAX_INLINE_VALUE_LENGTH:
-    body = END_LINE.LF + text
+    body = SINGLE_WHITESPACE + (END_LINE.LF + "'" + text + "'" if quoted else text)
   else:
     body = SINGLE_WHITESPACE + ("'" + text + "'" if quoted else text)
   return label + ":" + body + Style.RESET_ALL
@@ -278,9 +277,9 @@ def render_table(headers, rows):
   return END_LINE.LF.join(lines)
 
 # Print output of command execution
-def command_execution_output(shell):
-  result = Fore.GREEN + Style.BRIGHT + shell + Style.RESET_ALL
-  return result
+def command_execution_output(label, shell):
+  print_data_to_stdout(print_retrieved_data("Execution output", shell))
+  return shell
 
 """
 Write to stdout, falling back to a lossy re-encode for unsupported characters.
@@ -405,7 +404,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "191"
+REVISION = "192"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -2097,7 +2096,7 @@ FAILED_HISTORY_FILE = None
 MAX_UPDATE_REASON_LENGTH = 200
 
 # Longer than this and a retrieved value is shown fenced, rather than running off the label's line.
-MAX_INLINE_VALUE_LENGTH = 80
+MAX_INLINE_VALUE_LENGTH = 200
 
 # How many answers the concurrency probe times on each side, and the total below which it cannot say.
 CONCURRENCY_PROBE_REQUESTS = 16
