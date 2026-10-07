@@ -749,8 +749,8 @@ def do_boolean_based_process(url, timesec, filename, http_request_method, inject
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       return None
     # A boundary that answered both ways round is a candidate, and asking it once more is this
-    # technique's false-positive test - announced the way every other technique announces its own.
-    checks.check_for_false_positive_result(False)
+    # technique's own false-positive test - left unannounced, since the parameter as a whole gets
+    # one such announcement of its own once every technique has had its turn.
     # Asked once more, because a page that moves on its own can answer either way by itself.
     again, _ = injector.answer(payload, prefix, suffix, whitespace, http_request_method, url, vuln_parameter)
     if again is not True:
@@ -1255,15 +1255,20 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
                 # Set the original delay time
                 original_exec_time = exec_time
 
-                # Check for false positive resutls
+                # Check for false positive results - silent, since this is a per-technique gate on
+                # whether to accept/retry the finding, not the one false-positive check reported to
+                # the user; that is settings.CHECKING_PARAMETER's own, asked once at the very end.
                 if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
-                  exec_time, output = injector.false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timesec, http_request_method, url, vuln_parameter, randvcalc, interpreter, exec_time, url_time_response, false_positive_warning, technique, _false_positive_retry + 1, settings.FALSE_POSITIVE_RETRIES)
+                  exec_time, output = injector.false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timesec, http_request_method, url, vuln_parameter, randvcalc, interpreter, exec_time, url_time_response, false_positive_warning, technique, _false_positive_retry + 1, settings.FALSE_POSITIVE_RETRIES, silent=True)
                 else:
-                  exec_time, output = injector.false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, interpreter, exec_time, url_time_response, false_positive_warning, technique, _false_positive_retry + 1, settings.FALSE_POSITIVE_RETRIES)
+                  exec_time, output = injector.false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, interpreter, exec_time, url_time_response, false_positive_warning, technique, _false_positive_retry + 1, settings.FALSE_POSITIVE_RETRIES, silent=True)
 
                 if checks.time_related_shell(exec_time, timesec):
                   if str(output) == str(randvcalc) and len(TAG) == output_length:
                     possibly_vulnerable = True
+                    # Closes the "Testing/Continuing with..." spinner - the silent false-positive
+                    # gate above no longer does this as a side effect of its own (now silenced) print.
+                    checks.injection_process(injection_type, technique, done=True)
                 else:
                   break
               # False positive
@@ -1614,8 +1619,8 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
     # Yaw, got shellz!
     # Do some magic tricks!
     if shell and not resumed:
-      # Re-verify with a fresh marker/pair each round.
-      checks.check_for_false_positive_result(False)
+      # Re-verify with a fresh marker/pair each round - left unannounced, since the parameter as a
+      # whole gets one such announcement of its own once every technique has had its turn.
       verified = True
       if technique == settings.INJECTION_TECHNIQUE.FILE_BASED and settings.TARGET_OS != settings.OS.WINDOWS:
         # One write + one fetch for all rounds, not a cycle per round.
@@ -1662,9 +1667,6 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
       if not verified:
         checks.unexploitable_point()
         shell = False
-      elif settings.VERBOSITY_LEVEL == 0:
-        settings.print_data_to_stdout(" (done)")
-        settings.close_progress_line()
     if shell:
       found = True
       no_result = False

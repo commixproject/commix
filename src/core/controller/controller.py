@@ -1133,6 +1133,7 @@ def injection_process(url, check_parameter, http_request_method, filename, times
             return True
         return False
 
+      confirmed_mark = len(settings.CONFIRMED_INJECTION_POINTS)
       end_detection = _run_techniques()
       # Nothing got through while a protection is in the way, so reach for a heavier evasion and
       # give the techniques another go - being blocked throughout is the answer this waits for.
@@ -1140,6 +1141,8 @@ def injection_process(url, check_parameter, http_request_method, filename, times
             settings.WAF_ENABLED and checks.escalate_waf_evasion(on_block=False):
         settings.WAF_EVASION_ESCALATED = False
         end_detection = _run_techniques()
+
+      checks.final_false_positive_check(url, http_request_method, check_parameter, timesec, confirmed_mark)
 
       # All injection techniques seems to be failed!
       if checks.injection_techniques_status() is False:

@@ -138,6 +138,77 @@ def injection_techniques_status():
   else:
     return True
 
+# The state flag each technique's confirmation set - needed to roll one back if the final check below finds it was a false positive.
+_STATE_BY_TECHNIQUE = {
+  settings.INJECTION_TECHNIQUE.RESULTS_BASED: "RESULTS_BASED_STATE",
+  settings.INJECTION_TECHNIQUE.DYNAMIC_CODE: "EVAL_BASED_STATE",
+  settings.INJECTION_TECHNIQUE.BOOLEAN_BASED: "BOOLEAN_BASED_STATE",
+  settings.INJECTION_TECHNIQUE.TIME_BASED: "TIME_BASED_STATE",
+  settings.INJECTION_TECHNIQUE.FILE_BASED: "FILE_BASED_STATE",
+  settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED: "TEMPFILE_BASED_STATE",
+  settings.INJECTION_TECHNIQUE.OOB: "OOB_STATE",
+}
+
+# The techniques a confirmation can rest on alone - an inference, never a directly observed result.
+_BLIND_TECHNIQUES = (
+  settings.INJECTION_TECHNIQUE.BOOLEAN_BASED,
+  settings.INJECTION_TECHNIQUE.TIME_BASED,
+  settings.INJECTION_TECHNIQUE.FILE_BASED,
+  settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED,
+  settings.INJECTION_TECHNIQUE.OOB,
+)
+
+"""
+One last check of the parameter as a whole, once every applicable technique has already had its own
+turn - a result-based or dynamic-code finding is an echoed value and is left as it stands, but a
+parameter that only ever rests on an inference (boolean/time/file/tempfile/out-of-band) is asked the
+same question once more before it is reported, the way the earlier per-technique confirmations were
+each asked it on their own. 'mark' is the length of settings.CONFIRMED_INJECTION_POINTS before this
+parameter's techniques ran, so only the entries they just added are the ones being re-asked about.
+"""
+def final_false_positive_check(url, http_request_method, check_parameter, timesec, mark):
+  new_points = settings.CONFIRMED_INJECTION_POINTS[mark:]
+  if not new_points or settings.LOAD_SESSION:
+    return
+  if any(row[0] not in _BLIND_TECHNIQUES for row in new_points):
+    return
+  boundary = settings.CONFIRMED_BOUNDARY.get(settings.CHECKING_PARAMETER)
+  if not boundary:
+    return
+  prefix, suffix, separator, whitespace = boundary
+  from src.core.controller import injector
+  # One line for the whole parameter, said once - not the per-technique wording each technique's
+  # own confirmation already prints on the way here.
+  info_msg = "Checking if the injection point on " + settings.CHECKING_PARAMETER + " is a false positive"
+  if settings.VERBOSITY_LEVEL != 0:
+    info_msg = info_msg + "." + settings.END_LINE.LF
+  else:
+    info_msg = info_msg + ", please wait..."
+  settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_info_msg(info_msg))
+  # A delay of 0 is what settings.TIMESEC sits at until some technique asks for a real one - a
+  # purely blind confirmation found through boolean-based alone never did, so the sleep this litmus
+  # measures needs the same safe minimum any other first ask for a delay would get.
+  timesec = timesec or settings.MIN_SAFE_TIMESEC
+  # The executor hands back elapsed time only while this flag is set - unset it hands back the raw
+  # response instead, which is all the litmus this reuses was ever written to read.
+  previous = settings.TIME_RELATED_ATTACK
+  settings.TIME_RELATED_ATTACK = True
+  try:
+    # Silent: this prints its own single line above, not the per-request one the reused check
+    # would otherwise add underneath it.
+    _, output = injector.false_positive_check(separator, "", "", prefix, suffix, whitespace, timesec, http_request_method,
+                                               url, check_parameter, None, 1, False, 0, 0, False,
+                                               settings.INJECTION_TECHNIQUE.TIME_BASED, silent=True)
+  finally:
+    settings.TIME_RELATED_ATTACK = previous
+  if settings.VERBOSITY_LEVEL == 0:
+    settings.print_data_to_stdout(" (done)")
+  if not output:
+    settings.CONFIRMED_INJECTION_POINTS = settings.CONFIRMED_INJECTION_POINTS[:mark]
+    settings.IDENTIFIED_COMMAND_INJECTION = False
+    for row in new_points:
+      setattr(settings, _STATE_BY_TECHNIQUE[row[0]], False)
+
 """
 Check for quoted values
 """

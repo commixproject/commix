@@ -1214,10 +1214,17 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
   if not interpreter:
     a, c, b = sorted(random.sample(range(1, 50), 3))
     # End on a must-delay check; the caller re-validates the final exec_time.
+    # Only when boolean-based never already proved the point - just in case the backend hasn't
+    # properly recovered from an earlier delayed request; boolean-based ran no such delay, so a
+    # confirmation resting on it alone has nothing to let settle.
+    settle = not settings.BOOLEAN_BASED_STATE
     if settings.TARGET_OS == settings.OS.WINDOWS:
       litmus_checks = [
         (payloads.windows_condition_check(separator, str(a) + "-" + str(a), 0, timesec), True),
-        (payloads.windows_condition_check(separator, str(a) + "-" + str(c), 0, timesec), None),  # discarded - lets the backend settle after any earlier delay
+      ]
+      if settle:
+        litmus_checks.append((payloads.windows_condition_check(separator, str(a) + "-" + str(c), 0, timesec), None))  # discarded - lets the backend settle after any earlier delay
+      litmus_checks += [
         (payloads.windows_condition_check(separator, str(a) + "-" + str(b), 0, timesec), False),
         (payloads.windows_condition_check(separator, str(b) + "-" + str(c), 0, timesec), False),
         (payloads.windows_condition_check(separator, "1-1", 999999, timesec), False),  # deliberate mismatch
@@ -1226,7 +1233,10 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
     else:
       litmus_checks = [
         (payloads.condition_check(separator, str(a) + " -eq " + str(a), timesec, http_request_method), True),
-        (payloads.condition_check(separator, str(a) + " -eq " + str(c), timesec, http_request_method), None),  # discarded - lets the backend settle after any earlier delay
+      ]
+      if settle:
+        litmus_checks.append((payloads.condition_check(separator, str(a) + " -eq " + str(c), timesec, http_request_method), None))  # discarded - lets the backend settle after any earlier delay
+      litmus_checks += [
         (payloads.condition_check(separator, str(a) + " -eq " + str(b), timesec, http_request_method), False),
         (payloads.condition_check(separator, str(b) + " -eq " + str(c), timesec, http_request_method), False),
       ]
