@@ -1198,13 +1198,19 @@ def results_based_injection(separator, TAG, cmd, prefix, suffix, whitespace, htt
 """
 False-positive check and evaluation.
 """
-def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, interpreter, exec_time, url_time_response, false_positive_warning, technique, retry_attempt=None, retry_total=None, silent=False):
+def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, interpreter, exec_time, url_time_response, false_positive_warning, technique, retry_attempt=None, retry_total=None, silent=False, show_dots=None):
 
   payloads = execution.select_payloads_module(technique)
 
   # silent=True skips the detection-phase chatter for a resume re-verify.
   if not silent:
     checks.check_for_false_positive_result(false_positive_warning)
+
+  # Whether to print one '.' per request below - tied to 'silent' unless the caller asks for the
+  # dots on their own, the way a caller with its own "please wait..." line does: its own progress,
+  # not the per-technique chatter 'silent' is there to drop.
+  if show_dots is None:
+    show_dots = not silent
 
   # Varying the sleep time.
   if false_positive_warning:
@@ -1256,7 +1262,7 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
       if payload is None:
         verified = False
         break
-      if not silent and settings.VERBOSITY_LEVEL == 0:
+      if show_dots and settings.VERBOSITY_LEVEL == 0:
         settings.print_data_to_stdout(".")
       before = stability.requests_sent()
       exec_time, vuln_parameter, _, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
@@ -1285,7 +1291,7 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
     cmd, previous_cmd = execution.windows_transform_cmd(cmd, technique, interpreter)
 
   output_length = 1
-  if not silent and settings.VERBOSITY_LEVEL == 0:
+  if show_dots and settings.VERBOSITY_LEVEL == 0:
     settings.print_data_to_stdout(".")
   if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
     payload = payloads.cmd_execution_alter_interpreter(separator, cmd, output_length, timesec, http_request_method)
@@ -1321,7 +1327,7 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
     output = []
     # The verified value is always in 1-7 (see handler.py's randv1/randv2 ranges).
     for ascii_char in range(1, 8):
-      if not silent and settings.VERBOSITY_LEVEL == 0:
+      if show_dots and settings.VERBOSITY_LEVEL == 0:
         settings.print_data_to_stdout(".")
       if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
         payload = payloads.fp_result_alter_interpreter(separator, cmd, 1, ascii_char, timesec, http_request_method)

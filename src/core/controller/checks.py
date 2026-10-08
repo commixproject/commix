@@ -194,11 +194,12 @@ def final_false_positive_check(url, http_request_method, check_parameter, timese
   previous = settings.TIME_RELATED_ATTACK
   settings.TIME_RELATED_ATTACK = True
   try:
-    # Silent: this prints its own single line above, not the per-request one the reused check
-    # would otherwise add underneath it.
+    # Silent: this prints its own single line above, not the per-request chatter the reused check
+    # would otherwise add underneath it - but still asks for its dots, one per real request, same
+    # as every other multi-request progress line here.
     _, output = injector.false_positive_check(separator, "", "", prefix, suffix, whitespace, timesec, http_request_method,
                                                url, check_parameter, None, 1, False, 0, 0, False,
-                                               settings.INJECTION_TECHNIQUE.TIME_BASED, silent=True)
+                                               settings.INJECTION_TECHNIQUE.TIME_BASED, silent=True, show_dots=True)
   finally:
     settings.TIME_RELATED_ATTACK = previous
   if settings.VERBOSITY_LEVEL == 0:
