@@ -34,8 +34,8 @@ Wiki'deki bazı özellikleri gösteren [ekran görüntüleri koleksiyonunu](http
 
 ## Özellikler
 
-* **Beş enjeksiyon tekniği** - results-based (classic), boolean-based (kör, yanıtı sayfadan okuyarak), time-based (kör), file-based (kör, yazma kısıtlı hedefler için tempfile-based varyantıyla birlikte) ve HTTP/S ile DNS üzerinden out-of-band (OAST). `--technique` ile ya da `--type` ile bildirildikleri türe göre seçilir.
-* **Kod enjeksiyonu** - `--eval`, hedefin kod olarak değerlendirdiği dizgeyi PHP, Python, Ruby, JavaScript veya PowerShell olarak, aynı beş teknikle sınar.
+* **Dört enjeksiyon tekniği** - results-based (classic), boolean-based (kör, yanıtı sayfadan okuyarak), time-based (kör) ve file-based (kör, yazma kısıtlı hedefler için tempfile-based varyantıyla birlikte). `--technique` ile ya da `--type` ile bildirildikleri türe göre seçilir. Ayrıca, bir `--technique` değil kendi `--oob` anahtarıyla açılan, HTTP/S ile DNS üzerinden out-of-band (OAST) kanalı.
+* **Kod enjeksiyonu** - `--eval`, hedefin kod olarak değerlendirdiği dizgeyi PHP, Python, Ruby, JavaScript veya PowerShell olarak, aynı dört teknikle (ve out-of-band kanalıyla) sınar.
 * **Geniş enjeksiyon yüzeyi** - GET/POST parametreleri, HTTP başlıkları, çerezler ve JSON/XML istek gövdeleri; ayrıca CGI hedefleri için `shellshock` modülü.
 * **Etkileşimli kabuklar ve sömürü sonrası** - hedef üzerinde `os_shell`, yerleşik `reverse_tcp` ve `bind_tcp` modları, kurulan kabuk üzerinden dosya aktarımı (`download`/`upload`) ve geçerli kullanıcı, makine adı, yetkiler, sistem bilgileri, kullanıcılar ile parola özetlerinin numaralandırılması. Her bulgu `--proof` ile yeniden kanıtlanabilir; bu, kendi deneyini çalıştırır ve dökümü taramanın diğer çıktılarının yanına yazar.
 * **Filtre ve WAF atlatma** - birlikte kullanılabilen çok sayıda tamper betiği, belirlenimci bir sırayla uygulanır.
@@ -78,7 +78,7 @@ Yanıtın hiçbir şey döndürmediği durumlarda çalıştırmayı bant dışı
 > sunucusunu kullanır; bu nedenle hedefinizle ilgili etkileşim meta verileri ağınızın dışına çıkar.
 > Bunları kurum içinde tutmak için `--oob-server` seçeneğini kendi sunucunuza yönlendirin. Ayrıntılı
 > rehber için wiki'deki
-> [**`out-of-band-technique-blind`**](https://github.com/commixproject/commix/wiki/Techniques#3-out-of-band-technique-blind) sayfasına bakın.
+> [**`out-of-band-oob-channel`**](https://github.com/commixproject/commix/wiki/Techniques#out-of-band-oob-channel) sayfasına bakın.
 
 Bir hedef listesini gözetimsiz taramak ve sonuçları bir dosyaya yazmak için:
 

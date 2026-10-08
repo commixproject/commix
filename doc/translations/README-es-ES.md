@@ -34,8 +34,8 @@ Puede visitar la **[colección de capturas de pantalla](https://github.com/commi
 
 ## Características
 
-* **Cinco técnicas de inyección** - results-based (classic), boolean-based (a ciegas, leyendo la respuesta en la página), time-based (a ciegas), file-based (a ciegas, con una variante tempfile-based para objetivos con escritura restringida) y out-of-band (OAST) sobre HTTP/S y DNS. Se eligen con `--technique`, o según el tipo con el que se informan con `--type`.
-* **Inyección de código** - `--eval` prueba la cadena que el objetivo evalúa como código, en PHP, Python, Ruby, JavaScript o PowerShell, con las mismas cinco técnicas.
+* **Cuatro técnicas de inyección** - results-based (classic), boolean-based (a ciegas, leyendo la respuesta en la página), time-based (a ciegas) y file-based (a ciegas, con una variante tempfile-based para objetivos con escritura restringida). Se eligen con `--technique`, o según el tipo con el que se informan con `--type`. Además, un canal out-of-band (OAST) sobre HTTP/S y DNS, activado con su propio interruptor `--oob` en vez de una `--technique` propia.
+* **Inyección de código** - `--eval` prueba la cadena que el objetivo evalúa como código, en PHP, Python, Ruby, JavaScript o PowerShell, con las mismas cuatro técnicas (y el canal out-of-band).
 * **Amplia superficie de inyección** - parámetros GET/POST, cabeceras HTTP, cookies y cuerpos de petición JSON/XML, además del módulo `shellshock` para objetivos CGI.
 * **Shells interactivas y post-explotación** - una `os_shell` en el objetivo, los modos integrados `reverse_tcp` y `bind_tcp`, transferencia de archivos (`download`/`upload`) a través de la shell establecida, y enumeración del usuario actual, nombre del host, privilegios, información del sistema, usuarios y hashes de contraseñas. Cada hallazgo puede volver a demostrarse con `--proof`, que ejecuta un experimento propio y escribe la transcripción junto a la salida del análisis.
 * **Evasión de filtros y WAF** - Múltiples scripts de manipulación (tamper) combinables, aplicados en un orden determinista.
@@ -85,7 +85,7 @@ $ python3 commix.py --url="http://commix-testbed/scenarios/regular/POST/blind.ph
 > interactsh público `oast.fun`, por lo que los metadatos de las interacciones con su objetivo salen
 > de su red. Apunte `--oob-server` a una instancia propia para mantenerlos internos. Para una guía
 > detallada, consulte la página
-> [**`out-of-band-technique-blind`**](https://github.com/commixproject/commix/wiki/Techniques#3-out-of-band-technique-blind) del wiki.
+> [**`out-of-band-oob-channel`**](https://github.com/commixproject/commix/wiki/Techniques#out-of-band-oob-channel) del wiki.
 
 Analizar una lista de objetivos de forma desatendida y guardar los resultados en un archivo:
 

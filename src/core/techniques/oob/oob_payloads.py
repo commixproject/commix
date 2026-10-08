@@ -102,7 +102,7 @@ The command that makes the target resolve a name.
 
 On Windows 'nslookup' is always there. Elsewhere it is part of an optional package, so the ones a
 host is likely to have instead follow it, and 'ping' comes last because it waits for a reply that a
-host with no ICMP out will never get. They are chained with the separator being tested, so a sink
+host with its echo traffic filtered will never get. They are chained with the separator being tested, so a sink
 that filters some other operator does not defeat the separator that would have worked; where there
 is nothing to chain with, only the likeliest command is sent.
 """

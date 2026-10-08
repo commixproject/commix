@@ -631,12 +631,17 @@ def sink_boundaries():
 """
 Whether a technique is one this run is testing. Two separate choices sit behind it: which sink is
 being tested, chosen with '--eval', and by which technique, chosen with '--technique'. A technique
-runs when its letter was asked for and it reaches the sink in hand, so the two compose - and the
-out-of-band technique answers to the letter alone, carrying whichever sink it is given.
+runs when its letter was asked for and it reaches the sink in hand, so the two compose.
+
+Out-of-band is not one of the techniques '--technique' names - 'o' is not even in
+settings.AVAILABLE_TECHNIQUES, so a user can never ask for it there. Whether it runs is '--oob'
+alone to say, independent of whatever '--technique' was given: '--oob --technique=r' still tries
+out-of-band, rather than reading the 'r' as leaving it out.
 """
 def technique_selected(tech_letter, eval_sink=False):
-  # The out-of-band technique carries whichever sink it is given, so it answers to the letter alone.
-  if tech_letter != settings.OOB_TECHNIQUE_LETTER and bool(menu.options.eval_sink) != bool(eval_sink):
+  if tech_letter == settings.OOB_TECHNIQUE_LETTER:
+    return bool(menu.options.oob)
+  if bool(menu.options.eval_sink) != bool(eval_sink):
     return False
   return len(menu.options.tech) == 0 or tech_letter in menu.options.tech
 

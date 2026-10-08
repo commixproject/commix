@@ -33,8 +33,8 @@ To **commix** (συντομογραφία [**comm**]and [**i**]njection e[**x**]
 
 ## Χαρακτηριστικά
 
-* **Πέντε τεχνικές injection** – results-based (classic), boolean-based (blind, με την απάντηση να διαβάζεται από τη σελίδα), time-based (blind), file-based (blind, με παραλλαγή βασισμένη σε προσωρινό αρχείο για targets με περιορισμούς εγγραφής) και out-of-band (OAST) μέσω HTTP/S και DNS. Επιλέγονται με `--technique` ή βάσει του τύπου που αναφέρουν με `--type`.
-* **Code injection** – το `--eval` ελέγχει strings που εκτελούνται ως κώδικας από το target, σε PHP, Python, Ruby, JavaScript ή PowerShell, χρησιμοποιώντας τις ίδιες πέντε τεχνικές.
+* **Τέσσερις τεχνικές injection** – results-based (classic), boolean-based (blind, με την απάντηση να διαβάζεται από τη σελίδα), time-based (blind) και file-based (blind, με παραλλαγή βασισμένη σε προσωρινό αρχείο για targets με περιορισμούς εγγραφής). Επιλέγονται με `--technique` ή βάσει του τύπου που αναφέρουν με `--type`. Επιπλέον, ένα κανάλι out-of-band (OAST) μέσω HTTP/S και DNS, που ενεργοποιείται με το δικό του διακόπτη `--oob` αντί για `--technique`.
+* **Code injection** – το `--eval` ελέγχει strings που εκτελούνται ως κώδικας από το target, σε PHP, Python, Ruby, JavaScript ή PowerShell, χρησιμοποιώντας τις ίδιες τέσσερις τεχνικές (και το κανάλι out-of-band).
 * **Ευρεία κάλυψη injection επιφανειών** – GET/POST parameters, HTTP headers, cookies και JSON/XML request bodies, καθώς και το `shellshock` module για CGI targets.
 * **Interactive shells και post-exploitation** – `os_shell` στο target, ενσωματωμένα modes `reverse_tcp` και `bind_tcp`, `download`/`upload` αρχείων μέσω του established shell, καθώς και enumeration για current user, hostname, privileges, system information, users και password hashes. Κάθε εύρημα μπορεί να επαληθευτεί εκ νέου με το `--proof`, το οποίο εκτελεί δικό του πείραμα και αποθηκεύει το transcript δίπλα στο output του run.
 * **Filter και WAF evasion** – πολλαπλά συνδυάσιμα tamper scripts, τα οποία εφαρμόζονται με deterministic σειρά.
@@ -76,7 +76,7 @@ To **commix** (συντομογραφία [**comm**]and [**i**]njection e[**x**]
 > διακομιστή interactsh `oast.fun`, οπότε μεταδεδομένα των αλληλεπιδράσεων με τον στόχο σας φεύγουν
 > από το δίκτυό σας. Ορίστε την `--oob-server` σε μια δική σας εγκατάσταση, ώστε να παραμείνουν
 > εσωτερικά. Για αναλυτικό οδηγό, συμβουλευτείτε τη σελίδα
-> [**`out-of-band-technique-blind`**](https://github.com/commixproject/commix/wiki/Techniques#3-out-of-band-technique-blind) στο wiki.
+> [**`out-of-band-oob-channel`**](https://github.com/commixproject/commix/wiki/Techniques#out-of-band-oob-channel) στο wiki.
 
 Σάρωση λίστας στόχων χωρίς επίβλεψη και εγγραφή των αποτελεσμάτων σε αρχείο :
 
