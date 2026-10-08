@@ -404,7 +404,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "193"
+REVISION = "194"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1796,6 +1796,8 @@ WAF_EVASION_PROFILE = {
 }
 # What the evasion actually turned on, so it is reported once and never applied twice.
 WAF_EVASION_APPLIED = ""
+# Whether the evasion getting a finding past the WAF/IPS has already been confirmed to the user.
+WAF_BYPASS_CONFIRMED = False
 # Whether the user agreed to the evasion, asked once and remembered for the rest of the run.
 WAF_EVASION_CONSENT = None
 # Which tier of the profile is in use, stepped up while the protection keeps blocking.

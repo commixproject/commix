@@ -5429,6 +5429,12 @@ def announce_vulnerable_finding(filename, injection_type, technique, the_type, h
   oracle_hint = boolean_oracle_hint(technique)
   info_msg += (" (with " + oracle_hint + ")" if oracle_hint else "") + "."
   settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
+  # Closes the loop the evasion messages opened - said once, the first time a finding actually
+  # confirms while it is active, rather than left implicit in the finding just having come through.
+  if settings.WAF_ENABLED and settings.WAF_EVASION_APPLIED and not settings.WAF_BYPASS_CONFIRMED:
+    settings.WAF_BYPASS_CONFIRMED = True
+    info_msg = "Bypassed the WAF/IPS by using the '" + settings.WAF_EVASION_APPLIED.replace(",", "', '") + "' tamper scripts."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   announce_leftover_file(technique)
   decoded_payload = str(url_decode(payload)) if decode_payload else payload
   if not settings.LOAD_SESSION:
