@@ -405,7 +405,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "200"
+REVISION = "201"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1688,6 +1688,9 @@ PASSWORDS_TXT_FILE = os.path.join(TXT_DIR, "default_passwords.txt")
 
 # Path to file with known CGI scripts/pages potentially vulnerable to Shellshock
 CGI_SCRIPTS = os.path.join(TXT_DIR, "shocker-cgi_list.txt")
+
+# The candidate paths '--common-files' checks for existence, one '--file-read' away once confirmed.
+COMMON_FILES_LIST = os.path.join(TXT_DIR, "common-files.txt")
 
 REQUIRED_AUTHENTICATION = False
 

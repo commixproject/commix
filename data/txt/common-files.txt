@@ -1,0 +1,54 @@
+# Candidate paths for '--common-files', checked for existence one at a time through the confirmed
+# injection point. Only absolute paths are listed - a relative one would resolve against whatever
+# directory the shell starts a command in, which is not reliably the web root. Unix-style paths are
+# tried on a Unix-like target, drive-letter paths on a Windows one - each line only on the target OS
+# it is shaped for.
+
+# System accounts and shell configuration
+/etc/passwd
+/etc/shadow
+/etc/group
+/etc/hosts
+/etc/hostname
+/etc/resolv.conf
+/etc/sudoers
+/etc/crontab
+/root/.bash_history
+/root/.ssh/id_rsa
+/root/.ssh/authorized_keys
+
+# Web server configuration
+/etc/apache2/apache2.conf
+/etc/httpd/conf/httpd.conf
+/etc/nginx/nginx.conf
+/etc/php.ini
+
+# Cloud and service credentials
+/root/.aws/credentials
+/root/.docker/config.json
+/var/lib/docker/config.json
+/proc/self/environ
+
+# Logs that can carry secrets a request leaked
+/var/log/auth.log
+/var/log/apache2/access.log
+/var/log/nginx/access.log
+
+# Windows system configuration
+C:\Windows\win.ini
+C:\Windows\System32\drivers\etc\hosts
+C:\Windows\repair\SAM
+C:\Windows\System32\config\SAM
+C:\Windows\debug\NetSetup.log
+C:\Windows\Panther\Unattend.xml
+C:\Windows\Panther\Unattended.xml
+C:\Windows\System32\inetsrv\config\applicationHost.config
+C:\inetpub\wwwroot\web.config
+C:\xampp\apache\conf\httpd.conf
+C:\xampp\php\php.ini
+C:\AppServ\www\config.php
+
+# Windows user data
+C:\Users\Administrator\NTUser.dat
+C:\Users\Administrator\.ssh\id_rsa
+C:\Users\Administrator\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt

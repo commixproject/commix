@@ -88,15 +88,42 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
   checks.file_read_status(shell, file_to_read, filename)
 
 """
+Check for the '--common-files' wordlist on the target host, one path at a time.
+"""
+def common_files(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique):
+  candidates = checks.common_files_candidates()
+  if not candidates:
+    return
+  info_msg = "Checking for " + str(len(candidates)) + " common file" + ('s', '')[len(candidates) == 1] + " on the target."
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  injector = execution.select_injector(technique)
+  execute_cmd = execution.make_execute_cmd(injector, separator, maxlen, TAG, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, interpreter, filename, url_time_response, technique, OUTPUT_TEXTFILE)
+  found = []
+  for path in candidates:
+    # The same cheap pre-check '--file-read' uses under a timed technique - skipping the full
+    # extraction for a path that is not even there, rather than paying for one per candidate.
+    if settings.TIME_RELATED_ATTACK and technique in (settings.INJECTION_TECHNIQUE.TIME_BASED, settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED) and \
+       not checks.file_readable(separator, timesec, http_request_method, url, vuln_parameter, whitespace, prefix, suffix, url_time_response, path, technique):
+      continue
+    shell, fresh = execute_cmd(checks.check_file(path))
+    if checks.common_file_exists(shell):
+      found.append(path)
+  checks.print_common_files(found, filename)
+
+"""
 Check the defined options
 """
 def do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique):
   if menu.options.file_write:
     file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique)
     settings.FILE_ACCESS_DONE = True
-    
+
   if menu.options.file_read:
     file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique)
+    settings.FILE_ACCESS_DONE = True
+
+  if menu.options.common_files:
+    common_files(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique)
     settings.FILE_ACCESS_DONE = True
 
 """

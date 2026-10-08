@@ -702,6 +702,12 @@ file_access.add_option("--file-dest",
                 dest="file_dest",
                 help="Host's absolute filepath to write to.")
 
+file_access.add_option("--common-files",
+                action="store_true",
+                dest="common_files",
+                default=False,
+                help="Check for common files on the target host.")
+
 # Windows registry access options
 registry = OptionGroup(parser, "Registry access",
                         "These options can be used to access the Windows registry on the target host.")
@@ -890,7 +896,7 @@ injection.add_option("--maxlen",
                 type="int",
                 dest="maxlen",
                 default=settings.MAXLEN,
-                help="Set the max length of character-by-character output (Default: " + str(settings.MAXLEN) + " chars)."
+                help="Set the max length of character-by-character output (Default: " + str(settings.MAXLEN) + " chars).")
 
 injection.add_option("--time-sec",
                 default=0,
@@ -1494,7 +1500,7 @@ def enumeration_options():
 Check if file access options are enabled.
 """
 def file_access_options():
-  if any(v is not None for v in (options.file_write, options.file_read)):
+  if any(v is not None for v in (options.file_write, options.file_read)) or options.common_files:
     return True
 
 """

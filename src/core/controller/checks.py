@@ -4923,6 +4923,45 @@ def check_file(remote_file_path):
   return cmd
 
 """
+The '--common-files' candidate paths, filtered to the ones shaped for the target's own OS - a
+drive-letter path is never tried on a Unix-like target, nor an absolute Unix one on Windows.
+"""
+def common_files_candidates():
+  try:
+    with open(settings.COMMON_FILES_LIST, "r", encoding=settings.DEFAULT_CODEC) as candidates:
+      lines = [line.strip() for line in candidates if line.strip() and not line.startswith("#")]
+  except IOError:
+    return []
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    return [path for path in lines if re.match(r"^[A-Za-z]:[\\/]", path)]
+  return [path for path in lines if path.startswith("/")]
+
+"""
+Whether 'check_file()' says the path exists - 'Test-Path' answers in words ('True'/'False'), which
+'if shell:' alone would read as existing either way, so the word itself is what is compared here.
+"""
+def common_file_exists(shell):
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    return str(shell).strip() == "True"
+  return bool(shell)
+
+"""
+Report the '--common-files' findings.
+"""
+def print_common_files(found, filename):
+  if found:
+    info_msg = "Found " + str(len(found)) + " common file" + ('s', '')[len(found) == 1] + " on the target:"
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    for path in found:
+      file_line = "[*] '" + path + "'"
+      settings.print_data_to_stdout(file_line)
+      logs.add_line(filename, file_line, group="common-files")
+      logs.report_add_enumeration("common_files", path)
+  else:
+    info_msg = "None of the common files checked for were found on the target."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
+"""
 File content to read.
 """
 def file_content_to_read(file_to_read=None):
@@ -5173,6 +5212,15 @@ def run_file_access(execute_cmd, filename):
   if menu.options.file_read:
     ran = True
     download_file(execute_cmd, None, filename)
+
+  if menu.options.common_files:
+    ran = True
+    candidates = common_files_candidates()
+    if candidates:
+      info_msg = "Checking for " + str(len(candidates)) + " common file" + ('s', '')[len(candidates) == 1] + " on the target."
+      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+      found = [path for path in candidates if common_file_exists(execute_cmd(check_file(path)))]
+      print_common_files(found, filename)
 
   if ran:
     settings.FILE_ACCESS_DONE = True
