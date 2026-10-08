@@ -1083,7 +1083,7 @@ misc.add_option("--purge",
                 action="store_true",
                 dest="purge",
                 default=False,
-                help="Safely remove all content from commix data directory.")
+                help="Safely remove all content from " + settings.APPLICATION + " data directory.")
 
 misc.add_option("--unstable",
                 action="store_true",
@@ -1273,7 +1273,7 @@ if options.save_config:
 COMMON_OPTIONS = (
     (("?",), "show this help"),
     (("back",), "return to the previous menu"),
-    (("quit", "exit"), "exit Commix (<Ctrl-C> asks what to do instead)"),
+    (("quit", "exit"), "exit " + settings.APPLICATION + " (<Ctrl-C> asks what to do instead)"),
 )
 
 OS_SHELL_OPTIONS = COMMON_OPTIONS + (

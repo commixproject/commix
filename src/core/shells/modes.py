@@ -175,7 +175,7 @@ def shell_mode_options(mode, separator, filename, url):
   while True:
     prompt_name = mode.name if selected_module is None else mode.qualified(selected_module)
     try:
-      option = common.safe_input("commix(" + prompt_name + ") > ")
+      option = common.safe_input(settings.APPLICATION + "(" + prompt_name + ") > ")
     except KeyboardInterrupt:
       checks.handle_exploitation_interrupt(filename, url)
       continue

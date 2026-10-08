@@ -26,6 +26,9 @@ from datetime import datetime
 from src.core.compat import xrange
 from src.core import eval as _eval
 
+# About
+APPLICATION = "commix"
+
 # The language whose code injection grammar is in use; '--eval' can name another one.
 EVAL_GRAMMAR = _eval.grammar()
 from src.thirdparty.six.moves import reload_module as _reload_module
@@ -95,7 +98,7 @@ RL_INVISIBLE_END = "\002"
 def styled_prompt(codes, text):
   return RL_INVISIBLE_START + codes + RL_INVISIBLE_END + text
 
-OS_SHELL = "commix(os_shell) > "
+OS_SHELL = APPLICATION + "(os_shell) > "
 
 # The timestamp every message carries.
 def print_time():
@@ -399,12 +402,10 @@ sys_argv_checks()
 """
 The global variables.
 """
-# About
-APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "199"
+REVISION = "200"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:

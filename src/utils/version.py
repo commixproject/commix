@@ -31,7 +31,7 @@ def python_version():
   if PYTHON_VERSION.split(".")[0] != "3":
     err_msg = "Unsupported Python version detected: "
     err_msg += PYTHON_VERSION + ". "
-    err_msg += "commix requires Python 3.7 or later."
+    err_msg += settings.APPLICATION + " requires Python 3.7 or later."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     # Exits non-zero: a caller that cannot tell this apart from a finished run - a CI job, or any
     # script around commix - would otherwise read the wrong interpreter as a successful one.

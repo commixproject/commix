@@ -81,7 +81,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
   checks.warm_up_response_baseline(url, http_request_method)
 
   if settings.EXPLOITATION_PHASE and settings.ADJUST_TIME_DELAY_CHOICE is None:
-    msg = "Do you want commix to try to optimize the value(s) for delay responses (option '--time-sec')? [Y/n] "
+    msg = "Do you want " + settings.APPLICATION + " to try to optimize the value(s) for delay responses (option '--time-sec')? [Y/n] "
     settings.ADJUST_TIME_DELAY_CHOICE = common.read_input(msg, default="Y", check_batch=True) in settings.CHOICE_YES
 
   # An interrupted prior run's partial value carries an already-confirmed length.

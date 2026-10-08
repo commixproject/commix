@@ -440,7 +440,7 @@ def mobile_user_agents():
   menu.mobile_user_agents(devices, default_index)
 
   while True:
-    message = "Which smartphone do you want commix to imitate through HTTP User-Agent header? "
+    message = "Which smartphone do you want " + settings.APPLICATION + " to imitate through HTTP User-Agent header? "
     mobile_user_agent = common.read_input(message, default=str(default_index + 1), check_batch=True)
     try:
       choice = int(mobile_user_agent)
@@ -1053,7 +1053,7 @@ def offer_anticsrf_token(parameter):
   if not name or not any(name.lower().count(token) for token in settings.CSRF_TOKEN_PARAMETER_INFIXES):
     return
   message = "The parameter '" + name + "' appears to hold an anti-CSRF token. "
-  message += "Do you want commix to automatically update it in further requests? [y/N] "
+  message += "Do you want " + settings.APPLICATION + " to automatically update it in further requests? [y/N] "
   if common.read_input(message, default="N", check_batch=True) in settings.CHOICE_YES:
     set_anticsrf_token(name)
 
@@ -3420,7 +3420,7 @@ def waf_evasion_consent():
     # The evasion is only ours to choose while the user has not chosen one of their own.
     if not settings.WAF_ENABLED or menu.options.skip_waf or settings.USER_APPLIED_TAMPER or menu.options.tamper:
       return False
-    message = "Do you want commix to try bypassing it? [Y/n] "
+    message = "Do you want " + settings.APPLICATION + " to try bypassing it? [Y/n] "
     settings.WAF_EVASION_CONSENT = common.read_input(message, default="Y", check_batch=True).lower() != "n"
   return settings.WAF_EVASION_CONSENT
 
@@ -3863,7 +3863,7 @@ def check_encoders(payload):
   encoded_with = description["codec"]
   while True:
     message = "The value appears to already be " + encoded_with + "-encoded. "
-    message += "Do you want commix to keep it that way? [Y/n] "
+    message += "Do you want " + settings.APPLICATION + " to keep it that way? [Y/n] "
     answer = common.read_input(message, default="Y", check_batch=True)
     if answer in settings.CHOICE_YES:
       break
