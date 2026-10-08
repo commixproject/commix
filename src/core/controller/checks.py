@@ -4548,10 +4548,10 @@ def print_users(sys_users, filename, newline_first, separator, TAG, cmd, prefix,
           info_msg += " [" + str(len(sys_users_list)) + "]:"
           settings.print_data_to_stdout(info_msg)
           logs.add_line(filename, info_msg, group="users")
-          table = settings.render_table(["Username"], [[name] for name in sys_users_list])
-          settings.print_data_to_stdout(table)
-          logs.add_line(filename, table, group="users")
           for name in sys_users_list:
+            user_line = "[*] '" + name + "'"
+            settings.print_data_to_stdout(user_line)
+            logs.add_line(filename, user_line, group="users")
             logs.report_add_enumeration("users", name)
       else:
         no_user_enumeration_permission()
@@ -4611,9 +4611,10 @@ def print_users(sys_users, filename, newline_first, separator, TAG, cmd, prefix,
                 settings.print_data_to_stdout(raw_line)
                 logs.add_line(filename, "      " + raw_line, group="users")
             if parsed_users:
-              users_table = settings.render_table(["Username"], [[name] for name, _, _ in parsed_users])
-              settings.print_data_to_stdout(users_table)
-              logs.add_line(filename, users_table, group="users")
+              for name, _, _ in parsed_users:
+                user_line = "[*] '" + name + "'"
+                settings.print_data_to_stdout(user_line)
+                logs.add_line(filename, user_line, group="users")
 
             # Per-user privileges, only when explicitly requested.
             if menu.options.privileges and parsed_users:
@@ -4680,9 +4681,12 @@ def print_passes(sys_passes, filename, newline_first, interpreter):
       logs.add_line(filename, info_msg, group="passwords")
       for username, digest in usable:
         logs.report_add_enumeration("passwords", {"username": username, "hash": digest})
-      passwords_table = settings.render_table(["Username", "Hash"], [[username, digest] for username, digest in usable])
-      settings.print_data_to_stdout(passwords_table)
-      logs.add_line(filename, passwords_table, group="passwords")
+        user_line = "[*] " + username + " [1]:"
+        hash_line = "    password hash: " + digest
+        settings.print_data_to_stdout(user_line)
+        settings.print_data_to_stdout(hash_line)
+        logs.add_line(filename, user_line, group="passwords")
+        logs.add_line(filename, hash_line, group="passwords")
     else:
       warn_msg = "Unable to retrieve the password hashes for the operating system users."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
