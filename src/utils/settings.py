@@ -404,7 +404,7 @@ APPLICATION = "commix"
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "198"
+REVISION = "199"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1024,6 +1024,14 @@ SYS_PASSES = FILE_READ + SHADOW_FILE
 
 WIN_REPLACE_WHITESPACE = r"-replace('\s+',' '))"
 
+# Windows registry access
+WIN_REG_QUERY = "reg query "
+WIN_REG_ADD = "reg add "
+WIN_REG_DEL = "reg delete "
+REG_ACCESS_DENIED = ["Access is denied", "ERROR: Access is denied", "requires elevation"]
+REG_VALUE_NOT_FOUND = "ERROR: The system was unable to find the specified registry key or value."
+REG_VALUE_TYPES = ("REG_SZ", "REG_EXPAND_SZ", "REG_DWORD", "REG_QWORD", "REG_BINARY", "REG_MULTI_SZ", "REG_NONE")
+
 # Accepts 'YES','YE','Y','yes','ye','y'
 CHOICE_YES = ['YES','YE','Y','yes','ye','y']
 
@@ -1444,6 +1452,9 @@ ENUMERATION_DONE = False
 
 # FIle access options
 FILE_ACCESS_DONE = False
+
+# Registry access options
+REGISTRY_ACCESS_DONE = False
 
 # Set when '--file-dest' targets the "/tmp/" directory, to switch straight to the tempfile-based technique.
 CALL_TMP_BASED = False
@@ -2623,7 +2634,7 @@ RUN_WIDE_STATE = frozenset((
   "RECOGNISE_OS", "THREADED_TIME_RETRIEVAL_CHOICE", "USE_BIN_SUBDIR_CHOICE", "WAF_EVASION_CONSENT",
   # Counted or noted for the run as a whole.
   "CRAWLED_SKIPPED_URLS_NUM", "CRAWLED_URLS_INJECTED", "CRAWLED_URLS_NUM", "CRAWLING",
-  "CRAWLING_PHASE", "ENUMERATION_DONE", "FILE_ACCESS_DONE", "HANDLER", "HREF_SKIPPED",
+  "CRAWLING_PHASE", "ENUMERATION_DONE", "FILE_ACCESS_DONE", "REGISTRY_ACCESS_DONE", "HANDLER", "HREF_SKIPPED",
   "HTTP_ERROR_CODES_SUM", "IDENTIFIED_WARNINGS", "INIT_TEST", "LAST_DOT_BUCKET", "LAST_LOG_GROUP",
   "LAST_LOGGED_PARAMETER", "LAST_SELECTED_MODULE", "LIKELY_RESUME", "LOGGED_FINDINGS_HEADER",
   "MULTI_REQUEST_TARGETS", "MULTI_TARGETS", "OS_CHECKS_NUM", "PROGRESS_LINE_OPEN", "READLINE_ERROR",

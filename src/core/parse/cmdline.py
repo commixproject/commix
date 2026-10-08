@@ -380,7 +380,7 @@ request.add_option("--proxy",
                 action="store",
                 dest="proxy",
                 default=False,
-                help="Use a proxy to connect to the target URL.")
+                help="Use a proxy to connect to the target URL ('(http|https|socks4|socks5)://address:port').")
 
 request.add_option("--tor",
                 action="store_true",
@@ -702,6 +702,46 @@ file_access.add_option("--file-dest",
                 dest="file_dest",
                 help="Host's absolute filepath to write to.")
 
+# Windows registry access options
+registry = OptionGroup(parser, "Registry access",
+                        "These options can be used to access the Windows registry on the target host.")
+
+registry.add_option("--reg-read",
+                action="store_true",
+                dest="reg_read",
+                help="Read a Windows registry key value.")
+
+registry.add_option("--reg-add",
+                action="store_true",
+                dest="reg_add",
+                help="Write a Windows registry key value.")
+
+registry.add_option("--reg-del",
+                action="store_true",
+                dest="reg_del",
+                help="Delete a Windows registry key (value).")
+
+registry.add_option("--reg-key",
+                action="store",
+                dest="reg_key",
+                help="Windows registry key (e.g. 'HKLM\\Software\\Foo').")
+
+registry.add_option("--reg-value",
+                action="store",
+                dest="reg_value",
+                help="Windows registry key value name.")
+
+registry.add_option("--reg-data",
+                action="store",
+                dest="reg_data",
+                help="Windows registry key value data.")
+
+registry.add_option("--reg-type",
+                action="store",
+                dest="reg_type",
+                default="REG_SZ",
+                help="Windows registry key value type (Default: 'REG_SZ').")
+
 # Modules options
 modules = OptionGroup(parser, "Modules",
                         "These options can be used increase the detection and/or injection capabilities.")
@@ -775,7 +815,7 @@ injection.add_option("--technique",
                 action="store",
                 default="",
                 dest="tech",
-                help="Specify injection technique(s) to use.")
+                help="Specify injection technique(s) to use (Default: 'rbtf').")
 
 injection.add_option("--type",
                 action="store",
@@ -811,7 +851,7 @@ injection.add_option("--oob",
                 action="store_true",
                 dest="oob",
                 default=False,
-                help="Use an out-of-band (OAST) channel over HTTP(S).")
+                help="Test over an out-of-band (OAST) channel (HTTP(S) or DNS, see '--oob-transport').")
 
 injection.add_option("--oob-server",
                 action="store",
@@ -850,7 +890,7 @@ injection.add_option("--maxlen",
                 type="int",
                 dest="maxlen",
                 default=settings.MAXLEN,
-                help="Set the max length of output for the techniques that retrieve it one character at a time (Default: " + str(settings.MAXLEN) + " chars).")
+                help="Set the max length of character-by-character output (Default: " + str(settings.MAXLEN) + " chars)."
 
 injection.add_option("--time-sec",
                 default=0,
@@ -875,7 +915,7 @@ injection.add_option("--interpreter",
                 action="store",
                 dest="interpreter",
                 default = "",
-                help="Construct detection and exploitation payloads using an alternative interpreter (e.g. 'Python') instead of native OS shell syntax.")
+                help="Specify an alternative interpreter to build payloads with (e.g. 'Python').")
 
 injection.add_option("--os-cmd",
                 action="store",
@@ -1092,6 +1132,7 @@ parser.add_option_group(target)
 parser.add_option_group(request)
 parser.add_option_group(enumeration)
 parser.add_option_group(file_access)
+parser.add_option_group(registry)
 parser.add_option_group(modules)
 parser.add_option_group(optimization)
 parser.add_option_group(injection)
@@ -1454,6 +1495,13 @@ Check if file access options are enabled.
 """
 def file_access_options():
   if any(v is not None for v in (options.file_write, options.file_read)):
+    return True
+
+"""
+Check if registry access options are enabled.
+"""
+def registry_options():
+  if any((options.reg_read, options.reg_add, options.reg_del)):
     return True
 
 # eof

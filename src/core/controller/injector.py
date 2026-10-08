@@ -63,7 +63,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
   if settings.TARGET_OS == settings.OS.WINDOWS:
     cmd, previous_cmd = execution.windows_transform_cmd(cmd, technique, interpreter)
 
-  if menu.options.file_write:
+  if menu.options.file_write or menu.options.reg_read or menu.options.reg_add or menu.options.reg_del:
     minlen = 0
   else:
     minlen = 1

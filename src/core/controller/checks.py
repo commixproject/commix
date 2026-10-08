@@ -2647,6 +2647,50 @@ def validate_options():
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit(settings.EXIT_FAILURE)
 
+  reg_actions = (menu.options.reg_read, menu.options.reg_add, menu.options.reg_del)
+  if sum(bool(_) for _ in reg_actions) > 1:
+    err_msg = "The options '--reg-read', '--reg-add' and '--reg-del' cannot be used simultaneously."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit(settings.EXIT_FAILURE)
+
+  if any(reg_actions) and not menu.options.reg_key:
+    err_msg = "You must specify the Windows registry key to use (i.e. '--reg-key')."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit(settings.EXIT_FAILURE)
+
+  if menu.options.reg_key and not any(reg_actions):
+    err_msg = "The option '--reg-key' requires one of '--reg-read', '--reg-add' or '--reg-del'."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit(settings.EXIT_FAILURE)
+
+  if menu.options.reg_read and not menu.options.reg_value:
+    err_msg = "You must specify the registry value to read (i.e. '--reg-value')."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit(settings.EXIT_FAILURE)
+
+  if menu.options.reg_add and not menu.options.reg_value:
+    err_msg = "You must specify the registry value to write (i.e. '--reg-value')."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit(settings.EXIT_FAILURE)
+
+  if menu.options.reg_add and menu.options.reg_data is None:
+    err_msg = "You must specify the registry value's data to write (i.e. '--reg-data')."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit(settings.EXIT_FAILURE)
+
+  if menu.options.reg_data is not None and not menu.options.reg_add:
+    err_msg = "The option '--reg-data' requires '--reg-add'."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit(settings.EXIT_FAILURE)
+
+  if any(reg_actions):
+    if menu.options.reg_type.upper() not in settings.REG_VALUE_TYPES:
+      err_msg = "The value for option '--reg-type' must be one of: "
+      err_msg += ", ".join(settings.REG_VALUE_TYPES) + "."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit(settings.EXIT_FAILURE)
+    menu.options.reg_type = menu.options.reg_type.upper()
+
 """
 Checking for all required third-party library dependencies.
 """
@@ -5132,6 +5176,137 @@ def run_file_access(execute_cmd, filename):
 
   if ran:
     settings.FILE_ACCESS_DONE = True
+
+"""
+Build the 'reg query' command for the key/value named with '--reg-key'/'--reg-value'.
+"""
+def registry_read_cmd():
+  key = menu.options.reg_key
+  value = menu.options.reg_value
+  info_msg = "Fetching the registry value '" + value + "' of the key '" + key + "'."
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  cmd = settings.WIN_REG_QUERY + "\"" + key + "\" /v \"" + value + "\""
+  return cmd, key, value
+
+"""
+Pick the value's data out of 'reg query' output, which lists it alongside its type on the same line as the value's name.
+"""
+def registry_read_status(shell, key, value, filename, newline_first=False):
+  if settings.VERBOSITY_LEVEL == 0 and newline_first:
+    settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+  denied = shell and any(phrase.lower() in str(shell).lower() for phrase in settings.REG_ACCESS_DENIED)
+  match = re.search(r"^\s*" + re.escape(value) + r"\s+(REG_\S+)\s+(.*?)\s*$", str(shell), re.MULTILINE) if shell else None
+  if match:
+    reg_type, data = match.group(1), match.group(2)
+    label = "Registry value"
+    settings.print_data_to_stdout(settings.print_retrieved_data(label, data))
+    logs.add_line(filename, "Registry '" + key + "\\" + value + "' (" + reg_type + "): " + data, group="registry")
+    logs.report_add_enumeration("registry", {"key": key, "value": value, "type": reg_type, "data": data})
+  elif denied:
+    warn_msg = "It seems you do not have permission to read the registry key '" + key + "'."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  else:
+    warn_msg = "Retrieved no data for the registry value '" + value + "' of the key '" + key + "'. "
+    warn_msg += "This could mean the key/value does not exist, or you do not have permission to read it."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
+"""
+Build the 'reg add' command for the key/value/data/type named with '--reg-key'/'--reg-value'/'--reg-data'/'--reg-type'.
+"""
+def registry_write_cmd():
+  key = menu.options.reg_key
+  value = menu.options.reg_value
+  data = menu.options.reg_data
+  reg_type = menu.options.reg_type
+  info_msg = "Attempting to write the registry value '" + value + "' of the key '" + key + "'."
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  cmd = settings.WIN_REG_ADD + "\"" + key + "\" /v \"" + value + "\" /t " + reg_type + " /d \"" + data + "\" /f"
+  return cmd, key, value
+
+"""
+Display the result of an attempted registry write to the remote target.
+"""
+def registry_write_status(shell, key, value, newline_first=False):
+  if settings.VERBOSITY_LEVEL == 0 and newline_first:
+    settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+  if shell and any(phrase.lower() in str(shell).lower() for phrase in settings.REG_ACCESS_DENIED):
+    warn_msg = "It seems you do not have permission to write to the registry key '" + key + "'."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  elif shell and "operation completed successfully" in str(shell).lower():
+    info_msg = "The registry value '" + value + "' has been successfully written to the key '" + key + "'."
+    settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
+  else:
+    warn_msg = "The registry value '" + value + "' does not appear to have been written to the key '" + key + "'. "
+    warn_msg += "This could mean the write failed, or you do not have permission to write to that key."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
+"""
+Build the 'reg delete' command for the key named with '--reg-key', or the single value named with '--reg-value'.
+"""
+def registry_delete_cmd():
+  key = menu.options.reg_key
+  value = menu.options.reg_value
+  target = "value '" + value + "' of the key '" + key + "'" if value else "key '" + key + "'"
+  info_msg = "Attempting to delete the registry " + target + "."
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  cmd = settings.WIN_REG_DEL + "\"" + key + "\""
+  # With no value named, 'reg delete' takes the bare key as the whole key to remove - '/va' would
+  # only clear its values and leave the key itself standing, which is not what "delete the key" means.
+  if value:
+    cmd += " /v \"" + value + "\""
+  cmd += " /f"
+  return cmd, key, value
+
+"""
+Display the result of an attempted registry deletion on the remote target.
+"""
+def registry_delete_status(shell, key, value, newline_first=False):
+  if settings.VERBOSITY_LEVEL == 0 and newline_first:
+    settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+  target = "value '" + value + "' of the key '" + key + "'" if value else "key '" + key + "'"
+  if shell and any(phrase.lower() in str(shell).lower() for phrase in settings.REG_ACCESS_DENIED):
+    warn_msg = "It seems you do not have permission to delete the registry " + target + "."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  elif shell and "operation completed successfully" in str(shell).lower():
+    info_msg = "The registry " + target + " has been successfully deleted."
+    settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
+  else:
+    warn_msg = "The registry " + target + " does not appear to have been deleted. "
+    warn_msg += "This could mean it does not exist, or you do not have permission to delete it."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
+"""
+Run the standard registry-access checks via the given execute_cmd(cmd) -> output callback - the shared logic behind any module's own registry-access entry point (see shellshock.py).
+"""
+def run_registry_access(execute_cmd, filename):
+  ran = False
+
+  if settings.TARGET_OS != settings.OS.WINDOWS and (menu.options.reg_read or menu.options.reg_add or menu.options.reg_del):
+    warn_msg = "The registry access options only apply to a Windows target, so they are skipped here."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    settings.REGISTRY_ACCESS_DONE = True
+    return
+
+  if menu.options.reg_add:
+    ran = True
+    cmd, key, value = registry_write_cmd()
+    shell = execute_cmd(cmd)
+    registry_write_status(shell, key, value)
+
+  if menu.options.reg_read:
+    ran = True
+    cmd, key, value = registry_read_cmd()
+    shell = execute_cmd(cmd)
+    registry_read_status(shell, key, value, filename)
+
+  if menu.options.reg_del:
+    ran = True
+    cmd, key, value = registry_delete_cmd()
+    shell = execute_cmd(cmd)
+    registry_delete_status(shell, key, value)
+
+  if ran:
+    settings.REGISTRY_ACCESS_DONE = True
 
 # Mark which HTTP header the payload is going into.
 def define_vulnerable_http_header(http_header_name):

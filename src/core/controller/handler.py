@@ -30,6 +30,7 @@ from src.thirdparty.six.moves import urllib as _urllib
 from src.core.controller import shell_options
 from src.thirdparty.six.moves import html_parser as _html_parser
 from src.core.controller import file_access
+from src.core.controller import registry_access
 from src.core.controller import enumeration
 from src.core.techniques.tempfile_based import tfb_handler
 
@@ -496,6 +497,7 @@ def do_oob_process(url, timesec, filename, http_request_method, injection_type, 
     interpreter = menu.options.interpreter
     _register_post_detection_action(lambda: enumeration.stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, 0, technique))
     _register_post_detection_action(lambda: file_access.stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, 0, technique))
+    _register_post_detection_action(lambda: registry_access.stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, 0, technique))
     if menu.options.os_cmd:
       # Run the command given with '--os-cmd', once, whichever technique got there first.
       def _run_os_cmd():
@@ -699,6 +701,7 @@ def do_boolean_based_process(url, timesec, filename, http_request_method, inject
     interpreter = menu.options.interpreter
     _register_post_detection_action(lambda: enumeration.stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, 0, technique))
     _register_post_detection_action(lambda: file_access.stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, 0, technique))
+    _register_post_detection_action(lambda: registry_access.stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, 0, technique))
     if menu.options.os_cmd:
       def _run_os_cmd():
         if settings.OS_CMD_DONE:
@@ -1343,6 +1346,7 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
         # Registered here, run once at quit().
         _register_post_detection_action(lambda: enumeration.stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique))
         _register_post_detection_action(lambda: file_access.stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique))
+        _register_post_detection_action(lambda: registry_access.stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique))
         if menu.options.os_cmd:
           # Run the command given with '--os-cmd', once, whichever technique got there first.
           def _run_os_cmd(separator=separator, maxlen=maxlen, TAG=TAG, cmd=menu.options.os_cmd, prefix=prefix, suffix=suffix, whitespace=whitespace, timesec=timesec, http_request_method=http_request_method, url=url, vuln_parameter=vuln_parameter, OUTPUT_TEXTFILE=OUTPUT_TEXTFILE, interpreter=interpreter, filename=filename, url_time_response=url_time_response, technique=technique, output=output):
@@ -1686,6 +1690,7 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
       # Registered here, run once at quit().
       _register_post_detection_action(lambda: enumeration.stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique))
       _register_post_detection_action(lambda: file_access.stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique))
+      _register_post_detection_action(lambda: registry_access.stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique))
       if menu.options.os_cmd:
         # Run the command given with '--os-cmd', once, whichever technique got there first.
         def _run_os_cmd(separator=separator, maxlen=maxlen, TAG=TAG, cmd=menu.options.os_cmd, prefix=prefix, suffix=suffix, whitespace=whitespace, timesec=timesec, http_request_method=http_request_method, url=url, vuln_parameter=vuln_parameter, OUTPUT_TEXTFILE=OUTPUT_TEXTFILE, interpreter=interpreter, filename=filename, url_time_response=url_time_response, technique=technique):

@@ -535,6 +535,7 @@ def main(filename, url, http_request_method):
     # Both are per-target: what was enumerated on one target says nothing about the next, and file
     # access is already taken back here. Left set, enumeration would run for the first target only.
     settings.FILE_ACCESS_DONE = False
+    settings.REGISTRY_ACCESS_DONE = False
     settings.ENUMERATION_DONE = False
 
     if menu.options.alert:

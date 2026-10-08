@@ -177,7 +177,13 @@ def file_access(url, cve, check_header, filename):
   checks.run_file_access(_command_executor(url, cve, check_header, filename), filename)
 
 """
-Enumeration, file access, --os-cmd, --os-shell - shared by fresh detection and resume.
+Registry Access Options
+"""
+def registry_access(url, cve, check_header, filename):
+  checks.run_registry_access(_command_executor(url, cve, check_header, filename), filename)
+
+"""
+Enumeration, file access, registry access, --os-cmd, --os-shell - shared by fresh detection and resume.
 """
 def _post_exploitation(url, cve, check_header, filename, technique, no_result):
   if settings.ENUMERATION_DONE:
@@ -189,6 +195,11 @@ def _post_exploitation(url, cve, check_header, filename, technique, no_result):
     checks.ask_redo_stored_session("access files", lambda: file_access(url, cve, check_header, filename))
   else:
     file_access(url, cve, check_header, filename)
+
+  if settings.REGISTRY_ACCESS_DONE is True:
+    checks.ask_redo_stored_session("access the registry", lambda: registry_access(url, cve, check_header, filename))
+  else:
+    registry_access(url, cve, check_header, filename)
 
   if menu.options.os_cmd:
     checks.run_single_os_cmd(_command_executor(url, cve, check_header, filename), filename)
