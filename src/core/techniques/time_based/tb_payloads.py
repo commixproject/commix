@@ -62,6 +62,17 @@ def _py_length_expr(cmd):
           " -c \"import sys;print(len(sys.stdin.buffer.read()))\"" + settings.CMD_SUB_SUFFIX)
 
 """
+The command's output, saved to a file by the alternative interpreter - the tempfile-based technique's
+own write step. Piped in the same way _py_length_expr is and for the same reason: the output is data
+read off a stream, never text spliced into the program's own source, so nothing in it can break out
+of a literal or be misread as code.
+"""
+def _py_write_expr(cmd, output_file):
+  return (settings.CMD_SUB_PREFIX + "printf '%s' \"" + _output_word(cmd) + "\"|" +
+          settings.LINUX_PYTHON_INTERPRETER + " -c \"import sys;open('" + output_file +
+          "','wb').write(sys.stdin.buffer.read())\"" + settings.CMD_SUB_SUFFIX)
+
+"""
 The ordinal of that output's Nth byte, read the same way. Indexing bytes answers with the number
 itself, so nothing has to be converted afterwards.
 """
