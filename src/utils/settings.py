@@ -405,7 +405,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "205"
+REVISION = "206"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:

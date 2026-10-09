@@ -25,9 +25,26 @@
 
 # Cloud and service credentials
 /root/.aws/credentials
+/root/.aws/config
 /root/.docker/config.json
 /var/lib/docker/config.json
+/root/.kube/config
+/root/.config/gcloud/application_default_credentials.json
+/root/.azure/accessTokens.json
+/root/.azure/azureProfile.json
+/root/.netrc
+/root/.npmrc
+/root/.pypirc
+/root/.git-credentials
 /proc/self/environ
+
+# Container and orchestration signals - fixed paths regardless of which user the container runs
+# as, since they come from how the container/pod itself is set up, not from a home directory.
+/.dockerenv
+/proc/1/cgroup
+/var/run/secrets/kubernetes.io/serviceaccount/token
+/var/run/secrets/kubernetes.io/serviceaccount/namespace
+/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
 
 # Logs that can carry secrets a request leaked
 /var/log/auth.log
@@ -52,3 +69,12 @@ C:\AppServ\www\config.php
 C:\Users\Administrator\NTUser.dat
 C:\Users\Administrator\.ssh\id_rsa
 C:\Users\Administrator\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
+
+# Windows cloud and service credentials
+C:\Users\Administrator\.aws\credentials
+C:\Users\Administrator\.docker\config.json
+C:\Users\Administrator\.kube\config
+C:\Users\Administrator\.netrc
+C:\Users\Administrator\.npmrc
+C:\Users\Administrator\.pypirc
+C:\Users\Administrator\.git-credentials
