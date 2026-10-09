@@ -32,9 +32,11 @@ import zlib
 import subprocess
 import contextlib
 import statistics
+import tempfile
 from glob import glob
 from src.utils import common
 from src.utils import logs
+from src.utils import crypt_algos
 from src.core.parse import cmdline as menu
 from src.utils import settings
 from src.thirdparty.odict import OrderedDict
@@ -4731,11 +4733,146 @@ def print_passes(sys_passes, filename, newline_first, interpreter):
         settings.print_data_to_stdout(hash_line)
         logs.add_line(filename, user_line, group="passwords")
         logs.add_line(filename, hash_line, group="passwords")
+      crack_passwords(usable, filename)
     else:
       warn_msg = "Unable to retrieve the password hashes for the operating system users."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
   else:
     warn_msg = "Unable to retrieve the password hashes for the operating system users."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
+"""
+Write the recognized hashes to a local temporary file, 'user:hash' one per line, the same way the
+dictionary attack below is about to read a wordlist - something to hand a dedicated tool instead.
+"""
+def store_hashes_to_file(usable):
+  handle, path = tempfile.mkstemp(prefix=settings.APPLICATION, suffix=".txt")
+  with os.fdopen(handle, "w") as f:
+    for username, digest in usable:
+      f.write(username + ":" + digest + settings.END_LINE.LF)
+  info_msg = "Writing hashes to a temporary file '" + path + "'."
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  modes = sorted(set(crypt_algos.hashcat_mode(crypt_algos.recognize(digest)) for _, digest in usable) - {None})
+  if modes:
+    info_msg = "The stored hashes can be cracked with a dedicated tool (e.g. "
+    info_msg += ", ".join("'hashcat -m " + str(mode) + "'" for mode in modes) + ")."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
+"""
+Which dictionary file the attack below reads its candidate words from - the bundled one by
+default, or a path of the user's own.
+"""
+def choose_wordlist():
+  message = "What dictionary do you want to use?" + settings.END_LINE.LF
+  message += "[1] Default dictionary file '" + settings.PASSWORDS_TXT_FILE + "' (press Enter)" + settings.END_LINE.LF
+  message += "[2] Custom dictionary file"
+  choice = common.read_input(message, default="1", check_batch=True)
+  if choice == "2":
+    path = common.read_input("What's the custom dictionary's location? ", default="", check_batch=True)
+    if path and os.path.isfile(path):
+      return path
+    warn_msg = "The specified dictionary file was not found. Using the default dictionary instead."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  return settings.PASSWORDS_TXT_FILE
+
+"""
+Dictionary-based attack against the password hashes '--passwords' just retrieved - offered the same
+way and in the same order every time: store to a file first, then (by default) crack, choose a
+dictionary, optionally add common suffixes, then try every word (plus suffix) against every hash of
+a format commix can compute, word-major so one pass serves every hash sharing that format at once.
+"""
+def crack_passwords(usable, filename):
+  if not usable:
+    return
+
+  store_msg = "Do you want to store hashes to a temporary file for eventual further processing with other tools? [y/N] "
+  if common.read_input(store_msg, default="N", check_batch=True) in settings.CHOICE_YES:
+    store_hashes_to_file(usable)
+
+  # Defaults to skipping under '--batch' on a bulk scan - a dictionary attack repeated unattended
+  # over every target in a list is a cost worth asking about, not assuming, the way a single run is.
+  crack_default = "N" if settings.MULTI_TARGETS else "Y"
+  crack_msg = "Do you want to crack them via a dictionary-based attack? [" + ("y/N" if settings.MULTI_TARGETS else "Y/n") + "] "
+  if common.read_input(crack_msg, default=crack_default, check_batch=True) not in settings.CHOICE_YES:
+    return
+
+  recognized = {}
+  unsupported = set()
+  for username, digest in usable:
+    fmt = crypt_algos.recognize(digest)
+    if fmt is None:
+      continue
+    if fmt in crypt_algos.CRACKABLE:
+      recognized.setdefault(fmt, []).append((username, digest))
+    else:
+      unsupported.add(fmt)
+
+  if unsupported:
+    for fmt in sorted(unsupported):
+      mode = crypt_algos.hashcat_mode(fmt)
+      warn_msg = "A '" + fmt + "' hash was found that cannot be cracked with the built-in dictionary attack"
+      warn_msg += (" (use e.g. 'hashcat -m " + str(mode) + "')") if mode else ""
+      warn_msg += "."
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
+  if not recognized:
+    warn_msg = "No clear password(s) found."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    return
+
+  for fmt in recognized:
+    info_msg = "Using hash method '" + fmt + "'."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
+  wordlist_path = choose_wordlist()
+  words = common.load_list_from_file(wordlist_path, "wordlist")
+
+  suffixes = [""]
+  suffix_msg = "Do you want to use common password suffixes? (slow!) [y/N] "
+  if common.read_input(suffix_msg, default="N", check_batch=True) in settings.CHOICE_YES:
+    suffixes += list(settings.COMMON_PASSWORD_SUFFIXES)
+
+  cracked = {}
+  for fmt, items in recognized.items():
+    pending = list(items)
+    info_msg = "Starting dictionary-based cracking ('" + fmt + "')."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    tried = 0
+    for suffix in suffixes:
+      if not pending:
+        break
+      for word in words:
+        if not pending:
+          break
+        candidate = word + suffix
+        tried += 1
+        if settings.VERBOSITY_LEVEL == 0 and tried % 15 == 0:
+          settings.print_data_to_stdout(".")
+        for item in list(pending):
+          username, digest = item
+          if crypt_algos.crack_candidate(digest, candidate):
+            cracked[item] = candidate
+            pending.remove(item)
+            info_msg = "Cracked password '" + candidate + "' for user '" + username + "'."
+            settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_bold_info_msg(info_msg))
+    settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+
+  if cracked:
+    info_msg = "Cracked " + str(len(cracked)) + " password" + ('s', '')[len(cracked) == 1] + ":"
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    for (username, digest), password in cracked.items():
+      user_line = "[*] " + username + " [1]:"
+      hash_line = "    password hash: " + digest
+      pass_line = "    clear-text password: " + password
+      settings.print_data_to_stdout(user_line)
+      settings.print_data_to_stdout(hash_line)
+      settings.print_data_to_stdout(pass_line)
+      logs.add_line(filename, user_line, group="passwords")
+      logs.add_line(filename, hash_line, group="passwords")
+      logs.add_line(filename, pass_line, group="passwords")
+      logs.report_add_enumeration("passwords", {"username": username, "hash": digest, "password": password})
+  else:
+    warn_msg = "No clear password(s) found."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """

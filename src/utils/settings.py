@@ -405,7 +405,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "206"
+REVISION = "207"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1685,6 +1685,10 @@ USERNAMES_TXT_FILE = os.path.join(TXT_DIR, "default_usernames.txt")
 
 # Path to file with default password values
 PASSWORDS_TXT_FILE = os.path.join(TXT_DIR, "default_passwords.txt")
+
+# Appended to each dictionary word, one suffix at a time, when the user opts into it for cracking
+# a retrieved password hash - the common ways a plain word gets turned into a "stronger" one.
+COMMON_PASSWORD_SUFFIXES = ("1", "123", "2", "12", "3", "13", "7", "11", "5", "22", "23", "01", "4", "07", "21", "14", "10", "06", "08", "8", "15", "69", "16", "6", "18")
 
 # Path to file with known CGI scripts/pages potentially vulnerable to Shellshock
 CGI_SCRIPTS = os.path.join(TXT_DIR, "shocker-cgi_list.txt")

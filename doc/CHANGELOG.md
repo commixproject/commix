@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: Dictionary-based password cracking for `--passwords`' retrieved hashes (MD5-crypt, SHA-256/512-crypt), prompted automatically.
 * Added: New option `--pty` for upgrading a plain reverse/bind TCP shell to a full interactive PTY.
 * Added: New option `--priv-esc` for running Metasploit's `local_exploit_suggester` automatically the instant a Meterpreter session opens.
 * Added: New option `--cleanup` for removing what `--file-write` or `--reg-add` just wrote to the target.
