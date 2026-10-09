@@ -36,7 +36,10 @@ def registry_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, time
   cmd, key, value = checks.registry_write_cmd()
   execute_cmd = execution.make_execute_cmd(injector, separator, maxlen, TAG, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, interpreter, filename, url_time_response, technique, OUTPUT_TEXTFILE, catch_time_error=True)
   shell, fresh = execute_cmd(cmd)
-  checks.registry_write_status(shell, key, value, settings.TIME_RELATED_ATTACK and fresh)
+  written = checks.registry_write_status(shell, key, value, settings.TIME_RELATED_ATTACK and fresh)
+  # Done right away, not deferred to quit() - see the matching note in file_access.py's file_write().
+  if written and menu.options.cleanup:
+    checks.cleanup_registry_value(lambda c: execute_cmd(c)[0], key, value)
 
 """
 Delete a Windows registry key, or a single value of it.

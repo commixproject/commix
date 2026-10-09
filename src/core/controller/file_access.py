@@ -67,7 +67,11 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
   if settings.TIME_RELATED_ATTACK:
     if settings.VERBOSITY_LEVEL == 0:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-  checks.file_write_status(shell, dest_to_write)
+  written = checks.file_write_status(shell, dest_to_write)
+  # Done right away, not deferred to quit() - 'fire' reads live technique state that moves on as
+  # the run keeps probing, so replaying it later is replaying it under the wrong technique.
+  if written and menu.options.cleanup:
+    checks.cleanup_remote_file(fire, dest_to_write)
 
 """
 Read a file from the target host.
@@ -106,7 +110,7 @@ def common_files(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timese
        not checks.file_readable(separator, timesec, http_request_method, url, vuln_parameter, whitespace, prefix, suffix, url_time_response, path, technique):
       continue
     shell, fresh = execute_cmd(checks.check_file(path))
-    if checks.common_file_exists(shell):
+    if checks.path_exists_on_target(shell):
       found.append(path)
   checks.print_common_files(found, filename)
 

@@ -1091,6 +1091,12 @@ misc.add_option("--purge",
                 default=False,
                 help="Safely remove all content from " + settings.APPLICATION + " data directory.")
 
+misc.add_option("--cleanup",
+                action="store_true",
+                dest="cleanup",
+                default=False,
+                help="Remove what this run itself wrote to the target ('--file-write', '--reg-add'), right after writing it.")
+
 misc.add_option("--unstable",
                 action="store_true",
                 dest="unstable",

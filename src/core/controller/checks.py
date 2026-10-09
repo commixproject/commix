@@ -4940,7 +4940,7 @@ def common_files_candidates():
 Whether 'check_file()' says the path exists - 'Test-Path' answers in words ('True'/'False'), which
 'if shell:' alone would read as existing either way, so the word itself is what is compared here.
 """
-def common_file_exists(shell):
+def path_exists_on_target(shell):
   if settings.TARGET_OS == settings.OS.WINDOWS:
     return str(shell).strip() == "True"
   return bool(shell)
@@ -5067,14 +5067,35 @@ def file_write_status(shell, dest_to_write):
     warn_msg = "The write to '" + dest_to_write + "' could not be verified - the confirmation "
     warn_msg += "output came back incomplete."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    return False
   elif shell:
     info_msg = "The file has been successfully created in remote directory: '" + dest_to_write + "'."
     settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
+    return True
   else:
     warn_msg = "The file does not appear to exist in the remote directory '" + dest_to_write + "'. "
     warn_msg += "This could mean the write failed, or you do not have permission to write to that directory."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    return False
 
+"""
+Remove a file '--cleanup' just confirmed this run wrote to the target, through the given
+execute_cmd(cmd) -> output callback - called right after the write, not deferred.
+"""
+def cleanup_remote_file(execute_cmd, path):
+  info_msg = "Cleaning up the file written to '" + path + "'."
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    cmd = settings.WIN_DEL + path.replace("\\", "\\\\")
+  else:
+    cmd = settings.DEL + quoted_cmd(path)
+  execute_cmd(cmd)
+  if path_exists_on_target(execute_cmd(check_file(path))):
+    warn_msg = "The file '" + path + "' still appears to exist on the target. Remove it by hand."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  else:
+    info_msg = "The file '" + path + "' has been removed from the target."
+    settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
 
 """
 Write a local file to the target, through the given execute_cmd(cmd) -> output callback.
@@ -5089,7 +5110,7 @@ def upload_file(execute_cmd, file_to_write, dest_to_write, content):
   else:
     execute_cmd(write_content(content, dest_to_write))
     shell = execute_cmd(remove_command_substitution(check_file(dest_to_write)))
-  file_write_status(shell, dest_to_write)
+  return file_write_status(shell, dest_to_write)
 
 """
 Read a file from the target, through the given execute_cmd(cmd) -> output callback.
@@ -5207,7 +5228,9 @@ def run_file_access(execute_cmd, filename):
   if menu.options.file_write:
     ran = True
     file_to_write, dest_to_write, content = check_file_to_write()
-    upload_file(execute_cmd, file_to_write, dest_to_write, content)
+    written = upload_file(execute_cmd, file_to_write, dest_to_write, content)
+    if written and menu.options.cleanup:
+      cleanup_remote_file(execute_cmd, dest_to_write)
 
   if menu.options.file_read:
     ran = True
@@ -5219,7 +5242,7 @@ def run_file_access(execute_cmd, filename):
     if candidates:
       info_msg = "Checking for " + str(len(candidates)) + " common file" + ('s', '')[len(candidates) == 1] + " on the target."
       settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-      found = [path for path in candidates if common_file_exists(execute_cmd(check_file(path)))]
+      found = [path for path in candidates if path_exists_on_target(execute_cmd(check_file(path)))]
       print_common_files(found, filename)
 
   if ran:
@@ -5280,13 +5303,44 @@ def registry_write_status(shell, key, value, newline_first=False):
   if shell and any(phrase.lower() in str(shell).lower() for phrase in settings.REG_ACCESS_DENIED):
     warn_msg = "It seems you do not have permission to write to the registry key '" + key + "'."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    return False
   elif shell and "operation completed successfully" in str(shell).lower():
     info_msg = "The registry value '" + value + "' has been successfully written to the key '" + key + "'."
     settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
+    return True
   else:
     warn_msg = "The registry value '" + value + "' does not appear to have been written to the key '" + key + "'. "
     warn_msg += "This could mean the write failed, or you do not have permission to write to that key."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    return False
+
+"""
+Remove a registry value (or whole key) '--cleanup' just confirmed this run wrote to the target,
+through the given execute_cmd(cmd) -> output callback - called right after the write, not deferred.
+"""
+def cleanup_registry_value(execute_cmd, key, value):
+  target = "value '" + value + "' of the key '" + key + "'" if value else "key '" + key + "'"
+  info_msg = "Cleaning up the registry " + target + "."
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  shell = execute_cmd(registry_delete_cmd_for(key, value))
+  if shell and "operation completed successfully" in str(shell).lower():
+    info_msg = "The registry " + target + " has been removed from the target."
+    settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
+  else:
+    warn_msg = "The registry " + target + " does not appear to have been removed. Remove it by hand."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
+"""
+The 'reg delete' command for a given key, or the single value of it named by 'value'.
+"""
+def registry_delete_cmd_for(key, value):
+  cmd = settings.WIN_REG_DEL + "\"" + key + "\""
+  # With no value named, 'reg delete' takes the bare key as the whole key to remove - '/va' would
+  # only clear its values and leave the key itself standing, which is not what "delete the key" means.
+  if value:
+    cmd += " /v \"" + value + "\""
+  cmd += " /f"
+  return cmd
 
 """
 Build the 'reg delete' command for the key named with '--reg-key', or the single value named with '--reg-value'.
@@ -5297,13 +5351,7 @@ def registry_delete_cmd():
   target = "value '" + value + "' of the key '" + key + "'" if value else "key '" + key + "'"
   info_msg = "Attempting to delete the registry " + target + "."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-  cmd = settings.WIN_REG_DEL + "\"" + key + "\""
-  # With no value named, 'reg delete' takes the bare key as the whole key to remove - '/va' would
-  # only clear its values and leave the key itself standing, which is not what "delete the key" means.
-  if value:
-    cmd += " /v \"" + value + "\""
-  cmd += " /f"
-  return cmd, key, value
+  return registry_delete_cmd_for(key, value), key, value
 
 """
 Display the result of an attempted registry deletion on the remote target.
@@ -5339,7 +5387,9 @@ def run_registry_access(execute_cmd, filename):
     ran = True
     cmd, key, value = registry_write_cmd()
     shell = execute_cmd(cmd)
-    registry_write_status(shell, key, value)
+    written = registry_write_status(shell, key, value)
+    if written and menu.options.cleanup:
+      cleanup_registry_value(execute_cmd, key, value)
 
   if menu.options.reg_read:
     ran = True
