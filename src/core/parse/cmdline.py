@@ -935,6 +935,12 @@ injection.add_option("--os-shell",
                 default=False,
                 help="Prompt for a command shell.")
 
+injection.add_option("--pty",
+                action="store_true",
+                dest="pty",
+                default=False,
+                help="Upgrade a built-in-handler reverse/bind TCP session to a full interactive PTY (Unix target only).")
+
 injection.add_option("--os",
                 action="store",
                 dest="os",

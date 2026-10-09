@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New option `--pty` for upgrading a plain reverse/bind TCP shell to a full interactive PTY.
 * Added: New option `--priv-esc` for running Metasploit's `local_exploit_suggester` automatically the instant a Meterpreter session opens.
 * Added: New option `--cleanup` for removing what `--file-write` or `--reg-add` just wrote to the target.
 * Added: New option `--common-files` for checking a bundled wordlist of common sensitive paths for existence on the target, as a lead into `--file-read`.
