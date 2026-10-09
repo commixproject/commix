@@ -959,6 +959,12 @@ injection.add_option("--msf-path",
                 default=False,
                 help="Set a local path where metasploit is installed.")
 
+injection.add_option("--priv-esc",
+                action="store_true",
+                dest="priv_esc",
+                default=False,
+                help="Suggest local privilege-escalation exploits as soon as a Meterpreter session opens.")
+
 # Detection options
 detection = OptionGroup(parser, "Detection", "These options can be "
                         "used to customize the detection phase.")
