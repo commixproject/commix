@@ -405,7 +405,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "208"
+REVISION = "209"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -939,6 +939,13 @@ LAST_LOGGED_PARAMETER = None
 # The accumulating --report-json data, built only when that option is set.
 REPORT_JSON = None
 LAST_LOG_GROUP = "header"
+
+# Said once per target, so a token carried on every request is not announced on every one of them.
+JWT_CHECKED = False
+
+# Put where a token would be, to find out whether the target gates on one at all. Deliberately not a
+# well-formed token - a token that is merely signed wrong is the thing being tested, not the ruler.
+JWT_NON_TOKEN = "not-a-token"
 
 # The max help option length.
 MAX_OPTION_LENGTH = 18
@@ -1551,7 +1558,11 @@ VALUE_ENCODING = None
 ENCODING_BASE64 = "base64"
 ENCODING_BASE64_SAFE = "base64-safe"
 ENCODING_HEX = "hex"
-SUPPORTED_PARAMETER_ENCODINGS = (ENCODING_BASE64, ENCODING_BASE64_SAFE, ENCODING_HEX)
+# A value carried as the 'kid' of a JSON Web Token - the field naming which key to verify with, read
+# by the target before the signature it would verify has been checked. The rest of the token is kept
+# exactly as it arrived, signature included, so what is tested is that one field.
+ENCODING_JWT_KID = "jwt-kid"
+SUPPORTED_PARAMETER_ENCODINGS = (ENCODING_BASE64, ENCODING_BASE64_SAFE, ENCODING_HEX, ENCODING_JWT_KID)
 # What the tamper scripts that used to write a value out encoded are taken to mean now.
 ENCODING_TAMPER_SCRIPTS = {"base64encode": ENCODING_BASE64, "hexencode": ENCODING_HEX}
 PARAMETER_ENCODINGS = {}

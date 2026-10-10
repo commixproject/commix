@@ -1018,6 +1018,12 @@ detection.add_option("--mine-endpoints",
                 default=False,
                 help="Mine for endpoints named in the scripts a page loads.")
 
+detection.add_option("--jwt",
+                action="store_true",
+                dest="jwt",
+                default=False,
+                help="Check the request's JSON Web Token and test its 'kid'.")
+
 detection.add_option("--skip-calc",
                 action="store_true",
                 dest="skip_calc",

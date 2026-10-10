@@ -1375,8 +1375,8 @@ def select_output_filename(technique, tmp_path, TAG, prompt=True):
   OUTPUT_TEXTFILE = TAG + settings.OUTPUT_FILE_EXT
 
   while prompt:
-    message = "Do you want to use a random file '" + OUTPUT_TEXTFILE 
-    message += "' to receive the execution output? [Y/n] "
+    message = "Do you want to use a random file ('" + OUTPUT_TEXTFILE 
+    message += "') to receive the execution output? [Y/n] "
     procced_option = common.read_input(message, default="Y", check_batch=True)
 
     if procced_option in settings.CHOICE_YES:

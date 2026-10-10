@@ -410,6 +410,7 @@ def init_injection(url):
   settings.WEB_ROOT_IS_GUESS = False
   settings.WRITABLE_DIR_ATTEMPT_SAID = False
   settings.WEB_ROOT_CATEGORY_LABEL = ""
+  settings.JWT_CHECKED = False
   if not settings.USER_APPLIED_WEB_ROOT:
     menu.options.web_root = False
 
@@ -800,6 +801,12 @@ def main(filename, url, http_request_method):
       err_msg = "You must specify the target URL."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit(settings.EXIT_FAILURE)
+
+    # Said before anything is tested, so what the request already carries is known going in.
+    if menu.options.jwt:
+      checks.scan_jwts(url, filename, http_request_method)
+    else:
+      checks.jwt_heuristic(url, filename)
 
     # Named nowhere by the target and answered to all the same, so tested like any other parameter.
     if menu.options.mine_params:

@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New switch `--jwt` for auditing the request's JSON Web Token, testing its `kid` as an injection point.
 * Added: A directory-choice menu for the file-based technique's writable-directory prompt, trying every candidate before falling back to `/tmp/`.
 * Added: Dictionary-based password cracking for `--passwords`' retrieved hashes (MD5-crypt, SHA-256/512-crypt), prompted automatically.
 * Added: New option `--pty` for upgrading a plain reverse/bind TCP shell to a full interactive PTY.

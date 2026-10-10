@@ -267,7 +267,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
               checks.set_target_os(shell_os)
               # A payload that ran answers what the banner could not, so nothing need be asked.
               settings.OS_IDENTIFICATION_PENDING = False
-              announce_heuristic_finding("identified command shell: '" + checks.target_shell_label() + "'")
+              announce_heuristic_finding("identified command shell type: '" + checks.target_shell_label() + "'")
               # A shell answering here says nothing about whether a string is also evaluated as
               # code, so it settles the question only where the code injection sink was not asked
               # for by name - otherwise every technique carrying it would skip itself, and the run
@@ -385,7 +385,7 @@ def oob_heuristic_basic(url, http_request_method, check_parameter, place):
     return url
   if not menu.options.os:
     settings.TARGET_OS = target_os
-  announce_heuristic_finding("identified command shell: '" + checks.target_shell_label() + "'")
+  announce_heuristic_finding("identified command shell type: '" + checks.target_shell_label() + "'")
   return url
 
 """
@@ -873,6 +873,13 @@ def injection_process(url, check_parameter, http_request_method, filename, times
     if decoded != settings.TESTABLE_VALUE:
       if menu.options.data:
         menu.options.data = menu.options.data.replace(settings.TESTABLE_VALUE, decoded)
+      # The envelope is taken off wherever the value rides, not just in the body and the URL - a
+      # carrier left holding the written-out value appends the payload to that instead, and what
+      # goes out is the whole envelope with the payload after it rather than the value replaced.
+      for option in ("cookie", "header", "headers", "host", "referer", "agent", "auth_cred"):
+        carried = getattr(menu.options, option, None)
+        if carried and settings.TESTABLE_VALUE in str(carried):
+          setattr(menu.options, option, str(carried).replace(settings.TESTABLE_VALUE, decoded))
       url = url.replace(settings.TESTABLE_VALUE, decoded)
       settings.TESTABLE_VALUE = decoded
 

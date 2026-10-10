@@ -37,6 +37,7 @@ from glob import glob
 from src.utils import common
 from src.utils import logs
 from src.utils import crypt_algos
+from src.utils import jwt_audit
 from src.core.parse import cmdline as menu
 from src.utils import settings
 from src.thirdparty.odict import OrderedDict
@@ -1813,7 +1814,7 @@ def target_fingerprint_summary():
   if technology:
     settings.print_data_to_stdout(settings.print_retrieved_data("Web application technology", ", ".join(technology)))
   if shell_identified:
-    settings.print_data_to_stdout(settings.print_retrieved_data("Command shell", target_shell_label()))
+    settings.print_data_to_stdout(settings.print_retrieved_data("Command shell type", target_shell_label()))
 
 def _injection_points_summary(header_msg, rows, decode_payload=False):
   settings.print_data_to_stdout(header_msg)
@@ -3739,6 +3740,12 @@ parameter written one way is not answered in another.
 def encoding_from_name(name, value):
   name = (name or "").strip().lower()
   value = value or ""
+  if name == settings.ENCODING_JWT_KID:
+    data = jwt_audit.parse(value)
+    # Only a token that names a 'kid' carries anything here - the rest of it is kept as it arrived.
+    if not data or "kid" not in data["header"]:
+      return None
+    return {"codec": "jwt-kid", "header": data["header"], "token": value}
   if name == settings.ENCODING_HEX:
     body = value[2:] if value[:2].lower() == "0x" else value
     return {"codec": "hex", "upper": body.upper() == body and body.lower() != body,
@@ -3836,6 +3843,8 @@ Write a value out the way the one it stands in for was written.
 def apply_encoding(value, description):
   if not description:
     return value
+  if description.get("codec") == "jwt-kid":
+    return jwt_audit.rewrite_kid(description.get("token") or "", value)
   if description.get("codec") == "hex":
     body = value.encode(settings.DEFAULT_CODEC).hex()
     if description.get("upper"):
@@ -3850,6 +3859,9 @@ def apply_encoding(value, description):
 def strip_encoding(value, description):
   if not description:
     return value
+  if description.get("codec") == "jwt-kid":
+    data = jwt_audit.parse(value)
+    return str(data["header"].get("kid", "")) if data else value
   if description.get("codec") == "hex":
     body = value[2:] if description.get("prefixed") else value
     return bytearray.fromhex(body).decode(settings.DEFAULT_CODEC)
@@ -5112,6 +5124,178 @@ def print_common_files(found, filename):
       logs.report_add_enumeration("common_files", path)
   else:
     info_msg = "None of the common files checked for were found on the target."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
+"""
+Where in the request a token could be carried, each named as it is reported. Parameters first, then
+the headers - the same order the token is looked for in.
+"""
+def _jwt_carriers(url):
+  return (("GET parameter", url, None),
+          ("POST parameter", menu.options.data, "data"),
+          ("Cookie parameter", menu.options.cookie, "cookie"),
+          ("'Host' header", menu.options.host, "host"),
+          ("'Referer' header", menu.options.referer, "referer"),
+          ("'User-Agent' header", menu.options.agent, "agent"),
+          ("'Authorization' header", menu.options.auth_cred, "auth_cred"),
+          ("extra header", menu.options.header, "header"),
+          ("extra header", menu.options.headers, "headers"))
+
+"""
+The name of the parameter carrying this token, where it rides in one written 'name=value'.
+"""
+def _jwt_parameter(value, token):
+  value = value or ""
+  # A URL carries its parameters after the '?', and everything before it is not one of them.
+  if "?" in value:
+    value = value.split("?", 1)[1]
+  for pair in re.split(r"[&;]", value):
+    name, separator, carried = pair.strip().partition("=")
+    if separator and token in carried:
+      return name.strip()
+  return None
+
+"""
+The first token the request carries, with where it was found and the parameter carrying it.
+"""
+def _locate_jwt(url):
+  for where, value, option in _jwt_carriers(url):
+    for token in jwt_audit.find(value):
+      return where, token, _jwt_parameter(value, token), option
+  return None, None, None, None
+
+"""
+The page the target answers with when the token is this one, or None where the request did not come
+back. The carrier is put back exactly as it was either way - every other check reads it afterwards.
+"""
+def _jwt_page(url, http_request_method, option, token, replacement):
+  from src.core.requests import requests
+  restore = getattr(menu.options, option) if option else None
+  try:
+    if option:
+      setattr(menu.options, option, str(restore).replace(token, replacement))
+      target = url
+    else:
+      target = url.replace(token, replacement)
+    response = requests.crawler_request(target, http_request_method)
+    if response is None or isinstance(response, bool):
+      return None
+    return decode_page_body(response.read(), response)
+  except Exception:
+    return None
+  finally:
+    if option:
+      setattr(menu.options, option, restore)
+
+"""
+A way to tell a token the target accepted from one it refused, or None where it answers both alike.
+
+Asked with something that is not a token at all, rather than with a token whose signature is wrong:
+a target that refuses the first but takes the second is exactly the target worth reporting, and
+building the oracle out of a wrong signature would have called that target indistinguishable and
+said nothing about it. What this separates is a target that gates on the token from one that never
+reads it - and only where it does gate can an answer below mean anything.
+"""
+def _jwt_oracle(url, http_request_method, option, token):
+  accepted = _jwt_page(url, http_request_method, option, token, token)
+  if accepted is None:
+    return None
+  refused = _jwt_page(url, http_request_method, option, token, settings.JWT_NON_TOKEN)
+  if refused is None:
+    return None
+  if comparable_page(accepted) == comparable_page(refused):
+    return None
+  return comparable_page(accepted)
+
+"""
+Emit findings most-severe first. A finding that names something worth testing is marked a candidate,
+one read straight off the token is marked confirmed - and only a real weakness is a warning.
+"""
+def _report_jwt(findings, filename):
+  if not findings:
+    info_msg = "No JSON Web Token weaknesses found."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    return
+
+  for finding_id, severity, summary, detail in sorted(findings, key=lambda _: jwt_audit.SEVERITY_RANK.get(_[1], 9)):
+    marker = "candidate" if finding_id in jwt_audit.CANDIDATES else "confirmed"
+    message = "JWT " + marker + " [" + severity + "]: " + summary + " (" + detail + ")."
+    if severity == "info":
+      settings.print_data_to_stdout(settings.print_info_msg(message))
+    else:
+      settings.print_data_to_stdout(settings.print_warning_msg(message))
+    logs.add_line(filename, message, group="jwt")
+
+"""
+Say once that the request carries a token, without being asked to look - the switch that examines it
+properly is named rather than assumed, so a run nobody asked for stays to a line.
+"""
+def jwt_heuristic(url, filename):
+  if settings.JWT_CHECKED or menu.options.jwt:
+    return
+  settings.JWT_CHECKED = True
+
+  where, token, _parameter, _option = _locate_jwt(url)
+  if not token:
+    return
+
+  info_msg = "Heuristic (JWT) test shows that the request carries a JSON Web Token (re-run with the '--jwt' switch)."
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  for _, severity, summary, detail in jwt_audit.audit(token):
+    message = "JWT weakness (" + severity + "): " + summary + "."
+    settings.print_data_to_stdout(settings.print_info_msg(message))
+    logs.add_line(filename, message, group="jwt")
+
+"""
+Report what the request's own token declares, read from the request as it stands and answered
+offline. Where it names a 'kid', the parameter carrying it is then marked so the run tests that
+field - nothing is signed for that, the token is rebuilt around each payload as it arrived.
+"""
+def scan_jwts(url, filename, http_request_method=settings.HTTPMETHOD.GET):
+  where, token, parameter, option = _locate_jwt(url)
+  if not token:
+    warn_msg = "No JSON Web Token found in the request (looked in the GET/POST/cookie parameters and the HTTP headers)."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    return
+
+  data = jwt_audit.parse(token)
+  info_msg = "Found a JSON Web Token in the " + where + " (algorithm '" + str(data["header"].get("alg") or "none") + "')."
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  logs.add_line(filename, "JWT (" + where + "): " + token, group="jwt")
+
+  findings = jwt_audit.audit(token)
+
+  """
+  What the target itself says about the token, which is the half the token cannot say on its own.
+
+  A target that never reads the signature answers a broken one exactly as it answers the real one -
+  so the two are asked for, and where they come back alike there is no answer to read and nothing
+  below is concluded. Nothing is signed for any of this: a signature is made unusable or dropped.
+  """
+  accepted = _jwt_oracle(url, http_request_method, option, token)
+  if accepted is None:
+    warn_msg = "The target answers the same whether the token is sent or not, so what it would make of a tampered one cannot be told apart (what the token itself declares still stands)."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  else:
+    broken = _jwt_page(url, http_request_method, option, token, jwt_audit.break_signature(token))
+    if broken is not None and comparable_page(broken) == accepted:
+      findings.append(("signature-not-verified", "critical", "the target accepts a token whose signature cannot be valid",
+                       "its claims are taken as read, so any of them can be restated"))
+    unsigned = _jwt_page(url, http_request_method, option, token, jwt_audit.strip_signature(token))
+    if unsigned is not None and comparable_page(unsigned) == accepted:
+      findings.append(("alg-none-accepted", "critical", "the target accepts an unsigned ('alg':'none') token",
+                       "its claims are taken as read, so any of them can be restated"))
+
+  _report_jwt(findings, filename)
+
+  """
+  A 'kid' named as worth testing is then actually tested, rather than left for the operator to wire
+  up by hand - the parameter carrying the token is marked as carrying its 'kid', so every technique
+  the run would use goes at that field with the rest of the token kept as it arrived.
+  """
+  if "kid" in data["header"] and parameter and not named_encoding(parameter, token):
+    settings.PARAMETER_ENCODINGS[parameter] = settings.ENCODING_JWT_KID
+    info_msg = "Testing the '" + parameter + "' parameter as the token's 'kid' from here on."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
 """
