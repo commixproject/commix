@@ -951,6 +951,15 @@ def injection_process(injection_type, technique, done=False, i=None, total=None)
   if settings.VERBOSITY_LEVEL != 0:
     return
   if not settings.PROGRESS_LINE_OPEN:
+    already_announced = settings.LAST_ANNOUNCED_TECHNIQUE == (settings.CHECKING_PARAMETER, technique_label(injection_type, technique))
+    # The line only closed because something else legitimately printed over it (e.g. a Y/n prompt
+    # deciding there is nothing left to try), not because testing moved on. Nothing is left to
+    # close in that case: the technique was already announced, and that other output already
+    # ended the line - neither re-announcing it nor a bare "(done)" with nothing before it on the
+    # line says anything the user was not already told.
+    if done and already_announced:
+      settings.LAST_COMPLETED_TECHNIQUE = technique
+      return
     testing_technique_title(injection_type, technique)
   if done:
     # Can be hit once per false-positive retry on the same technique - only print once.
@@ -4763,10 +4772,17 @@ Which dictionary file the attack below reads its candidate words from - the bund
 default, or a path of the user's own.
 """
 def choose_wordlist():
-  message = "What dictionary do you want to use?" + settings.END_LINE.LF
-  message += "[1] Default dictionary file '" + settings.PASSWORDS_TXT_FILE + "' (press Enter)" + settings.END_LINE.LF
-  message += "[2] Custom dictionary file"
-  choice = common.read_input(message, default="1", check_batch=True)
+  # Printed, not folded into the input() prompt below - see the matching note in
+  # choose_web_root_candidates().
+  question = "What dictionary do you want to use?"
+  options = (
+    "[1] Default dictionary file '" + settings.PASSWORDS_TXT_FILE + "' (press Enter)",
+    "[2] Custom dictionary file",
+  )
+  settings.print_data_to_stdout(Style.BRIGHT + question + Style.RESET_ALL)
+  for option in options:
+    settings.print_data_to_stdout(Style.BRIGHT + option + Style.RESET_ALL)
+  choice = resolve_menu_choice(question + " " + " ".join(options), "> ", "1")
   if choice == "2":
     path = common.read_input("What's the custom dictionary's location? ", default="", check_batch=True)
     if path and os.path.isfile(path):
@@ -5728,9 +5744,15 @@ def check_wrong_flags():
 Set writable path name
 """
 def setting_writable_dir(path):
-    info_msg = "Attempting to create a file in directory '" + path
-    info_msg += "' for execution output. "
-    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    if settings.VERBOSITY_LEVEL != 0:
+      info_msg = "Attempting to create a file in directory '" + path
+      info_msg += "' for execution output. "
+      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    elif not settings.WRITABLE_DIR_ATTEMPT_SAID:
+      settings.WRITABLE_DIR_ATTEMPT_SAID = True
+      where = settings.WEB_ROOT_CATEGORY_LABEL or "a writable directory"
+      info_msg = "Attempting to create a file in " + where + " for execution output."
+      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
 """
 Define python working dir (for windows targets)
@@ -5937,23 +5959,189 @@ def normalize_target_dir(path):
   return path
 
 """
+The directory-named-by-the-target-host candidates a brute-force search tries each prefix under -
+'www.example.com' also tries 'example.com', the way a vhost is as likely to be named one as the
+other; a bare IP or single-label host (no '.' to drop a label from) tries only itself.
+"""
+def brute_force_target_names():
+  host = settings.TARGET_URL or ""
+  if not host:
+    return set()
+  labels = host.split(".")
+  names = {host}
+  if labels[0] == "www":
+    names.add(".".join(labels[1:]))
+    names.add(".".join(labels[1:-1]))
+  else:
+    names.add(".".join(labels[:-1]))
+  names.discard("")
+  return names
+
+"""
+Every prefix/suffix combination worth trying blind - '--web-root'(interactive)'s 4th menu choice -
+target name substituted in where a prefix asks for one, nearest (most likely) first.
+"""
+def brute_force_web_roots():
+  sep = "\\" if settings.TARGET_OS == settings.OS.WINDOWS else "/"
+  prefixes = settings.BRUTE_DOC_ROOT_PREFIXES.get(settings.TARGET_OS, settings.BRUTE_DOC_ROOT_PREFIXES[settings.OS.UNIX])
+  names = brute_force_target_names()
+  candidates = []
+  for prefix in prefixes:
+    resolved = [prefix.replace(settings.DOC_ROOT_TARGET_MARK, name) for name in names] if settings.DOC_ROOT_TARGET_MARK in prefix else [prefix]
+    for base in resolved:
+      for suffix in settings.BRUTE_DOC_ROOT_SUFFIXES:
+        item = (base + sep + suffix) if suffix else base
+        if item not in candidates:
+          candidates.append(item)
+
+  info_msg = "Using generated directory list: " + ", ".join(candidates)
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
+  message = "Use any additional custom directories? [Enter for none] "
+  extra = common.read_input(message, default="", check_batch=True)
+  if extra:
+    candidates.extend(path.strip() for path in extra.split(",") if path.strip())
+  return candidates
+
+"""
+Resolve a numbered-menu answer: '--answers' is matched against the full question text (every
+option's own words, not just the bare prompt actually shown), the same breadth sqlmap's own
+answer-matching gets by searching its whole (there, multi-line) prompt - while what the operator
+actually sees stays the short, single-line, readline-safe prompt handed in as 'prompt'.
+"""
+def resolve_menu_choice(full_text, prompt, default):
+  if settings.ANSWERS and any(_ in settings.ANSWERS for _ in ",="):
+    for item in settings.ANSWERS.split(','):
+      question = item.split('=', 1)[0].strip()
+      answer = item.split('=', 1)[1] if '=' in item else None
+      if answer and question.lower() in full_text.lower():
+        settings.print_data_to_stdout(settings.print_message(prompt + str(answer)))
+        return answer
+  return common.read_input(prompt, default=default, check_batch=True)
+
+"""
+The directory-choice menu offered once a usable web root could not be worked out on its own - the
+same four choices every time: a short list of common locations, directories named by hand, a file
+listing them, or a brute-force sweep of likely ones - returning however many candidates that choice
+produced, nearest (most likely) first.
+"""
+def choose_web_root_candidates():
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    common_roots = list(settings.WINDOWS_DEFAULT_DOC_ROOTS)
+  else:
+    common_roots = [root.replace(settings.DOC_ROOT_TARGET_MARK, settings.TARGET_URL) for root in settings.LINUX_DEFAULT_DOC_ROOTS]
+
+  # The server's banner may have already guessed one - worth leading with, not worth trusting
+  # silently, since a guess is wrong often enough that the menu still belongs in front of it.
+  if settings.WEB_ROOT_IS_GUESS and settings.WEB_ROOT and settings.WEB_ROOT not in common_roots:
+    common_roots.insert(0, settings.WEB_ROOT)
+
+  # The full list is what gets tried - only a short preview of it is worth putting on one line,
+  # or the line wraps wherever the terminal happens to be narrow enough to break it.
+  preview = "'" + "', '".join(common_roots[:3]) + "'"
+  if len(common_roots) > 3:
+    preview += ", ..., " + str(len(common_roots)) + " total"
+  # Printed, not folded into the input() prompt below - a prompt with embedded newlines is a
+  # known readline weak spot (cursor/width tracking assumes one line), and corrupts on redraw in
+  # some terminals. Plain prints have no such tracking to get wrong.
+  question = "What do you want to use for the writable directory?"
+  options = (
+    "[1] Common location(s) (" + preview + ") (default)",
+    "[2] Custom location(s)",
+    "[3] Custom directory list file",
+    "[4] Brute force search",
+  )
+  settings.print_data_to_stdout(Style.BRIGHT + question + Style.RESET_ALL)
+  for option in options:
+    settings.print_data_to_stdout(Style.BRIGHT + option + Style.RESET_ALL)
+  # '--answers' is matched against the full text above (every option's own words), the same breadth
+  # sqlmap's own answer-matching gets by searching its whole (there, multi-line) prompt - while the
+  # prompt actually shown stays the bare "> " sqlmap itself shows once a multi-line one is rendered.
+  choice = resolve_menu_choice(question + " " + " ".join(options), "> ", "1")
+
+  if choice == "2":
+    settings.WEB_ROOT_CATEGORY_LABEL = "custom location(s)"
+    message = "Please provide a comma separated list of absolute directory paths"
+    given = common.read_input(message, default="", check_batch=True)
+    paths = [path.strip() for path in given.split(",") if path.strip()]
+    return paths or common_roots
+
+  if choice == "3":
+    settings.WEB_ROOT_CATEGORY_LABEL = "directory list file"
+    message = "What's the list file location? "
+    list_path = common.read_input(message, default="", check_batch=True)
+    try:
+      return common.load_list_from_file(list_path, "directory list")
+    except SystemExit:
+      return common_roots
+
+  if choice == "4":
+    settings.WEB_ROOT_CATEGORY_LABEL = "brute-forced directory list"
+    return brute_force_web_roots()
+
+  settings.WEB_ROOT_CATEGORY_LABEL = "common location(s)"
+  return common_roots
+
+"""
+Try to work out the web root from an absolute file path the target has already leaked somewhere
+in its own output - a PHP warning naming the script's own path is the most common way - checked
+before ever asking the operator, the same order sqlmap's own web-root resolution follows. A match
+is cut right after whichever generic document-root name (or the target's own hostname) it carries,
+the same as the directory the target is actually using is named.
+"""
+def web_root_from_leaked_path(url):
+  try:
+    parsed = _urllib.parse.urlparse(url)
+    response = get_response(parsed.scheme + "://" + parsed.netloc + "/")
+    if response is None or isinstance(response, bool):
+      return None
+    body = decode_page_body(response.read(), response)
+  except Exception:
+    return None
+
+  markers = ["/" + name + "/" for name in settings.GENERIC_DOC_ROOT_DIRECTORY_NAMES]
+  if parsed.hostname:
+    markers.append("/" + parsed.hostname + "/")
+
+  for match in re.finditer(settings.DIRECTORY_REGEX, body or ""):
+    path = match.group(0)
+    for marker in markers:
+      if marker in path:
+        return path.split(marker)[0] + marker
+
+  return None
+
+"""
 Provide custom server's root directory
 """
 def custom_web_root(url, timesec, filename, http_request_method, url_time_response):
   if not settings.CUSTOM_WEB_ROOT:
-    # Prefer the already-detected default over the generic one, but only while it still belongs to
-    # the operating system in use: the two disagree whenever that was settled after the root was.
-    if settings.WEB_ROOT and web_root_matches_os(settings.WEB_ROOT):
-      default_root_dir = settings.WEB_ROOT
-    elif settings.TARGET_OS == settings.OS.WINDOWS :
-      default_root_dir = settings.WINDOWS_DEFAULT_DOC_ROOTS[0]
+    # Prefer an already auto-detected root over asking - but only a genuinely confirmed one (never
+    # a banner guess, which belongs in the menu instead), and only its one, first turn, or a write
+    # failure on it would keep "preferring" the very path that just failed instead of moving on.
+    if not settings.WEB_ROOT_SETTLED_ONCE and settings.WEB_ROOT and not settings.WEB_ROOT_IS_GUESS and web_root_matches_os(settings.WEB_ROOT):
+      settings.WEB_ROOT_CANDIDATES = []
+    elif settings.WEB_ROOT_CANDIDATES:
+      # A previous choice already built a list - a write failure moves to the next untried
+      # candidate instead of asking the same question over again.
+      settings.WEB_ROOT = settings.WEB_ROOT_CANDIDATES.pop(0)
+      if settings.VERBOSITY_LEVEL != 0:
+        info_msg = "Trying '" + settings.WEB_ROOT + "' instead."
+        settings.print_data_to_stdout(settings.print_info_msg(info_msg))
     else:
-      default_root_dir = settings.LINUX_DEFAULT_DOC_ROOTS[0].replace(settings.DOC_ROOT_TARGET_MARK,settings.TARGET_URL)
-    message = "Enter a writable directory to use for file operations (e.g. '"
-    message += default_root_dir + "') "
-    settings.WEB_ROOT = common.read_input(message, default=default_root_dir, check_batch=True)
-    if len(settings.WEB_ROOT) == 0:
-      settings.WEB_ROOT = default_root_dir
+      leaked = web_root_from_leaked_path(url) if url else None
+      if leaked:
+        info_msg = "Retrieved the web server document root: '" + leaked + "'."
+        settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+        settings.WEB_ROOT = leaked
+        settings.WEB_ROOT_CANDIDATES = []
+      else:
+        warn_msg = "Unable to automatically retrieve the web server document root."
+        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+        candidates = choose_web_root_candidates()
+        settings.WEB_ROOT = candidates[0] if candidates else (settings.WINDOWS_DEFAULT_DOC_ROOTS[0] if settings.TARGET_OS == settings.OS.WINDOWS else settings.LINUX_DEFAULT_DOC_ROOTS[0])
+        settings.WEB_ROOT_CANDIDATES = candidates[1:]
+    settings.WEB_ROOT_SETTLED_ONCE = True
     settings.CUSTOM_WEB_ROOT = True
 
   if not settings.LOAD_SESSION:
@@ -6037,7 +6225,13 @@ Check if to use the "/tmp/" directory for tempfile-based technique.
 def use_temp_folder(no_result, url, timesec, filename, http_request_method, url_time_response):
   tmp_path = check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
   while True:
-    message = "Unable to write to '" + settings.WEB_ROOT + "'. "
+    # Named individually only at '-v' above 0 - at default verbosity, every path already tried
+    # was never named either, so the last one alone would not mean anything on its own.
+    if settings.VERBOSITY_LEVEL != 0 or not settings.WEB_ROOT_CATEGORY_LABEL:
+      where = "'" + settings.WEB_ROOT + "'"
+    else:
+      where = "any " + settings.WEB_ROOT_CATEGORY_LABEL + " directory"
+    message = "Unable to write to " + where + ". "
     message += "Do you want to use '" + tmp_path + "' instead? [Y/n] "
     tmp_upload = common.read_input(message, default="Y", check_batch=True)
     if tmp_upload in settings.CHOICE_YES:

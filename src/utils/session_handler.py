@@ -571,6 +571,16 @@ def load_stored_techniques(url, check_parameter, http_request_method):
     return stored
 
 """
+Raised by 'apply_stored_technique()' when an explicit '--web-root' conflicts with the one the
+stored file-based technique was found with - its own stored payload has that old path written
+into it, so honoring the new one while replaying the old payload verbatim would send the two
+different directories in the same request. The stored technique is dropped (forcing it to be
+found fresh, consistent with the path just given) rather than silently overriding either one.
+"""
+class StoredWebRootConflict(Exception):
+  pass
+
+"""
 Restore stored technique state and resume without querying the database again.
 """
 def apply_stored_technique(row):
@@ -625,9 +635,17 @@ def apply_stored_technique(row):
     # Stored as text, restored as one of the two values the rest of the code compares against.
     settings.TARGET_OS = settings.OS.WINDOWS if target_os.lower() == settings.OS.WINDOWS else settings.OS.UNIX
   if web_root and web_root != "None":
-    # The stored payload writes to the document root it was found with, spelled out inside it.
-    if settings.USER_APPLIED_WEB_ROOT:
-      announce_replay_conflict(web_root, menu.options.web_root, "document root", "--web-root")
+    # The stored payload writes to the document root it was found with, spelled out inside it - an
+    # explicit '--web-root' naming a different one cannot be honored by replaying that payload
+    # verbatim, so the stored technique is dropped instead of either value silently losing to the
+    # other; it is found again fresh, against the directory just given.
+    if settings.USER_APPLIED_WEB_ROOT and str(menu.options.web_root) != str(web_root):
+      warn_msg = ("The stored session was found using the document root '" + web_root + "', which "
+                  "differs from the '--web-root' value provided now ('" + str(menu.options.web_root) +
+                  "'). Forcing a fresh detection of the file-based technique to use it.")
+      say_once_about_session(warn_msg)
+      settings.STORED_TECHNIQUES.pop(technique, None)
+      raise StoredWebRootConflict()
     settings.WEB_ROOT = web_root
   for stored, applied_name, label, switch in ((second_url, "second_url", "second-order URL", "--second-url"),
                                              (second_req, "second_req", "second-order request file", "--second-req"),

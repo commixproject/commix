@@ -405,6 +405,11 @@ def init_injection(url):
   settings.WEB_ROOT = ""
   settings.DEFAULT_WEB_ROOT = ""
   settings.CUSTOM_WEB_ROOT = False
+  settings.WEB_ROOT_CANDIDATES = []
+  settings.WEB_ROOT_SETTLED_ONCE = False
+  settings.WEB_ROOT_IS_GUESS = False
+  settings.WRITABLE_DIR_ATTEMPT_SAID = False
+  settings.WEB_ROOT_CATEGORY_LABEL = ""
   if not settings.USER_APPLIED_WEB_ROOT:
     menu.options.web_root = False
 

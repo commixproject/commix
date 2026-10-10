@@ -405,7 +405,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "207"
+REVISION = "208"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -917,6 +917,11 @@ CUSTOM_FILENAME = ""
 # Whether '--web-root' was explicitly supplied on the CLI
 USER_APPLIED_WEB_ROOT = False
 USER_APPLIED_INTERPRETER = False
+
+# Whether WEB_ROOT is only a guess (from the server's banner) rather than something actually
+# confirmed - a guess is worth offering first, not worth skipping the directory-choice menu for,
+# since it is wrong often enough that silently trusting it just delays finding that out.
+WEB_ROOT_IS_GUESS = False
 USER_APPLIED_TIMESEC = False
 USER_APPLIED_TMP_PATH = False
 
@@ -1553,6 +1558,10 @@ PARAMETER_ENCODINGS = {}
 PARAMETER_ENCODING_DEFAULT = None
 
 DIRECTORY_REGEX = r'(?:/[^/]+)+?/\w+\.\w+'
+
+# Directory names a leaked absolute path (an error message naming the running script's own path is
+# the most common way) is cut at, the same document-root name the target itself is likely using.
+GENERIC_DOC_ROOT_DIRECTORY_NAMES = ("htdocs", "httpdocs", "public", "public_html", "wwwroot", "www", "site")
 
 # TFB Decimal
 TFB_DECIMAL = False
@@ -2377,6 +2386,33 @@ LINUX_DEFAULT_DOC_ROOTS = [
                   "/srv/www/htdocs/",                                    # SUSE/Fedora style
                   "/usr/local/lsws/DEFAULT/html/"                        # LiteSpeed default
 ]
+
+# Broader prefixes '--web-root'(interactive)'s brute-force search combines with the suffixes below -
+# independent of, and wider than, the common-location lists above.
+BRUTE_DOC_ROOT_PREFIXES = {
+  OS.WINDOWS: ("C:\\inetpub\\wwwroot", "C:\\xampp\\htdocs", "C:\\wamp\\www", "C:\\wamp64\\www", "C:\\laragon\\www", "C:\\Program Files\\Apache Group\\Apache2\\htdocs", "C:\\inetpub\\vhosts\\" + DOC_ROOT_TARGET_MARK),
+  OS.UNIX: ("/var/www", "/var/www/" + DOC_ROOT_TARGET_MARK, "/var/www/vhosts/" + DOC_ROOT_TARGET_MARK, "/var/www/html", "/usr/local/apache2/htdocs", "/usr/local/www/data", "/srv/www", "/srv/http", "/usr/share/nginx/html", "/opt/lampp/htdocs"),
+}
+BRUTE_DOC_ROOT_SUFFIXES = ("", "html", "htdocs", "httpdocs", "public", "public_html", "web", "www", "site", "data")
+
+# The candidate directories still untried from the last directory-choice menu, nearest first - the
+# one commix is already using is not in it, so a write failure pops straight to the next untried one.
+WEB_ROOT_CANDIDATES = []
+
+# Whether an auto-detected web root (or the directory-choice menu) has already had its one turn to
+# be preferred without asking - cleared once isn't "still auto-detected" on the next retry, or every
+# failed write would keep re-trying the same path instead of moving on to the next candidate.
+WEB_ROOT_SETTLED_ONCE = False
+
+# Whether the generic "looking for a writable directory" notice has already been said once at
+# default verbosity - a retry cycling through several candidates says it once, not once per
+# candidate; '-v' above 0 still names every one of them as it goes.
+WRITABLE_DIR_ATTEMPT_SAID = False
+
+# Which directory-choice menu answer the current web-root candidates came from (e.g. "common
+# location(s)", "custom location(s)") - named at default verbosity instead of each path in turn,
+# which only '-v' above 0 does. Empty where the root came from auto-detection, not the menu.
+WEB_ROOT_CATEGORY_LABEL = ""
 
 """
 Where each web server commix recognises keeps its document root, per platform.

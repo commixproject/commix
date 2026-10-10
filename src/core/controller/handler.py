@@ -522,6 +522,8 @@ def do_oob_process(url, timesec, filename, http_request_method, injection_type, 
       return _exploit(separator, prefix, suffix, settings.WHITESPACES[0], vuln_parameter, payloads.transport_of(payload), TAG)
     except TypeError:
       checks.error_loading_session_file()
+    except session_handler.StoredWebRootConflict:
+      pass
 
   _announce_technique(injection_type, technique)
 
@@ -790,6 +792,8 @@ def do_boolean_based_process(url, timesec, filename, http_request_method, inject
       TAG = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
     except TypeError:
       checks.error_loading_session_file()
+    except session_handler.StoredWebRootConflict:
+      pass
 
   _announce_technique(injection_type, technique)
 
@@ -1077,6 +1081,8 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
         resumed = True
       except TypeError:
         checks.error_loading_session_file()
+      except session_handler.StoredWebRootConflict:
+        pass
 
     if not resumed:
       num_of_chars = num_of_chars + 1
@@ -1374,6 +1380,9 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
   counter = 1
   exit_loops = False
   no_result = True
+  # Left unset where a stored technique was expected to resume outright - computed lazily below if
+  # a 'StoredWebRootConflict' sends that attempt back to the fresh detection path after all.
+  tmp_path = None
 
   if technique == settings.INJECTION_TECHNIQUE.RESULTS_BASED:
     try:
@@ -1475,6 +1484,8 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
         resumed = True
       except TypeError:
         checks.error_loading_session_file()
+      except session_handler.StoredWebRootConflict:
+        pass
 
     if not resumed:
       i = i + 1
@@ -1484,6 +1495,9 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
         prefix = ""
 
       if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
+        if tmp_path is None:
+          url_time_response = 0
+          tmp_path = checks.check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
         # The output file for file-based injection technique.
         OUTPUT_TEXTFILE = injector.select_output_filename(technique, tmp_path, TAG)
       else:
@@ -1550,6 +1564,19 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
               # Show an error message, after N failed tries.
               # Use the "/tmp/" directory for tempfile-based technique.
               elif (i == failed_tries and no_result is True) or (i == total):
+                """
+                A directory-choice menu left more candidates untried - move on to the next one
+                before ever offering "/tmp/". Done as a fresh call, not a 'continue' in place: 'i'
+                only ever counted up against the one 'combinations' list this call already built,
+                and the 'for' loop walking it does not rewind because a counter did - resetting 'i'
+                alone tried the new root against whatever few combinations were left in that same
+                exhausted pass, not a fair run of its own, and read as "still not injectable" after
+                barely trying. A fresh call builds its own list and its own count from zero.
+                """
+                if not settings.USER_APPLIED_WEB_ROOT and settings.WEB_ROOT_CANDIDATES:
+                  settings.CUSTOM_WEB_ROOT = False
+                  checks.custom_web_root(url, timesec, filename, http_request_method, url_time_response)
+                  return do_results_based_process(url, timesec, filename, http_request_method, injection_type, technique)
                 # Offered before giving up rather than instead of the last combinations: where
                 # there are fewer of those than '--failed-tries' allows, every one of them is
                 # still tried, and the temporary directory is what follows them failing.

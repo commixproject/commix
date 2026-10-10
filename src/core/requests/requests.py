@@ -1153,6 +1153,7 @@ def server_identification(response):
           # A server that runs on one platform only says which platform this is, whatever the
           # banner left out - IIS names no "(Win64)" and is no less Windows for it.
           settings.WEB_ROOT = roots.get(platform) or (list(roots.values())[0] if len(roots) == 1 else "")
+          settings.WEB_ROOT_IS_GUESS = bool(settings.WEB_ROOT)
           break
       break
 

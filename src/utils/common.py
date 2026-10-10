@@ -103,6 +103,11 @@ def read_input(message, default=None, check_batch=True):
       message += (settings.END_LINE.LF if message.count(settings.END_LINE.LF) > 1 else "")
     elif len(message) == 0:
       return is_empty()
+    elif not message.rstrip().endswith((']', '>')):
+      # A free-text answer prompt - not a '[Y/n]'-style one, and not already ending in its own
+      # '>' - marked the same way every one of them now is, so where to actually type is never
+      # in doubt.
+      message = message.rstrip() + " > "
     if settings.ANSWERS:
       if not any(_ in settings.ANSWERS for _ in ",="):
         return is_empty()
