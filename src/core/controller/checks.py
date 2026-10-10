@@ -208,6 +208,12 @@ def final_false_positive_check(url, http_request_method, check_parameter, timese
   if settings.VERBOSITY_LEVEL == 0:
     settings.print_data_to_stdout(" (done)")
   if not output:
+    # Said out loud, because what was already announced as found is being taken back here - left
+    # silent, the line that follows reads as though the technique above had never confirmed at all.
+    warn_msg = (settings.CHECKING_PARAMETER + " did not answer the same boundary a second time, so the "
+                "finding" + ('s', '')[len(new_points) == 1] + " reported above " +
+                ("is", "are")[len(new_points) != 1] + " discarded as a false positive.")
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     settings.CONFIRMED_INJECTION_POINTS = settings.CONFIRMED_INJECTION_POINTS[:mark]
     settings.IDENTIFIED_COMMAND_INJECTION = False
     for row in new_points:

@@ -405,7 +405,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "210"
+REVISION = "211"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1568,7 +1568,10 @@ ENCODING_TAMPER_SCRIPTS = {"base64encode": ENCODING_BASE64, "hexencode": ENCODIN
 PARAMETER_ENCODINGS = {}
 PARAMETER_ENCODING_DEFAULT = None
 
-DIRECTORY_REGEX = r'(?:/[^/]+)+?/\w+\.\w+'
+# Whitespace, angle brackets and quotes cannot be in a path worth reading back, and letting them in
+# is what turns a page that merely mentions a path in its prose into a match running across the
+# markup around it - tags, newlines and all - rather than the path itself.
+DIRECTORY_REGEX = r'(?:/[^/\s<>"\x27]+)+?/\w+\.\w+'
 
 # Directory names a leaked absolute path (an error message naming the running script's own path is
 # the most common way) is cut at, the same document-root name the target itself is likely using.

