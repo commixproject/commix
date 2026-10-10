@@ -6673,10 +6673,22 @@ out. Without a sum to check, any interaction counts.
 def oob_proof_holds(interactions, expected):
   if not expected:
     return bool(interactions)
+  """
+  Compared without regard to case, because a name lookup is not guaranteed to arrive spelled the way
+  it was sent - a resolver is free to change the case of what it forwards, which is the same reason
+  the output a lookup carries is encoded in lowercase hex before it goes out.
+  """
+  expected = expected.lower()
   for interaction in interactions:
+    # A lookup has no request line to read: what it carries is the name that was resolved, and the
+    # sum rides in a label of its own in front of the token.
+    if (interaction.protocol or "").lower() == "dns":
+      if expected in (interaction.identifier or "").lower():
+        return True
+      continue
     lines = (interaction.raw_request or "").splitlines()
     # Only the request line, so that a number appearing in a header cannot stand in for the result.
-    if lines and expected in lines[0]:
+    if lines and expected in lines[0].lower():
       return True
   return False
 

