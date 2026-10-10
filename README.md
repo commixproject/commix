@@ -33,16 +33,15 @@ You can visit the [collection of screenshots](https://github.com/commixproject/c
 
 ## Features
 
-* **Four injection techniques** - results-based (classic), boolean-based (blind, reading the answer off the page), time-based (blind), and file-based (blind, with a tempfile-based variant for write-restricted targets). Selected with `--technique`, or by the type they report with `--type`. Plus an out-of-band (OAST) channel over HTTP/S and DNS, turned on with its own `--oob` switch rather than a `--technique` of its own.
-* **Code injection** - `--eval` tests the string a target evaluates as code, in `PHP`, `Python`, `Ruby`, `JavaScript` or `PowerShell`, over the same four techniques (and the out-of-band channel).
-* **Broad injection surface** - GET/POST parameters, HTTP headers, cookies, and JSON/XML request bodies, plus the `shellshock` module for CGI targets.
-* **Interactive shells and post-exploitation** - an `os_shell` on the target, built-in `reverse_tcp` and `bind_tcp` modes, file `download`/`upload` over the established shell, and enumeration of the current user, hostname, privileges, system information, users and password hashes. Every finding can be re-proved with `--proof`, which runs an experiment of its own and writes the transcript beside the run's output.
-* **Filter and WAF evasion** - Multiple combinable tamper scripts, applied in a deterministic order.
-* **Flexible targeting** - a single URL, a crawl, HTML forms, a sitemap, an OpenAPI (Swagger) description, a proxy log, a bulk file, a raw HTTP request file, or piped `stdin`.
-* **Resumable scans and machine-readable output** - results are stored per target in a session file, and can be exported as JSON, as a CSV covering every target tested, or as a HAR log of the run's HTTP traffic. The options a run was given can be saved as a profile and reused.
-* **Wide back-end support** - PHP, Python, Perl, Ruby, ASP.NET, JSP and CGI, and works against both Unix-like and Windows targets - see
-[Windows and Unix-like targets at a glance](https://github.com/commixproject/commix/wiki/Techniques#windows-and-unix-like-targets-at-a-glance)
-for how the payloads differ.
+* **Four injection techniques** - results-based, boolean-based, time-based and file-based, chosen with `--technique` or by the type they report with `--type` - see [techniques](https://github.com/commixproject/commix/wiki/Techniques) for what each one asks of a target.
+* **Out-of-band, when nothing comes back at all** - `--oob` proves execution and carries the command's output over HTTP/S or DNS, reaching the server through whichever client the target happens to have - see [out-of-band client](https://github.com/commixproject/commix/wiki/Usage#out-of-band-client) for the ones it tries and how to pin one.
+* **Code injection** - [`--eval`](https://github.com/commixproject/commix/wiki/Usage#test-for-code-injection) tests what a target evaluates as code, in `PHP`, `Python`, `Ruby`, `JavaScript` or `PowerShell`, over those same techniques.
+* **Wherever input lands** - GET/POST parameters, [HTTP headers and cookies](https://github.com/commixproject/commix/wiki/Usage#request-options), JSON/XML/GraphQL bodies, plus the `shellshock` module for CGI targets.
+* **From proof to shell** - [`--os-shell`](https://github.com/commixproject/commix/wiki/Getting-shells), built-in `reverse_tcp` and `bind_tcp` upgradeable to a full PTY, file transfer, Windows registry read/write, and enumeration through to password hashes with a dictionary attack offered against them.
+* **Filter and WAF evasion** - combinable tamper scripts, applied in a deterministic order - see [filters bypass examples](https://github.com/commixproject/commix/wiki/Filters-bypass-examples).
+* **Targets in any shape** - a URL, a crawl, HTML forms, a sitemap, an OpenAPI (Swagger) description, a proxy log, a bulk file, a raw HTTP request, or piped `stdin` - see [target options](https://github.com/commixproject/commix/wiki/Usage#target-options).
+* **Resumable and scriptable** - [per-target session files](https://github.com/commixproject/commix/wiki/Usage#resume-from-stored-session-data), JSON/CSV/HAR output, reusable option profiles, and `--proof`, which re-proves any finding with an experiment of its own.
+* **Unix-like and Windows** - PHP, Python, Perl, Ruby, ASP.NET, JSP and CGI back ends - see [Windows and Unix-like targets at a glance](https://github.com/commixproject/commix/wiki/Techniques#windows-and-unix-like-targets-at-a-glance) for how the payloads differ.
 
 ## Installation
 
@@ -71,9 +70,11 @@ Prove execution out-of-band, where the response carries nothing back :
     $ python3 commix.py --url="http://commix-testbed/scenarios/regular/POST/blind.php" --data="addr=127.0.0.1" --oob
 
 > [!NOTE]
-> Out-of-band (OAST) detection with `--oob` uses the public `oast.fun` interactsh server by default,
-> so interaction metadata for your target leaves your network. Point `--oob-server` at a self-hosted
-> instance to keep it in-house. For a detailed guide, refer to the
+> The client is picked by what the target has, so a host stripped of the usual HTTP clients is still
+> in reach - pin one with `--oob-transport` where its egress is already known. By default `--oob` uses
+> the public `oast.fun` interactsh server, so interaction metadata for your target leaves your
+> network; point `--oob-server` at a self-hosted instance to keep it in-house. For a detailed guide,
+> refer to the
 > [**`out-of-band-oob-channel`**](https://github.com/commixproject/commix/wiki/Techniques#out-of-band-oob-channel) wiki page.
 
 Scan a list of targets unattended and write the results to a file :

@@ -33,14 +33,15 @@ To **commix** (συντομογραφία [**comm**]and [**i**]njection e[**x**]
 
 ## Χαρακτηριστικά
 
-* **Τέσσερις τεχνικές injection** – results-based (classic), boolean-based (blind, με την απάντηση να διαβάζεται από τη σελίδα), time-based (blind) και file-based (blind, με παραλλαγή βασισμένη σε προσωρινό αρχείο για targets με περιορισμούς εγγραφής). Επιλέγονται με `--technique` ή βάσει του τύπου που αναφέρουν με `--type`. Επιπλέον, ένα κανάλι out-of-band (OAST) μέσω HTTP/S και DNS, που ενεργοποιείται με το δικό του διακόπτη `--oob` αντί για `--technique`.
-* **Code injection** – το `--eval` ελέγχει strings που εκτελούνται ως κώδικας από το target, σε PHP, Python, Ruby, JavaScript ή PowerShell, χρησιμοποιώντας τις ίδιες τέσσερις τεχνικές (και το κανάλι out-of-band).
-* **Ευρεία κάλυψη injection επιφανειών** – GET/POST parameters, HTTP headers, cookies και JSON/XML request bodies, καθώς και το `shellshock` module για CGI targets.
-* **Interactive shells και post-exploitation** – `os_shell` στο target, ενσωματωμένα modes `reverse_tcp` και `bind_tcp`, `download`/`upload` αρχείων μέσω του established shell, καθώς και enumeration για current user, hostname, privileges, system information, users και password hashes. Κάθε εύρημα μπορεί να επαληθευτεί εκ νέου με το `--proof`, το οποίο εκτελεί δικό του πείραμα και αποθηκεύει το transcript δίπλα στο output του run.
-* **Filter και WAF evasion** – πολλαπλά συνδυάσιμα tamper scripts, τα οποία εφαρμόζονται με deterministic σειρά.
-* **Ευέλικτο targeting** – υποστήριξη για single URL, crawl, HTML forms, sitemap, OpenAPI (Swagger) description, proxy log, bulk file, raw HTTP request file ή δεδομένα μέσω piped `stdin`.
-* **Resumable scans και machine-readable output** – τα αποτελέσματα αποθηκεύονται ανά target σε session file και μπορούν να εξαχθούν σε JSON, CSV που περιλαμβάνει όλα τα tested targets ή HAR log με το HTTP traffic του run. Οι επιλογές ενός run μπορούν επίσης να αποθηκευτούν ως profile και να επαναχρησιμοποιηθούν.
-* **Ευρεία υποστήριξη back-ends** – PHP, Python, Perl, Ruby, ASP.NET, JSP και CGI, με υποστήριξη τόσο για Unix-like όσο και για Windows targets. Δείτε το [Windows and Unix-like targets at a glance](https://github.com/commixproject/commix/wiki/Techniques#windows-and-unix-like-targets-at-a-glance) για τις διαφορές στα payloads.
+* **Τέσσερις τεχνικές injection** – results-based, boolean-based, time-based και file-based, που επιλέγονται με `--technique` ή βάσει του τύπου που αναφέρουν με `--type` – δείτε τις [techniques](https://github.com/commixproject/commix/wiki/Techniques) για το τι απαιτεί η καθεμία από ένα target.
+* **Out-of-band, όταν δεν επιστρέφει τίποτα** – το `--oob` αποδεικνύει την εκτέλεση και μεταφέρει το output της εντολής μέσω HTTP/S ή DNS, φτάνοντας στον server μέσω όποιου client τυχαίνει να διαθέτει το target – δείτε [out-of-band client](https://github.com/commixproject/commix/wiki/Usage#out-of-band-client) για το ποιους δοκιμάζει και πώς να ορίσετε έναν.
+* **Code injection** – το [`--eval`](https://github.com/commixproject/commix/wiki/Usage#test-for-code-injection) ελέγχει ό,τι εκτελείται ως κώδικας από το target, σε PHP, Python, Ruby, JavaScript ή PowerShell, με τις ίδιες τεχνικές.
+* **Όπου κι αν καταλήγει το input** – GET/POST parameters, [HTTP headers και cookies](https://github.com/commixproject/commix/wiki/Usage#request-options), JSON/XML/GraphQL bodies, καθώς και το `shellshock` module για CGI targets.
+* **Από την απόδειξη στο shell** – [`--os-shell`](https://github.com/commixproject/commix/wiki/Getting-shells), ενσωματωμένα `reverse_tcp` και `bind_tcp` με αναβάθμιση σε πλήρες PTY, μεταφορά αρχείων, read/write στο Windows registry και enumeration μέχρι τα password hashes, με dictionary attack να προσφέρεται εναντίον τους.
+* **Filter και WAF evasion** – συνδυάσιμα tamper scripts, που εφαρμόζονται με deterministic σειρά – δείτε [filters bypass examples](https://github.com/commixproject/commix/wiki/Filters-bypass-examples).
+* **Targets σε κάθε μορφή** – URL, crawl, HTML forms, sitemap, OpenAPI (Swagger) description, proxy log, bulk file, raw HTTP request ή piped `stdin` – δείτε [target options](https://github.com/commixproject/commix/wiki/Usage#target-options).
+* **Resumable και scriptable** – [session files ανά target](https://github.com/commixproject/commix/wiki/Usage#resume-from-stored-session-data), output σε JSON/CSV/HAR, επαναχρησιμοποιήσιμα profiles επιλογών και το `--proof`, που επαληθεύει εκ νέου κάθε εύρημα με δικό του πείραμα.
+* **Unix-like και Windows** – PHP, Python, Perl, Ruby, ASP.NET, JSP και CGI back ends – δείτε το [Windows and Unix-like targets at a glance](https://github.com/commixproject/commix/wiki/Techniques#windows-and-unix-like-targets-at-a-glance) για τις διαφορές στα payloads.
 
 
 ## Εγκατάσταση
@@ -72,10 +73,12 @@ To **commix** (συντομογραφία [**comm**]and [**i**]njection e[**x**]
     $ python3 commix.py --url="http://commix-testbed/scenarios/regular/POST/blind.php" --data="addr=127.0.0.1" --oob
 
 > [!NOTE]
-> Η ανίχνευση εκτός ζώνης (OAST) με την επιλογή `--oob` χρησιμοποιεί από προεπιλογή τον δημόσιο
-> διακομιστή interactsh `oast.fun`, οπότε μεταδεδομένα των αλληλεπιδράσεων με τον στόχο σας φεύγουν
-> από το δίκτυό σας. Ορίστε την `--oob-server` σε μια δική σας εγκατάσταση, ώστε να παραμείνουν
-> εσωτερικά. Για αναλυτικό οδηγό, συμβουλευτείτε τη σελίδα
+> Ο client επιλέγεται βάσει του τι διαθέτει ο στόχος, οπότε ένα μηχάνημα χωρίς τους συνηθισμένους
+> HTTP clients παραμένει προσβάσιμο – ορίστε έναν με την `--oob-transport` όταν η εξερχόμενη
+> κίνησή του είναι ήδη γνωστή. Η ανίχνευση εκτός ζώνης (OAST) με την επιλογή `--oob` χρησιμοποιεί
+> από προεπιλογή τον δημόσιο διακομιστή interactsh `oast.fun`, οπότε μεταδεδομένα των
+> αλληλεπιδράσεων με τον στόχο σας φεύγουν από το δίκτυό σας. Ορίστε την `--oob-server` σε μια δική
+> σας εγκατάσταση, ώστε να παραμείνουν εσωτερικά. Για αναλυτικό οδηγό, συμβουλευτείτε τη σελίδα
 > [**`out-of-band-oob-channel`**](https://github.com/commixproject/commix/wiki/Techniques#out-of-band-oob-channel) στο wiki.
 
 Σάρωση λίστας στόχων χωρίς επίβλεψη και εγγραφή των αποτελεσμάτων σε αρχείο :

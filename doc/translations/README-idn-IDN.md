@@ -34,14 +34,15 @@ Anda dapat mengunjungi [koleksi dari tangkapan layar](https://github.com/commixp
 
 ## Fitur
 
-* **Empat teknik injeksi** - results-based (classic), boolean-based (buta, membaca jawabannya dari halaman), time-based (buta) dan file-based (buta, dengan varian tempfile-based untuk target yang terbatas hak tulisnya). Dipilih dengan `--technique`, atau berdasarkan tipe yang mereka laporkan dengan `--type`. Ditambah saluran out-of-band (OAST) melalui HTTP/S dan DNS, diaktifkan dengan switch `--oob` miliknya sendiri, bukan `--technique`.
-* **Injeksi kode** - `--eval` menguji string yang dievaluasi target sebagai kode, dalam PHP, Python, Ruby, JavaScript, atau PowerShell, dengan empat teknik yang sama (dan saluran out-of-band).
-* **Permukaan injeksi yang luas** - parameter GET/POST, header HTTP, cookie, dan body permintaan JSON/XML, serta modul `shellshock` untuk target CGI.
-* **Shell interaktif dan pasca-eksploitasi** - `os_shell` pada target, mode bawaan `reverse_tcp` dan `bind_tcp`, transfer berkas (`download`/`upload`) melalui shell yang telah terbentuk, serta enumerasi pengguna saat ini, nama host, hak akses, informasi sistem, daftar pengguna dan hash kata sandi. Setiap temuan dapat dibuktikan kembali dengan `--proof`, yang menjalankan percobaannya sendiri dan menulis transkripnya di samping keluaran pemindaian.
-* **Pengelakan filter dan WAF** - Beberapa skrip tamper yang dapat dikombinasikan, diterapkan dalam urutan yang deterministik.
-* **Penentuan target yang fleksibel** - satu URL, penelusuran situs, formulir HTML, sitemap, deskripsi OpenAPI (Swagger), log proxy, berkas berisi banyak target, berkas permintaan HTTP mentah, atau masukan `stdin`.
-* **Pemindaian yang dapat dilanjutkan dan keluaran terbaca mesin** - hasil disimpan per target dalam berkas sesi dan dapat diekspor sebagai JSON, sebagai CSV yang mencakup setiap target yang diuji, atau sebagai catatan HAR dari lalu lintas HTTP pemindaian. Opsi yang digunakan sebuah pemindaian dapat disimpan sebagai profil dan digunakan kembali.
-* **Dukungan back-end yang luas** - PHP, Python, Perl, Ruby, ASP.NET, JSP dan CGI, serta bekerja terhadap target Unix maupun Windows - lihat
+* **Empat teknik injeksi** - results-based, boolean-based, time-based dan file-based, dipilih dengan `--technique` atau berdasarkan tipe yang mereka laporkan dengan `--type` - lihat [techniques](https://github.com/commixproject/commix/wiki/Techniques) untuk apa yang dituntut masing-masing dari sebuah target.
+* **Out-of-band, ketika tidak ada yang kembali** - `--oob` membuktikan eksekusi dan membawa keluaran perintah melalui HTTP/S atau DNS, mencapai server lewat klien apa pun yang kebetulan dimiliki target - lihat [out-of-band client](https://github.com/commixproject/commix/wiki/Usage#out-of-band-client) untuk klien yang dicoba dan cara menetapkan salah satunya.
+* **Injeksi kode** - [`--eval`](https://github.com/commixproject/commix/wiki/Usage#test-for-code-injection) menguji apa yang dievaluasi target sebagai kode, dalam PHP, Python, Ruby, JavaScript, atau PowerShell, dengan teknik yang sama.
+* **Di mana pun masukan mendarat** - parameter GET/POST, [header HTTP dan cookie](https://github.com/commixproject/commix/wiki/Usage#request-options), body JSON/XML/GraphQL, serta modul `shellshock` untuk target CGI.
+* **Dari bukti ke shell** - [`--os-shell`](https://github.com/commixproject/commix/wiki/Getting-shells), mode bawaan `reverse_tcp` dan `bind_tcp` yang dapat ditingkatkan menjadi PTY penuh, transfer berkas, baca/tulis registry Windows, dan enumerasi hingga hash kata sandi, dengan serangan kamus yang ditawarkan terhadapnya.
+* **Pengelakan filter dan WAF** - skrip tamper yang dapat dikombinasikan, diterapkan dalam urutan yang deterministik - lihat [filters bypass examples](https://github.com/commixproject/commix/wiki/Filters-bypass-examples).
+* **Target dalam bentuk apa pun** - satu URL, penelusuran situs, formulir HTML, sitemap, deskripsi OpenAPI (Swagger), log proxy, berkas berisi banyak target, permintaan HTTP mentah, atau masukan `stdin` - lihat [target options](https://github.com/commixproject/commix/wiki/Usage#target-options).
+* **Dapat dilanjutkan dan diskripkan** - [berkas sesi per target](https://github.com/commixproject/commix/wiki/Usage#resume-from-stored-session-data), keluaran JSON/CSV/HAR, profil opsi yang dapat digunakan kembali, dan `--proof`, yang membuktikan kembali setiap temuan dengan percobaannya sendiri.
+* **Unix maupun Windows** - back-end PHP, Python, Perl, Ruby, ASP.NET, JSP dan CGI - lihat
 [Windows and Unix-like targets at a glance](https://github.com/commixproject/commix/wiki/Techniques#windows-and-unix-like-targets-at-a-glance)
 untuk perbedaan muatannya.
 
@@ -74,8 +75,10 @@ Membuktikan eksekusi secara out-of-band, ketika respons tidak mengembalikan apa 
     $ python3 commix.py --url="http://commix-testbed/scenarios/regular/POST/blind.php" --data="addr=127.0.0.1" --oob
 
 > [!NOTE]
-> Deteksi out-of-band (OAST) dengan `--oob` secara bawaan menggunakan server interactsh publik
-> `oast.fun`, sehingga metadata interaksi dengan target Anda keluar dari jaringan Anda. Arahkan
+> Klien dipilih berdasarkan apa yang dimiliki target, sehingga mesin tanpa klien HTTP yang biasa pun
+> tetap terjangkau - tetapkan salah satu dengan `--oob-transport` bila jalur keluarnya sudah
+> diketahui. Deteksi out-of-band (OAST) dengan `--oob` secara bawaan menggunakan server interactsh
+> publik `oast.fun`, sehingga metadata interaksi dengan target Anda keluar dari jaringan Anda. Arahkan
 > `--oob-server` ke instansi milik sendiri agar tetap berada di jaringan internal. Untuk panduan
 > lengkap, lihat halaman
 > [**`out-of-band-oob-channel`**](https://github.com/commixproject/commix/wiki/Techniques#out-of-band-oob-channel) di wiki.

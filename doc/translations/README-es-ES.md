@@ -34,14 +34,15 @@ Puede visitar la **[colección de capturas de pantalla](https://github.com/commi
 
 ## Características
 
-* **Cuatro técnicas de inyección** - results-based (classic), boolean-based (a ciegas, leyendo la respuesta en la página), time-based (a ciegas) y file-based (a ciegas, con una variante tempfile-based para objetivos con escritura restringida). Se eligen con `--technique`, o según el tipo con el que se informan con `--type`. Además, un canal out-of-band (OAST) sobre HTTP/S y DNS, activado con su propio interruptor `--oob` en vez de una `--technique` propia.
-* **Inyección de código** - `--eval` prueba la cadena que el objetivo evalúa como código, en PHP, Python, Ruby, JavaScript o PowerShell, con las mismas cuatro técnicas (y el canal out-of-band).
-* **Amplia superficie de inyección** - parámetros GET/POST, cabeceras HTTP, cookies y cuerpos de petición JSON/XML, además del módulo `shellshock` para objetivos CGI.
-* **Shells interactivas y post-explotación** - una `os_shell` en el objetivo, los modos integrados `reverse_tcp` y `bind_tcp`, transferencia de archivos (`download`/`upload`) a través de la shell establecida, y enumeración del usuario actual, nombre del host, privilegios, información del sistema, usuarios y hashes de contraseñas. Cada hallazgo puede volver a demostrarse con `--proof`, que ejecuta un experimento propio y escribe la transcripción junto a la salida del análisis.
-* **Evasión de filtros y WAF** - Múltiples scripts de manipulación (tamper) combinables, aplicados en un orden determinista.
-* **Objetivos flexibles** - una única URL, un rastreo del sitio, formularios HTML, un sitemap, una descripción OpenAPI (Swagger), un registro de proxy, un archivo con varios objetivos, un archivo con una petición HTTP en bruto o entrada por `stdin`.
-* **Análisis reanudables y salida legible por máquina** - los resultados se almacenan por objetivo en un archivo de sesión y pueden exportarse como JSON, como un CSV que abarca todos los objetivos analizados, o como un registro HAR del tráfico HTTP del análisis. Las opciones con las que se ejecutó un análisis pueden guardarse como perfil y reutilizarse.
-* **Amplio soporte de back-end** - PHP, Python, Perl, Ruby, ASP.NET, JSP y CGI, y funciona tanto contra objetivos tipo Unix como Windows - consulte
+* **Cuatro técnicas de inyección** - results-based, boolean-based, time-based y file-based, elegidas con `--technique` o según el tipo con el que se informan con `--type` - consulte [techniques](https://github.com/commixproject/commix/wiki/Techniques) para ver qué exige cada una de un objetivo.
+* **Out-of-band, cuando no vuelve nada** - `--oob` demuestra la ejecución y trae de vuelta la salida del comando sobre HTTP/S o DNS, llegando al servidor mediante el cliente que el objetivo tenga - consulte [out-of-band client](https://github.com/commixproject/commix/wiki/Usage#out-of-band-client) para ver cuáles prueba y cómo fijar uno.
+* **Inyección de código** - [`--eval`](https://github.com/commixproject/commix/wiki/Usage#test-for-code-injection) prueba lo que el objetivo evalúa como código, en PHP, Python, Ruby, JavaScript o PowerShell, con esas mismas técnicas.
+* **Dondequiera que llegue la entrada** - parámetros GET/POST, [cabeceras HTTP y cookies](https://github.com/commixproject/commix/wiki/Usage#request-options), cuerpos JSON/XML/GraphQL, además del módulo `shellshock` para objetivos CGI.
+* **De la prueba a la shell** - [`--os-shell`](https://github.com/commixproject/commix/wiki/Getting-shells), los modos integrados `reverse_tcp` y `bind_tcp` ampliables a una PTY completa, transferencia de archivos, lectura y escritura del registro de Windows, y enumeración hasta los hashes de contraseñas, con un ataque de diccionario ofrecido contra ellos.
+* **Evasión de filtros y WAF** - scripts de manipulación (tamper) combinables, aplicados en un orden determinista - consulte [filters bypass examples](https://github.com/commixproject/commix/wiki/Filters-bypass-examples).
+* **Objetivos de cualquier forma** - una URL, un rastreo del sitio, formularios HTML, un sitemap, una descripción OpenAPI (Swagger), un registro de proxy, un archivo con varios objetivos, una petición HTTP en bruto o entrada por `stdin` - consulte [target options](https://github.com/commixproject/commix/wiki/Usage#target-options).
+* **Reanudable y automatizable** - [archivos de sesión por objetivo](https://github.com/commixproject/commix/wiki/Usage#resume-from-stored-session-data), salida JSON/CSV/HAR, perfiles de opciones reutilizables y `--proof`, que vuelve a demostrar cualquier hallazgo con un experimento propio.
+* **Tipo Unix y Windows** - back-ends PHP, Python, Perl, Ruby, ASP.NET, JSP y CGI - consulte
 [Windows and Unix-like targets at a glance](https://github.com/commixproject/commix/wiki/Techniques#windows-and-unix-like-targets-at-a-glance)
 para ver en qué se diferencian las cargas útiles.
 
@@ -81,7 +82,9 @@ $ python3 commix.py --url="http://commix-testbed/scenarios/regular/POST/blind.ph
 ```
 
 > [!NOTE]
-> La detección fuera de banda (OAST) con `--oob` utiliza de forma predeterminada el servidor
+> El cliente se elige según lo que tenga el objetivo, de modo que una máquina sin los clientes HTTP
+> habituales sigue estando al alcance - fije uno con `--oob-transport` cuando su salida a red ya se
+> conozca. La detección fuera de banda (OAST) con `--oob` utiliza de forma predeterminada el servidor
 > interactsh público `oast.fun`, por lo que los metadatos de las interacciones con su objetivo salen
 > de su red. Apunte `--oob-server` a una instancia propia para mantenerlos internos. Para una guía
 > detallada, consulte la página

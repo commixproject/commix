@@ -34,14 +34,15 @@ Wiki'deki bazı özellikleri gösteren [ekran görüntüleri koleksiyonunu](http
 
 ## Özellikler
 
-* **Dört enjeksiyon tekniği** - results-based (classic), boolean-based (kör, yanıtı sayfadan okuyarak), time-based (kör) ve file-based (kör, yazma kısıtlı hedefler için tempfile-based varyantıyla birlikte). `--technique` ile ya da `--type` ile bildirildikleri türe göre seçilir. Ayrıca, bir `--technique` değil kendi `--oob` anahtarıyla açılan, HTTP/S ile DNS üzerinden out-of-band (OAST) kanalı.
-* **Kod enjeksiyonu** - `--eval`, hedefin kod olarak değerlendirdiği dizgeyi PHP, Python, Ruby, JavaScript veya PowerShell olarak, aynı dört teknikle (ve out-of-band kanalıyla) sınar.
-* **Geniş enjeksiyon yüzeyi** - GET/POST parametreleri, HTTP başlıkları, çerezler ve JSON/XML istek gövdeleri; ayrıca CGI hedefleri için `shellshock` modülü.
-* **Etkileşimli kabuklar ve sömürü sonrası** - hedef üzerinde `os_shell`, yerleşik `reverse_tcp` ve `bind_tcp` modları, kurulan kabuk üzerinden dosya aktarımı (`download`/`upload`) ve geçerli kullanıcı, makine adı, yetkiler, sistem bilgileri, kullanıcılar ile parola özetlerinin numaralandırılması. Her bulgu `--proof` ile yeniden kanıtlanabilir; bu, kendi deneyini çalıştırır ve dökümü taramanın diğer çıktılarının yanına yazar.
-* **Filtre ve WAF atlatma** - birlikte kullanılabilen çok sayıda tamper betiği, belirlenimci bir sırayla uygulanır.
-* **Esnek hedefleme** - tek bir URL, site taraması, HTML formları, sitemap, bir OpenAPI (Swagger) tanımı, proxy günlüğü, çoklu hedef dosyası, ham HTTP istek dosyası veya `stdin` girdisi.
-* **Kaldığı yerden devam eden taramalar ve makine tarafından okunabilir çıktı** - sonuçlar hedef bazında bir oturum dosyasında saklanır ve JSON olarak, test edilen her hedefi kapsayan bir CSV olarak veya taramanın HTTP trafiğinin HAR kaydı olarak dışa aktarılabilir. Bir taramanın çalıştırıldığı seçenekler profil olarak kaydedilip yeniden kullanılabilir.
-* **Geniş arka uç desteği** - PHP, Python, Perl, Ruby, ASP.NET, JSP ve CGI; hem Unix benzeri hem de Windows hedeflerine karşı çalışır - yüklerin nasıl farklılaştığı için bkz.
+* **Dört enjeksiyon tekniği** - results-based, boolean-based, time-based ve file-based; `--technique` ile ya da `--type` ile bildirildikleri türe göre seçilir - her birinin hedeften ne istediği için bkz. [techniques](https://github.com/commixproject/commix/wiki/Techniques).
+* **Hiçbir şey geri dönmediğinde out-of-band** - `--oob` yürütmeyi kanıtlar ve komutun çıktısını HTTP/S ya da DNS üzerinden geri taşır; sunucuya hedefte hangi istemci varsa onunla ulaşır - hangilerini denediği ve nasıl sabitleneceği için bkz. [out-of-band client](https://github.com/commixproject/commix/wiki/Usage#out-of-band-client).
+* **Kod enjeksiyonu** - [`--eval`](https://github.com/commixproject/commix/wiki/Usage#test-for-code-injection), hedefin kod olarak değerlendirdiğini PHP, Python, Ruby, JavaScript veya PowerShell olarak, aynı tekniklerle sınar.
+* **Girdi nereye düşerse** - GET/POST parametreleri, [HTTP başlıkları ve çerezler](https://github.com/commixproject/commix/wiki/Usage#request-options), JSON/XML/GraphQL gövdeleri; ayrıca CGI hedefleri için `shellshock` modülü.
+* **Kanıttan kabuğa** - [`--os-shell`](https://github.com/commixproject/commix/wiki/Getting-shells), tam PTY'ye yükseltilebilen yerleşik `reverse_tcp` ve `bind_tcp`, dosya aktarımı, Windows kayıt defteri okuma/yazma ve parola özetlerine kadar numaralandırma; bunlara karşı bir sözlük saldırısı da önerilir.
+* **Filtre ve WAF atlatma** - birlikte kullanılabilen tamper betikleri, belirlenimci bir sırayla uygulanır - bkz. [filters bypass examples](https://github.com/commixproject/commix/wiki/Filters-bypass-examples).
+* **Her biçimde hedef** - bir URL, site taraması, HTML formları, sitemap, bir OpenAPI (Swagger) tanımı, proxy günlüğü, çoklu hedef dosyası, ham HTTP isteği veya `stdin` girdisi - bkz. [target options](https://github.com/commixproject/commix/wiki/Usage#target-options).
+* **Devam ettirilebilir ve betiklenebilir** - [hedef bazında oturum dosyaları](https://github.com/commixproject/commix/wiki/Usage#resume-from-stored-session-data), JSON/CSV/HAR çıktısı, yeniden kullanılabilir seçenek profilleri ve her bulguyu kendi deneyiyle yeniden kanıtlayan `--proof`.
+* **Unix benzeri ve Windows** - PHP, Python, Perl, Ruby, ASP.NET, JSP ve CGI arka uçları - yüklerin nasıl farklılaştığı için bkz.
 [Windows and Unix-like targets at a glance](https://github.com/commixproject/commix/wiki/Techniques#windows-and-unix-like-targets-at-a-glance).
 
 ## Kurulum
@@ -74,8 +75,11 @@ Yanıtın hiçbir şey döndürmediği durumlarda çalıştırmayı bant dışı
     $ python3 commix.py --url="http://commix-testbed/scenarios/regular/POST/blind.php" --data="addr=127.0.0.1" --oob
 
 > [!NOTE]
-> `--oob` ile yapılan bant dışı (OAST) tespit, varsayılan olarak herkese açık `oast.fun` interactsh
-> sunucusunu kullanır; bu nedenle hedefinizle ilgili etkileşim meta verileri ağınızın dışına çıkar.
+> İstemci, hedefte ne varsa ona göre seçilir; bu yüzden alışılmış HTTP istemcilerinden yoksun bir
+> makine de erişilebilir kalır - çıkış trafiği zaten biliniyorsa `--oob-transport` ile birini
+> sabitleyin. `--oob` ile yapılan bant dışı (OAST) tespit, varsayılan olarak herkese açık `oast.fun`
+> interactsh sunucusunu kullanır; bu nedenle hedefinizle ilgili etkileşim meta verileri ağınızın
+> dışına çıkar.
 > Bunları kurum içinde tutmak için `--oob-server` seçeneğini kendi sunucunuza yönlendirin. Ayrıntılı
 > rehber için wiki'deki
 > [**`out-of-band-oob-channel`**](https://github.com/commixproject/commix/wiki/Techniques#out-of-band-oob-channel) sayfasına bakın.

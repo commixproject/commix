@@ -1,5 +1,5 @@
 ## Version 4.2 (TBA)
-* Added: Support for reaching the out-of-band server through the `--oob-transport` clients `php` and `ruby`.
+* Added: Support for reaching the out-of-band server through the `--oob-transport` clients `php`, `ruby` and `openssl`.
 * Added: New switch `--jwt` for auditing the request's JSON Web Token, testing its `kid` as an injection point.
 * Added: A directory-choice menu for the file-based technique's writable-directory prompt, trying every candidate before falling back to `/tmp/`.
 * Added: Dictionary-based password cracking for `--passwords`' retrieved hashes (MD5-crypt, SHA-256/512-crypt), prompted automatically.

