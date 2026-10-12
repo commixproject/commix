@@ -2779,7 +2779,8 @@ def list_dependencies():
      "Reading an OpenAPI description written in YAML ('--openapi')."),
     ("git", shutil.which("git") is not None,
      "Updating to the latest revision ('--update')."),
-    ("metasploit-framework", os.path.exists(settings.METASPLOIT_PATH),
+    # Read here rather than from settings, which is not given '--msf-path' until later on.
+    ("metasploit-framework", os.path.exists(menu.options.msf_path or settings.METASPLOIT_PATH),
      "Handing a session over to Metasploit ('--msf-path')."),
   ]
 

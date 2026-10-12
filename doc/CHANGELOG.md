@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New option `-z` for naming options by as much of their name as tells them apart (e.g. `-z "flu,bat,tec=rt"`).
 * Added: New switch `--dependencies` for reporting which of the third-party libraries and tools each option needs are installed on this host.
 * Added: Support for reaching the out-of-band server through the `--oob-transport` clients `php`, `ruby` and `openssl`.
 * Added: New switch `--jwt` for auditing the request's JSON Web Token, testing its `kid` as an injection point.

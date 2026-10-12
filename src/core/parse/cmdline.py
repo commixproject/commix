@@ -18,6 +18,7 @@ import sys
 import glob
 from src.utils import settings
 from optparse import OptionGroup
+from optparse import OptionValueError
 from optparse import OptionParser
 from optparse import SUPPRESS_HELP as SUPPRESS
 from src.thirdparty.colorama import Fore, Style, init
@@ -1079,6 +1080,11 @@ detection.add_option("--smart",
 # Miscellaneous options
 misc = OptionGroup(parser, "Miscellaneous")
 
+misc.add_option("-z",
+                action="store",
+                dest="mnemonics",
+                help="Use short mnemonics (e.g. 'flu,bat,tec=rt').")
+
 misc.add_option("--dependencies",
                 action="store_true",
                 dest="dependencies",
@@ -1221,6 +1227,90 @@ option.help = option.help.capitalize().replace("Show this help message and exit"
 # Listed by its short form alone, the way every other switch is, while '--help' keeps working.
 option._long_opts = []
 """
+How much of an option's name a mnemonic spelled, so that the shortest spelling settles a tie.
+"""
+def _mnemonic_length(option, name):
+  return min(len(spelling.strip("-")) for spelling in option._long_opts + option._short_opts
+             if spelling.strip("-").startswith(name))
+
+"""
+Expand the short mnemonics of '-z' into the options they name.
+
+A long command line is mostly repetition - the same handful of options, spelled out in full every
+time it is typed again. A mnemonic is as much of a name as it takes to tell one option apart from
+every other, so 'flu,bat,tec=rt' says what '--flush-session --batch --technique=rt' says.
+
+What was set is handed back, because a few options are read off the command line itself rather than
+off their value - one of those, named as a mnemonic, is otherwise nowhere to be seen.
+"""
+def expand_mnemonics(mnemonics, parser, options):
+  applied = set()
+  # Every option filed under each prefix of every name it answers to, so that a mnemonic lands
+  # directly on the options it could still be. Dashes are left out, as a mnemonic carries none.
+  by_prefix = {}
+  for option_list in [parser.option_list] + [group.option_list for group in parser.option_groups]:
+    for option in option_list:
+      for spelling in option._long_opts + option._short_opts:
+        prefix = ""
+        for char in spelling:
+          if char == "-":
+            continue
+          prefix += char
+          if option not in by_prefix.setdefault(prefix, []):
+            by_prefix[prefix].append(option)
+
+  for mnemonic in (mnemonics or "").split(","):
+    name = mnemonic.split("=")[0].replace("-", "").strip()
+    value = mnemonic.split("=", 1)[1] if "=" in mnemonic else None
+    if not name:
+      continue
+
+    candidates = by_prefix.get(name, [])
+    if not candidates:
+      err_msg = "The mnemonic '" + name + "' does not name any option."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit(settings.EXIT_FAILURE)
+
+    option = candidates[0]
+    if len(candidates) > 1:
+      # A mnemonic that is also a name in full means that one; otherwise the shortest name it
+      # could be is taken, and said out loud, because the other readings were just as available.
+      spelled_out = [_ for _ in candidates if name in [spelling.strip("-") for spelling in _._long_opts + _._short_opts]]
+      if spelled_out:
+        option = spelled_out[0]
+      else:
+        option = sorted(candidates, key=lambda _: _mnemonic_length(_, name))[0]
+        warn_msg = "The mnemonic '" + name + "' names "
+        warn_msg += ", ".join("'" + (_._long_opts + _._short_opts)[0] + "'" for _ in candidates)
+        warn_msg += ", and is read as '" + (option._long_opts + option._short_opts)[0] + "'."
+        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
+    spelling = (option._long_opts + option._short_opts)[0]
+    applied.add(option.dest)
+    if option.action == "store_true":
+      setattr(options, option.dest, True)
+    elif option.action == "store_false":
+      setattr(options, option.dest, False)
+    elif value is None and option.dest == "eval_sink":
+      # Read the way a bare '--eval' is read below: the language is what is optional about it.
+      setattr(options, option.dest, settings.EVAL_ALL_LANGUAGES)
+    elif value is None:
+      err_msg = "The mnemonic '" + name + "' names '" + spelling + "', which is given a value "
+      err_msg += "(e.g. '" + name + "=...')."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit(settings.EXIT_FAILURE)
+    else:
+      try:
+        setattr(options, option.dest, option.convert_value(spelling, value))
+      except OptionValueError:
+        err_msg = "The mnemonic '" + name + "' gives '" + spelling + "' the value '" + value
+        err_msg += "', which is not " + ("an " if str(option.type).startswith(("a", "e", "i", "o", "u")) else "a ") + str(option.type) + "."
+        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+        raise SystemExit(settings.EXIT_FAILURE)
+
+  return applied
+
+"""
 Spellings that are not commix's own, taken as the option they were meant to be.
 
 A command line is more often pasted than typed. A browser's "copy as cURL" writes '--data-raw', and
@@ -1254,6 +1344,12 @@ except SystemExit:
     settings.print_data_to_stdout("\n" + Style.BRIGHT + Style.UNDERLINE + "To see the full list of options run with '-hh'." + Style.RESET_ALL + "\n")
   raise
 
+# Read first, because everything below works out what the run is from the options, and a mnemonic
+# is one of them having been given.
+_from_mnemonics = set()
+if options.mnemonics:
+  _from_mnemonics = expand_mnemonics(options.mnemonics, parser, options)
+
 # Every registered module gets a switch of its own to be read through, whether or not '--module'
 # named it - the heuristic turns one on by itself where the target looks like it calls for it.
 # Resolved here rather than with the other option checks, because the startup that runs before
@@ -1276,8 +1372,8 @@ if options.config_file:
 settings.USER_APPLIED_WEB_ROOT = bool(options.web_root)
 
 # Remember whether '--retries' was explicitly supplied, since it carries a default of its own
-settings.USER_APPLIED_RETRIES = "retries" in _from_config or any(_ in sys.argv for _ in ("--retries",)) or any(_.startswith("--retries=") for _ in sys.argv)
-settings.USER_APPLIED_TIMEOUT = "timeout" in _from_config or any(_ in sys.argv for _ in ("--timeout",)) or any(_.startswith("--timeout=") for _ in sys.argv)
+settings.USER_APPLIED_RETRIES = "retries" in _from_config or "retries" in _from_mnemonics or any(_ in sys.argv for _ in ("--retries",)) or any(_.startswith("--retries=") for _ in sys.argv)
+settings.USER_APPLIED_TIMEOUT = "timeout" in _from_config or "timeout" in _from_mnemonics or any(_ in sys.argv for _ in ("--timeout",)) or any(_.startswith("--timeout=") for _ in sys.argv)
 
 # Remember whether '--auth-cred'/'--auth-type' were explicitly supplied on the CLI
 settings.USER_APPLIED_COOKIE = options.cookie or ""
