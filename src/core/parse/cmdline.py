@@ -1079,6 +1079,12 @@ detection.add_option("--smart",
 # Miscellaneous options
 misc = OptionGroup(parser, "Miscellaneous")
 
+misc.add_option("--dependencies",
+                action="store_true",
+                dest="dependencies",
+                default=False,
+                help="Check for missing (optional) third-party dependencies.")
+
 misc.add_option("--ignore-dependencies",
                 action="store_true",
                 dest="ignore_dependencies",
@@ -1381,6 +1387,30 @@ def print_module_table(title, items):
             "    "
             + name.ljust(name_width)
             + "   " + description[0].upper() + description[1:] + "\n"
+        )
+
+    settings.print_data_to_stdout(message.rstrip() + "\n")
+
+"""
+Render a Name/Installed/Description table for the third-party dependencies.
+"""
+def print_dependency_table(title, rows):
+    name_width = max(len("Name"), max(len(name) for name, _, _ in rows))
+    installed_width = len("Installed")
+
+    message = (
+        title + "\n"
+        + "=" * len(title) + "\n\n"
+        + "    " + "Name".ljust(name_width) + "   " + "Installed".ljust(installed_width) + "   Description\n"
+        + "    " + ("-" * len("Name")).ljust(name_width) + "   " + "-" * installed_width + "   " + "-" * len("Description") + "\n"
+    )
+
+    for name, installed, description in rows:
+        message += (
+            "    "
+            + name.ljust(name_width)
+            + "   " + ("no", "yes")[installed].ljust(installed_width)
+            + "   " + description + "\n"
         )
 
     settings.print_data_to_stdout(message.rstrip() + "\n")

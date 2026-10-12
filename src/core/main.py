@@ -864,6 +864,11 @@ def run():
         checks.no_readline_module()
         raise SystemExit()
 
+      # Check if defined "--dependencies" option.
+      if menu.options.dependencies:
+        checks.list_dependencies()
+        raise SystemExit()
+
       # Check if defined "--ignore-dependencies" option.
       if not menu.options.ignore_dependencies:
         checks.third_party_dependencies()

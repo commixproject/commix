@@ -47,9 +47,9 @@ def validate():
   # Check for missing mandatory option(s).
   if not settings.STDIN_PARSING and not any((menu.options.url, menu.options.logfile, menu.options.bulkfile, \
               menu.options.requestfile, menu.options.sitemap_url, menu.options.openapi, menu.options.wizard, \
-              menu.options.update, menu.options.list_tampers)):
+              menu.options.update, menu.options.list_tampers, menu.options.dependencies)):
     if not menu.options.purge:
-      err_msg = "Missing a mandatory option (-u, -l, -m, -r, -x, --openapi, --wizard, --update, --list-tampers or --purge). "
+      err_msg = "Missing a mandatory option (-u, -l, -m, -r, -x, --openapi, --wizard, --update, --list-tampers, --dependencies or --purge). "
       err_msg += "Use -h for basic and -hh for advanced help."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit(settings.EXIT_FAILURE)

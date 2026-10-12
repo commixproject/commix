@@ -2745,6 +2745,58 @@ def third_party_dependencies():
     pass
 
 """
+True when the given module can be imported on this host, without importing it.
+"""
+def _dependency_available(name):
+  import importlib.util
+  try:
+    return importlib.util.find_spec(name) is not None
+  except (ImportError, AttributeError, ValueError):
+    return False
+
+"""
+Lists the third-party dependencies, saying which of them this host already has.
+"""
+def list_dependencies():
+  import shutil
+
+  info_msg = "Checking for third-party dependencies."
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
+  # Named after whichever one is providing it, or after the one to install where none is.
+  readline_module = ("gnureadline", "pyreadline")[settings.IS_WINDOWS]
+  for module in ("readline", readline_module):
+    if _dependency_available(module):
+      readline_module = module
+      break
+
+  rows = [
+    ("sqlite3", _dependency_available("sqlite3"),
+     "Storing the injection points and commands of previous runs."),
+    (readline_module, _dependency_available(readline_module),
+     "TAB completion and command history in the shells."),
+    ("yaml", _dependency_available("yaml"),
+     "Reading an OpenAPI description written in YAML ('--openapi')."),
+    ("git", shutil.which("git") is not None,
+     "Updating to the latest revision ('--update')."),
+    ("metasploit-framework", os.path.exists(settings.METASPLOIT_PATH),
+     "Handing a session over to Metasploit ('--msf-path')."),
+  ]
+
+  menu.print_dependency_table("Third-party dependencies", rows)
+
+  missing = [name for name, installed, _ in rows if not installed]
+  if not missing:
+    info_msg = "Every third-party dependency is installed."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  else:
+    # Said as a warning rather than an error: all but 'sqlite3' are optional, and each one that is
+    # absent costs only the option named beside it.
+    warn_msg = "Missing third-party dependenc" + ("ies", "y")[len(missing) == 1] + ": "
+    warn_msg += ", ".join("'" + name + "'" for name in missing) + "."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
+"""
 Print the authentiation error message.
 """
 def http_auth_err_msg():

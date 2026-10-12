@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New switch `--dependencies` for reporting which of the third-party libraries and tools each option needs are installed on this host.
 * Added: Support for reaching the out-of-band server through the `--oob-transport` clients `php`, `ruby` and `openssl`.
 * Added: New switch `--jwt` for auditing the request's JSON Web Token, testing its `kid` as an injection point.
 * Added: A directory-choice menu for the file-based technique's writable-directory prompt, trying every candidate before falling back to `/tmp/`.

@@ -37,7 +37,7 @@ Options that say what to do instead of how, and are therefore not part of a prof
 loading it, and the ones that print something and end the run.
 """
 IGNORED = ("config_file", "save_config", "version", "install", "update", "advanced_help",
-           "list_tampers", "purge", "smoke_test", "wizard")
+           "list_tampers", "dependencies", "purge", "smoke_test", "wizard")
 
 """
 Every option the parser knows, as {group title: [(destination, option)]}.
