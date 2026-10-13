@@ -16,8 +16,11 @@ For more see the file 'readme/COPYING' for copying permission.
 import os
 import sys
 import signal
+from datetime import date
+from datetime import datetime
 
 from src.utils import common
+from src.utils import logs
 from src.utils import settings
 from src.utils import version
 from src.core.parse import cmdline as menu
@@ -68,9 +71,23 @@ def bootstrap():
     def _time_limit_reached(signum, frame):
       err_msg = "Reached the specified time limit of " + str(menu.options.time_limit) + " second(s)."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      # What was found before the cutoff is still what was found - left unwritten, a bounded run
+      # hands back nothing at all, and reads the same as one that found nothing.
+      logs.write_report(settings.REPORT_STATUS_TIME_LIMIT)
       os._exit(0)
     signal.signal(signal.SIGALRM, _time_limit_reached)
     signal.alarm(max(1, int(round(menu.options.time_limit))))
+
+  # Asked to stop by something other than a keyboard - another process, a container shutting down,
+  # whatever started this run deciding it has had long enough. Ctrl-C is left alone: it has menus of
+  # its own, and a person at the keyboard to read them.
+  def _terminated(signum, frame):
+    logs.write_report(settings.REPORT_STATUS_TERMINATED)
+    os._exit(settings.EXIT_FAILURE)
+  settings.REPORT_STARTED = str(date.today()) + settings.SINGLE_WHITESPACE + datetime.now().strftime("%H:%M:%S")
+  logs.open_report()
+  if hasattr(signal, "SIGTERM"):
+    signal.signal(signal.SIGTERM, _terminated)
 
   if settings.VERBOSITY_LEVEL != 0:
     settings.print_data_to_stdout(settings.execution("Starting"))

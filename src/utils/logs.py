@@ -113,6 +113,7 @@ def create_log_file(url, output_dir):
   http_request_method = settings.HTTPMETHOD.POST if menu.options.data else settings.HTTPMETHOD.GET
   command = " ".join(shlex.quote(_) for _ in sys.argv)
   started = str(date.today()) + settings.SINGLE_WHITESPACE + datetime.now().strftime("%H:%M:%S")
+  settings.REPORT_STARTED = settings.REPORT_STARTED or started
   try:
     with open(filename, 'w' if menu.options.flush_session else 'a', encoding=settings.DEFAULT_CODEC) as output_file:
       if not menu.options.no_logging:
@@ -136,7 +137,9 @@ def create_log_file(url, output_dir):
       "http_method": http_request_method,
       "command": command,
       "started": started,
+      "status": settings.REPORT_STATUS_RUNNING,
     }
+    flush_report()
 
   return filename
 
@@ -172,11 +175,59 @@ def report_active():
   return settings.REPORT_JSON is not None
 
 """
+Write what the report holds so far, so that a run still going can be read while it goes.
+
+Quietly, unlike the write that ends a run: a reader that is watching the file has somewhere to look
+either way, and a path that cannot be written is reported once, at the end, rather than at every
+finding on the way there.
+"""
+def flush_report():
+  if not report_active():
+    return
+  try:
+    _write_report_file()
+  except (IOError, OSError):
+    pass
+
+"""
+Put the report where it was asked for, in one move.
+
+Written beside it and renamed over it, rather than into it: a report is rewritten from the top every
+time it grows, and a reader watching it would otherwise be free to read it halfway through one.
+"""
+def _write_report_file():
+  directory = os.path.dirname(os.path.abspath(menu.options.report_json)) or "."
+  handle, path = tempfile.mkstemp(dir=directory, prefix=".report-", suffix=".json")
+  try:
+    with os.fdopen(handle, 'w', encoding=settings.DEFAULT_CODEC) as output_file:
+      json.dump(settings.REPORT_JSON, output_file, indent=2, ensure_ascii=False)
+    os.replace(path, menu.options.report_json)
+  except (IOError, OSError):
+    if os.path.exists(path):
+      os.unlink(path)
+    raise
+
+"""
+Open the report as the run begins, so that a reader is never left telling "not started yet" apart
+from "never asked for" by the absence of a file.
+"""
+def open_report():
+  if not menu.options.report_json or report_active():
+    return
+  settings.REPORT_JSON = {
+    "target": menu.options.url or "",
+    "started": settings.REPORT_STARTED,
+    "status": settings.REPORT_STATUS_RUNNING,
+  }
+  flush_report()
+
+"""
 Record a single fact (hostname, current user, OS, ...) into the JSON report.
 """
 def report_set_info(key, value):
   if report_active():
     settings.REPORT_JSON.setdefault("info", {})[key] = value
+    flush_report()
 
 """
 Record one enumerated item (a user, a privilege row, a password hash, ...) into the JSON report.
@@ -184,6 +235,7 @@ Record one enumerated item (a user, a privilege row, a password hash, ...) into 
 def report_add_enumeration(category, item):
   if report_active():
     settings.REPORT_JSON.setdefault("enumeration", {}).setdefault(category, []).append(item)
+    flush_report()
 
 """
 Record one extracted file's content into the JSON report.
@@ -191,6 +243,7 @@ Record one extracted file's content into the JSON report.
 def report_add_file(path, content):
   if report_active():
     settings.REPORT_JSON.setdefault("files", []).append({"path": path, "content": content})
+    flush_report()
 
 """
 Add a confirmed finding in log files, in the same format the console summary prints it.
@@ -231,6 +284,7 @@ def add_finding(filename, injection_type, technique, http_request_method, vuln_p
       if caveats:
         finding["reproduce_caveats"] = caveats
     settings.REPORT_JSON.setdefault("findings", []).append(finding)
+    flush_report()
 
 """
 Settle which CSV the findings of a run over several targets are collected in.
@@ -309,6 +363,7 @@ def executed_command(filename, cmd, output):
   add_line(filename, str(output.encode(settings.DEFAULT_CODEC).decode()), group="command:" + cmd)
   if report_active():
     settings.REPORT_JSON.setdefault("commands", []).append({"command": cmd, "output": output})
+    flush_report()
 
 """
 Fetched data logged to text files.
@@ -344,9 +399,17 @@ def add_footer(filename):
 """
 Write the accumulated --report-json data to the requested file.
 """
-def write_report():
-  if not report_active():
+def write_report(status=None):
+  if not menu.options.report_json:
     return
+  if not report_active():
+    # Over before the first target was opened. A reader that was promised a file is handed one
+    # saying so, rather than an absence it has to read as either "nothing found" or "never ran".
+    settings.REPORT_JSON = {
+      "target": menu.options.url or "",
+      "started": settings.REPORT_STARTED,
+    }
+  settings.REPORT_JSON["status"] = status or settings.REPORT_STATUS_COMPLETED
   settings.REPORT_JSON["finished"] = str(date.today()) + settings.SINGLE_WHITESPACE + datetime.now().strftime("%H:%M:%S")
   settings.REPORT_JSON["requests"] = settings.TOTAL_OF_REQUESTS
   settings.REPORT_JSON["target_os"] = settings.TARGET_OS.title()
@@ -354,8 +417,7 @@ def write_report():
   settings.REPORT_JSON["waf_detected"] = settings.WAF_ENABLED
   settings.REPORT_JSON["evasion_applied"] = settings.WAF_EVASION_APPLIED or menu.options.tamper or ""
   try:
-    with open(menu.options.report_json, 'w', encoding=settings.DEFAULT_CODEC) as output_file:
-      json.dump(settings.REPORT_JSON, output_file, indent=2, ensure_ascii=False)
+    _write_report_file()
     info_msg = "Run results stored to the JSON file '" + menu.options.report_json + "'."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   except IOError as err_msg:

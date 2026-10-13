@@ -405,7 +405,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "216"
+REVISION = "217"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -938,6 +938,16 @@ LOGGED_FINDINGS_HEADER = False
 LAST_LOGGED_PARAMETER = None
 # The accumulating --report-json data, built only when that option is set.
 REPORT_JSON = None
+
+"""
+What became of the run a JSON report belongs to, so that a reader can tell a scan still going, and
+one cut short, from one that simply found nothing.
+"""
+REPORT_STARTED = ""
+REPORT_STATUS_RUNNING = "running"
+REPORT_STATUS_COMPLETED = "completed"
+REPORT_STATUS_TIME_LIMIT = "time-limit"
+REPORT_STATUS_TERMINATED = "terminated"
 LAST_LOG_GROUP = "header"
 
 # Said once per target, so a token carried on every request is not announced on every one of them.
