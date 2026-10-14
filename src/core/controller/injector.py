@@ -27,6 +27,7 @@ except ImportError:
   _THREADS_SUPPORTED = False
 from src.core.parse import cmdline as menu
 from src.utils import settings
+from src.utils import logs
 from src.utils import progress
 from src.core.requests import requests
 from src.core.requests import stability
@@ -42,6 +43,7 @@ Abort the thread pool on SystemExit; KeyboardInterrupt is handled by the caller.
 """
 def _abort_executor(executor, exc):
   executor.shutdown(wait=False, cancel_futures=True)
+  logs.finalize_report(exc.code if isinstance(exc.code, int) else 0)
   os._exit(exc.code if isinstance(exc.code, int) else 0)
 
 """

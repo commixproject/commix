@@ -39,6 +39,8 @@ if __name__ == '__main__':
     # Raised as it was given: a caller that reads the exit code is told whether the run ended the
     # way it meant to, and a bare one is zero as it always was.
     import sys
+    from src.utils import logs
+    logs.finalize_report(err_msg.code)
     raise SystemExit(err_msg.code)
   except KeyboardInterrupt:
     import sys
@@ -49,6 +51,9 @@ if __name__ == '__main__':
     raise SystemExit()
   except:
     from src.utils import common
+    from src.utils import logs
+    from src.utils import settings
+    logs.finalize_report(settings.EXIT_FAILURE)
     common.unhandled_exception()
 
 # eof

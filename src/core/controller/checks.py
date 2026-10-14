@@ -73,6 +73,8 @@ Exiting, with the code the run ended on - which is how a caller tells an error f
 def exit(code=0):
   if settings.VERBOSITY_LEVEL != 0:
     settings.print_data_to_stdout(settings.execution("Ending"))
+  # Nothing runs after the line below, so the report is settled before it.
+  logs.finalize_report(code if isinstance(code, int) else 0)
   os._exit(code if isinstance(code, int) else 0)
 
 """

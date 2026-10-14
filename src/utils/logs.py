@@ -208,6 +208,20 @@ def _write_report_file():
     raise
 
 """
+Settle a report that is still saying the run is going, whatever ended it.
+
+A run cut short by a critical error never reaches the lines that close one down, so the report it
+leaves behind would otherwise claim forever to be in progress - and something reading it would
+wait for an ending that has already happened.
+"""
+def finalize_report(exit_code):
+  if not report_active():
+    return
+  if settings.REPORT_JSON.get("status") != settings.REPORT_STATUS_RUNNING:
+    return
+  write_report(settings.REPORT_STATUS_COMPLETED if not exit_code else settings.REPORT_STATUS_FAILED)
+
+"""
 Open the report as the run begins, so that a reader is never left telling "not started yet" apart
 from "never asked for" by the absence of a file.
 """

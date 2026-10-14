@@ -122,20 +122,45 @@ def print_legal_disclaimer_msg(legal_disclaimer_msg):
   result = LEGAL_DISCLAIMER + str(legal_disclaimer_msg) + Style.RESET_ALL
   return result
 
+"""
+Keep what went wrong where a reader of the JSON report will find it.
+
+A run that could not reach its target and a run that reached it and found nothing both end with no
+findings - what tells them apart is what went wrong on the way, so it is kept rather than only
+printed. Warnings are left out: most of them are a test saying what it ruled out, which is the run
+working rather than failing.
+"""
+def record_issue(level, message):
+  if REPORT_JSON is None:
+    return
+  REPORT_JSON.setdefault("errors", []).append({
+    "time": datetime.now().strftime("%H:%M:%S"),
+    "level": level,
+    "message": strip_ansi_codes(str(message)).rstrip(),
+  })
+  # Imported here, where it is used: logs reads this module on the way in, and reading it back at
+  # the top would be the two of them waiting on each other.
+  from src.utils import logs
+  logs.flush_report()
+
 # Print error message
 def print_error_msg(err_msg):
+  record_issue("error", err_msg)
   return _format_msg(ERROR_SIGN, err_msg)
 
 # Print error message
 def print_bold_error_msg(err_msg):
+  record_issue("error", err_msg)
   return _format_msg(ERROR_BOLD_SIGN, err_msg, bold=True)
 
 # Print critical error message
 def print_critical_msg(err_msg):
+  record_issue("critical", err_msg)
   return _format_msg(CRITICAL_SIGN, err_msg)
 
 # Print abortion message
 def print_abort_msg(abort_msg):
+  record_issue("abort", abort_msg)
   return _format_msg(ABORTION_SIGN, abort_msg)
 
 # Print warning message
@@ -405,7 +430,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "217"
+REVISION = "218"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -948,6 +973,7 @@ REPORT_STATUS_RUNNING = "running"
 REPORT_STATUS_COMPLETED = "completed"
 REPORT_STATUS_TIME_LIMIT = "time-limit"
 REPORT_STATUS_TERMINATED = "terminated"
+REPORT_STATUS_FAILED = "failed"
 LAST_LOG_GROUP = "header"
 
 # Said once per target, so a token carried on every request is not announced on every one of them.
