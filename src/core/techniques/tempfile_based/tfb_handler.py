@@ -93,8 +93,10 @@ def _calibrate_file_oracle(separator, prefix, suffix, whitespace, http_request_m
     page_true, code_true, vuln_parameter, prefix, suffix, reported_payload_true = bb_injector.page_of(payload_true, prefix, suffix, whitespace, http_request_method, url, vuln_parameter)
     page_false, code_false, vuln_parameter, prefix, suffix, _ = bb_injector.page_of(payload_false, prefix, suffix, whitespace, http_request_method, url, vuln_parameter)
     # A false answer that reads exactly like the unmodified page means the payload changed nothing
-    # at all, whatever the two probes look like beside each other.
-    if checks.comparable_page(page_false or "") == checks.comparable_page(settings.ORIGINAL_PAGE or ""):
+    # at all - but only where nothing is ever printed either way (the bare test). The shape that
+    # prints a marker on a true answer is built so the false answer looks like that same baseline
+    # on purpose, so this would throw away the one signal it is there for.
+    if not settings.BOOLEAN_PRINTED_STATE and checks.comparable_page(page_false or "") == checks.comparable_page(settings.ORIGINAL_PAGE or ""):
       continue
     if not checks.calibrate_boolean_oracle(page_true, page_false, code_true, code_false):
       continue

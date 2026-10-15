@@ -1,0 +1,477 @@
+openapi: 3.0.3
+info:
+  title: commix REST API
+  version: "1.0"
+  description: |
+    The API served by `commixapi.py`, implemented in `src/utils/api.py`.
+
+    A scan is a task: created, given options under the names the command line knows them by,
+    started, then read while it runs and after it ends. Each task is run as a process of its own,
+    started from a configuration file - the same file `-c` loads.
+
+    Notes for implementers:
+      * Options are the destinations of commix's own command-line options, with `-` read as `_`:
+        `url` is `--url`, `flush_session` is `--flush-session`. A name the parser does not know is
+        refused rather than kept.
+      * `report_json`, `output_dir` and `batch` are settled by the server and cannot be set.
+      * Something the server understood but would not do answers `200` with `success: false` and a
+        `message`. Only authentication (`401`), an address that is not served (`404`), one asked for
+        with the wrong method (`405`) and an unhandled failure (`500`) answer with a code of their
+        own.
+      * `/scan/{taskid}/data` hands back the `--report-json` file the run is writing, so a run
+        started from a command line and one started here cannot answer differently.
+  license:
+    name: GNU General Public License v3 (GPLv3)
+    url: https://github.com/commixproject/commix/blob/master/LICENSE.txt
+  contact:
+    name: commix project
+    url: https://commixproject.com
+externalDocs:
+  description: The API, in the user's manual
+  url: https://github.com/commixproject/commix/wiki/API
+servers:
+  - url: http://127.0.0.1:8775
+    description: A local commixapi.py server
+security:
+  - apiToken: []
+tags:
+  - name: Version
+    description: What the server is
+  - name: Tasks
+    description: Making and forgetting tasks
+  - name: Options
+    description: Reading and settling a task's options
+  - name: Scans
+    description: Running a task, and reading it while it runs
+  - name: Admin
+    description: Every task at once
+
+paths:
+  /version:
+    get:
+      tags: [Version]
+      operationId: getVersion
+      summary: commix's version, and this contract's
+      description: >-
+        The one address that is served without a token, so that a client can find out what it is
+        talking to before it authenticates. `api` is counted apart from `version`, so a client can
+        tell whether it still knows how to talk to a newer commix.
+      security: []
+      responses:
+        "200":
+          description: The versions.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      version: { type: string, example: "v4.2.dev219" }
+                      api: { type: string, example: "1.0" }
+
+  /task/new:
+    get:
+      tags: [Tasks]
+      operationId: newTask
+      summary: Make a task
+      responses:
+        "200":
+          description: The task's id.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      taskid: { type: string, example: "93c54d9323c4dcba" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /task/{taskid}/delete:
+    get:
+      tags: [Tasks]
+      operationId: deleteTask
+      summary: Forget a task, ending its scan if one is running
+      description: >-
+        What the task produced is left on disk; it is the task that is forgotten, not its output.
+      parameters: [ { $ref: "#/components/parameters/TaskId" } ]
+      responses:
+        "200": { $ref: "#/components/responses/Plain" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /option/{taskid}/list:
+    get:
+      tags: [Options]
+      operationId: listOptions
+      summary: Every option of a task, with what it is set to
+      parameters: [ { $ref: "#/components/parameters/TaskId" } ]
+      responses:
+        "200":
+          description: The options.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      options:
+                        type: object
+                        additionalProperties: true
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /option/{taskid}/get:
+    post:
+      tags: [Options]
+      operationId: getOption
+      summary: One option, by name
+      parameters: [ { $ref: "#/components/parameters/TaskId" } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [option]
+              properties:
+                option: { type: string, example: "url" }
+      responses:
+        "200":
+          description: The option, under its own name.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    additionalProperties: true
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /option/{taskid}/set:
+    post:
+      tags: [Options]
+      operationId: setOptions
+      summary: Set options on a task
+      description: >-
+        Every option in the body is settled, in the order given. A name the parser does not know
+        ends the request, and the ones before it stay set.
+      parameters: [ { $ref: "#/components/parameters/TaskId" } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Options"
+      responses:
+        "200": { $ref: "#/components/responses/Plain" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /scan/{taskid}/start:
+    post:
+      tags: [Scans]
+      operationId: startScan
+      summary: Start the task's scan
+      description: >-
+        Options in the body are settled first, which makes a scan two requests rather than three.
+        One of `url`, `logfile`, `bulkfile`, `requestfile`, `sitemap_url` or `openapi` has to be set
+        by then, and a scan already running is not started again.
+      parameters: [ { $ref: "#/components/parameters/TaskId" } ]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Options"
+      responses:
+        "200":
+          description: The process the scan is running as.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      engineid: { type: integer, example: 45671 }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /scan/{taskid}/stop:
+    get:
+      tags: [Scans]
+      operationId: stopScan
+      summary: Ask the scan to stop
+      description: >-
+        The run is asked to end and finishes its report first, so what it found up to then is kept.
+        Worth preferring to `/kill`, which does not.
+      parameters: [ { $ref: "#/components/parameters/TaskId" } ]
+      responses:
+        "200":
+          description: Whether there was a running scan to stop.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      stopped: { type: boolean }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /scan/{taskid}/kill:
+    get:
+      tags: [Scans]
+      operationId: killScan
+      summary: End the scan's process outright
+      description: >-
+        The process is given no chance to write anything further, so its report stops where it was.
+      parameters: [ { $ref: "#/components/parameters/TaskId" } ]
+      responses:
+        "200":
+          description: Whether there was a running scan to kill.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      killed: { type: boolean }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /scan/{taskid}/status:
+    get:
+      tags: [Scans]
+      operationId: scanStatus
+      summary: Where the run has got to
+      parameters: [ { $ref: "#/components/parameters/TaskId" } ]
+      responses:
+        "200":
+          description: The status, and the code the process ended on where it has ended.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      status:
+                        type: string
+                        enum: [not started, running, completed, time-limit, terminated, failed, killed]
+                      returncode:
+                        type: integer
+                        nullable: true
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /scan/{taskid}/data:
+    get:
+      tags: [Scans]
+      operationId: scanData
+      summary: The run's results, as they stand
+      description: >-
+        Readable throughout: the report is written as the run goes, so findings appear as they are
+        confirmed. `error` is what went wrong, which is what tells a run that could not reach its
+        target from one that reached it and found nothing - both end with no findings.
+      parameters: [ { $ref: "#/components/parameters/TaskId" } ]
+      responses:
+        "200":
+          description: The report.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      data: { $ref: "#/components/schemas/Report" }
+                      error:
+                        type: array
+                        items: { $ref: "#/components/schemas/Issue" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /scan/{taskid}/log:
+    get:
+      tags: [Scans]
+      operationId: scanLog
+      summary: What the run has said
+      parameters:
+        - { $ref: "#/components/parameters/TaskId" }
+        - name: start
+          in: query
+          required: false
+          schema: { type: integer }
+          description: First line to hand back.
+        - name: end
+          in: query
+          required: false
+          schema: { type: integer }
+          description: Line to stop before.
+      responses:
+        "200":
+          description: The lines.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      log:
+                        type: array
+                        items: { $ref: "#/components/schemas/LogLine" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /admin/list:
+    get:
+      tags: [Admin]
+      operationId: listTasks
+      summary: Every task this server holds
+      responses:
+        "200":
+          description: The tasks, by id.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      count: { type: integer }
+                      tasks:
+                        type: object
+                        additionalProperties:
+                          type: object
+                          properties:
+                            status: { type: string }
+                            returncode: { type: integer, nullable: true }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /admin/flush:
+    get:
+      tags: [Admin]
+      operationId: flushTasks
+      summary: Forget every task, ending any scan still running
+      responses:
+        "200": { $ref: "#/components/responses/Plain" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+components:
+  securitySchemes:
+    apiToken:
+      type: apiKey
+      in: header
+      name: X-Api-Token
+      description: >-
+        The token the server was started with, or the one it made up and printed as it started.
+
+  parameters:
+    TaskId:
+      name: taskid
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: "^[0-9a-f]+$"
+      description: The id `/task/new` handed back.
+
+  responses:
+    Plain:
+      description: Whether what was asked for happened.
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: "#/components/schemas/Success"
+              - $ref: "#/components/schemas/Failure"
+    Unauthorized:
+      description: The token was wrong or missing.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Failure"
+
+  schemas:
+    Success:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+    Failure:
+      type: object
+      required: [success, message]
+      properties:
+        success:
+          type: boolean
+          enum: [false]
+        message:
+          type: string
+          example: "Unknown option 'nosuchthing'."
+    Options:
+      type: object
+      description: >-
+        Options by the destinations of commix's own command-line options, with `-` read as `_`.
+      additionalProperties: true
+      example:
+        url: "http://commix-testbed/scenarios/regular/GET/classic.php?addr=127.0.0.1"
+        flush_session: true
+        time_limit: 90
+    Report:
+      type: object
+      description: >-
+        The `--report-json` report, as it stands. A run over a single target is the object below.
+        A run over several - `bulkfile`, `logfile`, `sitemap_url` or a crawl - carries one such
+        object per target under `targets`, with `started`, `status`, `finished` and `requests` for
+        the run as a whole.
+      properties:
+        targets:
+          type: array
+          description: Present only where the run covered more than one target.
+          items:
+            type: object
+        target: { type: string }
+        http_method: { type: string }
+        command: { type: string }
+        started: { type: string }
+        finished: { type: string }
+        status:
+          type: string
+          enum: [running, completed, time-limit, terminated, failed]
+        requests: { type: integer }
+        target_os: { type: string }
+        waf_detected: { type: boolean }
+        evasion_applied: { type: string }
+        findings:
+          type: array
+          items: { $ref: "#/components/schemas/Finding" }
+        errors:
+          type: array
+          items: { $ref: "#/components/schemas/Issue" }
+    Finding:
+      type: object
+      properties:
+        parameter: { type: string, example: "addr" }
+        http_method: { type: string, example: "GET" }
+        technique: { type: string, example: "Results-based" }
+        type: { type: string, example: "Classic command injection" }
+        boundary: { type: string, example: "';' separator, ' ' whitespace" }
+        payload: { type: string }
+        reproduce:
+          type: string
+          description: The single request that brings the finding back.
+        reproduce_caveats: { type: string }
+    Issue:
+      type: object
+      properties:
+        time: { type: string, example: "08:12:05" }
+        level:
+          type: string
+          enum: [error, critical, abort]
+        message: { type: string }
+    LogLine:
+      type: object
+      properties:
+        time: { type: string, example: "08:12:01" }
+        level: { type: string, example: "info" }
+        message: { type: string, example: "Testing connection to the target URL." }

@@ -40,7 +40,7 @@ To **commix** (συντομογραφία [**comm**]and [**i**]njection e[**x**]
 * **Από την απόδειξη στο shell** – [`--os-shell`](https://github.com/commixproject/commix/wiki/Getting-shells), ενσωματωμένα `reverse_tcp` και `bind_tcp` με αναβάθμιση σε πλήρες PTY, μεταφορά αρχείων, read/write στο Windows registry και enumeration μέχρι τα password hashes, με dictionary attack να προσφέρεται εναντίον τους.
 * **Filter και WAF evasion** – συνδυάσιμα tamper scripts, που εφαρμόζονται με deterministic σειρά – δείτε [filters bypass examples](https://github.com/commixproject/commix/wiki/Filters-bypass-examples).
 * **Targets σε κάθε μορφή** – URL, crawl, HTML forms, sitemap, OpenAPI (Swagger) description, proxy log, bulk file, raw HTTP request ή piped `stdin` – δείτε [target options](https://github.com/commixproject/commix/wiki/Usage#target-options).
-* **Resumable και scriptable** – [session files ανά target](https://github.com/commixproject/commix/wiki/Usage#resume-from-stored-session-data), output σε JSON/CSV/HAR, επαναχρησιμοποιήσιμα profiles επιλογών και το `--proof`, που επαληθεύει εκ νέου κάθε εύρημα με δικό του πείραμα.
+* **Resumable και scriptable** – [session files ανά target](https://github.com/commixproject/commix/wiki/Usage#resume-from-stored-session-data), output σε JSON/CSV/HAR, επαναχρησιμοποιήσιμα profiles επιλογών, το `--proof`, που επαληθεύει εκ νέου κάθε εύρημα με δικό του πείραμα, και ένα [REST API](https://github.com/commixproject/commix/wiki/API) για να τρέχεις scans από αλλού.
 * **Unix-like και Windows** – PHP, Python, Perl, Ruby, ASP.NET, JSP και CGI back ends – δείτε το [Windows and Unix-like targets at a glance](https://github.com/commixproject/commix/wiki/Techniques#windows-and-unix-like-targets-at-a-glance) για τις διαφορές στα payloads.
 
 

@@ -184,7 +184,30 @@ it, `--ignore-session` leaves it in place and ignores it.
 
 **On disk**: `.output/<host>_<port>/` (`settings.OUTPUT_DIR`), with `logs.py` writing the run's own
 log, `--report-json` and `--results-file`; `-t` writing the HTTP traffic from `headers.py`, and
-`--har` writing it through `src/utils/har.py`.
+`--har` writing it through `src/utils/har.py`. The JSON report is rewritten whenever it grows, and
+renamed into place rather than written in, so that something watching it never reads it halfway
+through a rewrite.
+
+## Driving it from somewhere else
+
+`commixapi.py` serves a REST API over `src/utils/api.py`, in which a scan is a **task**: created,
+given options under the names the command line knows them by, started, then read while it runs and
+after it ends. `Task` holds one, `Store` holds them all, and `ROUTES` maps an address to the method
+that answers it.
+
+A task runs commix as a process of its own, started from a configuration file written with
+`parse/configfile.py: save()` - the same file `-c` loads. It has to be a process: a run is settled
+in module-level state written once and read everywhere, so two of them inside one would be one run
+with two sets of answers.
+
+The API reads nothing of its own. `/scan/<id>/data` hands back the `--report-json` file the run is
+writing, which is why a run started from a command line and one started over HTTP cannot answer
+differently; `/scan/<id>/log` parses what the process printed. The report carries a `status` from
+the moment it is opened, and `logs.py: finalize_report()` settles it at every way out - including
+the two that never unwind, `--time-limit`'s alarm and `checks.exit()`.
+
+`api` in `/version` is the version of the contract, counted apart from commix's own, so a client
+can tell whether it still knows how to talk to a newer one.
 
 ## Where things live
 
@@ -200,7 +223,7 @@ log, `--report-json` and `--results-file`; `-t` writing the HTTP traffic from `h
 | `src/core/shells/` | interactive shells and the TCP handlers |
 | `src/core/modules/` | injection that needs no ordinary parameter |
 | `src/tamper/` | payload-rewriting scripts |
-| `src/utils/` | settings, session, logs, crawler, progress, install, update |
+| `src/utils/` | settings, session, logs, crawler, progress, install, update, the REST API |
 | `src/thirdparty/` | bundled libraries, so that a run needs nothing installed |
 | `data/txt/` | word lists read at runtime |
 
@@ -222,6 +245,7 @@ and docstring is one line.
 | a language for `--eval` | a module in `core/eval/grammars/` |
 | a body format | `parameters.configure_post_data_format()` and `split_post_parameters()` |
 | a module | the `MODULES` map in `core/modules/modules_handler.py`, and `settings.MODULES` |
+| an API address | `ROUTES` in `utils/api.py`, then the method of the same name on `Api` |
 
 And when something is already wrong: the wire is `requests/headers.py`, whether a parameter was
 tested at all is `controller.py: perform_checks()`, whether a finding was believed is `checks.py`,

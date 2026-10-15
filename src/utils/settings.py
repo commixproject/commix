@@ -154,8 +154,9 @@ def print_bold_error_msg(err_msg):
   return _format_msg(ERROR_BOLD_SIGN, err_msg, bold=True)
 
 # Print critical error message
-def print_critical_msg(err_msg):
-  record_issue("critical", err_msg)
+def print_critical_msg(err_msg, record=True):
+  if record:
+    record_issue("critical", err_msg)
   return _format_msg(CRITICAL_SIGN, err_msg)
 
 # Print abortion message
@@ -430,7 +431,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "218"
+REVISION = "219"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -969,6 +970,12 @@ What became of the run a JSON report belongs to, so that a reader can tell a sca
 one cut short, from one that simply found nothing.
 """
 REPORT_STARTED = ""
+
+"""
+The reports of the targets a run has already finished with, so that a run over several of them
+hands back all of them rather than whichever it happened to end on.
+"""
+REPORT_TARGETS = []
 REPORT_STATUS_RUNNING = "running"
 REPORT_STATUS_COMPLETED = "completed"
 REPORT_STATUS_TIME_LIMIT = "time-limit"
@@ -2713,7 +2720,7 @@ RUN_WIDE_STATE = frozenset((
   "LPORT", "MAXLEN", "MAX_RETRIES", "METASPLOIT_PATH", "OOB_IGNORE_TIMEOUT", "OOB_POLL_INTERVAL",
   "OOB_PORT", "OOB_SCHEME", "OOB_SERVER", "OOB_TOKEN", "OOB_TRANSPORT", "PERFORM_CRACKING",
   "POST_CUSTOM_INJECTION_MARKER_CHAR", "PRE_CUSTOM_INJECTION_MARKER_CHAR", "RAW_HTTP_HEADERS",
-  "REPORT_JSON", "RHOST", "SKIP_CALC", "SKIP_SUBST", "SKIP_PARAMETERS_LIST", "SKIP_TECHNIQUES", "SRVPORT",
+  "REPORT_JSON", "REPORT_STARTED", "REPORT_TARGETS", "RHOST", "SKIP_CALC", "SKIP_SUBST", "SKIP_PARAMETERS_LIST", "SKIP_TECHNIQUES", "SRVPORT",
   "THREADS", "TIMEOUT", "TMP_PATH", "TOR_HTTP_PROXY_PORT", "URIPATH", "URL_PARAM_DELIMITER",
   "URL_RELOAD", "USER_DEFINED_PHP_DIR", "USER_DEFINED_PYTHON_DIR", "USER_DEFINED_PYTHON_INTERPRETER",
   "VERBOSITY_LEVEL", "WIN_PHP_DIR", "WIN_PYTHON_INTERPRETER",

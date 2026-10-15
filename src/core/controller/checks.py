@@ -863,6 +863,13 @@ def handle_exploitation_interrupt(filename, url):
 Connection exceptions
 """
 def connection_exceptions(err_msg):
+  # A request that cannot be encoded is not a connection that failed: every retry builds the same
+  # one again, and the target never sees any of them.
+  if "codec can't encode" in str(err_msg):
+    error_msg = "Unable to build the request (" + str(err_msg) + "). An HTTP header carries only "
+    error_msg += "the characters the protocol can encode, so a value given with any other is never sent."
+    settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
+    raise SystemExit(settings.EXIT_FAILURE)
   requests.request_failed(err_msg)
   with settings.REQUESTS_LOCK:
     settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1

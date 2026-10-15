@@ -53,7 +53,8 @@ setup(
       ],
       entry_points={
           'console_scripts': [
-              'commix = src.core.main:entry_point'
+              'commix = src.core.main:entry_point',
+              'commixapi = src.utils.api:entry_point'
           ]
       },
 )

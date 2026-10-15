@@ -29,31 +29,10 @@ except ImportError as ex:
 # Main
 def main():
   import src.core.main
-  src.core.main.run()
+  src.core.main.entry_point()
 
 # Main
 if __name__ == '__main__':
-  try:
-    main()
-  except SystemExit as err_msg:
-    # Raised as it was given: a caller that reads the exit code is told whether the run ended the
-    # way it meant to, and a bare one is zero as it always was.
-    import sys
-    from src.utils import logs
-    logs.finalize_report(err_msg.code)
-    raise SystemExit(err_msg.code)
-  except KeyboardInterrupt:
-    import sys
-    raise SystemExit()
-  except IndentationError as err_msg:
-    from src.utils import settings
-    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit()
-  except:
-    from src.utils import common
-    from src.utils import logs
-    from src.utils import settings
-    logs.finalize_report(settings.EXIT_FAILURE)
-    common.unhandled_exception()
+  main()
 
 # eof

@@ -1248,4 +1248,30 @@ def run():
   except SystemExit as err_msg:
     raise checks.exit(err_msg.code)
 
+"""
+A run, including the ways it can end.
+
+Named here rather than left in 'commix.py', because an installed 'commix' command never reads that
+file - the two would otherwise be the same program ending in two different ways.
+"""
+def entry_point():
+  try:
+    run()
+  except SystemExit as err_msg:
+    # Raised as it was given: a caller that reads the exit code is told whether the run ended the
+    # way it meant to, and a bare one is zero as it always was.
+    from src.utils import logs
+    logs.finalize_report(err_msg.code)
+    raise SystemExit(err_msg.code)
+  except KeyboardInterrupt:
+    raise SystemExit()
+  except IndentationError as err_msg:
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit()
+  except:
+    from src.utils import common
+    from src.utils import logs
+    logs.finalize_report(settings.EXIT_FAILURE)
+    common.unhandled_exception()
+
 # eof

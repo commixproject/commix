@@ -132,6 +132,13 @@ def create_log_file(url, output_dir):
     filename = os.path.abspath(filename)
 
   if menu.options.report_json:
+    # Only a report that belongs to a target of its own is kept; the one opened as the run began
+    # stands for no target yet, and is written over rather than collected.
+    if _REPORT_HELD_A_TARGET[0] and report_active() and settings.REPORT_JSON.get("target"):
+      finished = settings.REPORT_JSON
+      finished.setdefault("status", settings.REPORT_STATUS_COMPLETED)
+      finished.setdefault("finished", str(date.today()) + settings.SINGLE_WHITESPACE + datetime.now().strftime("%H:%M:%S"))
+      settings.REPORT_TARGETS.append(finished)
     settings.REPORT_JSON = {
       "target": url,
       "http_method": http_request_method,
@@ -139,6 +146,7 @@ def create_log_file(url, output_dir):
       "started": started,
       "status": settings.REPORT_STATUS_RUNNING,
     }
+    _REPORT_HELD_A_TARGET[0] = True
     flush_report()
 
   return filename
@@ -195,12 +203,31 @@ Put the report where it was asked for, in one move.
 Written beside it and renamed over it, rather than into it: a report is rewritten from the top every
 time it grows, and a reader watching it would otherwise be free to read it halfway through one.
 """
+"""
+Whether a report has been opened for a target of its own yet, rather than only for the run.
+"""
+_REPORT_HELD_A_TARGET = [False]
+
+def _report_document():
+  if not settings.REPORT_TARGETS:
+    return settings.REPORT_JSON
+  targets = list(settings.REPORT_TARGETS)
+  if settings.REPORT_JSON:
+    targets.append(settings.REPORT_JSON)
+  return {
+    "targets": targets,
+    "started": settings.REPORT_STARTED or (targets[0].get("started") if targets else ""),
+    "status": (settings.REPORT_JSON or {}).get("status") or settings.REPORT_STATUS_RUNNING,
+    "finished": (settings.REPORT_JSON or {}).get("finished", ""),
+    "requests": settings.TOTAL_OF_REQUESTS,
+  }
+
 def _write_report_file():
   directory = os.path.dirname(os.path.abspath(menu.options.report_json)) or "."
   handle, path = tempfile.mkstemp(dir=directory, prefix=".report-", suffix=".json")
   try:
     with os.fdopen(handle, 'w', encoding=settings.DEFAULT_CODEC) as output_file:
-      json.dump(settings.REPORT_JSON, output_file, indent=2, ensure_ascii=False)
+      json.dump(_report_document(), output_file, indent=2, ensure_ascii=False)
     os.replace(path, menu.options.report_json)
   except (IOError, OSError):
     if os.path.exists(path):

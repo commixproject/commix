@@ -40,7 +40,7 @@
 * **از اثبات تا پوسته** - [`--os-shell`](https://github.com/commixproject/commix/wiki/Getting-shells)، حالت‌های داخلی `reverse_tcp` و `bind_tcp` با ارتقا به یک PTY کامل، انتقال فایل، خواندن و نوشتن رجیستری ویندوز، و شمارش تا درهم‌سازی گذرواژه‌ها، با پیشنهاد حمله دیکشنری علیه آن‌ها.
 * **دور زدن فیلترها و WAF** - اسکریپت‌های tamper قابل ترکیب، که با ترتیبی قطعی اعمال می‌شوند - [filters bypass examples](https://github.com/commixproject/commix/wiki/Filters-bypass-examples) را ببینید.
 * **هدف در هر شکلی** - یک URL، پویش سایت، فرم‌های HTML، sitemap، توصیف OpenAPI (Swagger)، گزارش پروکسی، فایل چندهدفی، درخواست خام HTTP یا ورودی `stdin` - [target options](https://github.com/commixproject/commix/wiki/Usage#target-options) را ببینید.
-* **قابل ازسرگیری و اسکریپت‌پذیر** - [فایل‌های نشست به تفکیک هدف](https://github.com/commixproject/commix/wiki/Usage#resume-from-stored-session-data)، خروجی JSON/CSV/HAR، نمایه‌های گزینه قابل استفاده مجدد، و `--proof` که هر یافته را با آزمایشی از آنِ خود دوباره اثبات می‌کند.
+* **قابل ازسرگیری و اسکریپت‌پذیر** - [فایل‌های نشست به تفکیک هدف](https://github.com/commixproject/commix/wiki/Usage#resume-from-stored-session-data)، خروجی JSON/CSV/HAR، نمایه‌های گزینه قابل استفاده مجدد، `--proof` که هر یافته را با آزمایشی از آنِ خود دوباره اثبات می‌کند، و یک [REST API](https://github.com/commixproject/commix/wiki/API) برای اجرای اسکن از جایی دیگر.
 * **شبه‌یونیکس و ویندوز** - بک‌اندهای PHP، Python، Perl، Ruby، ASP.NET، JSP و CGI - برای تفاوت بارها
 [Windows and Unix-like targets at a glance](https://github.com/commixproject/commix/wiki/Techniques#windows-and-unix-like-targets-at-a-glance)
 را ببینید.

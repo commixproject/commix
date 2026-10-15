@@ -736,7 +736,7 @@ def do_boolean_based_process(url, timesec, filename, http_request_method, inject
     if not checks.boolean_oracle_given():
       # A false answer that reads exactly like the page the parameter's own value returns means the
       # payload changed nothing at all, whatever the two probes look like beside each other.
-      if checks.comparable_page(page_false or "") == checks.comparable_page(settings.ORIGINAL_PAGE or ""):
+      if not settings.BOOLEAN_PRINTED_STATE and checks.comparable_page(page_false or "") == checks.comparable_page(settings.ORIGINAL_PAGE or ""):
         return None
       # These two pages are what says which answer is which, so the target teaches the oracle first.
       if not checks.calibrate_boolean_oracle(page_true, page_false, code_true, code_false):

@@ -1701,7 +1701,9 @@ def do_check(url, http_request_method, filename):
             err_msg += "% of page content is text), together with no parameter found to be dynamic."
         if settings.MULTI_TARGETS:
           err_msg += " Skipping to the next target."
-      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      # Said out loud as the verdict it is, but kept out of the report's errors: a run that tested
+      # everything it was asked to and found nothing is a run that worked.
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg, record=False))
       if not settings.MULTI_TARGETS:
         # What the run produced is written even where it found nothing: the traffic it sent and the
         # report of it are the output of a run that came up empty just as much as of one that did not,

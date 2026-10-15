@@ -40,7 +40,7 @@ You can visit the [collection of screenshots](https://github.com/commixproject/c
 * **From proof to shell** - [`--os-shell`](https://github.com/commixproject/commix/wiki/Getting-shells), built-in `reverse_tcp` and `bind_tcp` upgradeable to a full PTY, file transfer, Windows registry read/write, and enumeration through to password hashes with a dictionary attack offered against them.
 * **Filter and WAF evasion** - combinable tamper scripts, applied in a deterministic order - see [filters bypass examples](https://github.com/commixproject/commix/wiki/Filters-bypass-examples).
 * **Targets in any shape** - a URL, a crawl, HTML forms, a sitemap, an OpenAPI (Swagger) description, a proxy log, a bulk file, a raw HTTP request, or piped `stdin` - see [target options](https://github.com/commixproject/commix/wiki/Usage#target-options).
-* **Resumable and scriptable** - [per-target session files](https://github.com/commixproject/commix/wiki/Usage#resume-from-stored-session-data), JSON/CSV/HAR output, reusable option profiles, and `--proof`, which re-proves any finding with an experiment of its own.
+* **Resumable and scriptable** - [per-target session files](https://github.com/commixproject/commix/wiki/Usage#resume-from-stored-session-data), JSON/CSV/HAR output, reusable option profiles, `--proof`, which re-proves any finding with an experiment of its own, and a [REST API](https://github.com/commixproject/commix/wiki/API) for driving scans from somewhere else.
 * **Unix-like and Windows** - PHP, Python, Perl, Ruby, ASP.NET, JSP and CGI back ends - see [Windows and Unix-like targets at a glance](https://github.com/commixproject/commix/wiki/Techniques#windows-and-unix-like-targets-at-a-glance) for how the payloads differ.
 
 ## Installation
