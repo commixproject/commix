@@ -94,6 +94,7 @@ def read_input(message, default=None, check_batch=True):
   def is_empty():
     value = safe_input(settings.input_message(message))
     if len(value) == 0:
+      settings.echo_default_answer(message, default)
       return default
     else:
       return value

@@ -372,6 +372,22 @@ def print_data_to_stdout(data):
     PROGRESS_LINE_OPEN = is_spinner_style and not has_lf and not is_done_marker
 
 """
+Write back onto the line that was left blank the answer that blank stood for.
+
+An answer taken from a default is an answer the run acted on, and a line showing nothing is a line
+that reads, afterwards, as though the question was never settled. Only where there is a terminal to
+rewrite: anywhere else the line has already gone.
+"""
+def echo_default_answer(message, answer):
+  if answer is None or not sys.stdout.isatty():
+    return
+  with PRINT_LOCK:
+    # Up one line and clear it - the answer was entered on the line the cursor has just left.
+    _stdout_write("\033[A\033[2K")
+    sys.stdout.flush()
+  print_data_to_stdout(print_message(str(message) + str(answer)))
+
+"""
 Clear the current line before printing, without adding a blank line when already empty.
 """
 def clear_current_line():
@@ -431,7 +447,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "219"
+REVISION = "220"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
