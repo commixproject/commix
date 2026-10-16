@@ -129,14 +129,6 @@ Announce the technique about to be tested, re-checking tamper compatibility now 
 def _announce_technique(injection_type, technique):
   settings.CURRENT_TECHNIQUE = technique
   checks.tamper_scripts(stored_tamper_scripts=True)
-  """
-  Where a file-based technique writes, and under what name, is settled before it sends anything -
-  and those questions would come between the title and the first probe, leaving a line that says
-  "please wait" with a prompt under it. So the title is left to that first probe, which is past
-  them, and the technique announces itself once.
-  """
-  if settings.VERBOSITY_LEVEL == 0 and technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
-    return
   checks.testing_technique_title(injection_type, technique)
 
 """

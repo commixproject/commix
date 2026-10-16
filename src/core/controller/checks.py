@@ -949,8 +949,11 @@ def testing_technique_title(injection_type, technique):
   settings.LAST_DOT_BUCKET = -1
   technique = technique_label(injection_type, technique)
   announced = (settings.CHECKING_PARAMETER, technique)
-  title = "Continuing with the " if settings.LAST_ANNOUNCED_TECHNIQUE == announced else "Testing the "
+  # Said again where something came between the title and the testing it announced - the questions
+  # a file-based technique settles where it writes with, most of all.
+  title = "Continue testing the " if settings.LAST_ANNOUNCED_TECHNIQUE == announced else "Testing the "
   settings.LAST_ANNOUNCED_TECHNIQUE = announced
+  settings.LAST_ANNOUNCED_REQUESTS = settings.TOTAL_OF_REQUESTS
   if settings.VERBOSITY_LEVEL != 0:
     info_msg = title + technique + ". "
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
@@ -973,7 +976,7 @@ def injection_process(injection_type, technique, done=False, i=None, total=None)
     # close in that case: the technique was already announced, and that other output already
     # ended the line - neither re-announcing it nor a bare "(done)" with nothing before it on the
     # line says anything the user was not already told.
-    if done and already_announced:
+    if done and already_announced and settings.TOTAL_OF_REQUESTS == settings.LAST_ANNOUNCED_REQUESTS:
       settings.LAST_COMPLETED_TECHNIQUE = technique
       return
     testing_technique_title(injection_type, technique)

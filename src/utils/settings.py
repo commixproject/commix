@@ -447,7 +447,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "220"
+REVISION = "221"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -2188,6 +2188,12 @@ THREADED_TIME_RETRIEVAL_CHOICE = None
 # Technique titles to suppress when a fallback already announced the transition.
 # The (parameter, technique) last announced, so a re-announcement reads as "Continuing with".
 LAST_ANNOUNCED_TECHNIQUE = None
+
+"""
+How many requests had been sent when a technique announced itself, so that a line closed by
+something else can be told apart by whether any testing actually happened after it.
+"""
+LAST_ANNOUNCED_REQUESTS = 0
 
 # The output file last announced, so the same one is not announced again for every separator tried.
 LAST_ANNOUNCED_OUTPUT_FILE = None
