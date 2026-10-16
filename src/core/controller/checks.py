@@ -952,6 +952,8 @@ def testing_technique_title(injection_type, technique):
   # Said again where something came between the title and the testing it announced - the questions
   # a file-based technique settles where it writes with, most of all.
   title = "Continue testing the " if settings.LAST_ANNOUNCED_TECHNIQUE == announced else "Testing the "
+  if settings.LAST_ANNOUNCED_TECHNIQUE != announced:
+    settings.LAST_RESUMED_TECHNIQUE = None
   settings.LAST_ANNOUNCED_TECHNIQUE = announced
   settings.LAST_ANNOUNCED_REQUESTS = settings.TOTAL_OF_REQUESTS
   if settings.VERBOSITY_LEVEL != 0:
@@ -970,7 +972,8 @@ def injection_process(injection_type, technique, done=False, i=None, total=None)
   if settings.VERBOSITY_LEVEL != 0:
     return
   if not settings.PROGRESS_LINE_OPEN:
-    already_announced = settings.LAST_ANNOUNCED_TECHNIQUE == (settings.CHECKING_PARAMETER, technique_label(injection_type, technique))
+    announced = (settings.CHECKING_PARAMETER, technique_label(injection_type, technique))
+    already_announced = settings.LAST_ANNOUNCED_TECHNIQUE == announced
     # The line only closed because something else legitimately printed over it (e.g. a Y/n prompt
     # deciding there is nothing left to try), not because testing moved on. Nothing is left to
     # close in that case: the technique was already announced, and that other output already
@@ -979,6 +982,13 @@ def injection_process(injection_type, technique, done=False, i=None, total=None)
     if done and already_announced and settings.TOTAL_OF_REQUESTS == settings.LAST_ANNOUNCED_REQUESTS:
       settings.LAST_COMPLETED_TECHNIQUE = technique
       return
+    # Said a second time where something came between the title and the testing it announced, and
+    # only a second time: a technique that stops to ask again, and again, would otherwise repeat
+    # the line for every question. Until there is an ending to report, nothing more is said.
+    if already_announced and settings.LAST_RESUMED_TECHNIQUE == announced and not done:
+      return
+    if already_announced:
+      settings.LAST_RESUMED_TECHNIQUE = announced
     testing_technique_title(injection_type, technique)
   if done:
     # Can be hit once per false-positive retry on the same technique - only print once.

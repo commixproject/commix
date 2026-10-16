@@ -274,8 +274,6 @@ Something read off the target, written the way the summary blocks already are.
 
 No timestamp and no sign: what was retrieved is the answer, not a step towards it, and it reads
 apart from the running log for that. Quoted, so a value that is empty or padded is still visible.
-Long or multi-line content is printed as its own block right under the label, plainly - nothing here
-needs a border of its own to be read correctly.
 """
 def print_retrieved_data(label, retrieved, quoted=True):
   text = str(retrieved)
@@ -283,10 +281,7 @@ def print_retrieved_data(label, retrieved, quoted=True):
     text = text[:-2]
   elif text.endswith(END_LINE.LF):
     text = text[:-1]
-  if END_LINE.LF in text or len(text) > MAX_INLINE_VALUE_LENGTH:
-    body = SINGLE_WHITESPACE + (END_LINE.LF + "'" + text + "'" if quoted else text)
-  else:
-    body = SINGLE_WHITESPACE + ("'" + text + "'" if quoted else text)
+  body = SINGLE_WHITESPACE + ("'" + text + "'" if quoted else text)
   return label + ":" + body + Style.RESET_ALL
 
 """
@@ -447,7 +442,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "223"
+REVISION = "224"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -2194,6 +2189,13 @@ How many requests had been sent when a technique announced itself, so that a lin
 something else can be told apart by whether any testing actually happened after it.
 """
 LAST_ANNOUNCED_REQUESTS = 0
+
+"""
+The technique whose title has already been said a second time. A technique that stops to ask
+something more than once would otherwise announce itself again on every resume, turning one line
+into a column of identical ones.
+"""
+LAST_RESUMED_TECHNIQUE = None
 
 # The output file last announced, so the same one is not announced again for every separator tried.
 LAST_ANNOUNCED_OUTPUT_FILE = None
