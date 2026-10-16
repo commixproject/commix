@@ -150,7 +150,7 @@ general.add_option("--charset",
                 action="store",
                 dest="charset",
                 default=None,
-                help="Time-related injection charset (e.g. '0123456789abcdef').")
+                help="Blind injection charset (e.g. '0123456789abcdef').")
 
 general.add_option("--check-internet",
                 action="store_true",

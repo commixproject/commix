@@ -130,11 +130,34 @@ def output_length(channel, cmd, ceiling=None, payloads=None):
 
 """
 One byte of the output, found by bisecting its ordinal.
+
+Over whatever pool the run is working with, which '--charset' narrows: a byte known to be one of a
+handful of characters sits in a far shorter range than a printable one, and every halving of that
+range is a request not sent. The same pool the time-related techniques read, so an answer given
+once holds whichever of them ends up asking.
 """
 def _byte_at(channel, cmd, position, payloads=None):
   payloads = payloads or checks.boolean_based_payloads()
   question = lambda candidate: payloads.get_char(channel.separator, cmd, position, candidate, operator="-le")
-  return _bisect(channel, question, min(settings.CHAR_POOL_MULTI), max(settings.CHAR_POOL_MULTI))
+  char_pool = sorted(set(checks.generate_char_pool(position)))
+  low, high = char_pool[0], char_pool[-1]
+  # A pool with nothing missing between its ends is its own range: every answer inside it is one of
+  # its members, so the range is halved directly and the result needs no confirming.
+  if high - low + 1 == len(char_pool):
+    return _bisect(channel, question, low, high)
+  # Otherwise the gaps would be halved away too, which costs more questions than the pool has
+  # characters. The members themselves are halved instead - log2 of their number rather than of the
+  # span they are spread over - and one more question confirms the character found is the output's
+  # own, rather than the nearest one below it that the pool happens to hold.
+  index = _bisect(channel, lambda position_in_pool: question(char_pool[position_in_pool]), 0, len(char_pool) - 1)
+  if index is not None:
+    candidate = char_pool[index]
+    if _ask(channel, payloads.get_char(channel.separator, cmd, position, candidate, operator="-eq")):
+      return candidate
+  # The byte is not one of the pool's members, so it sits in one of the gaps the halving above
+  # skipped over. Found the long way rather than given up on: a charset is a statement about what
+  # the output is mostly made of, and a character it did not account for is still worth reading.
+  return _bisect(channel, question, low, high)
 
 """
 The command's output, one byte at a time, each found by bisecting its ordinal.
@@ -239,6 +262,11 @@ def retrieve(channel, cmd, length=None, payloads=None):
     warn_msg += ("them" if len(failed_positions) != 1 else "it") + ", on a second attempt either) - "
     warn_msg += ("they are" if len(failed_positions) != 1 else "it is") + " marked '"
     warn_msg += settings.UNRESOLVED_CHAR + "' in the retrieved output below."
+    if menu.options.charset:
+      # Said here rather than left to be guessed at: a character the given charset leaves out cannot
+      # be found however many times it is asked for, and reads exactly like an oracle that misfired.
+      warn_msg += " The run was given '--charset', and a character the output holds but that set"
+      warn_msg += " leaves out is never found - which is what this looks like."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
   output = _so_far()

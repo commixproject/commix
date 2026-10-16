@@ -1711,7 +1711,7 @@ def do_check(url, http_request_method, filename):
         checks.finish_target()
         logs.print_logs_notification(filename, url)
         common.show_http_error_codes()
-        raise SystemExit(settings.EXIT_FAILURE)
+        raise SystemExit(settings.EXIT_NOTHING_FOUND)
     elif settings.MULTI_TARGETS:
       checks.finish_target()
       logs.print_logs_notification(filename, url)

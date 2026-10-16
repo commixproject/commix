@@ -6259,10 +6259,10 @@ def brute_force_web_roots():
   return candidates
 
 """
-Resolve a numbered-menu answer: '--answers' is matched against the full question text (every
-option's own words, not just the bare prompt actually shown), the same breadth sqlmap's own
-answer-matching gets by searching its whole (there, multi-line) prompt - while what the operator
-actually sees stays the short, single-line, readline-safe prompt handed in as 'prompt'.
+Resolve a numbered-menu answer: '--answers' is matched against the full question text - every
+option's own words, not just the bare prompt actually shown - so that an answer can be written
+against any part of what was asked, while what the operator sees stays the short, single-line,
+readline-safe prompt handed in as 'prompt'.
 """
 def resolve_menu_choice(full_text, prompt, default):
   if settings.ANSWERS and any(_ in settings.ANSWERS for _ in ",="):
@@ -6309,9 +6309,8 @@ def choose_web_root_candidates():
   settings.print_data_to_stdout(Style.BRIGHT + question + Style.RESET_ALL)
   for option in options:
     settings.print_data_to_stdout(Style.BRIGHT + option + Style.RESET_ALL)
-  # '--answers' is matched against the full text above (every option's own words), the same breadth
-  # sqlmap's own answer-matching gets by searching its whole (there, multi-line) prompt - while the
-  # prompt actually shown stays the bare "> " sqlmap itself shows once a multi-line one is rendered.
+  # '--answers' is matched against the full text above, every option's own words included, while
+  # the prompt actually shown stays the bare "> " a rendered multi-line question leaves behind.
   choice = resolve_menu_choice(question + " " + " ".join(options), "> ", "1")
 
   if choice == "2":
@@ -6340,7 +6339,7 @@ def choose_web_root_candidates():
 """
 Try to work out the web root from an absolute file path the target has already leaked somewhere
 in its own output - a PHP warning naming the script's own path is the most common way - checked
-before ever asking the operator, the same order sqlmap's own web-root resolution follows. A match
+before ever asking the operator, since an answer the target gave itself beats one guessed at. A match
 is cut right after whichever generic document-root name (or the target's own hostname) it carries,
 the same as the directory the target is actually using is named.
 """

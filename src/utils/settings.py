@@ -447,7 +447,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "221"
+REVISION = "222"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -2252,6 +2252,11 @@ UNRESOLVED_CHAR = "?"
 # What a run that ended on an error exits with, so that a caller can tell it apart from one that
 # finished. A run ending any other way - the user quitting, the work being done - still exits zero.
 EXIT_FAILURE = 1
+
+# What a run that tested everything it was asked to and found nothing exits with. Apart from the
+# one above, because a caller gating on commix has to tell a target that came back clean from a
+# scan that never got to look - both of which used to end the same way.
+EXIT_NOTHING_FOUND = 2
 
 # Requests dropped on a timeout because '--ignore-timeouts' was given, counted for the run's summary.
 IGNORED_TIMEOUTS = 0
