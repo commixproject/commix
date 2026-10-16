@@ -13,7 +13,11 @@ info:
       * Options are the destinations of commix's own command-line options, with `-` read as `_`:
         `url` is `--url`, `flush_session` is `--flush-session`. A name the parser does not know is
         refused rather than kept.
-      * `report_json`, `output_dir` and `batch` are settled by the server and cannot be set.
+      * `report_json`, `output_dir` and `batch` are settled by the server, and setting them is
+        refused rather than ignored.
+      * Options that act on the host serving the API rather than on the target are refused too:
+        `--alert`, `-c`, `--save`, `--preprocess`, `--postprocess`, `--install`, `--update`,
+        `--purge`, and the switches that are not scans at all.
       * Something the server understood but would not do answers `200` with `success: false` and a
         `message`. Only authentication (`401`), an address that is not served (`404`), one asked for
         with the wrong method (`405`) and an unhandled failure (`500`) answer with a code of their
@@ -43,6 +47,8 @@ tags:
     description: Reading and settling a task's options
   - name: Scans
     description: Running a task, and reading it while it runs
+  - name: Files
+    description: What a task produced
   - name: Admin
     description: Every task at once
 
@@ -320,6 +326,68 @@ paths:
                         type: array
                         items: { $ref: "#/components/schemas/LogLine" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /download/{taskid}:
+    get:
+      tags: [Files]
+      operationId: listFiles
+      summary: Every file the task has to hand
+      description: >-
+        The options it was started with, the report, what it printed, and whatever the run itself
+        wrote - each by a path relative to the task's own directory, which is the path
+        `/download/{taskid}/{path}` takes.
+      parameters: [ { $ref: "#/components/parameters/TaskId" } ]
+      responses:
+        "200":
+          description: The files, by path.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Success"
+                  - type: object
+                    properties:
+                      files:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            path: { type: string, example: "output/localhost_8081/logs.txt" }
+                            size: { type: integer, example: 2127 }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /download/{taskid}/{path}:
+    get:
+      tags: [Files]
+      operationId: downloadFile
+      summary: One of those files, as itself
+      description: >-
+        The only address that answers with something other than JSON. A path that resolves outside
+        the task's own directory is refused, however it is spelled.
+      parameters:
+        - { $ref: "#/components/parameters/TaskId" }
+        - name: path
+          in: path
+          required: true
+          schema: { type: string }
+          description: The file's path, as the listing above gives it.
+      responses:
+        "200":
+          description: The file.
+          headers:
+            Content-Disposition:
+              schema: { type: string }
+              description: 'attachment; filename="<the file''s own name>"'
+          content:
+            application/octet-stream:
+              schema: { type: string, format: binary }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: No such task, or no such file in it.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Failure"
 
   /admin/list:
     get:

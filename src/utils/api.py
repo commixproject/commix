@@ -20,9 +20,12 @@ import sys
 import json
 import signal
 import shutil
+import socket
+import mimetypes
 import secrets
 import tempfile
 import subprocess
+import threading
 import contextlib
 
 from http.server import BaseHTTPRequestHandler
@@ -55,6 +58,42 @@ finally:
 What the server answers to, and what it answers with.
 """
 API_VERSION = "1.0"
+
+# How long one request may hold a connection open, and the most of a body that will be read. A
+# 'Content-Length' larger than what follows it would otherwise hold a worker forever waiting for
+# the rest, which is a request that never arrives taking a thread with it.
+REQUEST_TIMEOUT = 10
+
+"""
+Options a request may not set, because they act on the host serving the API rather than on the
+target being scanned.
+
+A task is a scan of somebody else's machine, asked for over the network. These would make it a way
+to run a command on this one, read or write a file of its choosing here, or change the installation
+underneath it - none of which is what a scan is, and all of which a token for scanning should not
+carry with it.
+"""
+REFUSED_OPTIONS = {
+  "alert": "runs a command on the host serving the API",
+  "config_file": "reads a file from the host serving the API",
+  "save_config": "writes a file to the host serving the API",
+  "preprocess": "runs a script on the host serving the API",
+  "postprocess": "runs a script on the host serving the API",
+  "install": "changes the installation serving the API",
+  "update": "changes the installation serving the API",
+  "purge": "erases the data of the host serving the API",
+  "wizard": "asks questions nobody is there to answer",
+  "smoke_test": "is not a scan",
+  "list_tampers": "is not a scan",
+  "dependencies": "is not a scan",
+}
+
+"""
+Options the server settles for every task, whatever it is asked. Refused rather than overridden, so
+that what a task says it was given is what it was actually run with.
+"""
+SERVER_OWNED_OPTIONS = ("report_json", "output_dir", "batch")
+MAX_BODY = 16 * 1024 * 1024
 TASK_ID_BYTES = 8
 LOG_LINE_REGEX = re.compile(r"^\[(?P<time>\d{2}:\d{2}:\d{2})\]\s+\[(?P<level>[a-z]+)\]\s+(?P<message>.*)$")
 
@@ -85,6 +124,10 @@ class Task(object):
     self.directory = directory
     self.options = menu.parser.get_default_values().__dict__.copy()
     self.process = None
+    # Held across deciding whether a scan is running and acting on that answer: the server answers
+    # every request in a thread of its own, and two 'start' requests that both looked first would
+    # both start, leaving two runs writing one report and only the later of them stoppable.
+    self.lock = threading.Lock()
     self.config_file = os.path.join(directory, "options.ini")
     self.report_file = os.path.join(directory, "report.json")
     self.console_file = os.path.join(directory, "console.log")
@@ -97,6 +140,10 @@ class Task(object):
     option = _option(name.strip().lstrip("-").replace("-", "_"))
     if option is None:
       return "Unknown option '" + str(name).strip() + "'."
+    if option.dest in REFUSED_OPTIONS:
+      return "The option '" + (option._long_opts + option._short_opts)[0] + "' cannot be set over the API: it " + REFUSED_OPTIONS[option.dest] + "."
+    if option.dest in SERVER_OWNED_OPTIONS:
+      return "The option '" + (option._long_opts + option._short_opts)[0] + "' is settled by the server for every task."
     # Checked here rather than left for the run to refuse: a value the parser would not have taken
     # is a request that did not do what it was told it did.
     if option.action == "store" and not isinstance(value, bool) and value is not None:
@@ -133,6 +180,12 @@ class Task(object):
     console.close()
 
   """
+  Whether a scan is running under this task right now.
+  """
+  def running(self):
+    return self.process is not None and self.process.poll() is None
+
+  """
   Whether the process is still going, and what it ended with where it is not.
   """
   def returncode(self):
@@ -144,19 +197,21 @@ class Task(object):
   Ask the run to stop, so that it writes down what it has before it goes.
   """
   def stop(self):
-    if self.process is None or self.process.poll() is not None:
-      return False
-    self.process.send_signal(signal.SIGTERM)
-    return True
+    with self.lock:
+      if not self.running():
+        return False
+      self.process.send_signal(signal.SIGTERM)
+      return True
 
   """
   End the process where asking did not.
   """
   def kill(self):
-    if self.process is None or self.process.poll() is not None:
-      return False
-    self.process.kill()
-    return True
+    with self.lock:
+      if not self.running():
+        return False
+      self.process.kill()
+      return True
 
   """
   The report as it stands - a run still going writes it as it goes, so there is one either way.
@@ -167,6 +222,36 @@ class Task(object):
         return json.load(report)
     except (IOError, OSError, ValueError):
       return None
+
+  """
+  Every file the task has to hand, by a path relative to its own directory.
+  """
+  def files(self):
+    found = []
+    for root, _, names in os.walk(self.directory):
+      for name in names:
+        full = os.path.join(root, name)
+        try:
+          size = os.path.getsize(full)
+        except OSError:
+          continue
+        found.append({"path": os.path.relpath(full, self.directory).replace(os.sep, "/"), "size": size})
+    return sorted(found, key=lambda entry: entry["path"])
+
+  """
+  One of those files, by that same path - or nothing, where the path names something else.
+
+  Checked by where it ends up rather than by how it is spelled: the name is the client's to choose,
+  and a task hands back what it produced rather than whatever else the host happens to hold.
+  """
+  def file(self, path):
+    if not path:
+      return None
+    wanted = os.path.realpath(os.path.join(self.directory, path))
+    directory = os.path.realpath(self.directory)
+    if wanted != directory and not wanted.startswith(directory + os.sep):
+      return None
+    return wanted if os.path.isfile(wanted) else None
 
   """
   The run's own log, as lines with the level each was printed at.
@@ -260,7 +345,16 @@ ROUTES = (
   ("GET", r"^/scan/(?P<taskid>[0-9a-f]+)/status$", "scan_status"),
   ("GET", r"^/scan/(?P<taskid>[0-9a-f]+)/data$", "scan_data"),
   ("GET", r"^/scan/(?P<taskid>[0-9a-f]+)/log$", "scan_log"),
+  ("GET", r"^/download/(?P<taskid>[0-9a-f]+)$", "download_list"),
+  ("GET", r"^/download/(?P<taskid>[0-9a-f]+)/(?P<path>.+)$", "download"),
 )
+
+"""
+A file to be handed back as itself, where every other answer is JSON.
+"""
+class _Download(object):
+  def __init__(self, path):
+    self.path = path
 
 """
 What every endpoint answers with, so that a client reads one shape whatever it asked for.
@@ -331,7 +425,7 @@ class Api(object):
       return _no("Unknown task.")
     if not isinstance(body, dict) or not body:
       return _no("No options given.")
-    if task.returncode() is None and task.process is not None:
+    if task.running():
       # Refused rather than kept: the running scan was handed its options when it started, so one
       # set now would read as having changed something it cannot reach.
       return _no("That scan is running, and a scan is given its options once, when it starts.")
@@ -345,16 +439,19 @@ class Api(object):
     task = Store.tasks.get(taskid)
     if task is None:
       return _no("Unknown task.")
-    if task.returncode() is None and task.process is not None:
-      return _no("That scan is already running.")
-    for name, value in (body or {}).items():
-      refused = task.set_option(name, value)
-      if refused:
-        return _no(refused)
-    if not any(task.options.get(_) for _ in ("url", "logfile", "bulkfile", "requestfile", "sitemap_url", "openapi")):
-      return _no("Nothing to scan: none of 'url', 'logfile', 'bulkfile', 'requestfile', 'sitemap_url' or 'openapi' was set.")
-    task.start()
-    return _ok(engineid=task.process.pid)
+    # Decided and acted on under the task's own lock, so that one of several requests arriving
+    # together starts the scan and the rest are told it is already running.
+    with task.lock:
+      if task.running():
+        return _no("That scan is already running.")
+      for name, value in (body or {}).items():
+        refused = task.set_option(name, value)
+        if refused:
+          return _no(refused)
+      if not any(task.options.get(_) for _ in ("url", "logfile", "bulkfile", "requestfile", "sitemap_url", "openapi")):
+        return _no("Nothing to scan: none of 'url', 'logfile', 'bulkfile', 'requestfile', 'sitemap_url' or 'openapi' was set.")
+      task.start()
+      return _ok(engineid=task.process.pid)
 
   def scan_stop(self, taskid=None, **_):
     task = Store.tasks.get(taskid)
@@ -387,6 +484,21 @@ class Api(object):
     if errors is None:
       errors = [issue for target in report.get("targets", []) for issue in target.get("errors", [])]
     return _ok(data=report, error=errors)
+
+  def download_list(self, taskid=None, **_):
+    task = Store.tasks.get(taskid)
+    if task is None:
+      return _no("Unknown task.")
+    return _ok(files=task.files())
+
+  def download(self, taskid=None, path=None, **_):
+    task = Store.tasks.get(taskid)
+    if task is None:
+      return _no("Unknown task.")
+    wanted = task.file(_urlparse.unquote(path or ""))
+    if wanted is None:
+      return _no("No such file in that task.", code=404)
+    return 200, _Download(wanted)
 
   def scan_log(self, taskid=None, query=None, **_):
     task = Store.tasks.get(taskid)
@@ -433,6 +545,7 @@ The HTTP in front of the endpoints above.
 class Handler(BaseHTTPRequestHandler):
   server_version = settings.APPLICATION + "/" + str(settings.VERSION)
   api = Api()
+  timeout = REQUEST_TIMEOUT
 
   # Nothing to a terminal: a server that narrates every poll buries what it was asked to say.
   def log_message(self, *args):
@@ -479,20 +592,46 @@ class Handler(BaseHTTPRequestHandler):
       length = int(self.headers.get("Content-Length") or 0)
     except ValueError:
       return None
-    if length <= 0:
+    if length <= 0 or length > MAX_BODY:
       return None
     try:
-      return json.loads(self.rfile.read(length).decode(settings.DEFAULT_CODEC))
+      body = self.rfile.read(length)
+    except (socket.timeout, OSError):
+      # Promised more than was sent. The connection is given up on rather than waited on.
+      return None
+    if len(body) != length:
+      return None
+    try:
+      return json.loads(body.decode(settings.DEFAULT_CODEC))
     except (ValueError, UnicodeDecodeError):
       return None
 
   def _answer(self, code, answer):
+    if isinstance(answer, _Download):
+      return self._answer_file(answer.path)
     body = json.dumps(answer, indent=2, ensure_ascii=False).encode(settings.DEFAULT_CODEC)
     self.send_response(code)
     self.send_header("Content-Type", "application/json")
     self.send_header("Content-Length", str(len(body)))
     self.end_headers()
     self.wfile.write(body)
+
+  """
+  Hand back a file, opened before anything is said: once a status line has gone out there is no
+  taking it back, and a file that cannot be read would answer 200 to a request it never served.
+  """
+  def _answer_file(self, path):
+    try:
+      handle = open(path, "rb")
+    except (IOError, OSError) as err_msg:
+      return self._answer(*_no(str(err_msg), code=500))
+    with handle:
+      self.send_response(200)
+      self.send_header("Content-Type", mimetypes.guess_type(path)[0] or "application/octet-stream")
+      self.send_header("Content-Length", str(os.fstat(handle.fileno()).st_size))
+      self.send_header("Content-Disposition", 'attachment; filename="' + os.path.basename(path) + '"')
+      self.end_headers()
+      shutil.copyfileobj(handle, self.wfile)
 
 """
 Serve the API until it is stopped.
