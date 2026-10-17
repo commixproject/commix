@@ -525,7 +525,7 @@ def check_http_method(url):
   else:
     if settings.COOKIE_INJECTION:
       http_request_method = settings.COOKIE
-    if settings.USER_DEFINED_POST_DATA:
+    elif settings.USER_DEFINED_POST_DATA:
       http_request_method = settings.HTTPMETHOD.POST
     else:
       http_request_method = settings.HTTPMETHOD.GET
@@ -6184,7 +6184,15 @@ def technique_display_name(technique):
 Record a newly-identified injectable finding to the log file and terminal - the shared tail of identified_vulnerable_param() above, reusable by modules (see shellshock.py) with their own header_name/the_type.
 """
 def announce_vulnerable_finding(filename, injection_type, technique, the_type, header_name, http_request_method, vuln_parameter, payload, counter, type_prefix="", decode_payload=True, title=None):
-  display_method = "HTTP Header" if "header" in the_type.lower() else http_request_method
+  # A Cookie finding is still sent over a real GET/POST on the wire - 'http_request_method' is that
+  # verb, not what to call the finding. Only a plain GET/POST parameter has no 'header_name' of its
+  # own and is left to that verb; a header finding already took the branch above.
+  if "header" in the_type.lower():
+    display_method = "HTTP Header"
+  elif header_name.strip():
+    display_method = header_name.strip()
+  else:
+    display_method = http_request_method
   logs.add_finding(filename, injection_type, technique, display_method, vuln_parameter, payload, title)
 
   if not settings.LOAD_SESSION:

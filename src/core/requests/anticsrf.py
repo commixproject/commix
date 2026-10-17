@@ -119,13 +119,34 @@ def adjust_header(raw, name, value):
   return re.sub(r"(?i)((?:\A|[\r\n]|\\n)\s*" + re.escape(name) + r"\s*:\s*)[^\\\r\n]*", lambda match: match.group(1) + value, raw)
 
 """
+Whether this request currently carries the configured token parameter anywhere 'apply_token' would
+write it back - the query string, the body, the cookie, or a header of its own. An auxiliary request
+the run makes on its own (document-root discovery, a '--safe-url' check...) carries none of these,
+and 'adjust_parameter'/'adjust_header' would leave it untouched anyway, so there is nothing here for
+a fresh token to be fetched for.
+"""
+def _carries_token(request):
+  name = re.escape(settings.CSRF_TOKEN)
+  parts = request.full_url.split("?", 1)
+  if len(parts) == 2 and re.search(r"(?i)\b" + name + r"\s*=", parts[1]):
+    return True
+  if request.data and re.search(r"(?i)\b" + name + r"\s*=", request.data.decode(settings.DEFAULT_CODEC, errors="replace")):
+    return True
+  if menu.options.cookie and re.search(r"(?i)(?:\A|;\s*)[^=;\s]*" + name + r"[^=;\s]*=", menu.options.cookie):
+    return True
+  for header_name in list(request.headers) + list(request.unredirected_hdrs):
+    if header_name.lower() == settings.CSRF_TOKEN.lower():
+      return True
+  return False
+
+"""
 Put a freshly fetched token into the request that is about to be sent.
 
 The value travels wherever the parameter does: the query string, the body, a header of its own, or
 the cookie - which is also where it is read from, for a target that hands it back that way.
 """
 def apply_token(request):
-  if not settings.CSRF_TOKEN or settings.FETCHING_CSRF_TOKEN:
+  if not settings.CSRF_TOKEN or settings.FETCHING_CSRF_TOKEN or not _carries_token(request):
     return
   settings.FETCHING_CSRF_TOKEN = True
   try:
