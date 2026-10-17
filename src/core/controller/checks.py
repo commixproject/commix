@@ -5570,6 +5570,35 @@ def download_file_bytes(execute_cmd, remote_file):
     return None, True
 
 """
+A file's exact contents, fetched as base64 so that nothing the page does to whitespace can reach
+them - or (None, False) where the target cannot produce it, leaving the plain read to be tried.
+
+Only where the whole answer arrives at once. A technique that reads a byte at a time pays for every
+one of them, and base64 is a third longer than what it carries.
+"""
+def file_read_encoded(execute_cmd, file_to_read):
+  if settings.CURRENT_TECHNIQUE not in (settings.INJECTION_TECHNIQUE.RESULTS_BASED, settings.INJECTION_TECHNIQUE.DYNAMIC_CODE):
+    return None, False
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    cmd = settings.WIN_FILE_READ_B64 + file_to_read.replace("\\", "\\\\") + "'))\""
+  else:
+    cmd = settings.FILE_READ_B64 + quoted_cmd(file_to_read)
+  try:
+    encoded, fresh = execute_cmd(cmd)
+  except Exception:
+    return None, False
+  if not encoded:
+    return None, False
+  try:
+    content = base64.b64decode("".join(str(encoded).split()), validate=True)
+  except Exception:
+    return None, False
+  try:
+    return content.decode(settings.DEFAULT_CODEC), fresh
+  except UnicodeDecodeError:
+    return content.decode(settings.DEFAULT_CODEC, "replace"), fresh
+
+"""
 Download a file from the target host to the local machine ("download <remote> <local>").
 """
 def shell_download(execute_cmd, cmd, filename):

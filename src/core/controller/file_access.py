@@ -85,7 +85,13 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
      not checks.file_readable(separator, timesec, http_request_method, url, vuln_parameter, whitespace, prefix, suffix, url_time_response, file_to_read, technique):
     shell, fresh = "", False
   else:
-    shell, fresh = execute_cmd(cmd)
+    # Asked for as base64 first, and read plainly only where the target cannot produce it. What a
+    # page does to a command's output - runs of whitespace folded into one, every newline among
+    # them - leaves a file that cannot be put back together; the encoded form has none of those
+    # characters in it, so the bytes arrive as they are on disk.
+    shell, fresh = checks.file_read_encoded(execute_cmd, file_to_read)
+    if shell is None:
+      shell, fresh = execute_cmd(cmd)
   if settings.TIME_RELATED_ATTACK:
     if settings.VERBOSITY_LEVEL == 0 and fresh and len(shell) != 0:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
