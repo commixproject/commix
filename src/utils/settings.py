@@ -442,7 +442,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "225"
+REVISION = "226"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -586,6 +586,8 @@ CMD_SUB_SUFFIX = ")"
 # Sent to be blocked, never to run: read-only and instant, in both shells, chained every way.
 WAF_CHECK_PAYLOAD = ";cat /etc/passwd|type C:\\Windows\\win.ini&&dir ../../||$(cat /etc/passwd)"
 WAF_ENABLED = False
+# The product name a blocked response was matched to, via 'WAF_SIGNATURES' - None until (if ever) found.
+WAF_IDENTIFIED = None
 
 class HEURISTIC_TEST(object):
   POSITIVE = True
@@ -2041,6 +2043,23 @@ WAF_BLOCK_HTTP_CODES = [ FORBIDDEN_ERROR,
                          NOT_IMPLEMENTED,
                          SERVICE_UNAVAILABLE
                        ]
+
+# Server header / cookie name / block-page body fingerprints for common WAF/CDN products, checked
+# against the first blocked response seen; a response matching none of them falls back to the
+# generic "some kind of WAF/IPS" wording instead of naming one.
+WAF_SIGNATURES = {
+                  "Cloudflare": r"(?i)cloudflare|cf-ray|__cfduid|cf_clearance",
+                  "Akamai": r"(?i)akamaighost|ak_bmsc|reference\s*#\d+\.[0-9a-f]+",
+                  "Imperva Incapsula": r"(?i)incapsula|incap_ses|visid_incap",
+                  "F5 BIG-IP ASM": r"(?i)big-?ip|bigipserver|the requested url was rejected",
+                  "Sucuri": r"(?i)sucuri",
+                  "ModSecurity": r"(?i)mod_security|owasp[_ ]core[_ ]rule[_ ]set",
+                  "FortiWeb": r"(?i)fortiweb|fortiwafsid",
+                  "Citrix Application Firewall": r"(?i)citrix application firewall|ns_af=",
+                  "Barracuda WAF": r"(?i)barracuda|barra_counter_session",
+                  "Wallarm": r"(?i)wallarm",
+                  "AWS WAF": r"(?i)aws waf|x-amzn-waf"
+                 }
 
 HTTP_ERROR_CODES_SUM = []
 

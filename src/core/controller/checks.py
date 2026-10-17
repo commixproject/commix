@@ -87,14 +87,34 @@ def persist_waf_finding():
   session_handler.import_waf_status(settings.TARGET_NETLOC, True)
 
 """
+Matches a blocked response's headers and body against known WAF/CDN product signatures, so the
+target can be named rather than spoken of in general terms. Tried once, the first time a block is
+seen - 'detect_waf' only reaches here before 'settings.WAF_ENABLED' is set.
+"""
+def identify_waf(err):
+  try:
+    blob = str(getattr(err, "headers", "")) + str(err.read())
+  except Exception:
+    return None
+  for name, regex in settings.WAF_SIGNATURES.items():
+    if re.search(regex, blob):
+      return name
+  return None
+
+"""
 Flags the target as WAF/IPS-protected on a block-like HTTP status code.
 """
-def detect_waf(err_code):
+def detect_waf(err):
+  err_code = getattr(err, "code", None)
   if str(err_code) in settings.WAF_BLOCK_HTTP_CODES and \
      not menu.options.skip_waf and \
      not settings.HOST_INJECTION:
     if not settings.WAF_ENABLED:
-      warn_msg = "It seems some kind of WAF/IPS is protecting the target."
+      settings.WAF_IDENTIFIED = identify_waf(err)
+      if settings.WAF_IDENTIFIED:
+        warn_msg = "'" + settings.WAF_IDENTIFIED + "' is protecting the target."
+      else:
+        warn_msg = "It seems some kind of WAF/IPS is protecting the target."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       settings.WAF_ENABLED = True
       persist_waf_finding()
@@ -1987,7 +2007,7 @@ def continue_tests(err):
 
   # Possible WAF/IPS
   try:
-    detect_waf(err.code)
+    detect_waf(err)
     if int(err.code) not in settings.WARNED_HTTP_ERROR_CODES:
       warn_msg = "The web server responded with an HTTP error code '" + http_error_code_label(err.code, err)
       warn_msg += "' which could interfere with the results of the tests."

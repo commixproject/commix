@@ -707,6 +707,7 @@ def do_check(request):
   if not checks.get_header(request.headers, settings.ACCEPT):
     request.add_header(settings.ACCEPT, settings.ACCEPT_VALUE)
 
+
   if not checks.get_header(request.headers, settings.CONTENT_TYPE):
     request.add_unredirected_header(settings.CONTENT_TYPE, settings.DEFAULT_HTTP_CONTENT_TYPE_VALUE)
 

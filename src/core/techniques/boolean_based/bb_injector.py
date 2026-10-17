@@ -14,6 +14,7 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 from src.core.requests import requests
+from src.utils import settings
 from src.core.controller import checks
 
 """
