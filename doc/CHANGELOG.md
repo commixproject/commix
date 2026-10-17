@@ -1,6 +1,6 @@
 ## Version 4.2 (TBA)
+* Added: New tamper script `printfoctal.py`, hiding command names/paths via `printf` octal escapes (`$(printf '\143\141\164')`), for shells lacking `ansiquote`/`ansiquoteoctal`'s ANSI-C quoting (e.g. `dash`).
 * Fixed: `--csrf-token` without `--csrf-url` crashing the run (discarding already-confirmed findings) whenever an auxiliary request, such as document-root discovery, didn't carry the token.
-* Fixed: Cookie-based findings being reported as `(GET)`/`(POST)` instead of `(Cookie)` in the summary.
 * Added: WAF/CDN product identification (`Cloudflare`, `Akamai`, `Imperva Incapsula`, `F5 BIG-IP ASM`, `Sucuri`, `ModSecurity`, `FortiWeb`, `Citrix Application Firewall`, `Barracuda WAF`, `Wallarm`, `AWS WAF`) on a blocked response, named in the "blocked IP", "browser verification" and "CAPTCHA" warnings as well as the generic WAF/IPS one.
 * Added: New `commixapi.py` for driving runs over a REST API, as a server or a client, each scan a task of its own with its options, status, results and log.
 * Added: New option `-z` for naming options by as much of their name as tells them apart (e.g. `-z "flu,bat,tec=rt"`).

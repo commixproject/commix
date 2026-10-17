@@ -442,7 +442,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "228"
+REVISION = "229"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1834,6 +1834,7 @@ TAMPER_SCRIPTS = {
                   "space2brace": False,
                   "ansiquote": False,
                   "ansiquoteoctal": False,
+                  "printfoctal": False,
                   "space2ifsraw": False,
                   "unicodequote": False,
                   "cmd2wildcard": False,
@@ -1947,10 +1948,19 @@ INCOMPATIBLE_TAMPER_SCRIPTS = [
                   ("ansiquoteoctal", "dollarstars"),
                   ("ansiquoteoctal", "singlequotes"),
                   ("ansiquoteoctal", "uninitializedvariable"),
+                  # A third encoding of the same words, over the same characters.
+                  ("printfoctal", "ansiquote"),
+                  ("printfoctal", "ansiquoteoctal"),
+                  ("printfoctal", "backslashes"),
+                  ("printfoctal", "dollaratsigns"),
+                  ("printfoctal", "dollarstars"),
+                  ("printfoctal", "singlequotes"),
+                  ("printfoctal", "uninitializedvariable"),
                   # A literal "'" is the delimiter both scripts need - one is quoting with it, the
                   # other is folding it away into a character no delimiter is read from.
                   ("ansiquote", "unicodequote"),
                   ("ansiquoteoctal", "unicodequote"),
+                  ("printfoctal", "unicodequote"),
                   ("singlequotes", "unicodequote"),
                   # "''" is literal inside the double-quoted "tr" ranges that "randomcase" builds.
                   ("randomcase", "singlequotes"),
