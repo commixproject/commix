@@ -96,8 +96,15 @@ def identify_waf(err):
     blob = str(getattr(err, "headers", "")) + str(err.read())
   except Exception:
     return None
+  return identify_waf_in_text(blob)
+
+"""
+Matches text (a response body, or a blocked response's headers-and-body) against known WAF/CDN
+product signatures, from 'settings.WAF_SIGNATURES'.
+"""
+def identify_waf_in_text(text):
   for name, regex in settings.WAF_SIGNATURES.items():
-    if re.search(regex, blob):
+    if re.search(regex, text or ""):
       return name
   return None
 
@@ -1609,6 +1616,17 @@ def parse_errors(page):
   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
+Appends the WAF/CDN product name identified in 'page' (if any) to a warning message that already
+ends in '.', as " ('<name>')." in its place - unidentified, the message is left as it stands.
+"""
+def _name_waf_in(message, page):
+  waf_name = settings.WAF_IDENTIFIED or identify_waf_in_text(page)
+  if waf_name:
+    settings.WAF_IDENTIFIED = waf_name
+    message = message[:-1] + " ('" + waf_name + "')."
+  return message
+
+"""
 Checks regarding a recognition of generic "your ip has been blocked" messages.
 """
 def blocked_ip(page):
@@ -1616,7 +1634,7 @@ def blocked_ip(page):
     settings.BLOCKED_IP_DETECTED = True
     settings.WAF_ENABLED = True
     persist_waf_finding()
-    warn_msg = "It appears the target server has blocked you."
+    warn_msg = _name_waf_in("It appears the target server has blocked you.", page)
     settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
 
 """
@@ -1627,11 +1645,7 @@ def browser_verification(page):
     settings.BROWSER_VERIFICATION = True
     settings.WAF_ENABLED = True
     persist_waf_finding()
-    warn_msg = "Potential browser verification protection mechanism detected"
-    if re.search(r"(?i)CloudFlare", page):
-      warn_msg += " (CloudFlare)."
-    else:
-      warn_msg += "."
+    warn_msg = _name_waf_in("Potential browser verification protection mechanism detected.", page)
     settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
 
 """
@@ -1644,11 +1658,7 @@ def captcha_check(page):
         settings.CAPTCHA_DETECED = True
         settings.WAF_ENABLED = True
         persist_waf_finding()
-        warn_msg = "Potential CAPTCHA protection mechanism detected"
-        if re.search(r"(?i)<title>[^<]*CloudFlare", page):
-          warn_msg += " (CloudFlare)."
-        else:
-          warn_msg += "."
+        warn_msg = _name_waf_in("Potential CAPTCHA protection mechanism detected.", page)
         if settings.CRAWLING:
           settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
         settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
