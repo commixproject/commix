@@ -179,10 +179,13 @@ def do_check(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, h
     checks.ps_check()
 
   if menu.options.ps_version and settings.PS_ENABLED == None:
+    # Set whichever way 'ps_incompatible_os()' answers - the wrong-OS case is itself the whole
+    # check 'do_check' was asked for here, and is otherwise re-run (and re-warned) on every
+    # technique 'stored_session()' sees confirmed, for having never been marked done.
+    settings.ENUMERATION_DONE = True
     if not checks.ps_incompatible_os():
       checks.print_enumenation().ps_version_msg()
       powershell_version(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, url_time_response, technique)
-      settings.ENUMERATION_DONE = True
 
   if menu.options.sys_info:
     checks.print_enumenation().os_info_msg()
