@@ -1007,6 +1007,18 @@ detection.add_option("--code",
                 default=None,
                 help="HTTP code to match when the injected condition is true.")
 
+detection.add_option("--lengths",
+                action="store_true",
+                dest="lengths",
+                default=False,
+                help="Compare pages based only on their content length.")
+
+detection.add_option("--null-connection",
+                action="store_true",
+                dest="null_connection",
+                default=False,
+                help="Retrieve the boolean-based page's length without its body.")
+
 detection.add_option("--mine-params",
                 action="store_true",
                 dest="mine_params",

@@ -4248,7 +4248,7 @@ Whether the page says the injected condition held.
 The answer a target gives where it branches on the command rather than printing what it returned -
 the page it renders, or the status it answers with, stands in for the output a blind sink withholds.
 """
-def boolean_oracle(page, code=None):
+def boolean_oracle(page, code=None, page_length=None):
   if menu.options.string:
     return menu.options.string in (page or "")
   if menu.options.not_string:
@@ -4260,6 +4260,22 @@ def boolean_oracle(page, code=None):
       return None
   if menu.options.code is not None:
     return str(code) == str(menu.options.code)
+  """
+  '--lengths' asked for by name, or 'page_length' handed in because there was no body to read at
+  all ('--null-connection') - either way, a length and nothing else is what there is to bisect on.
+  """
+  if menu.options.lengths or page_length is not None:
+    if settings.BOOLEAN_TRUE_LENGTH is None or settings.BOOLEAN_FALSE_LENGTH is None:
+      return None
+    if page_length is None:
+      page_length = len(page) if page is not None else None
+    if page_length is None or settings.BOOLEAN_TRUE_LENGTH == settings.BOOLEAN_FALSE_LENGTH:
+      return None
+    to_true = abs(page_length - settings.BOOLEAN_TRUE_LENGTH)
+    to_false = abs(page_length - settings.BOOLEAN_FALSE_LENGTH)
+    if to_true == to_false:
+      return None
+    return to_true < to_false
   # Nothing was named, so the answer is read against the two pages a known question came back with:
   # whichever of them this response is closer to is the answer it carries. Calibrated rather than
   # compared to a threshold, because what a condition changes can be a couple of characters of a
@@ -4282,12 +4298,25 @@ and everything bisected on it would be noise.
 def calibrate_boolean_oracle(page_true, page_false, code_true=None, code_false=None):
   settings.BOOLEAN_TRUE_PAGE = settings.BOOLEAN_FALSE_PAGE = None
   settings.BOOLEAN_TRUE_RAW = settings.BOOLEAN_FALSE_RAW = None
+  settings.BOOLEAN_TRUE_LENGTH = settings.BOOLEAN_FALSE_LENGTH = None
   settings.BOOLEAN_TRUE_CODE, settings.BOOLEAN_FALSE_CODE = code_true, code_false
   if page_true is None or page_false is None:
     return False
+  # Worth paying a fresh connection per request for '--null-connection' only past a minimum size -
+  # settled once, off the page this run actually has, rather than assumed.
+  if settings.NULL_CONNECTION_WORTHWHILE is None:
+    settings.NULL_CONNECTION_WORTHWHILE = len(page_true) >= settings.NULL_CONNECTION_MIN_LENGTH
+  # Taken from the raw pages, not the masked ones below - a length is a length whether or not the
+  # bytes it counts fall inside a region 'comparable_page' would otherwise mask out.
+  true_length, false_length = len(page_true), len(page_false)
+  lengths_distinguish = true_length != false_length
+  if lengths_distinguish:
+    settings.BOOLEAN_TRUE_LENGTH, settings.BOOLEAN_FALSE_LENGTH = true_length, false_length
   true_page, false_page = comparable_page(page_true), comparable_page(page_false)
   if not true_page or true_page == false_page:
-    return False
+    # Content alone cannot tell the two apart - length still might, and is reported precisely
+    # because it is the only one of the two that just did.
+    return lengths_distinguish
   settings.BOOLEAN_TRUE_PAGE, settings.BOOLEAN_FALSE_PAGE = true_page, false_page
   settings.BOOLEAN_TRUE_RAW, settings.BOOLEAN_FALSE_RAW = page_true, page_false
   return True

@@ -442,7 +442,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "231"
+REVISION = "232"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -777,6 +777,16 @@ BOOLEAN_FALSE_RAW = None
 
 BOOLEAN_TRUE_PAGE = None
 BOOLEAN_FALSE_PAGE = None
+
+# The raw length of the two calibration pages, read alongside them - what '--lengths' (and
+# '--null-connection', which has no body to compare at all) bisects on instead of page content.
+BOOLEAN_TRUE_LENGTH = None
+BOOLEAN_FALSE_LENGTH = None
+
+# Whether '--null-connection' is worth it here: established once, from the first calibration page,
+# since the "skip the body, pay a fresh connection instead" trade only wins past a minimum size.
+NULL_CONNECTION_WORTHWHILE = None
+NULL_CONNECTION_MIN_LENGTH = 32768
 
 # One-time "reflected value(s) found" notice already shown this run.
 REFLECTIVE_VALUE_FOUND = False

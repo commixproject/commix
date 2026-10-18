@@ -13,6 +13,7 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+from src.core.parse import cmdline as menu
 from src.core.requests import requests
 from src.utils import settings
 from src.core.controller import checks
@@ -33,9 +34,34 @@ Worked out by the request rather than guessed at here, which is what lets a find
 against the parameter it was actually found on.
 """
 def answer(payload, prefix, suffix, whitespace, http_request_method, url, vuln_parameter):
-  response, vuln_parameter, _, _, _ = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
+  """
+  '--null-connection': the length off the 'Content-Length' header is read back without the body -
+  worth it only once the page itself is large enough that a fresh connection per request costs
+  less than the transfer it avoids (settled once, in 'calibrate_boolean_oracle'). 'Content-Length'
+  has to name the same (uncompressed) size the calibration lengths were measured on, so compression
+  is turned off for this one request - asked for it, a compressed response would carry the size on
+  the wire instead, which is not what the two reference lengths were measured against.
+  """
+  use_null_connection = menu.options.null_connection and settings.NULL_CONNECTION_WORTHWHILE
+  if use_null_connection:
+    saved_compression = settings.PAGE_COMPRESSION
+    settings.PAGE_COMPRESSION = False
+  try:
+    response, vuln_parameter, _, _, _ = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
+  finally:
+    if use_null_connection:
+      settings.PAGE_COMPRESSION = saved_compression
   if response is False or response is None:
     return None, vuln_parameter
+  if use_null_connection:
+    try:
+      length = int(response.info().get(settings.CONTENT_LENGTH))
+      code = response.getcode()
+    except (TypeError, ValueError):
+      length = None
+    else:
+      response.close()
+      return checks.boolean_oracle(None, code, page_length=length), vuln_parameter
   try:
     page = checks.remove_reflected_values(checks.decode_page_body(response.read(), response), payload)
     code = response.getcode()

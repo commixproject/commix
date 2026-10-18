@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New options `--lengths` (bisect the boolean-based technique on content length instead of content) and `--null-connection` (read that length off the `Content-Length` header, with no body downloaded at all, past a minimum page size).
 * Fixed: `--skip-static` could mark a genuinely injectable parameter as static and skip it, against a target whose response is never byte-identical twice (e.g. a live `ping`).
 * Added: `-l`/`--logfile` now also reads a HAR export (the format `--har` itself writes to), alongside the proxy-log and XML-history formats it already read.
 * Added: New tamper script `printfoctal.py`, hiding command names/paths via `printf` octal escapes (`$(printf '\143\141\164')`), for shells lacking `ansiquote`/`ansiquoteoctal`'s ANSI-C quoting (e.g. `dash`).
