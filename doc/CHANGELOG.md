@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Fixed: `--skip-static` could mark a genuinely injectable parameter as static and skip it, against a target whose response is never byte-identical twice (e.g. a live `ping`).
 * Added: `-l`/`--logfile` now also reads a HAR export (the format `--har` itself writes to), alongside the proxy-log and XML-history formats it already read.
 * Added: New tamper script `printfoctal.py`, hiding command names/paths via `printf` octal escapes (`$(printf '\143\141\164')`), for shells lacking `ansiquote`/`ansiquoteoctal`'s ANSI-C quoting (e.g. `dash`).
 * Fixed: `--csrf-token` without `--csrf-url` crashing the run (discarding already-confirmed findings) whenever an auxiliary request, such as document-root discovery, didn't carry the token.

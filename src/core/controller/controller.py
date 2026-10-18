@@ -730,7 +730,7 @@ def check_parameter_dynamism(url, http_request_method, check_parameter):
     return
 
   changed = difflib.SequenceMatcher(None, real_body, placeholder_body).ratio()
-  if changed >= min(noise, settings.STABILITY_SIMILARITY_THRESHOLD):
+  if changed >= max(noise, settings.STABILITY_SIMILARITY_THRESHOLD):
     warn_msg = param_label + " does not appear to be dynamic."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     return False

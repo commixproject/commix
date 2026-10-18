@@ -144,6 +144,30 @@ def is_url_content_stable(url, response=None, fetch_time=None, http_request_meth
     settings.ORIGINAL_PAGE_COMPARABLE = checks.comparable_page(settings.ORIGINAL_PAGE)
     settings.PAGE_NOISE_RATIO = difflib.SequenceMatcher(None, settings.ORIGINAL_PAGE_COMPARABLE,
                                                         checks.comparable_page(second_page)).ratio()
+
+    """
+    '--skip-static' reads this ratio as how similar an unchanged response can be expected to look -
+    a single pair is one sample of how noisy the target's own output is, and against a target whose
+    every response carries its own jitter (a live 'ping', a timestamp), that one sample can land low
+    purely by chance, making a genuinely dynamic parameter look static. A third same-value sample
+    costs one more request, asked only where '--skip-static' will actually spend the ratio, and the
+    higher of the two ratios is kept - the more charitable of two readings of the same no-change
+    case, rather than whichever one happened to be measured.
+    """
+    if menu.options.skip_static:
+      try:
+        third_response = _sample()
+        try:
+          third_page = checks.decode_page_body(third_response.read(), third_response)
+        finally:
+          third_response.close()
+        third_ratio = difflib.SequenceMatcher(None, settings.ORIGINAL_PAGE_COMPARABLE,
+                                              checks.comparable_page(third_page)).ratio()
+        settings.PAGE_NOISE_RATIO = max(settings.PAGE_NOISE_RATIO, third_ratio)
+      except Exception:
+        # The two-sample ratio above still stands; a third, better-calibrated reading is a bonus.
+        pass
+
     if settings.VERBOSITY_LEVEL != 0 and settings.DYNAMIC_MARKINGS:
       debug_msg = "Marked " + str(len(settings.DYNAMIC_MARKINGS)) + " region"
       debug_msg += "s"[len(settings.DYNAMIC_MARKINGS) == 1:] + " of the page as moving on its own."
