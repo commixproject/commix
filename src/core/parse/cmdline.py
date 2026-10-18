@@ -215,7 +215,7 @@ target.add_option("--url-reload",
 
 target.add_option("-l",
                 dest="logfile",
-                help="Parse target from HTTP proxy log file.")
+                help="Parse target from HTTP proxy log file (or HAR export).")
 
 target.add_option("-m",
                 dest="bulkfile",

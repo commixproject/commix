@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: `-l`/`--logfile` now also reads a HAR export (the format `--har` itself writes to), alongside the proxy-log and XML-history formats it already read.
 * Added: New tamper script `printfoctal.py`, hiding command names/paths via `printf` octal escapes (`$(printf '\143\141\164')`), for shells lacking `ansiquote`/`ansiquoteoctal`'s ANSI-C quoting (e.g. `dash`).
 * Fixed: `--csrf-token` without `--csrf-url` crashing the run (discarding already-confirmed findings) whenever an auxiliary request, such as document-root discovery, didn't carry the token.
 * Added: WAF/CDN product identification (`Cloudflare`, `Akamai`, `Imperva Incapsula`, `F5 BIG-IP ASM`, `Sucuri`, `ModSecurity`, `FortiWeb`, `Citrix Application Firewall`, `Barracuda WAF`, `Wallarm`, `AWS WAF`) on a blocked response, named in the "blocked IP", "browser verification" and "CAPTCHA" warnings as well as the generic WAF/IPS one.

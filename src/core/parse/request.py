@@ -44,9 +44,55 @@ def _invalid_data(request_file):
   raise SystemExit(settings.EXIT_FAILURE)
 
 """
+Every entry of a HAR (HTTP Archive) export, rebuilt as the raw request text '_parse_request'
+already reads - the format Chrome, Firefox and Burp all export traffic as, and the one '--har'
+writes a run's own traffic to, but had no way back in until now.
+"""
+def _parse_har(content):
+  try:
+    document = json.loads(content)
+  except ValueError:
+    return None
+  entries = document.get("log", {}).get("entries") if isinstance(document, dict) else None
+  if not isinstance(entries, list):
+    return None
+
+  requests = []
+  for entry in entries:
+    req = entry.get("request") if isinstance(entry, dict) else None
+    if not isinstance(req, dict) or not req.get("url") or not req.get("method"):
+      continue
+    parsed_url = _urllib.parse.urlparse(req["url"])
+    path = parsed_url.path or "/"
+    if parsed_url.query:
+      path += "?" + parsed_url.query
+
+    lines = [req["method"] + " " + path + " HTTP/1.1"]
+    host_present = False
+    for header in req.get("headers") or []:
+      name, value = header.get("name", ""), header.get("value", "")
+      if not name:
+        continue
+      if name.lower() == settings.HOST.lower():
+        host_present = True
+      lines.append(name + ": " + value)
+    if not host_present:
+      lines.append(settings.HOST + ": " + parsed_url.netloc)
+
+    body = ((req.get("postData") or {}).get("text") or "")
+    requests.append(settings.END_LINE.LF.join(lines) + settings.END_LINE.LF + settings.END_LINE.LF + body)
+  return requests
+
+"""
 Split the content of a request / proxy log file into the single requests it holds.
 """
 def _split_requests(content):
+  # A HAR export is JSON through and through, so it is told apart from the rest before any of the
+  # text-based formats below get a chance to misread it.
+  har_requests = _parse_har(content)
+  if har_requests is not None:
+    return har_requests
+
   # A proxy log export delimits its entries with rows of '=', responses among them.
   if re.search(settings.PROXY_LOG_REQUEST_REGEX, content, re.I | re.S):
     # Only blocks opening on a method token are requests, which leaves the responses out.
