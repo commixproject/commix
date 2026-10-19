@@ -232,6 +232,18 @@ def final_false_positive_check(url, http_request_method, check_parameter, timese
     _, output = injector.false_positive_check(separator, "", "", prefix, suffix, whitespace, timesec, http_request_method,
                                                url, check_parameter, None, 1, False, 0, 0, False,
                                                settings.INJECTION_TECHNIQUE.TIME_BASED, silent=True, show_dots=True)
+    # This litmus leans on '$?' and '$((...))' to read its own exit status back, which a
+    # technique other than time/boolean-based never needed and a filter on '$' blocks outright -
+    # a confirmed file/tempfile/OOB finding would otherwise be taken back over a limitation in
+    # the re-ask, not in the finding. Retried once, already-'$'-free, before giving up.
+    if not output and not settings.SKIP_SUBST and separator in (";", "\n", "\r\n", "&"):
+      settings.SKIP_SUBST = True
+      try:
+        _, output = injector.false_positive_check(separator, "", "", prefix, suffix, whitespace, timesec, http_request_method,
+                                                   url, check_parameter, None, 1, False, 0, 0, False,
+                                                   settings.INJECTION_TECHNIQUE.TIME_BASED, silent=True, show_dots=True)
+      finally:
+        settings.SKIP_SUBST = False
   finally:
     settings.TIME_RELATED_ATTACK = previous
   if settings.VERBOSITY_LEVEL == 0:
