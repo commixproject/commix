@@ -242,6 +242,14 @@ def final_false_positive_check(url, http_request_method, check_parameter, timese
         _, output = injector.false_positive_check(separator, "", "", prefix, suffix, whitespace, timesec, http_request_method,
                                                    url, check_parameter, None, 1, False, 0, 0, False,
                                                    settings.INJECTION_TECHNIQUE.TIME_BASED, silent=True, show_dots=True)
+        # Still nothing, and the confirmed boundary's own whitespace is a literal space - the one
+        # character the '$'-free retry above never swapped out. A horizontal tab reaches the same
+        # 'if test ... then sleep ... fi', is just as much a POSIX word separator, and is not what
+        # a filter written against a literal space character, specifically, is looking for.
+        if not output and whitespace == settings.SINGLE_WHITESPACE:
+          _, output = injector.false_positive_check(separator, "", "", prefix, suffix, "\t", timesec, http_request_method,
+                                                     url, check_parameter, None, 1, False, 0, 0, False,
+                                                     settings.INJECTION_TECHNIQUE.TIME_BASED, silent=True, show_dots=True)
       finally:
         settings.SKIP_SUBST = False
   finally:

@@ -1140,6 +1140,21 @@ def injection_process(url, check_parameter, http_request_method, filename, times
             return True
         return False
 
+      def _reset_web_root_detection():
+        # A retry below is the one case where the web root genuinely needs working out again:
+        # the candidate list a filtered-out pass already walked through and gave up on says
+        # nothing about whether the tamper this retry is about to apply would have fared any
+        # better on any one of those same candidates - left alone, 'custom_web_root()' sees
+        # candidates already exhausted and reaches straight past all of them for '/tmp/'. And
+        # 'menu.options.web_root' is what the first pass's own result gets cached into once it
+        # settles on one - left set, 'check_tmp_path()' reuses that cached answer directly and
+        # never calls back into 'custom_web_root()' at all, retry or not.
+        settings.CUSTOM_WEB_ROOT = False
+        settings.WEB_ROOT_CANDIDATES = []
+        settings.WEB_ROOT_SETTLED_ONCE = False
+        settings.WEB_ROOT = settings.DEFAULT_WEB_ROOT
+        menu.options.web_root = False
+
       confirmed_mark = len(settings.CONFIRMED_INJECTION_POINTS)
       end_detection = _run_techniques()
       # Nothing got through while a protection is in the way, so reach for a heavier evasion and
@@ -1161,6 +1176,20 @@ def injection_process(url, check_parameter, http_request_method, filename, times
         settings.print_data_to_stdout(settings.print_info_msg(info_msg))
         menu.options.tamper = (menu.options.tamper + ",space2ifs") if menu.options.tamper else "space2ifs"
         checks.tamper_scripts(stored_tamper_scripts=True)
+        _reset_web_root_detection()
+        end_detection = _run_techniques()
+
+      # 'space2ifs' substitutes '${IFS}' for the space it works around - itself '$'-based, so a
+      # filter that also blocks '$' leaves this pass no better off than the one before it. A
+      # horizontal tab is still a plain POSIX word separator and needs no such substitution.
+      if not end_detection and checks.injection_techniques_status() is False and \
+            "space2htab" not in settings.MULTI_ENCODED_PAYLOAD:
+        info_msg = "Still nothing confirmed - retrying once more with the 'space2htab' tamper, "
+        info_msg += "in case whitespace is being filtered and '$' along with it."
+        settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+        menu.options.tamper = (menu.options.tamper + ",space2htab") if menu.options.tamper else "space2htab"
+        checks.tamper_scripts(stored_tamper_scripts=True)
+        _reset_web_root_detection()
         end_detection = _run_techniques()
 
       checks.final_false_positive_check(url, http_request_method, check_parameter, timesec, confirmed_mark)
