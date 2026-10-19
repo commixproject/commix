@@ -195,8 +195,13 @@ def randomized_value(value, name=None):
       pool = string.ascii_uppercase
     else:
       pool = string.ascii_lowercase
+    # A replacement this short has too small a pool to last a scan - a session that remembers
+    # every value it has already seen runs back into one of them within a dozen requests, and
+    # 'Duplicate' turns into a wall every later request bounces off alike. Padded out to a width
+    # wide enough that repeated requests do not exhaust it, rather than matching the original's own.
+    length = max(len(original), 6)
     while True:
-      candidate = "".join(random.choice(pool) for _ in original)
+      candidate = "".join(random.choice(pool) for _ in range(length))
       if candidate != original:
         return candidate
   return re.sub(r"[0-9]+|[A-Z]+|[a-z]+", _swap, value)

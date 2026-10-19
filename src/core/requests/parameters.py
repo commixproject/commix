@@ -773,8 +773,11 @@ def prefixes(payload, prefix):
       parameter = menu.options.host
     specify_host_parameter(parameter)
 
+  # Skipped where the user named a prefix of their own - that is the one place meant to override
+  # what the parameter's own required value would otherwise glue on, not stack in front of it, and
+  # a filter anchored on the shape of the value as a whole has no other way to be satisfied.
   pre_custom = resolve_marker_component(settings.TESTABLE_VALUE, settings.PRE_CUSTOM_INJECTION_MARKER_CHAR)
-  if pre_custom is not None and pre_custom not in prefix:
+  if pre_custom is not None and pre_custom not in prefix and not menu.options.prefix:
     prefix = pre_custom + prefix
   # Check if defined "--prefix" option.
   if menu.options.prefix and not settings.LOAD_SESSION:

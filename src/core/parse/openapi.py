@@ -240,7 +240,14 @@ def _base_url(spec, origin=None, servers=None):
     # An address given in full is used as it stands, host and all.
     if re.match(r"(?i)[a-z][a-z0-9+.-]*://", url):
       return url.rstrip("/")
-    return ((origin.rstrip("/") if origin else "") + "/" + url.lstrip("/")).rstrip("/")
+    # Only the scheme and host come from '--openapi-base' here - a document naming its own server
+    # already says where its paths live relative to it, and joining that onto the option's full
+    # value as well (itself sometimes a path, for a document that names no server at all) would
+    # carry the same path twice.
+    if origin:
+      parsed_origin = _urllib.parse.urlparse(origin if "://" in origin else "http://" + origin)
+      origin = (parsed_origin.scheme or "http") + "://" + parsed_origin.netloc
+    return ((origin or "") + "/" + url.lstrip("/")).rstrip("/")
   if spec.get("host"):
     schemes = spec.get("schemes")
     scheme = schemes[0] if isinstance(schemes, list) and schemes else "https"
