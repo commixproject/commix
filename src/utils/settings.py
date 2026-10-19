@@ -442,7 +442,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "235"
+REVISION = "236"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1273,6 +1273,10 @@ SKIP_TECHNIQUES = False
 # Out-of-band (OAST) support.
 OOB_PROVIDER_INTERACTSH = "interactsh"
 OOB_INTERACTSH_DOMAIN = "oast.fun"
+# The rest of ProjectDiscovery's own public interactsh pool, tried in turn where the default does
+# not answer - never applied over '--oob-server', since a self-hosted one is not a pool to fall
+# back out of.
+OOB_INTERACTSH_FALLBACK_DOMAINS = ("oast.pro", "oast.live", "oast.site", "oast.online", "oast.me")
 OOB_SERVER = ""
 OOB_TOKEN = ""
 OOB_TIMEOUT = 15

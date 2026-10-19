@@ -33,7 +33,24 @@ class Interactsh(OOBProvider):
   # A session with an interactsh server, keyed to the address it was opened against.
   def __init__(self):
     OOBProvider.__init__(self)
-    self.server = settings.OOB_SERVER or ("https://" + settings.OOB_INTERACTSH_DOMAIN)
+    # A self-hosted server is not a pool to fall back out of - it is the one the run was told to
+    # use, and the only one it is asked to use.
+    self._self_hosted = bool(settings.OOB_SERVER)
+    self._servers = [settings.OOB_SERVER] if self._self_hosted else (
+      [settings.OOB_INTERACTSH_DOMAIN] + list(settings.OOB_INTERACTSH_FALLBACK_DOMAINS))
+    self.token = settings.OOB_TOKEN
+    self.correlation_id = "".join(_rand.choice(string.ascii_lowercase + string.digits) for _ in range(20))
+    self.secret = str(uuid.uuid4())
+    self._aes_key = None
+    self._n = self._e = self._d = None
+    self._apply_server(self._servers[0])
+
+  """
+  Point the client at one server from the pool - its own address, scheme and port, same as a
+  self-hosted one carries.
+  """
+  def _apply_server(self, server):
+    self.server = server
     if "://" not in self.server:
       self.server = "https://" + self.server
     self.server = self.server.rstrip("/")
@@ -43,11 +60,6 @@ class Interactsh(OOBProvider):
     self.scheme = (parsed.scheme or "https").lower()
     # A self-hosted server may listen anywhere, and the payload's URL has to say where.
     self.port = parsed.port
-    self.token = settings.OOB_TOKEN
-    self.correlation_id = "".join(_rand.choice(string.ascii_lowercase + string.digits) for _ in range(20))
-    self.secret = str(uuid.uuid4())
-    self._aes_key = None
-    self._n = self._e = self._d = None
 
   """
   Issue a request against the interactsh server.
@@ -64,15 +76,32 @@ class Interactsh(OOBProvider):
     return json.loads(body) if body.strip() else {}
 
   """
-  Generate a key pair and register it with the server.
+  Generate a key pair and register it with the server - the first of the pool to answer, where
+  none was named, since the default pool rotates and retires on its own.
   """
   def _register(self):
     self._n, self._e, self._d = crypto.generate_rsa_key()
-    self._call("/register", {
-      "public-key": crypto.public_key_pem_b64(self._n, self._e),
-      "secret-key": self.secret,
-      "correlation-id": self.correlation_id
-    })
+    last_err = None
+    for server in self._servers:
+      self._apply_server(server)
+      if settings.VERBOSITY_LEVEL >= 1:
+        debug_msg = "Checking the out-of-band server '" + self.domain + "'."
+        settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+      try:
+        self._call("/register", {
+          "public-key": crypto.public_key_pem_b64(self._n, self._e),
+          "secret-key": self.secret,
+          "correlation-id": self.correlation_id
+        })
+        return
+      except Exception as err:
+        last_err = err
+        if settings.VERBOSITY_LEVEL >= 1:
+          debug_msg = "'" + self.domain + "' did not answer (" + str(err) + ")."
+          settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+        if self._self_hosted:
+          break
+    raise last_err
 
   """
   Release the registration.
