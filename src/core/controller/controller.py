@@ -1149,6 +1149,20 @@ def injection_process(url, check_parameter, http_request_method, filename, times
         settings.WAF_EVASION_ESCALATED = False
         end_detection = _run_techniques()
 
+      # One more pass with 'space2ifs' applied - a filter that rejects any literal whitespace
+      # blocks the heuristic test the same as every technique, so gating this on a positive
+      # heuristic would never fire for the one case it exists for. 'MULTI_ENCODED_PAYLOAD'
+      # already carrying the script is what keeps this from firing twice, or where it was
+      # already asked for.
+      if not end_detection and checks.injection_techniques_status() is False and \
+            "space2ifs" not in settings.MULTI_ENCODED_PAYLOAD:
+        info_msg = "Nothing confirmed so far - retrying once with the 'space2ifs' tamper, "
+        info_msg += "in case whitespace itself is being filtered."
+        settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+        menu.options.tamper = (menu.options.tamper + ",space2ifs") if menu.options.tamper else "space2ifs"
+        checks.tamper_scripts(stored_tamper_scripts=True)
+        end_detection = _run_techniques()
+
       checks.final_false_positive_check(url, http_request_method, check_parameter, timesec, confirmed_mark)
 
       # All injection techniques seems to be failed!
