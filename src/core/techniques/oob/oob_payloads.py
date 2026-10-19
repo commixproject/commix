@@ -184,11 +184,13 @@ def reach_command(transport, hostname, proof="", separator=OR):
 """
 The command that makes the target resolve a name.
 
-On Windows 'nslookup' is always there. Elsewhere it is part of an optional package, so the ones a
-host is likely to have instead follow it, and 'ping' comes last because it waits for a reply that a
-host with its echo traffic filtered will never get. They are chained with the separator being tested, so a sink
-that filters some other operator does not defeat the separator that would have worked; where there
-is nothing to chain with, only the likeliest command is sent.
+On Windows 'nslookup' is always there, but not necessarily left alone - 'Resolve-DnsName' follows
+it for the rare host where it is blocked or removed. Elsewhere 'nslookup' is part of an optional
+package, so the ones a host is likely to have instead follow it, and 'ping' comes last because it
+waits for a reply that a host with its echo traffic filtered will never get. They are chained with
+the separator being tested, so a sink that filters some other operator does not defeat the
+separator that would have worked; where there is nothing to chain with, only the likeliest command
+is sent.
 """
 def dns_lookup_command(hostname, separator=OR, proof=""):
   # The sum rides in a label of its own in front of the name, which is the only place a lookup has
@@ -197,8 +199,10 @@ def dns_lookup_command(hostname, separator=OR, proof=""):
   if proof:
     hostname = proof + "." + hostname
   if settings.TARGET_OS == settings.OS.WINDOWS:
-    return "nslookup " + hostname
-  commands = ["nslookup " + hostname, "getent hosts " + hostname, "host " + hostname, "ping -c1 " + hostname]
+    commands = ["nslookup " + hostname,
+                "powershell.exe -InputFormat none -Command Resolve-DnsName " + hostname]
+  else:
+    commands = ["nslookup " + hostname, "getent hosts " + hostname, "host " + hostname, "ping -c1 " + hostname]
   if not separator:
     return commands[0]
   return separator.join(commands)
