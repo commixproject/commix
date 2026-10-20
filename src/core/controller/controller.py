@@ -1192,6 +1192,20 @@ def injection_process(url, check_parameter, http_request_method, filename, times
         _reset_web_root_detection()
         end_detection = _run_techniques()
 
+      # Neither pass above helps a filter built around '-' rather than whitespace or '$' - every
+      # numeric 'test' commix writes, including the final litmus below, leans on '-eq'/'-ne' for
+      # it. 'dashlesstest' already reads those the dash-free way ('='/'!='), so this is the one
+      # case left where retrying on a tamper already built for something else solves it outright.
+      if not end_detection and checks.injection_techniques_status() is False and \
+            "dashlesstest" not in settings.MULTI_ENCODED_PAYLOAD:
+        info_msg = "Still nothing confirmed - retrying once more with the 'dashlesstest' tamper, "
+        info_msg += "in case a literal '-' is being filtered."
+        settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+        menu.options.tamper = (menu.options.tamper + ",dashlesstest") if menu.options.tamper else "dashlesstest"
+        checks.tamper_scripts(stored_tamper_scripts=True)
+        _reset_web_root_detection()
+        end_detection = _run_techniques()
+
       checks.final_false_positive_check(url, http_request_method, check_parameter, timesec, confirmed_mark)
 
       # All injection techniques seems to be failed!

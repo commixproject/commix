@@ -252,6 +252,16 @@ def final_false_positive_check(url, http_request_method, check_parameter, timese
                                                      settings.INJECTION_TECHNIQUE.TIME_BASED, silent=True, show_dots=True)
       finally:
         settings.SKIP_SUBST = False
+    # None of the above helps a filter built around a literal '-' rather than whitespace or '$' -
+    # every numeric 'test' this litmus writes leans on '-eq', whichever of the branches above built
+    # it. 'dashlesstest' already reads that the dash-free way ('=' in its place), so one more try
+    # with it applied is the same finding, asked a way this one filter does not catch.
+    if not output and "dashlesstest" not in settings.MULTI_ENCODED_PAYLOAD:
+      menu.options.tamper = (menu.options.tamper + ",dashlesstest") if menu.options.tamper else "dashlesstest"
+      tamper_scripts(stored_tamper_scripts=True)
+      _, output = injector.false_positive_check(separator, "", "", prefix, suffix, whitespace, timesec, http_request_method,
+                                                 url, check_parameter, None, 1, False, 0, 0, False,
+                                                 settings.INJECTION_TECHNIQUE.TIME_BASED, silent=True, show_dots=True)
   finally:
     settings.TIME_RELATED_ATTACK = previous
   if settings.VERBOSITY_LEVEL == 0:
