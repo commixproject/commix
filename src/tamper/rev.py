@@ -35,7 +35,11 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 
 # Hand the command over reversed, for the target to turn back with 'rev'.
 def tamper(payload):
-  if settings.EXPLOITATION_PHASE:
+  # An empty 'USER_APPLIED_CMD' is still "in" any string, so the replace below would otherwise
+  # insert the reversed-empty-string construct between every character of the payload - a
+  # verification litmus built after a finding confirms (and so after exploitation phase starts)
+  # has no command of its own to reverse at all.
+  if settings.EXPLOITATION_PHASE and settings.USER_APPLIED_CMD:
     source = payload if settings.USER_APPLIED_CMD in payload else settings.RAW_PAYLOAD
     if settings.USER_APPLIED_CMD in source:
       if settings.USE_BACKTICKS:

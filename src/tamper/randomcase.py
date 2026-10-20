@@ -37,7 +37,11 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 # Vary the case of the payload's letters, where the shell does not care about it.
 def tamper(payload):
   mixed_case = ''.join(choice((str.upper, str.lower))(char) for char in settings.USER_APPLIED_CMD)
-  if settings.EXPLOITATION_PHASE:
+  # An empty 'USER_APPLIED_CMD' is still "in" any string, so the replace below would otherwise
+  # insert the obfuscated-empty-string construct between every character of the payload - a
+  # verification litmus built after a finding confirms (and so after exploitation phase starts)
+  # has no command of its own to case-randomize at all.
+  if settings.EXPLOITATION_PHASE and settings.USER_APPLIED_CMD:
     if settings.TAMPER_SCRIPTS["rev"]:
       if settings.USE_BACKTICKS:
         mixed_case = mixed_case[::-1] + "|rev"

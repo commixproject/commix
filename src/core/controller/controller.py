@@ -1156,6 +1156,10 @@ def injection_process(url, check_parameter, http_request_method, filename, times
         menu.options.web_root = False
 
       confirmed_mark = len(settings.CONFIRMED_INJECTION_POINTS)
+      # An escalation already handled during the heuristic test, ahead of this first pass, would
+      # otherwise read here as "stepped up while the technique about to run was mid-flight" - and
+      # send the very first technique around a second, needless time before it is even one request in.
+      settings.WAF_EVASION_ESCALATED = False
       end_detection = _run_techniques()
       # Nothing got through while a protection is in the way, so reach for a heavier evasion and
       # give the techniques another go - being blocked throughout is the answer this waits for.
@@ -1549,9 +1553,12 @@ def perform_checks(url, http_request_method, filename):
 
   # Prepare whitespaces if multiple targets or stdin parsing is used,
   # and more than one whitespace character is defined. Keep only one.
+  # The literal constant is what every whitespace tamper's own reclaim check compares against - a
+  # URL-quoted one ('%20') never equals it, and so is never reclaimed, leaving it stuck underneath
+  # whatever a tamper appends instead.
   if (settings.MULTI_TARGETS or settings.STDIN_PARSING) and \
      len(settings.WHITESPACES) > 1:
-    settings.WHITESPACES = [settings.single_whitespace_for()]
+    settings.WHITESPACES = [settings.SINGLE_WHITESPACE]
 
   timesec = settings.TIMESEC
 

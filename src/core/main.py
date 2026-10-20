@@ -379,7 +379,10 @@ def init_injection(url):
 
   # A whitespace chosen by a tamper suits the target it was chosen for, not the next one: start
   # from the default and let the tampers in use pick again, for this target's operating system.
-  settings.WHITESPACES = [settings.single_whitespace_for()]
+  # The literal constant is what every whitespace tamper's own reclaim check compares against - a
+  # URL-quoted one ('%20') never equals it, and so is never reclaimed, leaving it stuck underneath
+  # whatever a tamper appends instead.
+  settings.WHITESPACES = [settings.SINGLE_WHITESPACE]
   if menu.options.tamper:
     checks.perform_payload_modification(payload="")
 

@@ -547,11 +547,15 @@ def request_failed(err_msg):
   stability.mark_url_invalid()
 
   # Pacing is answered on its own: being told to slow down holds whether or not a WAF is looked for.
-  if str(getattr(err_msg, "code", None)) in settings.WAF_BLOCK_HTTP_CODES:
+  # A plain '403'-style block is what the WAF-evasion tiers above already answer, on their own
+  # schedule - counting it here too would race the two against each other over the same signal.
+  # Only a '429', or a '503' that names its own wait, is the target actually asking to be paced.
+  code = str(getattr(err_msg, "code", None))
+  requested = retry_after_seconds(err_msg)
+  if code == settings.TOO_MANY_REQUESTS or (code == settings.SERVICE_UNAVAILABLE and requested is not None):
     stability.adapt_delay(blocked=True)
     # Where the target said how long to wait, that beats guessing at it - waited out once here,
     # while the delay between requests is what keeps the pace afterwards.
-    requested = retry_after_seconds(err_msg)
     if requested is not None and not settings.TIME_RELATED_ATTACK:
       waited = min(requested, settings.RATE_LIMIT_MAX_DELAY)
       if settings.VERBOSITY_LEVEL != 0:

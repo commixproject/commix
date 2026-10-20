@@ -49,7 +49,7 @@ come back as nothing at all and the position it sits at could never be resolved.
 def _ordinal_expr(word, num_of_chars):
   # '+' rather than a bare '+', which arrives as a space - and 'tail -c N' counts from the end.
   return ("$(printf '%d' \"'$(printf '%s' \"" + word + "\" | tail -c +" + str(num_of_chars) +
-          " | head -c 1; printf X)\")")
+          " | head -c 1" + settings.END_LINE.LF + "printf X)\")")
 
 """
 The command's output, measured by the alternative interpreter. The output travels through a pipe
@@ -205,11 +205,17 @@ def condition_check(separator, condition, timesec, http_request_method):
   if settings.SKIP_SUBST and separator in (";", "\n", "\r\n", "&"):
     """
     An 'if'/'then'/'fi' block branches on a real exit status using nothing but 'test' and a
-    newline - where '[ condition ]' followed by reading '$?' needs a ']' and a '$', both of
-    which a filter that blocks command substitution outright is just as likely to block too.
+    statement terminator - where '[ condition ]' followed by reading '$?' needs a ']' and a '$',
+    both of which a filter that blocks command substitution outright is just as likely to block
+    too. ';', '\n' and '\r\n' all terminate a statement on their own, so the separator under test
+    is what glues 'if' to 'then' to 'fi' for those three - nothing else belongs in a payload built
+    to prove that one of them, specifically, is what chains commands here. '&' backgrounds rather
+    than terminates, and cannot glue the block together itself; a newline is the one thing every
+    one of 'then' and 'fi' needs regardless, so it is the fallback for that case alone.
     """
-    payload = (separator + "if test " + condition + settings.END_LINE.LF +
-               "then sleep " + str(timesec) + settings.END_LINE.LF + "fi")
+    glue = separator if separator in (";", "\n", "\r\n") else settings.END_LINE.LF
+    payload = (separator + "if test " + condition + glue +
+               "then sleep " + str(timesec) + glue + "fi")
   elif separator in (";", "\n", "\r\n"):
     payload = (separator +
               "[ " + condition + " ]" + separator +

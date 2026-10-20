@@ -3633,6 +3633,11 @@ def escalate_waf_evasion(on_block=True):
   menu.options.tamper = profile
   # The scripts in use are rebuilt from scratch, so the ones being replaced are not kept on.
   settings.MULTI_ENCODED_PAYLOAD = []
+  # A whitespace-mutating tamper from the tier being replaced (e.g. 'space2ifs') claims
+  # 'WHITESPACES[0]' for itself and keeps it - the new tier's own one (e.g. 'space2htab') only
+  # takes that slot when it still holds the plain space, so left alone it just appends behind
+  # the stale, still-blocked substitute instead of replacing it.
+  settings.WHITESPACES = [settings.SINGLE_WHITESPACE]
   tamper_scripts(stored_tamper_scripts=True)
   settings.WAF_EVASION_APPLIED = ("chunked," if menu.options.chunked else "") + profile
   settings.WAF_EVASION_ESCALATED = True
@@ -6258,16 +6263,17 @@ def announce_vulnerable_finding(filename, injection_type, technique, the_type, h
     if settings.VERBOSITY_LEVEL == 0:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
 
-  info_msg = settings.CHECKING_PARAMETER + " appears to be injectable via " + type_prefix + technique_label(injection_type, technique)
-  oracle_hint = boolean_oracle_hint(technique)
-  info_msg += (" (with " + oracle_hint + ")" if oracle_hint else "") + "."
-  settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
-  # Closes the loop the evasion messages opened - said once, the first time a finding actually
-  # confirms while it is active, rather than left implicit in the finding just having come through.
+  # Said first where this is the finding that gets a blocked run past its WAF/IPS, so the two read
+  # as cause then effect rather than the bypass note trailing behind the finding it explains.
   if settings.WAF_ENABLED and settings.WAF_EVASION_APPLIED and not settings.WAF_BYPASS_CONFIRMED:
     settings.WAF_BYPASS_CONFIRMED = True
     info_msg = "Bypassed the WAF/IPS by using the '" + settings.WAF_EVASION_APPLIED.replace(",", "', '") + "' tamper scripts."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
+  info_msg = settings.CHECKING_PARAMETER + " appears to be injectable via " + type_prefix + technique_label(injection_type, technique)
+  oracle_hint = boolean_oracle_hint(technique)
+  info_msg += (" (with " + oracle_hint + ")" if oracle_hint else "") + "."
+  settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
   announce_leftover_file(technique)
   decoded_payload = str(url_decode(payload)) if decode_payload else payload
   if not settings.LOAD_SESSION:
