@@ -1162,6 +1162,7 @@ def injection_process(url, check_parameter, http_request_method, filename, times
       while not end_detection and checks.injection_techniques_status() is False and \
             settings.WAF_ENABLED and checks.escalate_waf_evasion(on_block=False):
         settings.WAF_EVASION_ESCALATED = False
+        _reset_web_root_detection()
         end_detection = _run_techniques()
 
       # One more pass with 'space2ifs' applied - a filter that rejects any literal whitespace
