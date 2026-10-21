@@ -442,7 +442,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "243"
+REVISION = "244"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1862,7 +1862,8 @@ TAMPER_SCRIPTS = {
                   "randomcase": False,
                   "rev": False,
                   "cmd2loop": False,
-                  "dashlesstest": False
+                  "dashlesstest": False,
+                  "noletters": False
                  }
 
 # Execution priority for tamper scripts; each script defines its own __priority__.
@@ -1972,7 +1973,11 @@ INCOMPATIBLE_TAMPER_SCRIPTS = [
                   ("cmd2wildcard", "rev"),
                   ("cmd2wildcard", "randomcase"),
                   ("cmd2var", "rev"),
-                  ("cmd2var", "randomcase")
+                  ("cmd2var", "randomcase"),
+                  # A bare name is glob territory, not a path to wildcard or a command to garble.
+                  ("noletters", "cmd2wildcard"),
+                  ("noletters", "rev"),
+                  ("noletters", "randomcase")
 ]
 
 # Words that must survive per-character obfuscation - shell keywords stop being keywords once

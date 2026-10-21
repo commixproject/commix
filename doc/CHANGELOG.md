@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New tamper script `noletters.py`, globbing a bare command name for targets blocking every letter.
 * Added: The out-of-band channel now falls back through five more public interactsh servers if `oast.fun` does not answer.
 * Added: The out-of-band DNS lookup on Windows now also tries `Resolve-DnsName`, alongside `nslookup`.
 * Added: New options `--lengths` (bisect the boolean-based technique on content length instead of content) and `--null-connection` (read that length off the `Content-Length` header, with no body downloaded at all, past a minimum page size).
