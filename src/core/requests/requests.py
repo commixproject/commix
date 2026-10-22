@@ -123,17 +123,21 @@ def is_url_content_stable(url, response=None, fetch_time=None, http_request_meth
     settings.PAGE_STABLE = status == "stable"
 
     # Said before the work it decides, so the answer is given with the reason for it still on screen.
-    if not settings.PAGE_STABLE and not settings.UNSTABLE_PROMPTED:
-      settings.UNSTABLE_PROMPTED = True
+    # 'PAGE_STABLE' is freshly computed every call, so this is said again for every target it is
+    # true of; the choice right after it is the user's to make once, not per target - 'UNSTABLE_
+    # PROMPTED' is what is carried over, so a later target gets the warning without being asked again.
+    if not settings.PAGE_STABLE:
       # What happened, what is done about it, and what to reach for when the results read wrong.
       warn_msg = "Target URL content is not stable (i.e. content differs). Page comparison is based "
       warn_msg += "on a sequence matcher, with the parts that move on their own left out. If no "
       warn_msg += "dynamic nor injectable parameter is detected, or in case of junk results, give "
       warn_msg += "it a go with the switch '--text-only'."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-      message = "How do you want to proceed? [(C)ontinue/(q)uit] "
-      if common.read_input(message, default="C", check_batch=True) in settings.CHOICE_QUIT:
-        raise SystemExit(settings.EXIT_FAILURE)
+      if not settings.UNSTABLE_PROMPTED:
+        settings.UNSTABLE_PROMPTED = True
+        message = "How do you want to proceed? [(C)ontinue/(q)uit] "
+        if common.read_input(message, default="C", check_batch=True) in settings.CHOICE_QUIT:
+          raise SystemExit(settings.EXIT_FAILURE)
 
     """
     The two samples are of the same request, so whatever differs between them is the page moving on

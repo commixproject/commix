@@ -442,7 +442,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "244"
+REVISION = "245"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1863,7 +1863,8 @@ TAMPER_SCRIPTS = {
                   "rev": False,
                   "cmd2loop": False,
                   "dashlesstest": False,
-                  "noletters": False
+                  "noletters": False,
+                  "phpnosymbols": False
                  }
 
 # Execution priority for tamper scripts; each script defines its own __priority__.

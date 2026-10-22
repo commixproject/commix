@@ -1,4 +1,6 @@
 ## Version 4.2 (TBA)
+* Fixed: PHP code injection (`--eval=php`) not closing its own statement at the default level.
+* Added: New tamper script `phpnosymbols.py`, rewriting a PHP eval-sink payload for filters blocking digits and quotes.
 * Added: New tamper script `noletters.py`, globbing a bare command name for targets blocking every letter.
 * Added: The out-of-band channel now falls back through five more public interactsh servers if `oast.fun` does not answer.
 * Added: The out-of-band DNS lookup on Windows now also tries `Resolve-DnsName`, alongside `nslookup`.

@@ -32,9 +32,10 @@ def _write(cmd, OUTPUT_TEXTFILE):
 def _contents(OUTPUT_TEXTFILE):
   return settings.EVAL_GRAMMAR.trim(settings.EVAL_GRAMMAR.read_file(OUTPUT_TEXTFILE))
 
-# A statement terminator, where the boundary being tested can carry one.
+# A statement terminator - a halt()/delay()-built expression is its own complete statement
+# regardless of the OS-shell separator under test, which is a different chain this one never joins.
 def _end(separator):
-  return settings.EVAL_GRAMMAR.TERMINATOR if separator else ""
+  return settings.EVAL_GRAMMAR.TERMINATOR
 
 # Delay only while the condition holds: a boolean times the delay is the delay or nothing at all.
 def _conditional_sleep(condition, timesec, separator):

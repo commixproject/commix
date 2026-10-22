@@ -59,12 +59,14 @@ SEPARATORS_LVL1 = [""]
 SEPARATORS_LVL2 = SEPARATORS_LVL1 + ["\n"]
 SEPARATORS_LVL3 = SEPARATORS_LVL2 + ["\r\n"]
 
-# Concatenation, concatenation out of a single-quoted string, and variable-variable interpolation.
-PREFIXES_LVL1 = [".", "'.", "{${"]
+# No wrapping at all, the way every other language here starts its own list - the value reaching
+# the sink whole is the simplest shape and the likeliest, not something worth leaving for level 3.
+# Then concatenation, concatenation out of a single-quoted string, and variable-variable interpolation.
+PREFIXES_LVL1 = ["", ".", "'.", "{${"]
 # Closing a call the value sits inside, and interpolation from within a double-quoted string.
 PREFIXES_LVL2 = PREFIXES_LVL1 + [")'}", "');}", "\".", "${"]
 # Ending the statement outright, and leaving a comment the value was written into.
-PREFIXES_LVL3 = PREFIXES_LVL2 + ["')", "\")", ");}", "\");}", ")", ";", "'", "\";", "';", "*/", ""]
+PREFIXES_LVL3 = PREFIXES_LVL2 + ["')", "\")", ");}", "\");}", ")", ";", "'", "\";", "';", "*/"]
 
 SUFFIXES_LVL1 = [ "",  ".'", "}}"]
 # Closing the interpolation, and commenting out whatever the application appends behind it.
@@ -79,7 +81,7 @@ output and marker separated by newlines, so anything printed without one runs in
 """
 def print_statement(separator, commands, chain=None):
   if separator == "":
-    return "print(" + ".".join("`" + command + "`" for command in commands) + ")"
+    return "print(" + ".".join("`" + command + "`" for command in commands) + ")" + TERMINATOR
   return "print(`" + (chain or separator).join(commands) + "`)" + TERMINATOR
 
 """
