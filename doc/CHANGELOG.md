@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New tamper script `basicobjectescape.py`, reaching a Ruby sink evaluated inside a `BasicObject`.
 * Added: New tamper script `pybuiltinsescape.py`, reaching a Python sink evaluated with `{"__builtins__": {}}`.
 * Added: New tamper script `nashornexec.py`, reaching a sink evaluating JavaScript through Java's Nashorn engine rather than Node.
 * Added: New tamper script `jsvmescape.py`, escaping a Node `vm` sandbox to reach `require()`.
