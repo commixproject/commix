@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New tamper script `nashornexec.py`, reaching a sink evaluating JavaScript through Java's Nashorn engine rather than Node.
 * Added: New tamper script `jsvmescape.py`, escaping a Node `vm` sandbox to reach `require()`.
 * Fixed: PHP code injection (`--eval=php`) not closing its own statement at the default level.
 * Added: New tamper script `phpnosymbols.py`, rewriting a PHP eval-sink payload for filters blocking digits and quotes.
