@@ -29,10 +29,11 @@ since the shell underneath is only ever asked to run the command.
 def _output(cmd):
   return settings.EVAL_GRAMMAR.trim(settings.EVAL_GRAMMAR.run(cmd))
 
-# A statement terminator - a delay()-built sleep is its own complete statement regardless of
-# the OS-shell separator under test, which is a different chain this one never joins.
+# A statement terminator, where the boundary being tested can carry one - an expression-only sink
+# (Python's 'eval()', not 'exec()') never can, and the empty separator is how that case is told
+# apart from one that is actually mid-statement, the way the file-based technique already tells it.
 def _end(separator):
-  return settings.EVAL_GRAMMAR.TERMINATOR
+  return settings.EVAL_GRAMMAR.TERMINATOR if separator else ""
 
 # Delay only while the condition holds: a boolean times the delay is the delay or nothing at all.
 def _conditional_sleep(condition, timesec, separator):
