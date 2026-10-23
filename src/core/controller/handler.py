@@ -129,6 +129,15 @@ Announce the technique about to be tested, re-checking tamper compatibility now 
 def _announce_technique(injection_type, technique):
   settings.CURRENT_TECHNIQUE = technique
   checks.tamper_scripts(stored_tamper_scripts=True)
+  announced = (settings.CHECKING_PARAMETER, checks.technique_label(injection_type, technique))
+  already_announced = settings.LAST_ANNOUNCED_TECHNIQUE == announced
+  # A technique retried internally - the file-based search across writable-directory candidates,
+  # most of all - would otherwise repeat the "Testing/Continue testing" line once per candidate.
+  # Said once, the same way injection_process() already holds its own repeats back.
+  if already_announced and settings.LAST_RESUMED_TECHNIQUE == announced:
+    return
+  if already_announced:
+    settings.LAST_RESUMED_TECHNIQUE = announced
   checks.testing_technique_title(injection_type, technique)
 
 """
