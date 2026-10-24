@@ -732,13 +732,13 @@ def do_check(request):
 
   # Appends a fake HTTP header 'X-Forwarded-For' (and similar)
   if settings.TAMPER_SCRIPTS["xforwardedfor"]:
-    from src.tamper import xforwardedfor
+    from src.tamper.misc import xforwardedfor
     xforwardedfor.tamper(request)
 
   # Carries the two halves the payload reads back through '$_SERVER' - drawn with it, so the names
   # in the payload and the headers on this request are the same pair.
   if settings.TAMPER_SCRIPTS["phpserverheaders"]:
-    from src.tamper import phpserverheaders
+    from src.tamper.eval.php import phpserverheaders
     phpserverheaders.apply_headers(request)
 
   # Check if defined any HTTP Authentication credentials.

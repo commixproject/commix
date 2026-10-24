@@ -18,7 +18,7 @@ from src.utils import settings
 from src.core.controller import checks
 
 """
-About: Replaces "sleep" with the wait between "ping" packets in a given payload.
+About: Replaces 'sleep' with the wait between 'ping' packets in a given payload.
 Notes: This tamper script works against target(s) with a POSIX shell.
 Reference: https://man7.org/linux/man-pages/man8/ping.8.html
 """

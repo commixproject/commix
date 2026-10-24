@@ -17,7 +17,7 @@ from src.utils import settings
 from src.core.controller import checks
 
 """
-About: Rewrites a user-supplied "<command> <path>" as "<command><>path>", for a target that lets no
+About: Rewrites a user-supplied '<command> <path>' as '<command><>path>', for a target that lets no
        whitespace at all through but leaves the redirection operators unfiltered.
 Notes: This tamper script works against target(s) with a POSIX shell. '<>' opens the path for both
        reading and writing and attaches it as the command's own stdin, so a command given no

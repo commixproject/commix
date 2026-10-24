@@ -17,7 +17,7 @@ from src.utils import settings
 from src.core.controller import checks
 
 """
-About: Replaces space character (%20) with vertical tab (%0b) in a given payload.
+About: Replaces space character (' ') with vertical tab (%0b) in a given payload.
 Notes: This tamper script works against Windows targets.
 """
 

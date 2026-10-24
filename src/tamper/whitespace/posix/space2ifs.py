@@ -17,7 +17,7 @@ from src.utils import settings
 from src.core.controller import checks
 
 """
-About: Replaces space character (%20) with the internal field separator ($IFS) in a given payload.
+About: Replaces space character (' ') with the internal field separator ($IFS) in a given payload.
 The internal field separator refers to a variable which defines the character
 or characters used to separate a pattern into tokens for some operations.
 Notes: This tamper script works against target(s) with a POSIX shell.

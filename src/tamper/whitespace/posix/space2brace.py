@@ -18,7 +18,7 @@ from src.utils import settings
 from src.core.controller import checks
 
 """
-About: Replaces the space character (%20) with a brace expansion ({a,b}) in a given payload.
+About: Replaces the space character (' ') with a brace expansion ({a,b}) in a given payload.
 Notes: This tamper script works against target(s) whose shell expands '{a,b}' where a command is
        expected (e.g. 'bash', 'ksh'), which leaves the payload's commands with no whitespace.
 References: [1] https://www.themiddleblue.com/2018/06/12/bypass-waf-using-brace-expansion/

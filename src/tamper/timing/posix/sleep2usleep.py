@@ -18,7 +18,7 @@ from src.utils import settings
 from src.core.controller import checks
 
 """
-About: Replaces "sleep" with "usleep" command in a given payload.
+About: Replaces 'sleep' with 'usleep' command in a given payload.
 Notes: This tamper script works against target(s) with a POSIX shell.
 Reference: http://man7.org/linux/man-pages/man3/usleep.3.html
 """

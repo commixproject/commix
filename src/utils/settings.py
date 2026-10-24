@@ -20,6 +20,7 @@ import time
 import random
 import string
 import codecs
+import unicodedata
 import threading as _threading
 from datetime import date
 from datetime import datetime
@@ -285,16 +286,30 @@ def print_retrieved_data(label, retrieved, quoted=True):
   return label + ":" + body + Style.RESET_ALL
 
 """
+How many terminal columns a string actually draws as - 'len()' counts codepoints, but a
+fullwidth/wide character (e.g. U+FF07, the one 'unicodequote' payloads print) still occupies two.
+"""
+def _display_width(text):
+  return sum(2 if unicodedata.east_asian_width(char) in ("W", "F") else 1 for char in text)
+
+"""
+'ljust()' pads by codepoint count too, so a cell measured with '_display_width' still needs its
+own padding worked out the same way, not left to the builtin.
+"""
+def _display_ljust(text, width):
+  return text + " " * (width - _display_width(text))
+
+"""
 A plain ASCII table - column widths taken from the widest cell each has, headers included.
 """
 def render_table(headers, rows):
-  widths = [len(str(header)) for header in headers]
+  widths = [_display_width(str(header)) for header in headers]
   for row in rows:
     for index, cell in enumerate(row):
-      widths[index] = max(widths[index], len(str(cell)))
+      widths[index] = max(widths[index], _display_width(str(cell)))
   border = "+" + "+".join("-" * (width + 2) for width in widths) + "+"
   def _row(cells):
-    return "| " + " | ".join(str(cell).ljust(widths[index]) for index, cell in enumerate(cells)) + " |"
+    return "| " + " | ".join(_display_ljust(str(cell), widths[index]) for index, cell in enumerate(cells)) + " |"
   lines = [border, _row(headers), border]
   lines.extend(_row(row) for row in rows)
   lines.append(border)
@@ -442,7 +457,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "249"
+REVISION = "250"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:

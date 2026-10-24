@@ -74,6 +74,10 @@ _EXEC_NAMES = list(settings.EXECUTION_FUNCTIONS_LVL3) + ["phpinfo", "sleep"]
 # from - read for what they answer, so hiding one has to answer with the same value it hid.
 _VALUE_NAMES = ["rtrim", "strlen", "ord", "substr", "intval"]
 
+# Each name's own pattern, compiled once rather than once per payload - none of the five changes
+# for the life of the process.
+_VALUE_CALL_PATTERNS = {name: re.compile(r"(?<![\w\\])" + re.escape(name) + r"\(") for name in _VALUE_NAMES}
+
 # Run one of the execution names through the letter-free call, its own arguments and closing
 # bracket left exactly where they were - no comma before them where the call took none of its own,
 # since this PHP still parses a trailing comma in a call as an error rather than an empty argument.
@@ -107,7 +111,7 @@ just where it opens - has to be found and replaced in one piece, since the array
 around the end of it as much as the name is hidden at the start.
 """
 def _hide_value_calls(payload, name):
-  pattern = re.compile(r"(?<![\w\\])" + re.escape(name) + r"\(")
+  pattern = _VALUE_CALL_PATTERNS[name]
   pieces, pos = [], 0
   while True:
     match = pattern.search(payload, pos)

@@ -17,7 +17,7 @@ from src.utils import settings
 from src.core.controller import checks
 
 """
-About: Replaces space character (%20) with '$IFS$9' (no braces, no quotes) in a given payload.
+About: Replaces space character (' ') with '$IFS$9' (no braces, no quotes) in a given payload.
 Notes: This tamper script works against target(s) with a POSIX shell, for a filter that also blocks
        curly braces and quotes - where 'space2ifs' ('${IFS}') and 'space2brace' both need a
        character this kind of filter takes away. '$9' is an empty positional parameter in an

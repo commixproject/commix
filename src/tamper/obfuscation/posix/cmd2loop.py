@@ -18,7 +18,7 @@ from src.utils import settings
 from src.core.controller import checks
 
 """
-About: Wraps the payload's command in a single-iteration "for" loop, so it is reached through a shell keyword instead of a separator.
+About: Wraps the payload's command in a single-iteration 'for' loop, so it is reached through a shell keyword instead of a separator.
 Notes: This tamper script works against target(s) with a POSIX shell.
 Reference: https://github.com/coreruleset/coreruleset/issues/4789
 """

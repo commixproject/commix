@@ -48,7 +48,7 @@ from src.core.requests import stability
 from src.thirdparty.six.moves import urllib as _urllib
 from src.thirdparty.six.moves import http_client as _http_client
 from src.thirdparty.six.moves import html_parser as _html_parser
-from src.thirdparty.colorama import Style
+from src.thirdparty.colorama import Style, Fore
 from src.thirdparty.flatten_json.flatten_json import flatten, unflatten_list
 
 try:
@@ -2540,6 +2540,40 @@ def identified_os():
         raise SystemExit()
 
 """
+Where each tamper script actually lives, now that they sit under a category directory rather than
+all flat in one - built once per run and kept here, since nothing moves a script mid-run.
+
+Keyed by the bare name every caller already uses ('nashornexec', not 'eval.javascript.nashornexec')
+so '--tamper=' and everything that reads it back stays exactly as it was before the scripts had
+categories at all - only this lookup, and the glob the two callers below used to do directly, needs
+to know where a name's file actually is.
+"""
+_TAMPER_SCRIPT_PATHS = None
+
+def tamper_script_paths():
+  global _TAMPER_SCRIPT_PATHS
+  if _TAMPER_SCRIPT_PATHS is None:
+    _TAMPER_SCRIPT_PATHS = {}
+    pattern = os.path.join(settings.TAMPER_SCRIPTS_PATH, "**", "*.py")
+    for script in sorted(glob(pattern, recursive=True)):
+      name = os.path.basename(script)[:-len(".py")]
+      if name == "__init__":
+        continue
+      _TAMPER_SCRIPT_PATHS[name] = script
+
+  return _TAMPER_SCRIPT_PATHS
+
+"""
+The dotted module path a tamper script's bare name imports as, wherever its category placed it.
+"""
+def tamper_module_path(name):
+  script = tamper_script_paths().get(name)
+  if not script:
+    return "src.tamper." + name
+  rel = os.path.relpath(script, settings.TAMPER_SCRIPTS_PATH)[:-len(".py")]
+  return "src.tamper." + rel.replace(os.sep, ".")
+
+"""
 The tamper scripts the user named, rejected here if any of them names nothing.
 
 Run before the target is touched: an option that cannot be acted on is the user's to correct, and
@@ -2552,8 +2586,7 @@ def validate_tamper_scripts():
     return []
   raw_scripts = re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower())
   provided_scripts = list(dict.fromkeys(script.strip() for script in raw_scripts if script.strip()))
-  available_scripts = [os.path.basename(script.split(".py")[0])
-                       for script in sorted(glob(os.path.join(settings.TAMPER_SCRIPTS_PATH, "*.py")))]
+  available_scripts = list(tamper_script_paths().keys())
   for script in provided_scripts:
     if script not in available_scripts:
       err_msg = "The '" + script + "' tamper script does not exist. "
@@ -3309,8 +3342,8 @@ def list_tamper_scripts():
   
   if menu.options.list_tampers:
     message = ""
-    
-    for script in sorted(glob(os.path.join(settings.TAMPER_SCRIPTS_PATH, "*.py"))):
+
+    for script in sorted(tamper_script_paths().values()):
       with open(script, "rb") as script_file:
         content = script_file.read().decode(settings.DEFAULT_CODEC)
       match = re.search(r"About:(.*)\n", content)
@@ -3320,14 +3353,15 @@ def list_tamper_scripts():
         comment = comment[0].upper() + comment[1:] if comment else comment
         script_name = os.path.basename(script)
         message += (
-          Style.BRIGHT
+          "* "
+          + Fore.LIGHTYELLOW_EX
           + script_name
           + Style.RESET_ALL
           + " - "
           + comment
           + "\n"
         )
-    
+
     settings.print_data_to_stdout(message.rstrip())
     
 """
@@ -3474,7 +3508,7 @@ def tamper_rewrite_user_command(payload, tamper_name):
     return payload
   command = settings.USER_APPLIED_CMD
   for name in rewriters:
-    command = importlib.import_module("src.tamper." + name).rewrite_command(command)
+    command = importlib.import_module(tamper_module_path(name)).rewrite_command(command)
   if command == settings.USER_APPLIED_CMD:
     return payload
   source = payload if settings.USER_APPLIED_CMD in payload else settings.RAW_PAYLOAD
@@ -3661,7 +3695,7 @@ def tamper_scripts(stored_tamper_scripts):
         info_msg = "Loading tamper module '" + script + "'."
         settings.print_data_to_stdout(settings.print_info_msg(info_msg))
       try:
-        module = importlib.import_module("src.tamper." + script)
+        module = importlib.import_module(tamper_module_path(script))
       except (ImportError, ValueError):
         continue
       if not hasattr(module, "__tamper__"):
@@ -4106,7 +4140,7 @@ def perform_payload_modification(payload):
   for script in list(settings.MULTI_ENCODED_PAYLOAD):
     if script == 'xforwardedfor':
       continue
-    module = importlib.import_module("src.tamper." + script)
+    module = importlib.import_module(tamper_module_path(script))
     payload = _apply_tamper(script, module, payload)
 
   return payload

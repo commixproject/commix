@@ -18,9 +18,9 @@ from src.utils import settings
 from src.core.controller import checks
 
 """
-About: Replaces "sleep" with "timeout" command in a given payload.
-  * Regarding Unix-like target(s), it replaces the "sleep XX" command with "timeout XX ping localhost".
-  * Regarding windows target(s), it replaces the "powershell.exe -InputFormat none Start-Sleep -s XX" command with "timeout XX".
+About: Replaces 'sleep' with 'timeout' command in a given payload.
+  * Regarding Unix-like target(s), it replaces the 'sleep XX' command with 'timeout XX ping localhost'.
+  * Regarding windows target(s), it replaces the 'powershell.exe -InputFormat none Start-Sleep -s XX' command with 'timeout XX'.
 Notes: This tamper script works against all targets.
 """
 

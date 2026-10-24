@@ -34,9 +34,24 @@ def dependencies():
 if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
+"""
+Every character's case chosen independently, so two letters - the shortest a real command ever
+is - still come out matching the original's case throughout one time in two: a signature over the
+literal, unmixed word is still caught as often as it is dodged. Retried until at least one letter
+actually differs in case from the rest, the way the result is supposed to read in the first place -
+skipped only where there are fewer than two letters to vary at all, since no retry would ever end.
+"""
+def _mixed_case(cmd):
+  if sum(char.isalpha() for char in cmd) < 2:
+    return ''.join(choice((str.upper, str.lower))(char) for char in cmd)
+  while True:
+    candidate = ''.join(choice((str.upper, str.lower))(char) for char in cmd)
+    if candidate not in (candidate.lower(), candidate.upper()):
+      return candidate
+
 # Vary the case of the payload's letters, where the shell does not care about it.
 def tamper(payload):
-  mixed_case = ''.join(choice((str.upper, str.lower))(char) for char in settings.USER_APPLIED_CMD)
+  mixed_case = _mixed_case(settings.USER_APPLIED_CMD)
   # An empty 'USER_APPLIED_CMD' is still "in" any string, so the replace below would otherwise
   # insert the obfuscated-empty-string construct between every character of the payload - a
   # verification litmus built after a finding confirms (and so after exploitation phase starts)

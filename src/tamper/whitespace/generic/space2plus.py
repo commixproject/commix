@@ -14,26 +14,34 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 from src.utils import settings
+from src.thirdparty.six.moves import urllib as _urllib
 
 """
-About: Replaces space character (%20) with horizontal tab (%09) in a given payload.
+About: Replaces space character (' ') with plus (+) in a given payload.
 Notes: This tamper script works against all targets.
 """
 
-__tamper__ = "space2htab"
+__tamper__ = "space2plus"
 __priority__ = settings.PRIORITY.LOWER
-space2htab = "\t"
+space2plus = _urllib.parse.quote_plus(settings.SINGLE_WHITESPACE)
 
 if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
-# Separate the payload's words with a horizontal tab instead of a space.
+# Separate the payload's words with a plus sign instead of a space.
 def tamper(payload):
-  if len(settings.WHITESPACES) != 0:
+  if len(settings.WHITESPACES) != 0 and not settings.IS_JSON:
     if settings.WHITESPACES[0] == settings.SINGLE_WHITESPACE:
-      settings.WHITESPACES[0] = space2htab
-    elif space2htab not in settings.WHITESPACES:
-      settings.WHITESPACES.append(space2htab)
+      settings.WHITESPACES[0] = space2plus
+    elif space2plus not in settings.WHITESPACES:
+      settings.WHITESPACES.append(space2plus)
+
+  # Said only where it is true: an empty list is another reason to do nothing, and not this one.
+  elif settings.IS_JSON:
+    warn_msg = "The tamper script '" + __tamper__ + "' is ineffective for JSON payloads. "
+    warn_msg += "Skipping tamper script."
+    settings.print_once(warn_msg)
+
   return payload
 
 # eof
