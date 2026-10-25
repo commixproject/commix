@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New `--eval=perl` support, for a sink evaluating Perl.
 * Added: New tamper script `space2randomblank.py`, varying the whitespace substitute per occurrence instead of one for the whole payload.
 * Added: New tamper script `basicobjectescape.py`, reaching a Ruby sink evaluated inside a `BasicObject`.
 * Added: New tamper script `pybuiltinsescape.py`, reaching a Python sink evaluated with `{"__builtins__": {}}`.
