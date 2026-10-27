@@ -457,7 +457,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "253"
+REVISION = "254"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1884,7 +1884,8 @@ TAMPER_SCRIPTS = {
                   "nashornexec": False,
                   "pybuiltinsescape": False,
                   "basicobjectescape": False,
-                  "space2randomblank": False
+                  "space2randomblank": False,
+                  "luadebugescape": False
                  }
 
 # Execution priority for tamper scripts; each script defines its own __priority__.

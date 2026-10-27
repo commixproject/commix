@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New tamper script `luadebugescape.py`, reaching a Lua sink evaluated with a restricted environment through `debug.getregistry()._LOADED`.
 * Added: New `--eval=lua` support, for a sink evaluating Lua.
 * Added: New `--eval=perl` support, for a sink evaluating Perl.
 * Added: New tamper script `space2randomblank.py`, varying the whitespace substitute per occurrence instead of one for the whole payload.
