@@ -548,6 +548,7 @@ def do_oob_process(url, timesec, filename, http_request_method, injection_type, 
 # Try each boundary against the channel until one of them calls back.
 def _oob_sweep(is_eval, injection_type, prefixes, suffixes, separators, url, timesec, filename, http_request_method, technique, channel, payloads, _exploit):
 
+  checks.prime_whitespace_tampers()
   whitespaces = settings.WHITESPACES
   prefixes, suffixes, separators, whitespaces = _prioritize_confirmed_boundary(prefixes, suffixes, separators, whitespaces)
 
@@ -720,6 +721,7 @@ def do_boolean_based_process(url, timesec, filename, http_request_method, inject
   else:
     prefixes, suffixes, separators = checks.sink_boundaries()
     separators = checks.chainable_separators(separators)
+  checks.prime_whitespace_tampers()
   whitespaces = settings.WHITESPACES
   prefixes, suffixes, separators, whitespaces = _prioritize_confirmed_boundary(prefixes, suffixes, separators, whitespaces)
 
@@ -1042,6 +1044,7 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
 
   prefixes, suffixes, separators = checks.sink_boundaries()
   separators = checks.chainable_separators(separators)
+  checks.prime_whitespace_tampers()
   whitespaces = settings.WHITESPACES
 
   prefixes, suffixes, separators, whitespaces = _prioritize_confirmed_boundary(prefixes, suffixes, separators, whitespaces)
@@ -1420,6 +1423,7 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
       url_time_response = 0
       tmp_path = checks.check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
 
+  checks.prime_whitespace_tampers()
   whitespaces = settings.WHITESPACES
 
   prefixes, suffixes, separators, whitespaces = _prioritize_confirmed_boundary(prefixes, suffixes, separators, whitespaces)

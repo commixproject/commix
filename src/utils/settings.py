@@ -457,7 +457,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "254"
+REVISION = "255"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -818,6 +818,15 @@ TECHNIQUES_BEFORE_NARROWING = None
 
 # Whether the file-based technique was accepted for a run given a document root but other techniques.
 FILE_BASED_NARROWING_CHOICE = None
+
+"""
+Whether going around a filtered whitespace was accepted, asked once and held for the run.
+
+Every technique is sent around again for it, so the pass costs about what the one before it did -
+worth offering rather than spending unannounced, and worth asking only once, since the answer is
+about the target's own filter rather than about any one technique that just came back empty.
+"""
+WHITESPACE_RETRY_CHOICE = None
 
 # The HTTP header name.
 HTTP_HEADER = ""
@@ -1823,6 +1832,16 @@ SKIPPED_OUT_OF_SCOPE = set()
 
 USER_APPLIED_TAMPER = ""
 USER_APPLIED_MODULE = ""
+
+"""
+Tamper scripts this run reached for on its own, kept apart from the ones '--tamper' named.
+
+What is adopted to get past a filter belongs to the parameter it was adopted for: written back into
+the option instead, it outlives that parameter and every one tested afterwards inherits a rewrite it
+was never shown to need - which reads as "not injectable" where the substitute is filtered too. The
+option itself is also the user's answer to this question, so it is never written over with ours.
+"""
+AUTO_TAMPER = []
 
 """
 Registered injection modules: the name '--module' takes -> (import path, handler).

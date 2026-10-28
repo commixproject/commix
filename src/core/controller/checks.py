@@ -256,8 +256,9 @@ def final_false_positive_check(url, http_request_method, check_parameter, timese
     # every numeric 'test' this litmus writes leans on '-eq', whichever of the branches above built
     # it. 'dashlesstest' already reads that the dash-free way ('=' in its place), so one more try
     # with it applied is the same finding, asked a way this one filter does not catch.
-    if not output and "dashlesstest" not in settings.MULTI_ENCODED_PAYLOAD:
-      menu.options.tamper = (menu.options.tamper + ",dashlesstest") if menu.options.tamper else "dashlesstest"
+    if not output and "dashlesstest" not in settings.MULTI_ENCODED_PAYLOAD and \
+       not (settings.USER_APPLIED_TAMPER or menu.options.tamper):
+      settings.AUTO_TAMPER.append("dashlesstest")
       tamper_scripts(stored_tamper_scripts=True)
       _, output = injector.false_positive_check(separator, "", "", prefix, suffix, whitespace, timesec, http_request_method,
                                                  url, check_parameter, None, 1, False, 0, 0, False,
@@ -2582,9 +2583,12 @@ leaving it until the payloads are built costs a connection test and a WAF probe 
 def validate_tamper_scripts():
   # An encoding named the old way is taken as an encoding before it is judged as a script name.
   absorb_encoding_tampers()
-  if not menu.options.tamper:
+  if not menu.options.tamper and not settings.AUTO_TAMPER:
     return []
-  raw_scripts = re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower())
+  # What '--tamper' named, then whatever this run adopted for the parameter in hand - the two are
+  # kept in separate places and only ever read together, here.
+  raw_scripts = re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower()) if menu.options.tamper else []
+  raw_scripts = raw_scripts + list(settings.AUTO_TAMPER)
   provided_scripts = list(dict.fromkeys(script.strip() for script in raw_scripts if script.strip()))
   available_scripts = list(tamper_script_paths().keys())
   for script in provided_scripts:
@@ -3388,8 +3392,12 @@ def tamper_dep_command_incompatible(tamper_name):
 
   The mirror of 'tamper_dep_eval_incompatible': what these scripts rewrite is the syntax of the
   language doing the evaluating, which a payload going straight to a shell never carries.
+
+  'menu.options.eval_sink' alone misses the heuristic probe 'code_injections_heuristic_basic' sends
+  before that option is ever set - it already carries eval syntax, not a command, which is what
+  'EVAL_BASED_STATE' marks regardless of whether '--eval' was given.
   """
-  if not menu.options.eval_sink:
+  if not menu.options.eval_sink and not settings.EVAL_BASED_STATE:
     return "The '" + tamper_name + ".py' tamper script needs code injection (i.e. '--eval'). Skipping tamper script."
 
 # Why this script cannot be applied to an evaluated language other than the one it is written for.
@@ -3404,8 +3412,13 @@ def tamper_dep_eval_incompatible(tamper_name):
   Asked of the classic technique alone, they were skipped there and applied everywhere else - and
   code injection is now proven time-based and file-based as well, so the payloads they would have
   corrupted were being sent by every technique but the one that refused them.
+
+  'menu.options.eval_sink' alone misses the heuristic probe 'code_injections_heuristic_basic' sends
+  before that option is ever set - a shell-only rewrite applied to that probe's own eval syntax
+  corrupts it into something no language reads back the way the probe needs, which is what
+  'EVAL_BASED_STATE' catches regardless of whether '--eval' was given yet.
   """
-  if menu.options.eval_sink:
+  if menu.options.eval_sink or settings.EVAL_BASED_STATE:
     return "Code injection (i.e. '--eval') does not support the usage of '" + tamper_name + ".py'. Skipping tamper script."
 
 # Why this script cannot be applied where no time-related technique is in scope.
@@ -3680,12 +3693,31 @@ def escalate_waf_evasion(on_block=True):
   return True
 
 """
+Take back every tamper script this run adopted on its own, leaving the ones '--tamper' named.
+
+Rebuilt from scratch rather than removed one by one, the way an evasion tier that replaces another
+is: a whitespace-mutating script holds 'WHITESPACES[0]' for as long as it is in use, and dropping
+the script without putting the plain space back leaves every payload built afterwards carrying a
+substitute nothing is applying any more.
+"""
+def drop_auto_tampers():
+  if not settings.AUTO_TAMPER:
+    return
+  for name in settings.AUTO_TAMPER:
+    if name in settings.TAMPER_SCRIPTS:
+      settings.TAMPER_SCRIPTS[name] = False
+  settings.AUTO_TAMPER = []
+  settings.MULTI_ENCODED_PAYLOAD = []
+  settings.WHITESPACES = [settings.SINGLE_WHITESPACE]
+  tamper_scripts(stored_tamper_scripts=True)
+
+"""
 Tamper script checker
 """
 def tamper_scripts(stored_tamper_scripts):
   # A stored session may still name the scripts by their old names, as may the command line.
   absorb_encoding_tampers()
-  if menu.options.tamper:
+  if menu.options.tamper or settings.AUTO_TAMPER:
     provided_scripts = validate_tamper_scripts()
     priorities = {}
     for script in provided_scripts:
@@ -3740,9 +3772,9 @@ def _enable_tamper_script(tamper_name):
   if settings.TAMPER_SCRIPTS[tamper_name]:
     return
   provided = re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower()) if menu.options.tamper else []
-  if tamper_name in provided:
+  if tamper_name in provided or tamper_name in settings.AUTO_TAMPER:
     return
-  menu.options.tamper = (menu.options.tamper + "," + tamper_name) if menu.options.tamper else tamper_name
+  settings.AUTO_TAMPER.append(tamper_name)
 
 """
 Check for modified whitespaces.
@@ -4146,6 +4178,24 @@ def perform_payload_modification(payload):
   return payload
 
 """
+Settle what a tamper script's own mutation to 'WHITESPACES' would be, before anything built off
+that list is frozen.
+
+Several whitespace tampers ('space2ifs', 'space2htab', ...) do not rewrite the payload they are
+handed at all - they rewrite 'settings.WHITESPACES' as a side effect, so that every payload built
+afterwards carries the substitute instead of a plain space. A technique that reads 'WHITESPACES'
+before sending its own first payload reads it as it stood before an escalation stage just added the
+script - that technique never asks again once it has gone through its own boundaries once, so the
+substitute the stage was supposed to try only ends up reaching whichever technique happens to run
+after it, in the same pass, by accident. Running the active scripts once against a bare space here,
+ahead of that read, settles it there instead - not a real payload, since the scripts this is for do
+not look at the one they are given.
+"""
+def prime_whitespace_tampers():
+  if settings.MULTI_ENCODED_PAYLOAD:
+    perform_payload_modification(settings.SINGLE_WHITESPACE)
+
+"""
 Skip parameters when the provided value is empty.
 """
 def skip_empty(empty_parameters, http_request_method):
@@ -4386,6 +4436,19 @@ def calibrate_boolean_oracle(page_true, page_false, code_true=None, code_false=N
     # Content alone cannot tell the two apart - length still might, and is reported precisely
     # because it is the only one of the two that just did.
     return lengths_distinguish
+  """
+  A page that is a plain shell error on both questions is not two answers - it is one error, with
+  this run's own calibration digits echoed back inside it. A filter that corrupts the payload before
+  a shell ever sees it still leaves the random marker's length (6 vs. 7) sitting in the "command not
+  found" text the shell quotes it in, which tells the two pages apart without either command having
+  actually run. Normalizing the digits out of each error catches exactly that case, without touching
+  a real difference in wording a target's own interpreter would give for two different questions.
+  """
+  true_error, false_error = extract_error_message(page_true), extract_error_message(page_false)
+  if true_error is not None and false_error is not None:
+    normalized = lambda text: re.sub(r"\d+", "#", text)
+    if normalized(true_error) == normalized(false_error):
+      return False
   settings.BOOLEAN_TRUE_PAGE, settings.BOOLEAN_FALSE_PAGE = true_page, false_page
   settings.BOOLEAN_TRUE_RAW, settings.BOOLEAN_FALSE_RAW = page_true, page_false
   return True

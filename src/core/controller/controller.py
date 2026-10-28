@@ -397,6 +397,11 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, p
   # naming a version, so the language is all there is to report in that case.
   detail = "identified evaluated language: '" + settings.EVAL_GRAMMAR.LABEL + "'"
   settings.EVAL_BASED_STATE = True
+  # A command-only tamper (e.g. 'printfoctal') was still compatible the last time dependencies were
+  # checked, before this probe's own eval syntax made it not - re-checked now, or it would corrupt
+  # these payloads into something no language reads back the way the probe needs.
+  if menu.options.tamper:
+    checks.tamper_scripts(stored_tamper_scripts=True)
   try:
     whitespace = settings.SINGLE_WHITESPACE
     if (not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_EVAL_PROBE):
@@ -441,11 +446,21 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, p
               detail = "identified " + settings.EVAL_GRAMMAR.LABEL + " version: '" + match.group(1) + "'"
               settings.IDENTIFIED_EVAL_PROBE = True
               break
-            for warning in settings.EVAL_WARNINGS:
-              if warning in html_data:
-                settings.IDENTIFIED_WARNINGS = True
-                detail = "identified evaluated language: '" + settings.EVAL_GRAMMAR.LABEL + "'"
-                break
+            # A plain shell error (the probe reached a shell, not an interpreter) can still contain
+            # one of these words by coincidence - 'syntax error' reads the same complaint from
+            # 'sh' as it does from Perl. Where the response is one of those, the word is the
+            # shell's, not the language's, so it is not treated as evidence of an eval sink.
+            if not checks.extract_error_message(html_data):
+              baseline = settings.ORIGINAL_PAGE or ""
+              for warning in settings.EVAL_WARNINGS:
+                # A word the page was already carrying before anything was sent to it is the page's
+                # own - prose that happens to name an error reads exactly like one reported, and a
+                # page that explains itself ('..., a syntax error - ...') says it on every response
+                # whatever the probe was. What the probe caused is what is not there to begin with.
+                if warning in html_data and warning not in baseline:
+                  settings.IDENTIFIED_WARNINGS = True
+                  detail = "identified evaluated language: '" + settings.EVAL_GRAMMAR.LABEL + "'"
+                  break
         if settings.IDENTIFIED_EVAL_PROBE:
           break
 
@@ -468,6 +483,10 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, p
             settings.SKIP_COMMAND_INJECTIONS = True
 
     settings.EVAL_BASED_STATE = False
+    # A command-only tamper dropped above for this probe's own eval syntax belongs back in play now
+    # - '--eval' was declined, or never came up, and whatever runs next is a command once again.
+    if menu.options.tamper:
+      checks.tamper_scripts(stored_tamper_scripts=True)
     return url
 
   except (_urllib.error.URLError, _urllib.error.HTTPError) as err_msg:
@@ -1007,10 +1026,20 @@ def injection_process(url, check_parameter, http_request_method, filename, times
     if check_parameter in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST and not checks.already_tested(place, check_parameter):
       settings.CHECKING_PARAMETER = "(custom) " + settings.CHECKING_PARAMETER
 
+    """
+    A rewrite adopted for the parameter before this one is dropped here.
+
+    What got past that parameter's filter says nothing about this one, and the scripts are not free
+    to carry: '${IFS}' in place of every space is itself filtered on some targets, so a parameter
+    that would have answered a plain payload is reported as not injectable instead - found only by
+    testing it on its own. Whatever this parameter needs, it adopts again for itself.
+    """
+    checks.drop_auto_tampers()
+
     if not settings.LOAD_SESSION:
       info_msg = "Setting " + settings.CHECKING_PARAMETER  + " for tests."
       settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-      
+
     if menu.options.skip_heuristics:
       if settings.VERBOSITY_LEVEL != 0:
         debug_msg = "Skipping heuristic (basic) test on the " + settings.CHECKING_PARAMETER + "."
@@ -1169,17 +1198,44 @@ def injection_process(url, check_parameter, http_request_method, filename, times
         _reset_web_root_detection()
         end_detection = _run_techniques()
 
+      """
+      Whether this run gets to reach for a rewrite of its own.
+
+      '--tamper' is the user's own answer to the question these passes exist to ask, so where it was
+      given, it is the only answer applied - a script added behind it is one they did not ask for,
+      and stacking ours on top is what earns the "too many tamper scripts" warning against a run
+      that named exactly one.
+      """
+      def _may_adopt_tamper():
+        return not (settings.USER_APPLIED_TAMPER or menu.options.tamper)
+
+      """
+      Whether to go around a filtered whitespace at all.
+
+      Sending every technique around a second time costs about what the first pass did, so it is
+      offered rather than spent unannounced. Asked once and held for the run: the answer is about
+      the target's own filter, not about whichever technique happened to come back empty first.
+      """
+      def _accepts_whitespace_retry():
+        if settings.WHITESPACE_RETRY_CHOICE is None:
+          warn_msg = "Nothing was confirmed with a plain whitespace, which the target may be filtering."
+          settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+          message = "Do you want to retry the techniques with whitespace substitutes applied? [Y/n] "
+          settings.WHITESPACE_RETRY_CHOICE = common.read_input(message, default="Y", check_batch=True) not in settings.CHOICE_NO
+        return settings.WHITESPACE_RETRY_CHOICE
+
       # One more pass with 'space2ifs' applied - a filter that rejects any literal whitespace
       # blocks the heuristic test the same as every technique, so gating this on a positive
       # heuristic would never fire for the one case it exists for. 'MULTI_ENCODED_PAYLOAD'
       # already carrying the script is what keeps this from firing twice, or where it was
       # already asked for.
       if not end_detection and checks.injection_techniques_status() is False and \
-            "space2ifs" not in settings.MULTI_ENCODED_PAYLOAD:
-        info_msg = "Nothing confirmed so far - retrying once with the 'space2ifs' tamper, "
-        info_msg += "in case whitespace itself is being filtered."
+            _may_adopt_tamper() and "space2ifs" not in settings.MULTI_ENCODED_PAYLOAD and \
+            _accepts_whitespace_retry():
+        info_msg = "Applying the 'space2ifs' tamper script, "
+        info_msg += "separating the payload's words with '${IFS}'."
         settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-        menu.options.tamper = (menu.options.tamper + ",space2ifs") if menu.options.tamper else "space2ifs"
+        settings.AUTO_TAMPER.append("space2ifs")
         checks.tamper_scripts(stored_tamper_scripts=True)
         _reset_web_root_detection()
         end_detection = _run_techniques()
@@ -1188,11 +1244,12 @@ def injection_process(url, check_parameter, http_request_method, filename, times
       # filter that also blocks '$' leaves this pass no better off than the one before it. A
       # horizontal tab is still a plain POSIX word separator and needs no such substitution.
       if not end_detection and checks.injection_techniques_status() is False and \
-            "space2htab" not in settings.MULTI_ENCODED_PAYLOAD:
-        info_msg = "Still nothing confirmed - retrying once more with the 'space2htab' tamper, "
-        info_msg += "in case whitespace is being filtered and '$' along with it."
+            _may_adopt_tamper() and "space2htab" not in settings.MULTI_ENCODED_PAYLOAD and \
+            _accepts_whitespace_retry():
+        info_msg = "'${IFS}' was filtered too; applying the 'space2htab' tamper script, "
+        info_msg += "separating them with a horizontal tab instead."
         settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-        menu.options.tamper = (menu.options.tamper + ",space2htab") if menu.options.tamper else "space2htab"
+        settings.AUTO_TAMPER.append("space2htab")
         checks.tamper_scripts(stored_tamper_scripts=True)
         _reset_web_root_detection()
         end_detection = _run_techniques()
@@ -1202,11 +1259,11 @@ def injection_process(url, check_parameter, http_request_method, filename, times
       # it. 'dashlesstest' already reads those the dash-free way ('='/'!='), so this is the one
       # case left where retrying on a tamper already built for something else solves it outright.
       if not end_detection and checks.injection_techniques_status() is False and \
-            "dashlesstest" not in settings.MULTI_ENCODED_PAYLOAD:
-        info_msg = "Still nothing confirmed - retrying once more with the 'dashlesstest' tamper, "
-        info_msg += "in case a literal '-' is being filtered."
+            _may_adopt_tamper() and "dashlesstest" not in settings.MULTI_ENCODED_PAYLOAD:
+        info_msg = "The character '-' appears to be filtered by the target; "
+        info_msg += "applying the 'dashlesstest' tamper script to adapt."
         settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-        menu.options.tamper = (menu.options.tamper + ",dashlesstest") if menu.options.tamper else "dashlesstest"
+        settings.AUTO_TAMPER.append("dashlesstest")
         checks.tamper_scripts(stored_tamper_scripts=True)
         _reset_web_root_detection()
         end_detection = _run_techniques()
