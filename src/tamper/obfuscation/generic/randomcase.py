@@ -23,8 +23,9 @@ Notes: Only the name is varied, on either target: the fold that lowers it back o
        would lower an argument's own letters with it, and the command was asked for with the
        letters it was asked for. On Windows nothing has to fold it back at all, 'cmd.exe'
        resolving a name without regard to case.
-       The fold is read by 'awk', which takes the name as an argument - a pipe into 'tr' would be
-       an operator the payload is not proving.
+       The fold alone is read by 'awk', which takes the name as an argument and so carries no
+       operator at all. Reading the name back from its end as well - where 'rev' is in use too -
+       carries one either way, and is written the way that script writes its own.
        The character ranges are quoted with "'", which is the one quote neither an
        evaluated string nor the shell inside it is already using.
 """
@@ -81,18 +82,21 @@ def tamper(payload):
       # rewrites are spelled out together rather than one wrapped around the other.
       # The fold on its own is one statement and needs no operator at all. Reading the name back
       # from its end as well needs one, so that form is chosen the way 'rev' chooses its own.
+      # The fold on its own is one awk statement and carries no operator at all. Reading the name
+      # back from its end as well carries one either way, so that form is chosen the way 'rev'
+      # chooses its own - awk where its ';' or newline is the separator under test, the pipes
+      # otherwise, those being what a target letting '&' through does not stop.
       if not settings.TAMPER_SCRIPTS["rev"]:
-        program = _FOLD
+        folded = "awk" + settings.SINGLE_WHITESPACE + _FOLD + settings.SINGLE_WHITESPACE + mixed_case
       else:
         mixed_case = mixed_case[::-1]
         payload_separator = checks.current_separator()
-        if not checks.awk_separator_usable(payload_separator):
-          warn_msg = "Nothing reads a name back from its end without an operator of its own, and "
-          warn_msg += "none of the ones that do is the separator under test. Skipping tamper script."
-          settings.print_once(warn_msg)
-          return payload
-        program = checks.awk_reverse_program(payload_separator, fold=True)
-      folded = "awk" + settings.SINGLE_WHITESPACE + program + settings.SINGLE_WHITESPACE + mixed_case
+        if checks.awk_separator_usable(payload_separator):
+          program = checks.awk_reverse_program(payload_separator, fold=True)
+          folded = "awk" + settings.SINGLE_WHITESPACE + program + settings.SINGLE_WHITESPACE + mixed_case
+        else:
+          folded = "echo" + settings.SINGLE_WHITESPACE + mixed_case + "|rev|tr" + \
+                   settings.SINGLE_WHITESPACE + "'[A-Z]'" + settings.SINGLE_WHITESPACE + "'[a-z]'"
       if settings.USE_BACKTICKS:
         random_case_cmd = "\\`" + folded + "\\`"
       else:

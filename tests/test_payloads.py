@@ -13,6 +13,7 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import re
 import inspect
 import importlib
 import unittest
@@ -29,13 +30,7 @@ stay that way: a payload measures something and then delays on the answer, and t
 one command - the delay scaled by the comparison itself - rather than as two chained by an
 operator of their own. Nothing goes in here without a reason that says why its shape cannot.
 """
-UNRESOLVED = {
-                  # This one does not only measure and delay: it rewrites the file afterwards, as
-                  # decimals, for the character extraction that follows. That is a second command,
-                  # which no arithmetic absorbs into the first - and '&' chains it without waiting,
-                  # so the next request could read the file before the rewrite has landed.
-                  ("tfb_payloads", "cmd_execution"),
-}
+UNRESOLVED = set()
 
 """
 A value for whatever the builder asks for, named the way the builders name it.
@@ -154,6 +149,83 @@ class PayloadSeparators(unittest.TestCase):
         if any(counted[_] and _ != separator for _ in counted):
           still_offending.add((module_name, name))
     self.assertEqual(UNRESOLVED, still_offending)
+
+class AwkExpressions(unittest.TestCase):
+  """
+  The measurements a payload makes when it cannot carry a variable from one command to the next.
+  Each is handed to awk as an argument, so none of them needs a pipe - and each program is written
+  so that it needs no separator of its own either.
+  """
+  def _programs(self):
+    from src.core.techniques.time_based import tb_payloads
+    from src.core.techniques.tempfile_based import tfb_payloads
+    return {
+      "length": tb_payloads._length_arg_expr("WORD"),
+      "ordinal": tb_payloads._ordinal_arg_expr("WORD", 3),
+      "flatten": tfb_payloads.flattened_trimmed_text("FILE"),
+    }
+
+  def test_none_of_them_pipes(self):
+    # A pipe is what each of these exists to avoid; 'wc', 'rev' and 'tr' all read one.
+    for name, program in self._programs().items():
+      self.assertNotIn("|", program, name + " reaches for a pipe")
+
+  def test_none_of_them_chains(self):
+    for name, program in self._programs().items():
+      for operator in ("&&", "||", "&", ";"):
+        self.assertNotIn(operator, program, name + " carries " + repr(operator))
+
+  def test_no_awk_program_holds_a_space_inside_its_own_quotes(self):
+    """
+    A space there is text to awk and a separator to the substitution that rewrites whitespace, so
+    a run with a space2* script would rewrite the program itself into something awk cannot read.
+    """
+    for name, program in self._programs().items():
+      # Only awk's own program, since the ordinal carries a lone quote of printf's beside it.
+      programs = re.findall(r"awk '([^']*)'", program)
+      self.assertTrue(programs, name + " has no awk program to check")
+      for part in programs:
+        self.assertNotIn(" ", part, name + " holds a space inside its quotes")
+
+class ArithmeticConditions(unittest.TestCase):
+  """
+  A 'test' comparison, rewritten as arithmetic so the delay can be scaled by it instead of branching
+  on it - and refused where it is not one, rather than mistranslated into something that always holds.
+  """
+  def test_a_numeric_comparison_translates(self):
+    from src.core.techniques.time_based import tb_payloads
+    for condition, expected in (("1 -eq 1", "1==1"), ("2 -ne 3", "2!=3"), ("4 -le 5", "4<=5"),
+                                ("6 -lt 7", "6<7"), ("8 -ge 9", "8>=9"), ("1 -gt 0", "1>0")):
+      self.assertEqual(expected, tb_payloads._arithmetic_condition(condition))
+
+  def test_anything_else_is_refused(self):
+    from src.core.techniques.time_based import tb_payloads
+    for condition in ("-f /etc/passwd", "\"$x\" = \"y\"", "-n $VAR", "1 -eq $VAR"):
+      self.assertIsNone(tb_payloads._arithmetic_condition(condition), condition + " was translated")
+
+  def test_the_condition_payloads_use_it(self):
+    # The separator count is the sweep's job; this is only that the arithmetic replaced the branch.
+    from src.core.techniques.time_based import tb_payloads
+    for separator in ("&", "&&"):
+      payload = tb_payloads.condition_check(separator, "1 -eq 1", 5, "GET")
+      self.assertIn("1==1", payload)
+      self.assertNotIn("[ 1 -eq 1 ]", payload)
+
+class BackticksFallback(unittest.TestCase):
+  """
+  The one-command forms nest one substitution inside another, which backticks cannot express - so
+  a run using them keeps the older shape. It still has to produce a payload.
+  """
+  def test_a_payload_is_still_built_with_backticks(self):
+    from src.core.techniques.time_based import tb_payloads
+    settings.USE_BACKTICKS = True
+    try:
+      for separator in ("&", "&&"):
+        payload = tb_payloads.decision(separator, "MARKER", 6, 5, "GET")
+        self.assertTrue(payload.strip(), "no payload under " + repr(separator))
+        self.assertNotIn("awk", payload, "the nested form was used with backticks")
+    finally:
+      settings.USE_BACKTICKS = False
 
 class PayloadShape(unittest.TestCase):
   def setUp(self):

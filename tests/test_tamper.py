@@ -14,6 +14,7 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import os
+import importlib
 import unittest
 
 from tests._testutils import SEPARATORS, stage, tamper_modules, separators_in
@@ -72,12 +73,61 @@ class TamperSeparators(unittest.TestCase):
     self.assertEqual([], offenders)
 
   def test_fold_alone_carries_no_operator_at_all(self):
-    from src.tamper.obfuscation.posix import randomcase
+    from src.tamper.obfuscation.generic import randomcase
     for separator in SEPARATORS:
       payload = stage(separator, rev=False)
       tampered = randomcase.tamper(payload)
       before, after = separators_in(payload), separators_in(tampered)
       self.assertEqual(before, after, "randomcase changed the separator count under " + repr(separator))
+
+class EvalTamperSeparators(unittest.TestCase):
+  """
+  A script that rewrites evaluated code is inert against a shell payload, so the sweep above never
+  reaches one - which is how an '&&' sat in the PHP rewrite unnoticed. Each is run here against a
+  payload shaped the way its own language's grammar writes them.
+
+  No evaluated language chains on a shell operator (test_grammars pins that), so any '&', '&&',
+  '|' or '||' a rewrite introduces is one the payload is not proving. A ';' is not counted: it
+  terminates a statement in several of these grammars, and one of them appends a bare one.
+  """
+  SHAPES = {
+                  "php": 'system("echo MARKER");',
+                  "python": '__import__("os").system("echo MARKER")',
+                  "ruby": 'system("echo MARKER")',
+                  "javascript": 'require("child_process").execSync("echo MARKER")',
+                  "lua": 'os.execute("echo MARKER")',
+  }
+
+  def _eval_scripts(self):
+    return dict((name, module) for name, module in tamper_modules().items()
+                if "/eval/" in (module.__file__ or "").replace(os.sep, "/"))
+
+  def test_the_sweep_reaches_the_evaluated_language_scripts(self):
+    acted = set()
+    for language, shape in self.SHAPES.items():
+      settings.EVAL_GRAMMAR = importlib.import_module("src.core.eval.grammars." + language)
+      stage(";")
+      settings.RAW_PAYLOAD = shape
+      for name, module in self._eval_scripts().items():
+        if module.tamper(shape) != shape:
+          acted.add(name)
+    # Short of this the assertion below passes by never rewriting anything at all.
+    self.assertGreater(len(acted), 8)
+
+  def test_no_evaluated_rewrite_introduces_a_shell_operator(self):
+    offenders = []
+    for language, shape in self.SHAPES.items():
+      settings.EVAL_GRAMMAR = importlib.import_module("src.core.eval.grammars." + language)
+      stage(";")
+      settings.RAW_PAYLOAD = shape
+      before = separators_in(shape)
+      for name, module in self._eval_scripts().items():
+        tampered = module.tamper(shape)
+        after = separators_in(tampered)
+        added = [_ for _ in ("&", "&&", "|", "||") if after[_] > before[_]]
+        if added:
+          offenders.append(language + "/" + name + " adds " + ",".join(added))
+    self.assertEqual([], offenders)
 
 class TamperOperatingSystem(unittest.TestCase):
   """
@@ -105,7 +155,7 @@ class TamperCommandIntegrity(unittest.TestCase):
   What the user asked to run is what has to run: a rewrite may hide the command, never change it.
   """
   def test_arguments_keep_their_own_case(self):
-    from src.tamper.obfuscation.posix import randomcase
+    from src.tamper.obfuscation.generic import randomcase
     # 'awk -F' is what the operating system users are read with, and '-f' is a different flag.
     for command in ("echo Hello", "awk -F ':' '{print $1}' /etc/passwd", "ping -n 1 127.0.0.1"):
       arguments = command.partition(settings.SINGLE_WHITESPACE)[2]
@@ -125,7 +175,7 @@ class TamperCommandIntegrity(unittest.TestCase):
         self.assertNotIn(";", program, "the newline-separated program still carries a ';'")
 
   def test_only_the_name_is_varied(self):
-    from src.tamper.obfuscation.posix import randomcase
+    from src.tamper.obfuscation.generic import randomcase
     for target_os in (settings.OS.UNIX, settings.OS.WINDOWS):
       payload = stage(";", command="echo Hello", target_os=target_os)
       self.assertIn("Hello", randomcase.tamper(payload))

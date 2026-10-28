@@ -165,7 +165,6 @@
 /cgi-bin/lookwho.cgi
 /cgi-bin/lwgate.cgi
 /cgi-bin/MachineInfo
-/cgi-bin/MachineInfo
 /cgi-bin/magiccard.cgi
 /cgi-bin/mail/emumail.cgi
 /cgi-bin/maillist.cgi
@@ -244,8 +243,6 @@
 /cgi-bin/smartsearch.cgi
 /cgi-bin/smartsearch/smartsearch.cgi
 /cgi-bin/snorkerz.bat
-/cgi-bin/snorkerz.bat
-/cgi-bin/snorkerz.cmd
 /cgi-bin/snorkerz.cmd
 /cgi-bin/sojourn.cgi
 /cgi-bin/spin_client.cgi
@@ -332,13 +329,10 @@
 /ez2000/ezboard.cgi
 /ez2000/ezman.cgi
 /fcgi-bin/echo
-/fcgi-bin/echo
-/fcgi-bin/echo2
 /fcgi-bin/echo2
 /Gozila.cgi
 /hitmatic/analyse.cgi
 /hp_docs/cgi-bin/index.cgi
-/html/cgi-bin/cgicso
 /html/cgi-bin/cgicso
 /index.cgi
 /info.cgi
@@ -372,7 +366,6 @@
 /sample03.cgi
 /sample04.cgi
 /sampleposteddata.cgi
-/scancfg.cgi
 /scancfg.cgi
 /servers/link.cgi
 /setpasswd.cgi

