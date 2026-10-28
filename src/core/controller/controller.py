@@ -1184,19 +1184,33 @@ def injection_process(url, check_parameter, http_request_method, filename, times
         settings.WEB_ROOT = settings.DEFAULT_WEB_ROOT
         menu.options.web_root = False
 
-      confirmed_mark = len(settings.CONFIRMED_INJECTION_POINTS)
+      """
+      One pass of the techniques, and the verification of whatever it confirmed.
+
+      Verified here rather than once at the end, because everything below reads "has anything been
+      confirmed yet" to decide whether to reach further. A finding that the re-ask takes back is not
+      a confirmation, and counted as one it closes every escalation behind it: the run reports "not
+      injectable" having skipped the passes that would have looked. Costs nothing on a pass that
+      confirmed nothing, which is the pass this is standing in front of.
+      """
+      def _run_and_verify():
+        mark = len(settings.CONFIRMED_INJECTION_POINTS)
+        ended = _run_techniques()
+        checks.final_false_positive_check(url, http_request_method, check_parameter, timesec, mark)
+        return ended
+
       # An escalation already handled during the heuristic test, ahead of this first pass, would
       # otherwise read here as "stepped up while the technique about to run was mid-flight" - and
       # send the very first technique around a second, needless time before it is even one request in.
       settings.WAF_EVASION_ESCALATED = False
-      end_detection = _run_techniques()
+      end_detection = _run_and_verify()
       # Nothing got through while a protection is in the way, so reach for a heavier evasion and
       # give the techniques another go - being blocked throughout is the answer this waits for.
       while not end_detection and checks.injection_techniques_status() is False and \
             settings.WAF_ENABLED and checks.escalate_waf_evasion(on_block=False):
         settings.WAF_EVASION_ESCALATED = False
         _reset_web_root_detection()
-        end_detection = _run_techniques()
+        end_detection = _run_and_verify()
 
       """
       Whether this run gets to reach for a rewrite of its own.
@@ -1212,63 +1226,62 @@ def injection_process(url, check_parameter, http_request_method, filename, times
       """
       Whether to go around a filtered whitespace at all.
 
-      Sending every technique around a second time costs about what the first pass did, so it is
-      offered rather than spent unannounced. Asked once and held for the run: the answer is about
-      the target's own filter, not about whichever technique happened to come back empty first.
+      Sending every technique around again costs about what the pass before it did, so it is offered
+      rather than spent unannounced. Asked once and held for the run: the answer is about the
+      target's own filter, not about whichever technique happened to come back empty first.
       """
       def _accepts_whitespace_retry():
         if settings.WHITESPACE_RETRY_CHOICE is None:
-          warn_msg = "Nothing was confirmed with a plain whitespace, which the target may be filtering."
-          settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-          message = "Do you want to retry the techniques with whitespace substitutes applied? [Y/n] "
+          # Only what was actually established is stated here. That nothing was confirmed with a
+          # plain whitespace is a fact about this run; that the target is filtering one is a guess,
+          # and far more often than not the parameter simply never reached a shell - a mistyped
+          # name answers exactly like a filtered space does. The guess belongs in the question,
+          # where it reads as the reason to try rather than as something already found.
+          # Worded as the WAF/IPS consent next to it is, since it is the same question asked about a
+          # different obstacle. No script named: one is turned on here and another behind it where
+          # that one is filtered too, so naming the first reads as a promise that it is the only
+          # one - each says which it loaded as it loads it, which is where that belongs.
+          message = "Do you want " + settings.APPLICATION + " to try again in case plain whitespace is being filtered "
+          message += "(e.g. by using whitespace tamper script(s))? [Y/n] "
           settings.WHITESPACE_RETRY_CHOICE = common.read_input(message, default="Y", check_batch=True) not in settings.CHOICE_NO
         return settings.WHITESPACE_RETRY_CHOICE
 
-      # One more pass with 'space2ifs' applied - a filter that rejects any literal whitespace
-      # blocks the heuristic test the same as every technique, so gating this on a positive
-      # heuristic would never fire for the one case it exists for. 'MULTI_ENCODED_PAYLOAD'
-      # already carrying the script is what keeps this from firing twice, or where it was
-      # already asked for.
+      # A filter that rejects any literal whitespace blocks the heuristic test the same as every
+      # technique, so gating this on a positive heuristic would never fire for the one case it
+      # exists for. 'MULTI_ENCODED_PAYLOAD' already carrying the script is what keeps it from
+      # firing twice, or where it was asked for by name.
       if not end_detection and checks.injection_techniques_status() is False and \
             _may_adopt_tamper() and "space2ifs" not in settings.MULTI_ENCODED_PAYLOAD and \
             _accepts_whitespace_retry():
-        info_msg = "Applying the 'space2ifs' tamper script, "
-        info_msg += "separating the payload's words with '${IFS}'."
-        settings.print_data_to_stdout(settings.print_info_msg(info_msg))
         settings.AUTO_TAMPER.append("space2ifs")
-        checks.tamper_scripts(stored_tamper_scripts=True)
+        checks.tamper_scripts(stored_tamper_scripts=False)
         _reset_web_root_detection()
-        end_detection = _run_techniques()
+        end_detection = _run_and_verify()
 
-      # 'space2ifs' substitutes '${IFS}' for the space it works around - itself '$'-based, so a
-      # filter that also blocks '$' leaves this pass no better off than the one before it. A
-      # horizontal tab is still a plain POSIX word separator and needs no such substitution.
+      # '${IFS}' is itself '$'-based, so a filter that blocks '$' along with the whitespace leaves
+      # that pass no better off than the one before it. A horizontal tab is still a plain POSIX
+      # word separator and needs no such substitution.
       if not end_detection and checks.injection_techniques_status() is False and \
             _may_adopt_tamper() and "space2htab" not in settings.MULTI_ENCODED_PAYLOAD and \
             _accepts_whitespace_retry():
-        info_msg = "'${IFS}' was filtered too; applying the 'space2htab' tamper script, "
-        info_msg += "separating them with a horizontal tab instead."
-        settings.print_data_to_stdout(settings.print_info_msg(info_msg))
         settings.AUTO_TAMPER.append("space2htab")
-        checks.tamper_scripts(stored_tamper_scripts=True)
+        checks.tamper_scripts(stored_tamper_scripts=False)
         _reset_web_root_detection()
-        end_detection = _run_techniques()
+        end_detection = _run_and_verify()
 
-      # Neither pass above helps a filter built around '-' rather than whitespace or '$' - every
+      # A filter built around '-' rather than whitespace is a different question - every
       # numeric 'test' commix writes, including the final litmus below, leans on '-eq'/'-ne' for
       # it. 'dashlesstest' already reads those the dash-free way ('='/'!='), so this is the one
       # case left where retrying on a tamper already built for something else solves it outright.
       if not end_detection and checks.injection_techniques_status() is False and \
             _may_adopt_tamper() and "dashlesstest" not in settings.MULTI_ENCODED_PAYLOAD:
-        info_msg = "The character '-' appears to be filtered by the target; "
-        info_msg += "applying the 'dashlesstest' tamper script to adapt."
-        settings.print_data_to_stdout(settings.print_info_msg(info_msg))
         settings.AUTO_TAMPER.append("dashlesstest")
-        checks.tamper_scripts(stored_tamper_scripts=True)
+        # Announced the way '--tamper' announces its own, rather than in a sentence of its own:
+        # what is loaded is the same thing either way, and worth reading as the same line.
+        checks.tamper_scripts(stored_tamper_scripts=False)
         _reset_web_root_detection()
-        end_detection = _run_techniques()
+        end_detection = _run_and_verify()
 
-      checks.final_false_positive_check(url, http_request_method, check_parameter, timesec, confirmed_mark)
 
       # All injection techniques seems to be failed!
       if checks.injection_techniques_status() is False:

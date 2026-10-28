@@ -681,7 +681,7 @@ def _oob_sweep(is_eval, injection_type, prefixes, suffixes, separators, url, tim
       return False
 
   checks.injection_process(injection_type, technique, done=True)
-  settings.CONFIRMED_BOUNDARY[settings.CHECKING_PARAMETER] = (bare_prefix, bare_suffix, separator, whitespace)
+  checks.confirm_boundary(bare_prefix, bare_suffix, separator, whitespace)
   checks.identified_vulnerable_param(url, technique, injection_type, vuln_parameter, payload, http_request_method, filename, 1, checks.finding_title(separator, whitespace, bare_prefix, bare_suffix))
   session_handler.import_injection_points(url, technique, injection_type, filename, separator, True, vuln_parameter, prefix, suffix, TAG, menu.options.interpreter, payload, http_request_method, url_time_response=0, timesec=0, exec_time=0, output_length=0, is_vulnerable=settings.INJECTION_LEVEL)
   return _exploit(separator, prefix, suffix, whitespace, vuln_parameter, transport, TAG)
@@ -786,7 +786,7 @@ def do_boolean_based_process(url, timesec, filename, http_request_method, inject
         confirmed = _answers_both_ways(whitespace, stored_prefix, stored_suffix, stored_separator, TAG)
         if confirmed:
           _, vuln_parameter, sent_prefix, sent_suffix = confirmed
-          settings.CONFIRMED_BOUNDARY[settings.CHECKING_PARAMETER] = (stored_prefix, stored_suffix, stored_separator, whitespace)
+          checks.confirm_boundary(stored_prefix, stored_suffix, stored_separator, whitespace)
           return _exploit(stored_separator, sent_prefix, sent_suffix, whitespace, vuln_parameter, TAG)
       # The stored boundary no longer answers, so this is a target that has moved rather than a
       # session to replay - it is tested again from the start, and announced as any first run is.
@@ -823,7 +823,7 @@ def do_boolean_based_process(url, timesec, filename, http_request_method, inject
         continue
       payload, vuln_parameter, prefix, suffix = confirmed
       checks.injection_process(injection_type, technique, done=True)
-      settings.CONFIRMED_BOUNDARY[settings.CHECKING_PARAMETER] = (bare_prefix, bare_suffix, separator, whitespace)
+      checks.confirm_boundary(bare_prefix, bare_suffix, separator, whitespace)
       checks.identified_vulnerable_param(url, technique, injection_type, vuln_parameter, payload, http_request_method, filename, 1, checks.finding_title(separator, whitespace, bare_prefix, bare_suffix))
       session_handler.import_injection_points(url, technique, injection_type, filename, separator, True, vuln_parameter, prefix, suffix, TAG, menu.options.interpreter, payload, http_request_method, url_time_response=0, timesec=0, exec_time=0, output_length=0, is_vulnerable=settings.INJECTION_LEVEL)
       return _exploit(separator, prefix, suffix, whitespace, vuln_parameter, TAG)
@@ -1346,7 +1346,7 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
         else:
           whitespace = settings.WHITESPACES[0]
         if not resumed:
-          settings.CONFIRMED_BOUNDARY[settings.CHECKING_PARAMETER] = (bare_prefix, bare_suffix, separator, whitespace)
+          checks.confirm_boundary(bare_prefix, bare_suffix, separator, whitespace)
         if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
           OUTPUT_TEXTFILE = ""
         # An optimisation only, and it costs a timing model and a delayed request to find - so a
@@ -1713,7 +1713,7 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
       else:
         whitespace = settings.WHITESPACES[0]
       if not resumed:
-        settings.CONFIRMED_BOUNDARY[settings.CHECKING_PARAMETER] = (bare_prefix, bare_suffix, separator, whitespace)
+        checks.confirm_boundary(bare_prefix, bare_suffix, separator, whitespace)
       cmd = maxlen =  ""
       if not 'url_time_response' in locals():
         url_time_response = ""

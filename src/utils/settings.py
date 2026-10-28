@@ -334,7 +334,7 @@ def _stdout_write(data):
 Print data to stdout
 """
 def print_data_to_stdout(data):
-  global PROGRESS_LINE_OPEN, PROGRESS_DOT_COUNT
+  global PROGRESS_LINE_OPEN, PROGRESS_DOT_COUNT, PROGRESS_INTERRUPTIONS
   if getattr(_threading.current_thread(), "commix_suppress_output", False):
     return
   with PRINT_LOCK:
@@ -355,6 +355,10 @@ def print_data_to_stdout(data):
 
     if is_established_closer and not PROGRESS_LINE_OPEN:
       return  # nothing open to close - skip the cosmetic blank line
+    if is_established_closer:
+      # A question closes the progress line through this path before it is asked, so what follows
+      # it interrupts the technique just as much as a printed message does.
+      PROGRESS_INTERRUPTIONS += 1
 
     # However many requests the step behind it actually took, the dot line itself stops growing
     # once it would otherwise wrap - a fresh CR-drawn line (a new "please wait", or a rewritten one
@@ -368,6 +372,8 @@ def print_data_to_stdout(data):
 
     # Spinner continuations can append directly; other output needs a newline first.
     if PROGRESS_LINE_OPEN and not is_spinner_style and not is_established_closer:
+      # Counted here because this is exactly "a message came between a progress line and its end".
+      PROGRESS_INTERRUPTIONS += 1
       sys.stdout.write(END_LINE.LF)
 
     # Only spinner output stays unterminated; other messages always end with a newline. The
@@ -407,6 +413,20 @@ def clear_current_line():
       sys.stdout.write(END_LINE.LF)
     else:
       sys.stdout.write(END_LINE.CR + "\033[K")
+    sys.stdout.flush()
+    PROGRESS_LINE_OPEN = False
+
+"""
+Take the cursor back to the start of the current line and wipe it, leaving no newline behind.
+
+What 'clear_current_line' does where nothing is open, asked for by name: a line about to be drawn
+again word for word is overwriting itself, not following on from anything, and the newline that
+closing an open line would leave is exactly what stacks the two copies up.
+"""
+def redraw_current_line():
+  global PROGRESS_LINE_OPEN
+  with PRINT_LOCK:
+    sys.stdout.write(END_LINE.CR + "\033[K")
     sys.stdout.flush()
     PROGRESS_LINE_OPEN = False
 
@@ -457,7 +477,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "255"
+REVISION = "256"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -2265,6 +2285,17 @@ something else can be told apart by whether any testing actually happened after 
 LAST_ANNOUNCED_REQUESTS = 0
 
 """
+How often real output has broken into an open progress line, and what that stood at when a technique
+last announced itself.
+
+Compared rather than counted for its own sake: a technique whose line was interrupted by a question
+resumes as "Continue testing the ...", while one announced again with nothing printed in between was
+never interrupted and stays "Testing the ..." - the reader saw no break for it to continue from.
+"""
+PROGRESS_INTERRUPTIONS = 0
+LAST_ANNOUNCED_INTERRUPTIONS = 0
+
+"""
 The technique whose title has already been said a second time. A technique that stops to ask
 something more than once would otherwise announce itself again on every resume, turning one line
 into a column of identical ones.
@@ -2573,6 +2604,15 @@ WRITABLE_DIR_ATTEMPT_SAID = False
 # location(s)", "custom location(s)") - named at default verbosity instead of each path in turn,
 # which only '-v' above 0 does. Empty where the root came from auto-detection, not the menu.
 WEB_ROOT_CATEGORY_LABEL = ""
+
+"""
+The answer the directory-choice menu already got, as (candidates, label).
+
+A pass that retries with a tamper script walks the candidates again, so the menu's own question
+would otherwise be put a second and a third time - the same question, to someone who answered it
+before the first retry was even offered. None where it has not been asked yet.
+"""
+WEB_ROOT_CHOICE = None
 
 """
 Where each web server commix recognises keeps its document root, per platform.

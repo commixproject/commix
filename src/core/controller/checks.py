@@ -181,13 +181,22 @@ _STATE_BY_TECHNIQUE = {
   settings.INJECTION_TECHNIQUE.OOB: "OOB_STATE",
 }
 
-# The techniques a confirmation can rest on alone - an inference, never a directly observed result.
-_BLIND_TECHNIQUES = (
+"""
+The techniques whose confirmation is read off the target rather than carried by the payload.
+
+A page that reads one way for a true condition and another for a false one, or that answers slower
+than it did before, is evidence about the target's own behaviour - which a flaky page, a loaded
+network or a coincidence can imitate, so it is worth asking a second time before it is believed.
+
+The rest prove themselves by what came back: a six-character tag this run invented, written to a
+file and then fetched out of the web root, or a hostname only this run knows being resolved, is not
+something a target produces without having run the command. Re-asking those adds nothing, and the
+litmus it re-asks with - built on 'test', '$?' and '$((...))' - is itself blocked by a filter on
+'-' or '$', so asking it of a finding that already proved itself can only take a true one back.
+"""
+_INFERRED_TECHNIQUES = (
   settings.INJECTION_TECHNIQUE.BOOLEAN_BASED,
   settings.INJECTION_TECHNIQUE.TIME_BASED,
-  settings.INJECTION_TECHNIQUE.FILE_BASED,
-  settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED,
-  settings.INJECTION_TECHNIQUE.OOB,
 )
 
 """
@@ -202,7 +211,9 @@ def final_false_positive_check(url, http_request_method, check_parameter, timese
   new_points = settings.CONFIRMED_INJECTION_POINTS[mark:]
   if not new_points or settings.LOAD_SESSION:
     return
-  if any(row[0] not in _BLIND_TECHNIQUES for row in new_points):
+  # One technique that proved itself is enough for the parameter, so there is nothing here to take
+  # back - whatever the inference-based ones alongside it would have answered on a second ask.
+  if any(row[0] not in _INFERRED_TECHNIQUES for row in new_points):
     return
   boundary = settings.CONFIRMED_BOUNDARY.get(settings.CHECKING_PARAMETER)
   if not boundary:
@@ -1008,18 +1019,28 @@ def testing_technique_title(injection_type, technique):
   technique = technique_label(injection_type, technique)
   announced = (settings.CHECKING_PARAMETER, technique)
   # Said again where something came between the title and the testing it announced - the questions
-  # a file-based technique settles where it writes with, most of all.
-  title = "Continue testing the " if settings.LAST_ANNOUNCED_TECHNIQUE == announced else "Testing the "
+  # a file-based technique settles where it writes with, most of all. Asked of that interruption
+  # rather than of the repeat alone: announced twice with nothing printed in between, there is no
+  # break for the reader to continue from, and the title stays as it was.
+  interrupted = settings.PROGRESS_INTERRUPTIONS != settings.LAST_ANNOUNCED_INTERRUPTIONS
+  # Taken before the two are written back below, or it compares 'announced' against itself.
+  same_line = settings.LAST_ANNOUNCED_TECHNIQUE == announced and not interrupted
+  title = "Continue testing the " if (settings.LAST_ANNOUNCED_TECHNIQUE == announced and interrupted) else "Testing the "
   if settings.LAST_ANNOUNCED_TECHNIQUE != announced:
     settings.LAST_RESUMED_TECHNIQUE = None
   settings.LAST_ANNOUNCED_TECHNIQUE = announced
   settings.LAST_ANNOUNCED_REQUESTS = settings.TOTAL_OF_REQUESTS
+  settings.LAST_ANNOUNCED_INTERRUPTIONS = settings.PROGRESS_INTERRUPTIONS
   if settings.VERBOSITY_LEVEL != 0:
     info_msg = title + technique + ". "
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   else:
-    # Close a previous technique's dangling "... (done)" line first.
-    settings.clear_current_line()
+    # Close a previous technique's dangling "... (done)" line first - unless this is the same line
+    # about to be written again, which is overwritten in place rather than stacked underneath.
+    if same_line:
+      settings.redraw_current_line()
+    else:
+      settings.clear_current_line()
     info_msg = title + technique + ", please wait..."
     settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_info_msg(info_msg))
 
@@ -3347,7 +3368,10 @@ def list_tamper_scripts():
   if menu.options.list_tampers:
     message = ""
 
-    for script in sorted(tamper_script_paths().values()):
+    # Sorted by the name each one is listed and asked for by, not by the path it happens to sit at -
+    # which is the category directory, and groups the listing by something the reader is not looking
+    # a script up by.
+    for _, script in sorted(tamper_script_paths().items()):
       with open(script, "rb") as script_file:
         content = script_file.read().decode(settings.DEFAULT_CODEC)
       match = re.search(r"About:(.*)\n", content)
@@ -3442,6 +3466,19 @@ plain space is what the payload was built with in the first place.
 """
 def current_whitespace():
   return settings.WHITESPACES[0] if len(settings.WHITESPACES) != 0 else settings.SINGLE_WHITESPACE
+
+"""
+Record the boundary a technique just proved, and put its whitespace at the front of the list.
+
+The boundary itself is what the techniques after this one lead with. The whitespace is promoted on
+top of that because everything reached after detection - the shell, file access, the out-of-band
+exploit - asks for 'WHITESPACES[0]' rather than for the boundary, and a substitute that had to be
+used to prove the injection is just as necessary to use it.
+"""
+def confirm_boundary(bare_prefix, bare_suffix, separator, whitespace):
+  settings.CONFIRMED_BOUNDARY[settings.CHECKING_PARAMETER] = (bare_prefix, bare_suffix, separator, whitespace)
+  if whitespace and settings.WHITESPACES and settings.WHITESPACES[0] != whitespace:
+    settings.WHITESPACES = [whitespace] + [_ for _ in settings.WHITESPACES if _ != whitespace]
 
 """
 Undo a per-character obfuscation (obf_char inserted before each letter) on any whole word that settings.IGNORE_TAMPER_TRANSFORMATION says must survive intact (e.g. shell keywords like 'if'/'then').
@@ -3655,7 +3692,7 @@ def apply_waf_evasion():
   settings.WAF_EVASION_APPLIED = (settings.WAF_EVASION_APPLIED + "," + profile).strip(",")
   # The combination was chosen on purpose here, so the warning about their number does not apply.
   settings.TAMPER_WARNING_SHOWN = True
-  info_msg = "Turning on the '" + profile.replace(",", "', '") + "' tamper scripts, to get the payload past it."
+  info_msg = "Turning on the tamper scripts that suit the target, to get the payload past it."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
 """
@@ -3685,11 +3722,12 @@ def escalate_waf_evasion(on_block=True):
   # takes that slot when it still holds the plain space, so left alone it just appends behind
   # the stale, still-blocked substitute instead of replacing it.
   settings.WHITESPACES = [settings.SINGLE_WHITESPACE]
-  tamper_scripts(stored_tamper_scripts=True)
   settings.WAF_EVASION_APPLIED = ("chunked," if menu.options.chunked else "") + profile
   settings.WAF_EVASION_ESCALATED = True
-  warn_msg = "Still being blocked, so stepping the evasion up to the '" + profile.replace(",", "', '") + "' tamper scripts."
+  warn_msg = "What is already tampered is still being blocked, so stepping the evasion up a tier."
   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  # Said after the reason for it and named the way '--tamper' names its own.
+  tamper_scripts(stored_tamper_scripts=False)
   return True
 
 """
@@ -3701,6 +3739,17 @@ the script without putting the plain space back leaves every payload built after
 substitute nothing is applying any more.
 """
 def drop_auto_tampers():
+  """
+  The whitespace a parameter was proved through is put back behind the plain space as well.
+
+  'confirm_boundary' moves whatever worked to the front of the list, which is worth leading with for
+  the rest of that parameter and worth nothing on the next one - left there, every parameter after
+  it is asked through a substitute the target may well have filtered before the plain space is tried
+  at all. Put back, the next parameter starts from the plain space as this one did.
+  """
+  if settings.WHITESPACES and settings.WHITESPACES[0] != settings.SINGLE_WHITESPACE and \
+     not (settings.USER_APPLIED_TAMPER or menu.options.tamper) and not settings.LOAD_SESSION:
+    settings.WHITESPACES = [settings.SINGLE_WHITESPACE]
   if not settings.AUTO_TAMPER:
     return
   for name in settings.AUTO_TAMPER:
@@ -3721,9 +3770,13 @@ def tamper_scripts(stored_tamper_scripts):
     provided_scripts = validate_tamper_scripts()
     priorities = {}
     for script in provided_scripts:
-      if script not in settings.MULTI_ENCODED_PAYLOAD:
+      # Announced where it is loaded, not every time the list is read back: a pass that adopts one
+      # more script re-reads the ones already in use, and saying so again reads as the same script
+      # being loaded over and over.
+      newly_loaded = script not in settings.MULTI_ENCODED_PAYLOAD
+      if newly_loaded:
         settings.MULTI_ENCODED_PAYLOAD.append(script)
-      if not stored_tamper_scripts:
+      if not stored_tamper_scripts and newly_loaded:
         info_msg = "Loading tamper module '" + script + "'."
         settings.print_data_to_stdout(settings.print_info_msg(info_msg))
       try:
@@ -3753,11 +3806,17 @@ def tamper_scripts(stored_tamper_scripts):
         settings.MULTI_ENCODED_PAYLOAD = sorted_order + [script for script in settings.MULTI_ENCODED_PAYLOAD if script not in priorities]
 
     # Using too many tamper scripts is usually not a good idea. :P
+    #
+    # Counted over the ones '--tamper' named, not the ones this run reached for behind a filter: the
+    # advice is to drop a script, which is only advice where choosing them was the user's to make.
+    # Said against a combination commix put together itself, it reads as a warning about a decision
+    # they did not take and cannot act on.
+    user_scripts = [script for script in provided_scripts if script not in settings.AUTO_TAMPER]
     warn_needed = False
-    if len(provided_scripts) >= 3 and not settings.LOAD_SESSION:
+    if len(user_scripts) >= 3 and not settings.LOAD_SESSION:
       warn_msg = "Using too many tamper scripts "
       warn_needed = True
-    elif len([x for x in provided_scripts if any(y in x for y in ["nested", "doublequotes"])]) == 2 and not settings.LOAD_SESSION:
+    elif len([x for x in user_scripts if any(y in x for y in ["nested", "doublequotes"])]) == 2 and not settings.LOAD_SESSION:
       warn_needed = True
       warn_msg = "The combination of the provided tamper scripts "
     if warn_needed and not settings.TAMPER_WARNING_SHOWN:
@@ -4194,6 +4253,7 @@ not look at the one they are given.
 def prime_whitespace_tampers():
   if settings.MULTI_ENCODED_PAYLOAD:
     perform_payload_modification(settings.SINGLE_WHITESPACE)
+
 
 """
 Skip parameters when the provided value is empty.
@@ -6520,6 +6580,23 @@ listing them, or a brute-force sweep of likely ones - returning however many can
 produced, nearest (most likely) first.
 """
 def choose_web_root_candidates():
+  """
+  Asked once and held for the target.
+
+  A retry that applies a tamper script does need the candidates walked again - what a filtered pass
+  gave up on says nothing about how the same directories answer a payload shaped differently. The
+  operator's answer is not part of that: which directories to try is a fact about the target, not
+  about the payload that happened to reach them, and asking for it again on every pass makes the
+  same question look unanswered.
+  """
+  if settings.WEB_ROOT_CHOICE is None:
+    candidates = _ask_web_root_candidates()
+    settings.WEB_ROOT_CHOICE = (list(candidates), settings.WEB_ROOT_CATEGORY_LABEL)
+  candidates, settings.WEB_ROOT_CATEGORY_LABEL = settings.WEB_ROOT_CHOICE
+  return list(candidates)
+
+# The menu itself, asked on behalf of the function above and only while it has no answer yet.
+def _ask_web_root_candidates():
   if settings.TARGET_OS == settings.OS.WINDOWS:
     common_roots = list(settings.WINDOWS_DEFAULT_DOC_ROOTS)
   else:
@@ -6629,8 +6706,12 @@ def custom_web_root(url, timesec, filename, http_request_method, url_time_respon
         settings.WEB_ROOT = leaked
         settings.WEB_ROOT_CANDIDATES = []
       else:
-        warn_msg = "Unable to automatically retrieve the web server document root."
-        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+        # Said where the menu below is about to be put, not on every pass that walks the same
+        # candidates again: it is the reason for that question, and repeating it without the
+        # question reads as the root having failed to be worked out a second and a third time.
+        if settings.WEB_ROOT_CHOICE is None:
+          warn_msg = "Unable to automatically retrieve the web server document root."
+          settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
         candidates = choose_web_root_candidates()
         settings.WEB_ROOT = candidates[0] if candidates else (settings.WINDOWS_DEFAULT_DOC_ROOTS[0] if settings.TARGET_OS == settings.OS.WINDOWS else settings.LINUX_DEFAULT_DOC_ROOTS[0])
         settings.WEB_ROOT_CANDIDATES = candidates[1:]
