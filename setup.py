@@ -32,7 +32,8 @@ setup(
       python_requires='>=3.7',
       # The data files live beside the code rather than inside it, so they are named here to be
       # installed along with it.
-      packages=find_packages() + ["data", "data.txt"],
+      # The suite is run from a checkout, not from an install, so it is left out of the package.
+      packages=find_packages(exclude=["tests"]) + ["data", "data.txt"],
       include_package_data=True,
       package_data={"": ["*.txt"], "data.txt": ["*.txt", "*.tx_"]},
       zip_safe=False,

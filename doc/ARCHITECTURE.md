@@ -226,6 +226,7 @@ can tell whether it still knows how to talk to a newer one.
 | `src/utils/` | settings, session, logs, crawler, progress, install, update, the REST API |
 | `src/thirdparty/` | bundled libraries, so that a run needs nothing installed |
 | `data/txt/` | word lists read at runtime |
+| `tests/` | the offline suite, which no run of commix itself reaches |
 
 Two objects carry the run, and neither is passed around - both are imported where they are read.
 `src/utils/settings.py` holds the constants and the mutable run state, and is where a new constant
@@ -251,3 +252,22 @@ And when something is already wrong: the wire is `requests/headers.py`, whether 
 tested at all is `controller.py: perform_checks()`, whether a finding was believed is `checks.py`,
 what a run remembers is `session_handler.py`, and state bleeding from one target into the next is
 `settings.RUN_WIDE_STATE`.
+
+## Checking a change
+
+Two layers, neither of which needs a target.
+
+`tests/` is an offline suite written against the standard library's `unittest` alone - nothing to
+install, no network, and no payload leaving the machine. It pins what reading the code does not
+catch: that no payload and no tamper script carries an operator other than the separator under
+test, that a script declared for one shell answers for the other, that a rewrite leaves a command's
+arguments as they were given, that every grammar declares what the techniques ask it for, and that
+the word lists hold no repeat. Run it from the root with
+`python -m unittest discover -s tests -t .`.
+
+A sweep that finds nothing must not pass, so each one counts what it swept before it reads it -
+a suite that quietly stopped looking is the one failure none of the assertions below it would show.
+
+`--smoke-test` is the other layer, and imports every module in the tree, which catches a name that
+moved or a file that stopped parsing - neither of which the suite above would reach. Both run in
+`.github/workflows/builds.yml`, alongside the API's own start-up.

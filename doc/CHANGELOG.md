@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: An offline unit-test suite, run with `python -m unittest discover -s tests -t .`.
 * Added: New tamper script `luadebugescape.py`, reaching a Lua sink evaluated with a restricted environment through `debug.getregistry()._LOADED`.
 * Added: New `--eval=lua` support, for a sink evaluating Lua.
 * Added: New `--eval=perl` support, for a sink evaluating Perl.

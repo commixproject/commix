@@ -26,6 +26,9 @@ def smoke_test():
     passed = True
     file_paths = []
     for root, directories, filenames in os.walk(settings.COMMIX_ROOT_PATH):
+        # The suite is run on its own, by the test runner - this walk is for what commix imports.
+        if "tests" in root.split(os.sep):
+            continue
         file_paths.extend([os.path.abspath(os.path.join(root, i)) for i in filenames])
 
     for filename in file_paths:
