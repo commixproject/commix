@@ -69,6 +69,9 @@ def rewrite_command(command):
 
 # Hand the command over with its paths spelled as globs, alongside whatever else rewrites it.
 def tamper(payload):
+  # A target settled as Windows after this script was accepted: 'cmd.exe' globs nothing on its own.
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    return payload
   # The exploitation phase reaches here before there is a command of the user's own to rewrite.
   if settings.EXPLOITATION_PHASE and settings.USER_APPLIED_CMD:
     return checks.tamper_rewrite_user_command(payload, __tamper__)

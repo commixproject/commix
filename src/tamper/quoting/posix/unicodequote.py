@@ -38,6 +38,9 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 
 # Fold every single quote into the fullwidth apostrophe a later normalization step reads as one.
 def tamper(payload):
+  # A target settled as Windows after this script was accepted: 'cmd.exe' does not quote with the single quote this replaces.
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    return payload
   return payload.replace("'", "＇")
 
 # eof

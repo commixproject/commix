@@ -6431,6 +6431,26 @@ def announce_vulnerable_finding(filename, injection_type, technique, the_type, h
   oracle_hint = boolean_oracle_hint(technique)
   info_msg += (" (with " + oracle_hint + ")" if oracle_hint else "") + "."
   settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
+  """
+  Said where a shell answered the same parameter that an evaluated sink was just confirmed on.
+
+  The command substitution an evaluated payload reaches the system through - backticks, '$()' - is
+  read the same way by a shell, so a target that evaluates nothing at all still runs it and still
+  writes the file or waits the delay the technique was looking for. The finding is real either way;
+  which of the two it is, this cannot tell apart, and reported as code injection on its own it names
+  the wrong one for a sink that only ever reached '/bin/sh'.
+
+  Said only where nothing identified an interpreter: a sink that answered the language's own probe,
+  or complained in its own words, has evidence of evaluating for itself, and a shell reachable from
+  inside it is what an evaluated payload is expected to reach - not a reason to doubt the finding.
+  """
+  if menu.options.eval_sink and settings.IDENTIFIED_COMMAND_INJECTION and not settings.EVAL_OVER_SHELL_SAID \
+     and not (settings.IDENTIFIED_EVAL_PROBE or settings.IDENTIFIED_WARNINGS):
+    settings.EVAL_OVER_SHELL_SAID = True
+    warn_msg = "A command shell answered this parameter as well, and the payload's own command "
+    warn_msg += "substitution is read the same way by one - so this may be command injection rather "
+    warn_msg += "than code injection. Re-run without '--eval' to tell them apart."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
   announce_leftover_file(technique)
   decoded_payload = str(url_decode(payload)) if decode_payload else payload
   if not settings.LOAD_SESSION:

@@ -51,6 +51,9 @@ def _mixed_case(cmd):
 
 # Vary the case of the payload's letters, where the shell does not care about it.
 def tamper(payload):
+  # A target settled as Windows after this script was accepted: 'cmd.exe' has no command substitution to lower the case back through.
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    return payload
   mixed_case = _mixed_case(settings.USER_APPLIED_CMD)
   # An empty 'USER_APPLIED_CMD' is still "in" any string, so the replace below would otherwise
   # insert the obfuscated-empty-string construct between every character of the payload - a

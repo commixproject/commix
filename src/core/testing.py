@@ -29,7 +29,9 @@ def smoke_test():
         file_paths.extend([os.path.abspath(os.path.join(root, i)) for i in filenames])
 
     for filename in file_paths:
-      if os.path.splitext(filename)[1].lower() == ".py" and not "__init__.py" in filename:
+      # Only a file inside a package is importable by name; the regression suite under 'tests' is not.
+      if os.path.splitext(filename)[1].lower() == ".py" and not "__init__.py" in filename \
+         and os.path.isfile(os.path.join(os.path.dirname(filename), "__init__.py")):
         path = os.path.join(settings.COMMIX_ROOT_PATH, os.path.splitext(filename)[0])
         path = path.replace(settings.COMMIX_ROOT_PATH, '.')
         path = path.replace(os.sep, '.').lstrip('.')

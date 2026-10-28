@@ -35,6 +35,9 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 
 # Put empty single quotes between the characters, which the shell drops.
 def tamper(payload):
+  # A target settled as Windows after this script was accepted: 'cmd.exe' does not drop the quotes this interleaves.
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    return payload
   return checks.interleave_char_tamper(payload, obf_char)
 
 # eof

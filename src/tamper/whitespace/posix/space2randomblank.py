@@ -57,6 +57,9 @@ def _blank_for(part, start, end):
 # Every occurrence of the current separator, each replaced with its own independent pick - so a
 # signature over one consistent telltale substitute never sees the same one twice in a row.
 def tamper(payload):
+  # A target settled as Windows after this script was accepted: the blanks this draws from are not all separators to 'cmd.exe'.
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    return payload
   if len(settings.WHITESPACES) == 0:
     return payload
   current = settings.WHITESPACES[0]

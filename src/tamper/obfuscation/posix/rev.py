@@ -35,6 +35,9 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 
 # Hand the command over reversed, for the target to turn back with 'rev'.
 def tamper(payload):
+  # A target settled as Windows after this script was accepted: 'cmd.exe' has no command substitution to reverse the command back through.
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    return payload
   # An empty 'USER_APPLIED_CMD' is still "in" any string, so the replace below would otherwise
   # insert the reversed-empty-string construct between every character of the payload - a
   # verification litmus built after a finding confirms (and so after exploitation phase starts)

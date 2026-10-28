@@ -35,6 +35,9 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 
 # Put an empty '$@' between the characters, which the shell expands to nothing.
 def tamper(payload):
+  # A target settled as Windows after this script was accepted: 'cmd.exe' does not drop the characters this interleaves.
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    return payload
   return checks.interleave_char_tamper(payload, obf_char)
 
 # eof

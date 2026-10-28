@@ -1051,8 +1051,7 @@ def injection_process(url, check_parameter, http_request_method, filename, times
         settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
         try:
-          if not (len(menu.options.tech) == 1 and "e" in menu.options.tech):
-            url = command_injection_heuristic_basic(url, http_request_method, check_parameter, place)
+          url = command_injection_heuristic_basic(url, http_request_method, check_parameter, place)
 
           # Asked for out-of-band, so probe the channel either way: whether the target can reach it
           # at all, and over which client, is a separate question from whether it is injectable.

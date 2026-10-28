@@ -67,6 +67,9 @@ def _rewrite_ordering(payload):
 
 # Read every comparison the way 'test' does without its own operators' '-'.
 def tamper(payload):
+  # A target settled as Windows after this script was accepted: 'cmd.exe' has no 'test' expression to write the dash-free way.
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    return payload
   payload = _rewrite_ordering(payload)
   return payload.replace(" -eq ", " = ").replace(" -ne ", " != ")
 

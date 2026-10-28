@@ -477,7 +477,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "256"
+REVISION = "257"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -825,6 +825,10 @@ NULL_CONNECTION_MIN_LENGTH = 32768
 
 # One-time "reflected value(s) found" notice already shown this run.
 REFLECTIVE_VALUE_FOUND = False
+
+# Whether the caveat about an evaluated finding that a shell could equally explain has been given.
+EVAL_OVER_SHELL_SAID = False
+
 
 RESPONSE_DELAYS = False
 

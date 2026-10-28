@@ -35,6 +35,9 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 
 # Put a back slash between the characters, which the shell reads straight through.
 def tamper(payload):
+  # A target settled as Windows after this script was accepted: 'cmd.exe' does not drop the character this interleaves.
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    return payload
   return checks.interleave_char_tamper(payload, obf_char)
 
 # eof

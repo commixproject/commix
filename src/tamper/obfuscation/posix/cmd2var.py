@@ -70,6 +70,9 @@ def rewrite_command(command):
 
 # Hand the command's name over in pieces, alongside whatever else rewrites the command.
 def tamper(payload):
+  # A target settled as Windows after this script was accepted: 'cmd.exe' does not expand a variable written this way.
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    return payload
   # The exploitation phase reaches here before there is a command of the user's own to rewrite.
   if settings.EXPLOITATION_PHASE and settings.USER_APPLIED_CMD:
     return checks.tamper_rewrite_user_command(payload, __tamper__)
