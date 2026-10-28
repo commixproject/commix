@@ -2546,16 +2546,18 @@ def identified_os():
       warn_msg = "Identified a different operating system (i.e. '"
       warn_msg += target_os_label() + "') than the one you defined (i.e. '" + menu.options.os.title() + "')."
       settings.print_data_to_stdout(settings.print_bold_warning_msg(warn_msg))
-      message = "How do you want to proceed? [(C)ontinue/(s)kip] "
+      # Each letter names the operating system it settles on, and the capitalised one is the default.
+      message = "How do you want to proceed? [(K)eep the identified '" + target_os_label() + "'"
+      message += "/(f)orce the defined '" + menu.options.os.title() + "'/(q)uit] "
       while True:
-        proceed_option = (common.read_input(message, default="S", check_batch=True) or "S").strip().lower()
-        if proceed_option in ("c", "s", "q"):
+        proceed_option = (common.read_input(message, default="K", check_batch=True) or "K").strip().lower()
+        if proceed_option in ("k", "f", "q"):
           break
         common.invalid_option(proceed_option)
-      if proceed_option == "c":
+      if proceed_option == "f":
         settings.IGNORE_IDENTIFIED_TARGET_OS = True
         return settings.IGNORE_IDENTIFIED_TARGET_OS
-      elif proceed_option == "s":
+      elif proceed_option == "k":
         settings.IGNORE_IDENTIFIED_TARGET_OS = False
         return settings.IGNORE_IDENTIFIED_TARGET_OS
       elif proceed_option == "q":
@@ -3466,6 +3468,29 @@ plain space is what the payload was built with in the first place.
 """
 def current_whitespace():
   return settings.WHITESPACES[0] if len(settings.WHITESPACES) != 0 else settings.SINGLE_WHITESPACE
+
+# The separator the parameter at hand was proved on, for a rewrite choosing between forms by it.
+def current_separator():
+  boundary = settings.CONFIRMED_BOUNDARY.get(settings.CHECKING_PARAMETER)
+  return boundary[2] if boundary else None
+
+# The statements of an awk program that reads its arguments back from the end, bar the one that
+# prints the result. Every loop is a 'while': a 'for' header carries two ';' of its own, which no
+# newline between statements would take back. Each word is reversed and the words put back in
+# reverse order too, so a command and its arguments come out the way they went in - with 'OFS'
+# standing in for the space between them, a literal one being the whitespace substitution's to take.
+_AWK_REVERSE_STATEMENTS = ("BEGIN{j=ARGC-1", "while(j>0){i=length(ARGV[j])",
+                           "while(i>0){o=(o)(substr(ARGV[j],i,1))", "i--}",
+                           "if(j>1)o=(o)(OFS)", "j--}")
+
+# Whether awk reads a program whose statements are separated by this one.
+def awk_separator_usable(separator):
+  return separator in (";", settings.END_LINE.LF)
+
+# That program, written out with the separator the payload is already proving between its statements.
+def awk_reverse_program(separator, fold=False):
+  printed = "print(" + ("tolower(o)" if fold else "o") + ")}"
+  return "'" + separator.join(_AWK_REVERSE_STATEMENTS + (printed,)) + "'"
 
 """
 Record the boundary a technique just proved, and put its whitespace at the front of the list.

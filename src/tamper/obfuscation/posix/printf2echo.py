@@ -18,7 +18,11 @@ from src.core.controller import checks
 
 """
 About: Replaces the printf-based ASCII to Decimal `printf "%d" "'$char'"` with `echo -n $char | od -An -tuC | xargs`.
-Notes: This tamper script works against target(s) with a POSIX shell
+Notes: This tamper script works against target(s) with a POSIX shell.
+       The two pipes are the one thing this rewrite cannot be written without: 'od' reads a byte
+       from its standard input alone, and the only way to hand it one without a pipe is awk's
+       'sprintf', which carries the very name this script exists to avoid. On a target filtering a
+       pipe as well as 'printf', this one has nothing left to offer.
 """
 
 __tamper__ = "printf2echo"

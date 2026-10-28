@@ -18,8 +18,13 @@ from src.utils import settings
 from src.core.controller import checks
 
 """
-About: Replaces each character in a user-supplied OS command with a random case.
-Notes: This tamper script works against target(s) with a POSIX shell.
+About: Replaces each character in a user-supplied OS command's name with a random case.
+Notes: Only the name is varied, on either target: the fold that lowers it back on a POSIX shell
+       would lower an argument's own letters with it, and the command was asked for with the
+       letters it was asked for. On Windows nothing has to fold it back at all, 'cmd.exe'
+       resolving a name without regard to case.
+       The fold is read by 'awk', which takes the name as an argument - a pipe into 'tr' would be
+       an operator the payload is not proving.
        The character ranges are quoted with "'", which is the one quote neither an
        evaluated string nor the shell inside it is already using.
 """
@@ -27,12 +32,11 @@ Notes: This tamper script works against target(s) with a POSIX shell.
 __tamper__ = "randomcase"
 __priority__ = settings.PRIORITY.HIGH
 
-# Why this script cannot be applied to the target at hand, or nothing where it can.
-def dependencies():
-  return checks.tamper_dep_unix_only(__tamper__)
-
 if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
+
+# Folded back to lower case by awk, which takes the name as an argument rather than through a pipe.
+_FOLD = "'BEGIN{print(tolower(ARGV[1]))}'"
 
 """
 Every character's case chosen independently, so two letters - the shortest a real command ever
@@ -49,31 +53,53 @@ def _mixed_case(cmd):
     if candidate not in (candidate.lower(), candidate.upper()):
       return candidate
 
-# Vary the case of the payload's letters, where the shell does not care about it.
+# Vary the case of the command's letters, folded back where the shell cares which case it was given.
 def tamper(payload):
-  # A target settled as Windows after this script was accepted: 'cmd.exe' has no command substitution to lower the case back through.
+  # 'cmd.exe' reads the mixed case as the command it names, so it is handed over as it is - and only
+  # the name is varied, an argument being the command's own to read however it reads it.
   if settings.TARGET_OS == settings.OS.WINDOWS:
+    if settings.EXPLOITATION_PHASE and settings.USER_APPLIED_CMD:
+      source = payload if settings.USER_APPLIED_CMD in payload else settings.RAW_PAYLOAD
+      if settings.USER_APPLIED_CMD in source:
+        name, separator, arguments = settings.USER_APPLIED_CMD.partition(settings.SINGLE_WHITESPACE)
+        payload = source.replace(settings.USER_APPLIED_CMD, _mixed_case(name) + separator + arguments)
+        if len(settings.WHITESPACES) != 0:
+          payload = payload.replace(settings.SINGLE_WHITESPACE, settings.WHITESPACES[0])
     return payload
-  mixed_case = _mixed_case(settings.USER_APPLIED_CMD)
   # An empty 'USER_APPLIED_CMD' is still "in" any string, so the replace below would otherwise
   # insert the obfuscated-empty-string construct between every character of the payload - a
   # verification litmus built after a finding confirms (and so after exploitation phase starts)
   # has no command of its own to case-randomize at all.
   if settings.EXPLOITATION_PHASE and settings.USER_APPLIED_CMD:
-    if settings.TAMPER_SCRIPTS["rev"]:
-      if settings.USE_BACKTICKS:
-        mixed_case = mixed_case[::-1] + "|rev"
-      else:
-        mixed_case = "$(echo \"" + mixed_case[::-1] + "\"|rev)"
     source = payload if settings.USER_APPLIED_CMD in payload else settings.RAW_PAYLOAD
     if settings.USER_APPLIED_CMD in source:
-      if settings.USE_BACKTICKS:
-        random_case_cmd = "\\`echo " + mixed_case + "|tr '[A-Z]' '[a-z]'\\`"
+      # Only the name, since the fold would lower an argument's own letters along with it - and the
+      # command was asked for with the letters it was asked for.
+      name, separator, arguments = settings.USER_APPLIED_CMD.partition(settings.SINGLE_WHITESPACE)
+      mixed_case = _mixed_case(name)
+      # 'rev' runs before this one and this rebuilds what it wrote, so where both are in use the two
+      # rewrites are spelled out together rather than one wrapped around the other.
+      # The fold on its own is one statement and needs no operator at all. Reading the name back
+      # from its end as well needs one, so that form is chosen the way 'rev' chooses its own.
+      if not settings.TAMPER_SCRIPTS["rev"]:
+        program = _FOLD
       else:
-        random_case_cmd = "$(echo " + mixed_case + "|tr '[A-Z]' '[a-z]')"
+        mixed_case = mixed_case[::-1]
+        payload_separator = checks.current_separator()
+        if not checks.awk_separator_usable(payload_separator):
+          warn_msg = "Nothing reads a name back from its end without an operator of its own, and "
+          warn_msg += "none of the ones that do is the separator under test. Skipping tamper script."
+          settings.print_once(warn_msg)
+          return payload
+        program = checks.awk_reverse_program(payload_separator, fold=True)
+      folded = "awk" + settings.SINGLE_WHITESPACE + program + settings.SINGLE_WHITESPACE + mixed_case
+      if settings.USE_BACKTICKS:
+        random_case_cmd = "\\`" + folded + "\\`"
+      else:
+        random_case_cmd = settings.CMD_SUB_PREFIX + folded + settings.CMD_SUB_SUFFIX
       # Applied to the payload as handed over, not to the untouched original: the scripts run in
       # order, and reaching back past the ones before would throw their work away.
-      payload = source.replace(settings.USER_APPLIED_CMD, random_case_cmd)
+      payload = source.replace(settings.USER_APPLIED_CMD, random_case_cmd + separator + arguments)
       if len(settings.WHITESPACES) != 0:
         payload = payload.replace(settings.SINGLE_WHITESPACE, settings.WHITESPACES[0])
   return payload
