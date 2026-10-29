@@ -1350,8 +1350,8 @@ def false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timese
       cmd = previous_cmd
 
     output = []
-    # The verified value is always in 1-7 (see handler.py's randv1/randv2 ranges).
-    for ascii_char in range(1, 8):
+    # The verified value is in 1-7 (see handler.py's randv1/randv2 ranges), or a single digit under '--skip-calc'.
+    for ascii_char in (range(0, 10) if settings.SKIP_CALC else range(1, 8)):
       if show_dots and settings.VERBOSITY_LEVEL == 0:
         settings.print_data_to_stdout(".")
       if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:

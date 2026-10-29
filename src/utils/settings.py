@@ -316,7 +316,7 @@ def render_table(headers, rows):
   return END_LINE.LF.join(lines)
 
 # Print output of command execution
-def command_execution_output(label, shell):
+def command_execution_output(shell):
   print_data_to_stdout(print_retrieved_data("Execution output", shell))
   return shell
 
@@ -477,7 +477,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "266"
+REVISION = "267"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:

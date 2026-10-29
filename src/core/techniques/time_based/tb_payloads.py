@@ -14,7 +14,6 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import re
-import random
 from src.utils import settings
 from src.core.controller import checks
 
@@ -206,16 +205,14 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
       """
       Measured and delayed on in the one command, so neither of these has to chain anything.
 
-      A number read straight back, rather than the length of the marker: the shell has to run the
-      substitution for the two sides to match, which is what the length check proved too, and this
-      asks nothing of the target beyond its own 'echo'. Detection is where that matters - a shell
-      without 'awk' would otherwise answer nothing here, and answering nothing reads as not
-      injectable rather than as a tool that could not ask.
+      The length asked about is what the two sides are compared on. A marker compared against itself
+      answered the same way whatever length it was asked about, so the control question - the same
+      one asked about a length the output cannot have - waited just as long as the real one, and a
+      target running the payload was read as a slow target rather than an injectable one.
       """
-      marker = random.randint(10000, 99999)
       payload = (separator +
-                 "sleep $((" + str(timesec) + "*(" + str(marker) + "==" +
-                 _output_word("echo " + str(marker)) + ")))"
+                 "sleep $((" + str(timesec) + "*(" + str(output_length) + "==" +
+                 _output_word("echo " + str(len(TAG))) + ")))"
                  )
     elif separator == "&":
       # Backticks cannot nest, so the measurement is carried in a variable here - which '&' cannot

@@ -68,7 +68,7 @@ def _report_send_failure(send_result):
   elif send_result.get("shell"):
     info_msg = "The target returned output for the payload (usually the interpreter's own error):"
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-    settings.print_data_to_stdout(settings.command_execution_output(send_result["shell"]))
+    settings.command_execution_output(send_result["shell"])
 
 """
 Reports a bind shell that never came up, plus whatever the backgrounded send has to say about it.
@@ -239,7 +239,7 @@ def reverse_tcp_config_generic(execute_cmd, cmd, go_back, go_back_again, filenam
         settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
         shell = _execute_shell_launch(execute_cmd, cmd, filename, url)
         if shell:
-          settings.print_data_to_stdout(settings.command_execution_output(shell))
+          settings.command_execution_output(shell)
       else:
         info_msg = "Started reverse TCP handler on " + settings.LHOST + ":" + settings.LPORT + "."
         settings.print_data_to_stdout(settings.print_info_msg(info_msg))

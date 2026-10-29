@@ -284,7 +284,7 @@ def pseudo_terminal_shell_generic(url, filename, technique, no_result, execute_c
               # execute_cmd() itself is responsible for logging the executed command.
               shell = execute_cmd(cmd)
               if shell:
-                settings.command_execution_output("Execution output", shell)
+                settings.command_execution_output(shell)
               else:
                 err_msg = common.invalid_cmd_output(cmd)
                 settings.print_data_to_stdout(settings.print_error_msg(err_msg))
@@ -1271,10 +1271,8 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
                 # Check for false positive results - silent, since this is a per-technique gate on
                 # whether to accept/retry the finding, not the one false-positive check reported to
                 # the user; that is settings.CHECKING_PARAMETER's own, asked once at the very end.
-                if technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
-                  exec_time, output = injector.false_positive_check(separator, TAG, cmd, whitespace, prefix, suffix, timesec, http_request_method, url, vuln_parameter, randvcalc, interpreter, exec_time, url_time_response, false_positive_warning, technique, _false_positive_retry + 1, settings.FALSE_POSITIVE_RETRIES, silent=True)
-                else:
-                  exec_time, output = injector.false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, interpreter, exec_time, url_time_response, false_positive_warning, technique, _false_positive_retry + 1, settings.FALSE_POSITIVE_RETRIES, silent=True)
+                # The time-based technique has no output file of its own, and carries the empty one set above.
+                exec_time, output = injector.false_positive_check(separator, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, randvcalc, interpreter, exec_time, url_time_response, false_positive_warning, technique, _false_positive_retry + 1, settings.FALSE_POSITIVE_RETRIES, silent=True)
 
                 if checks.time_related_shell(exec_time, timesec):
                   if str(output) == str(randvcalc) and len(TAG) == output_length:
