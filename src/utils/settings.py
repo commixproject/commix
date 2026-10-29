@@ -477,7 +477,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "265"
+REVISION = "266"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1371,6 +1371,9 @@ OOB_HTTP_GRACE = 4
 # How many of a sweep's first combinations are polled for eagerly, instead of waiting out the
 # interval. The likeliest boundary comes first, so this usually ends the sweep after a few probes.
 OOB_EAGER_POLLS = 3
+# What the 'shellshock' module reports and stores its findings under, read back by the session the same way.
+SHELLSHOCK_TECHNIQUE = "shellshock module"
+
 SHELLSHOCK_OOB = False
 
 # Set where the module is confirmed but the target hands nothing back, so the output is read off the

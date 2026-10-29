@@ -99,7 +99,7 @@ def _oob_probe(url, testable_headers):
 
   channel = checks.init_oob_channel()
   if channel is None:
-    return None, None
+    return None, None, ""
   for transport in oob_payloads.transports():
     fired = []
     sent = {}
@@ -221,7 +221,7 @@ def shellshock_handler(url, http_request_method, filename):
 
   injection_type = "results-based command injection"
   # Not an injection technique like the others - it's the 'shellshock' module.
-  technique = "shellshock module"
+  technique = settings.SHELLSHOCK_TECHNIQUE
 
   try:
     # Resume everything at once and quit, like the core engine's LOAD_SESSION path.

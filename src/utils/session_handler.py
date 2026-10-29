@@ -360,7 +360,7 @@ def get_all_stored_shellshock(url, http_request_method):
       clause, url_params = url_match(url)
       query = ("SELECT http_header, payload FROM \"" + table + "\" WHERE " + clause + " AND "
                "technique = ? AND http_request_method = ?;")
-      cursor = conn.execute(query, url_params + ("shellshock injection technique", http_request_method))
+      cursor = conn.execute(query, url_params + (settings.SHELLSHOCK_TECHNIQUE, http_request_method))
       found = [(row[0], row[1]) for row in cursor.fetchall()]
     return found
   except Exception:
@@ -379,7 +379,7 @@ def has_stored_shellshock(url):
         return False
       clause, url_params = url_match(url)
       query = "SELECT 1 FROM \"" + table + "\" WHERE " + clause + " AND technique = ? LIMIT 1;"
-      cursor = conn.execute(query, url_params + ("shellshock injection technique",))
+      cursor = conn.execute(query, url_params + (settings.SHELLSHOCK_TECHNIQUE,))
       return cursor.fetchone() is not None
   except Exception:
     return False
