@@ -210,6 +210,21 @@ def show_http_error_codes():
 Masks sensitive data in the supplied message.
 """
 def mask_sensitive_data(err_msg):
+  """
+  What each option was given, masked wherever it turns up - not only where it follows the option's
+  own name. A value reaches a message through more than the command line: a stack trace quoting it,
+  a URL rebuilt around it, a path printed by something else.
+  """
+  for option in settings.SENSITIVE_VALUE_OPTIONS:
+    value = getattr(menu.options, option, None)
+    if not value or not isinstance(value, str) or len(value) < 3:
+      continue
+    err_msg = err_msg.replace(value, "<sanitized>")
+
+  # The home directory carries the account's own name, whoever printed the path.
+  err_msg = re.sub(r"(?i)([A-Za-z]:[\\/]+Users[\\/]+|[\\/]+home[\\/]+)([^\\/\s]+)",
+                   lambda match: match.group(1) + "<sanitized>", err_msg)
+
   for item in settings.SENSITIVE_OPTIONS:
     """
     The whole value goes, not the part of it before a hyphen.

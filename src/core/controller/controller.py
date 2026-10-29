@@ -56,7 +56,7 @@ def basic_payload_generator():
   marker3 = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
 
   suffix = ""
-  if settings.USE_BACKTICKS:
+  if checks.using_backticks():
     # 'expr' wants its operands as separate arguments - given one, it echoes the string back
     # instead of adding anything up.
     prefix = "expr "

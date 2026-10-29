@@ -410,7 +410,7 @@ def proof(transport, plus=PLUS):
   elif settings.SKIP_CALC:
     # Command substitution either way, so '--tamper=backticks' reaches here too.
     total = settings.CMD_SUB_PREFIX + "echo" + settings.SINGLE_WHITESPACE + token + settings.CMD_SUB_SUFFIX
-  elif settings.USE_BACKTICKS or settings.WAF_ENABLED:
+  elif checks.using_backticks() or settings.WAF_ENABLED:
     # Same fallback the classic technique uses, so '--tamper=backticks' reaches here too.
     total = (settings.CMD_SUB_PREFIX + "expr" + settings.SINGLE_WHITESPACE + str(first) +
              settings.SINGLE_WHITESPACE + plus + settings.SINGLE_WHITESPACE + str(second) +

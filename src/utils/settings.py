@@ -477,7 +477,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "260"
+REVISION = "261"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -615,6 +615,10 @@ USER_DEFINED_PYTHON_INTERPRETER = False
 # Feeds 'set /p' from the null device, so its no-newline echo trick gets EOF instead of blocking.
 CMD_NUL = "<nul"
 
+# The substitution that cannot hold another one - see checks.substitution_nests().
+BACKTICK_SUBSTITUTION = "`"
+# The one that can, to go back to where a script that chose otherwise turns out not to apply.
+NESTING_SUBSTITUTION = ("$(", ")")
 CMD_SUB_PREFIX = "$("
 CMD_SUB_SUFFIX = ")"
 
@@ -745,6 +749,16 @@ OUTPUT_FILE = OUTPUT_FILE_NAME + OUTPUT_FILE_EXT
 
 # Max Length for execution output.
 MAXLEN = 10000
+# How long an output is allowed to be said to be before the answer is disbelieved rather than
+# trusted - a bound on what is plausible, not on what is read. An oracle that answers yes to
+# everything would otherwise double its way up for as long as the arithmetic holds.
+MAX_INFERRED_LENGTH = 50 * 1024 * 1024
+
+# The factor the length search grows its bracket by before halving it back. Larger reaches a long
+# output in fewer steps, at the cost of a wider bracket to halve - and measured across the lengths
+# worth reading, four is where the two balance, saving several probes on a large output for at most
+# one more on the smallest.
+LENGTH_SEARCH_BASE = 4
 
 STDIN_PARSING = False
 
@@ -859,6 +873,17 @@ EXTRA_HTTP_HEADERS = False
 
 # Use the full printable ASCII range; bisection only depends on ordinal bounds.
 CHAR_POOL_SINGLE = list(range(32, 127))
+# The largest ordinal a byte can be. The pools below stop at printable ASCII, which is what output
+# mostly is - a byte above that is searched for only once the pool has been ruled out.
+HIGHEST_BYTE = 255
+
+# How a byte the page's own encoding cannot read is written down instead, so that it is still the
+# byte that was sent - and the error handler that writes it that way.
+UNREADABLE_BYTE_FORMAT = "\\x%02x"
+UNREADABLE_BYTE_HANDLER = "commix-keep-bytes"
+# The same thing read back: only a byte past ASCII is ever written out this way.
+UNREADABLE_BYTE_REGEX = r"\\x([89a-fA-F][0-9a-fA-F])"
+
 # Newline and tab are part of real command output, so they have to be recoverable too.
 CHAR_POOL_MULTI = [9, 10] + list(range(32, 127))
 
@@ -2065,6 +2090,10 @@ IGNORE_TAMPER_TRANSFORMATION = [
                   "cmd",
                   "%0d",
                   "PATH%%u*",
+                  # A quoted name is a command name rather than an assignment, and the locale would go unpinned.
+                  "LC_ALL",
+                  # A builtin, so there is no file of its own length for a glob to resolve it to.
+                  "export",
                   RANDOM_VAR_GENERATOR,
                   RANDOM_VAR_GENERATOR + "1",
                   RANDOM_VAR_GENERATOR + "2",
@@ -2180,8 +2209,6 @@ SKIP_CALC = False
 # Confirm the time-based technique with a plain, uncomputed delay - no '$(...)' or backtick at all -
 # for a target whose filter blocks command substitution outright but still lets a separator through.
 SKIP_SUBST = False
-
-USE_BACKTICKS = False
 
 METASPLOIT_ERROR_MSG =  "You need to have Metasploit installed. "
 METASPLOIT_ERROR_MSG += "Please ensure it is installed in the right path."
@@ -2451,9 +2478,36 @@ IDENTIFIED_EVAL_LANGUAGE = None
 
 # Options to explicitly mask in anonymous (unhandled exception) reports.
 # Everything that can carry a target's identity or a credential into a report meant for strangers.
-SENSITIVE_OPTIONS = ["--data", "-d", "--cookie", "-p", "--url", "-u", "-x", "--auth-cred", "-r", "-l",
+# The locale a payload measures its own output in.
+#
+# '${#var}' counts characters, and the retrieval beside it counts bytes - 'cut -c', 'tail -c' and
+# the ordinal that reads one back. A shell in a UTF-8 locale makes the two disagree on any output
+# that is not ASCII, so the length a run is given is short and the last bytes are never asked for.
+# Pinned where the separator under test can carry the assignment, which adds nothing new to filter.
+BYTE_LOCALE = "LC_ALL=C"
+
+# The same locale, exported - what a measurement taken by a command of its own ('expr length') needs, since an assignment the shell keeps to itself never reaches one.
+BYTE_LOCALE_EXPORTED = "export " + BYTE_LOCALE
+
+# What a crash report may not carry. Named twice over, because one pass is not enough.
+#
+# The values come first: whatever these options were given is masked wherever it turns up, not only
+# where it follows the option's own name - a credential read back inside a stack trace, a URL
+# rebuilt into a message, a path printed by something else all leak past a pattern written around
+# the command line. Named by the parser's own destination, so an alias cannot miss.
+SENSITIVE_VALUE_OPTIONS = ("url", "data", "cookie", "host", "referer", "header", "headers",
+                           "proxy", "proxy_cred", "proxy_file", "auth_cred", "auth_data",
+                           "auth_url", "auth_file", "oob_token", "csrf_token", "csrf_data",
+                           "csrf_url", "safe_url", "second_url", "reg_data")
+
+# And the command line itself, for a value that never reached an option - a typo, or a run that
+# died before the parser finished. Matched on the option as typed, aliases and all.
+SENSITIVE_OPTIONS = ["--data", "--data-raw", "-d", "--cookie", "-p", "--url", "-u", "-x",
+                     "--auth-cred", "--auth-creds", "--auth-data", "--auth-url", "--auth-file",
+                     "--proxy-cred", "--proxy-file", "--oob-token", "-r", "-l",
                      "--proxy", "--header", "-H", "--headers", "--load-cookies", "--live-cookies",
-                     "--csrf-token", "--host", "--referer"]
+                     "--csrf-token", "--csrf-data", "--csrf-url", "--reg-data",
+                     "--safe-url", "--second-url", "--host", "--referer"]
 
 CAPTCHA_DETECED = None
 

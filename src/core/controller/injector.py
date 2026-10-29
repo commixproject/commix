@@ -499,33 +499,15 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
 
       # Find the length of the output, by bracketing it and then halving the bracket.
       def _bisect_length():
-        lo = int(minlen) - 1
-        hi = None
-        # Doubling first, so the bracket is found among plausible lengths. Starting at '--maxlen'
-        # instead would let one late answer settle the search on the upper bound.
-        candidate = max(1, int(minlen))
-        while candidate < int(maxlen):
-          try:
-            if not _length_delayed_confirmed(candidate):
-              hi = candidate
-              break
-            lo = candidate
-            candidate = candidate * 2
-          except KeyboardInterrupt:
-            checks.handle_exploitation_interrupt(filename, url)
-        if hi is None:
-          hi = int(maxlen)
-        # A single value to find, nothing to distribute across threads - stays serial.
-        while hi - lo > 1:
-          try:
-            mid = (lo + hi) // 2
-            if _length_delayed_confirmed(mid):
-              lo = mid
-            else:
-              hi = mid
-          except KeyboardInterrupt:
-            checks.handle_exploitation_interrupt(filename, url)
-        return lo if lo >= int(minlen) else None
+        # Each question keeps the interrupt handling the rest of this search has, and the searching
+        # itself is the shared one - the same halving the ordinals are found with, over lengths.
+        def _asks(candidate):
+          while True:
+            try:
+              return _length_delayed_confirmed(candidate)
+            except KeyboardInterrupt:
+              checks.handle_exploitation_interrupt(filename, url)
+        return resolved_length(_asks, minlen)
 
       output_length = _bisect_length()
 
@@ -616,6 +598,21 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
   if length_suspect:
     warn_msg = "The detected output length may be unreliable due to connection instability. Consider re-running to confirm it."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
+  """
+  What the run was willing to read, applied to the reading - after the length has been settled and
+  confirmed, so what is announced is what will actually be read.
+
+  The length is found on its own now, so an output past that limit is known to be past it rather
+  than guessed at a bound: the first characters of a length said outright, instead of a shorter
+  output that reads like a whole one.
+  """
+  if found_chars is True and output_length is not None and int(output_length) > int(maxlen):
+    settings.INCOMPLETE_OUTPUT = True
+    warn_msg = "The output is " + str(int(output_length)) + " characters long, and this run reads "
+    warn_msg += str(int(maxlen)) + " of them. Re-run with a higher '--maxlen' to read the rest of it."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    output_length = int(maxlen)
 
   if _cached_length is None and found_chars is True and output_length > 1:
     info_msg = "Retrieved: " + str(output_length)
@@ -767,14 +764,40 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
           try:
             if _char_delayed(hi) and _char_delayed(hi):
               """
-              And ask something that cannot be true. A target answering late to everything agrees
-              to this shortcut for every position, and the equality check that follows agrees too,
-              being just as saturated - so the whole output resolves to the pool's last character.
-              A control that comes back delayed says the timing, not the byte, is doing the talking.
+              And ask something no byte can be. A target answering late to everything agrees to this
+              shortcut for every position, and the equality check that follows agrees too, being
+              just as saturated - so the whole output resolves to the pool's last character. A
+              control that comes back delayed says the timing, not the byte, is doing the talking.
+
+              One above the pool is no such control: the pool stops at the last printable character
+              and a byte is free to carry on past it, so a target reading one answers that question
+              honestly and used to be thrown away for it.
               """
-              if _char_delayed(hi + 1):
+              if _char_delayed(settings.HIGHEST_BYTE + 1):
                 return None, True
-              return hi, True
+              if not _char_delayed(hi + 1):
+                return hi, True
+              """
+              Above everything the pool holds, so the rest of the range a byte can be is asked about
+              too - the halving below only ever looks inside the pool, and the heuristics before it
+              only at characters already seen. Paid for by the positions that need it, and not at
+              all by a pool the user wrote out, where a byte outside it was not asked for.
+              """
+              if not checks.char_pool_expands():
+                return None, True
+              low_delayed, high_undelayed = hi + 1, settings.HIGHEST_BYTE + 1
+              while high_undelayed - low_delayed > 1:
+                try:
+                  mid = (low_delayed + high_undelayed) // 2
+                  if _char_delayed(mid):
+                    low_delayed = mid
+                  else:
+                    high_undelayed = mid
+                except KeyboardInterrupt:
+                  if threaded:
+                    raise
+                  checks.handle_exploitation_interrupt(filename, url)
+              return low_delayed, True
             break
           except KeyboardInterrupt:
             if threaded:
@@ -958,20 +981,20 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
 
         # The halving itself, over the ordinals the character can still be.
         def _bisect(local_timesec):
-          lo, hi = min(char_pool) - 1, max(char_pool)
-          while hi - lo > 1:
-            mid = (lo + hi) // 2
-            if _delayed(mid, "-le", local_timesec):
-              lo = mid
-            else:
-              hi = mid
-          return lo if lo >= min(char_pool) else None
+          return resolved_ordinal(lambda candidate: _delayed(candidate, "-le", local_timesec),
+                                  char_pool, expands=checks.char_pool_expands())
 
         # Whether an ordinal is the answer: it must hold, and the next one up must not.
+        #
+        # The halving asks whether the byte is at least some ordinal, so one above everything the
+        # pool holds answers yes to all of them and the search climbs to the pool's own last
+        # character. Nothing above it is ever asked about, so that answer would be taken for the
+        # byte's own - which is why the top of the pool is the one candidate checked from above as
+        # well, in the range a byte can still be rather than only the range the pool covers.
         def _boundary_holds(candidate, local_timesec):
           if not _delayed(candidate, "-le", local_timesec):
             return False
-          if candidate + 1 <= max(char_pool) and _delayed(candidate + 1, "-le", local_timesec):
+          if candidate + 1 <= settings.HIGHEST_BYTE and _delayed(candidate + 1, "-le", local_timesec):
             return False
           return True
 
@@ -1124,7 +1147,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
 
     check_end  = time.time()
     check_exec_time = int(check_end - check_start)
-    output = "".join(str(p) for p in output)
+    output = checks.decoded_byte_output("".join(str(p) for p in output))
 
     # Check for empty output.
     if output == (len(output) * settings.SINGLE_WHITESPACE):
@@ -1589,6 +1612,83 @@ def injection_test_results(response, TAG, randvcalc, technique, payload=None):
 """
 Command execution results.
 """
+def resolved_length(asks, minlen, confirmed=None, sanity=None):
+  """
+  How long the output is, found by growing a bracket until a length the output does not reach and
+  then halving it back - with 'asks' answering whether the output is at least the length it is given.
+
+  Nothing caps the growing but implausibility. Capped at what the run was willing to read instead,
+  the search had an upper bound nothing had answered for: an output exactly that long settled one
+  character short of itself, and one longer settled there too rather than being known to be longer.
+  What a run is willing to read is a limit on the reading, and is applied to that.
+
+  >>> [resolved_length(lambda _, n=n: _ <= n, 1) for n in (1, 3, 8, 100, 10000)]
+  [1, 3, 8, 100, 10000]
+  >>> resolved_length(lambda _: False, 1) is None
+  True
+  >>> resolved_length(lambda _: True, 1, sanity=64) is None
+  True
+  """
+  confirmed = confirmed or asks
+  sanity = int(sanity or settings.MAX_INFERRED_LENGTH)
+  lo, hi = int(minlen) - 1, None
+  candidate = max(1, int(minlen))
+  while candidate <= sanity:
+    if not confirmed(candidate):
+      hi = candidate
+      break
+    lo = candidate
+    candidate = candidate * settings.LENGTH_SEARCH_BASE
+  """
+  An answer of yes all the way up is not a very long output, it is an oracle agreeing with whatever
+  it is asked - so it is disbelieved rather than reported, the way a length past what could be read
+  is handed back as nothing at all instead of as the bound it ran into.
+  """
+  if hi is None:
+    return None
+  while hi - lo > 1:
+    mid = (lo + hi) // 2
+    if confirmed(mid):
+      lo = mid
+    else:
+      hi = mid
+  return lo if lo >= int(minlen) else None
+
+def resolved_ordinal(asks, char_pool, expands=True):
+  """
+  The ordinal of one byte, found by halving the range it can be in - with 'asks' answering whether
+  the byte is at least the ordinal it is given.
+
+  The halving is never asked about its own upper bound, so a byte that reaches the pool's last
+  character settles one below it, and so does a byte that carries on past the pool. That character
+  is asked about on its own, and where it holds and the pool is commix's own, the rest of the range
+  a byte can be is halved as well.
+
+  >>> pool = [9, 10] + list(range(32, 127))
+  >>> [resolved_ordinal(lambda _, b=b: _ <= b, pool) for b in (120, 125, 126, 127, 169, 195, 255)]
+  [120, 125, 126, 127, 169, 195, 255]
+  >>> resolved_ordinal(lambda _: _ <= 195, pool, expands=False)
+  126
+  >>> resolved_ordinal(lambda _: False, pool) is None
+  True
+  """
+  def _halve(lo, hi):
+    while hi - lo > 1:
+      mid = (lo + hi) // 2
+      if asks(mid):
+        lo = mid
+      else:
+        hi = mid
+    return lo
+
+  top = max(char_pool)
+  lo = _halve(min(char_pool) - 1, top)
+  if lo == top - 1 and asks(top):
+    lo = top
+    if expands and asks(top + 1) and not asks(settings.HIGHEST_BYTE + 1):
+      lo = _halve(top, settings.HIGHEST_BYTE + 1)
+  return lo if lo >= min(char_pool) else None
+
 def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, timesec):
 
   if technique == settings.INJECTION_TECHNIQUE.RESULTS_BASED or technique == settings.INJECTION_TECHNIQUE.TIME_BASED or technique == settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
@@ -1629,6 +1729,9 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
         shell = [backslash.replace(r"\/","/") for backslash in shell]
         # The output's own line breaks, back where they were.
         shell = [marked.replace(new_line, settings.END_LINE.LF) for marked in shell]
+        # And the bytes the page's own encoding could not read, back as the bytes the target sent -
+        # written out at the point the page was read rather than thrown away, so they are still here.
+        shell = [checks.decoded_byte_output(checks.restored_unreadable_bytes(kept)) for kept in shell]
       except UnicodeDecodeError:
         pass
       if settings.TARGET_OS == settings.OS.WINDOWS:
@@ -1668,6 +1771,8 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
       response = fetch_output_response(url, OUTPUT_TEXTFILE, timesec, technique)
       if response is not None:
         shell = checks.process_page_content(response, action="encode").rstrip().lstrip()
+        # The bytes the file's own encoding could not read, back as the bytes the target wrote.
+        shell = checks.decoded_byte_output(checks.restored_unreadable_bytes(shell))
         if settings.TARGET_OS == settings.OS.WINDOWS:
           shell = [newline.replace(settings.END_LINE.CR, "") for newline in shell]
           shell = [empty for empty in shell if empty]

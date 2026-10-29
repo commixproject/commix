@@ -63,7 +63,7 @@ def tamper(payload):
         reversed_cmd = "awk" + settings.SINGLE_WHITESPACE + checks.awk_reverse_program(separator) + settings.SINGLE_WHITESPACE + settings.USER_APPLIED_CMD[::-1]
       else:
         reversed_cmd = "echo" + settings.SINGLE_WHITESPACE + settings.USER_APPLIED_CMD[::-1] + "|rev"
-      if settings.USE_BACKTICKS:
+      if checks.using_backticks():
         rev_cmd = "\\`" + reversed_cmd + "\\`"
       else:
         rev_cmd = settings.CMD_SUB_PREFIX + reversed_cmd + settings.CMD_SUB_SUFFIX

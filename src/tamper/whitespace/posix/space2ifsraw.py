@@ -39,12 +39,22 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
 # Separate the payload's words with '$IFS$9' instead of a space.
-def tamper(payload):
+"""
+What this script settles before any payload is built, rather than when it first rewrites one.
+
+Called once while the scripts are being settled. 'tamper()' calls it too, so a choice that has to
+follow a target settled later - an OS, or a technique that has since been refused - still follows it.
+"""
+def declare():
   if settings.TARGET_OS != settings.OS.WINDOWS and len(settings.WHITESPACES) != 0:
     if settings.WHITESPACES[0] == settings.SINGLE_WHITESPACE:
       settings.WHITESPACES[0] = space2ifsraw
     elif space2ifsraw not in settings.WHITESPACES:
       settings.WHITESPACES.append(space2ifsraw)
+
+
+def tamper(payload):
+  declare()
   return payload
 
 # eof

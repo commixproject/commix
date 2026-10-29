@@ -35,7 +35,7 @@ def stage(separator, command="echo Hello", target_os=None, rev=False, whitespace
   settings.WHITESPACES = [whitespace or settings.SINGLE_WHITESPACE]
   settings.EXPLOITATION_PHASE = True
   settings.TIME_RELATED_ATTACK = True
-  settings.USE_BACKTICKS = False
+  settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = "$(", ")"
   settings.USER_APPLIED_CMD = command
   settings.CHECKING_PARAMETER = "P"
   settings.CONFIRMED_BOUNDARY = {"P": ("", "", separator, settings.WHITESPACES[0])}

@@ -74,6 +74,44 @@ class AwkProgram(unittest.TestCase):
     self.assertIn("tolower", checks.awk_reverse_program(";", fold=True))
     self.assertNotIn("tolower", checks.awk_reverse_program(";"))
 
+class SmallDecisions(unittest.TestCase):
+  """
+  Helpers a run leans on in passing. None of them reaches the network, and each one decides
+  something a later line reads back as fact.
+  """
+  def test_a_port_is_a_number_inside_the_range(self):
+    for port in ("1", "80", "8080", "65535"):
+      self.assertTrue(checks._validate_port(port), port)
+    for port in ("0", "65536", "-1", "", "abc", "80.5"):
+      self.assertFalse(checks._validate_port(port), port)
+
+  def test_a_uid_is_classified_by_the_range_it_falls_in(self):
+    self.assertEqual("root user", checks.classify_uid("0"))
+    for uid in ("1", "98"):
+      self.assertEqual("system user", checks.classify_uid(uid), uid)
+    for uid in ("100", "500", "1000"):
+      self.assertEqual("regular user", checks.classify_uid(uid), uid)
+    for uid in ("99", "60001", "65534"):
+      self.assertEqual("anonymous user", checks.classify_uid(uid), uid)
+    self.assertEqual("non-trusted user", checks.classify_uid("60002"))
+
+  def test_a_uid_past_the_last_range_is_not_classified(self):
+    self.assertEqual("", checks.classify_uid("65535"))
+
+  def test_a_uid_that_is_not_a_number_is_refused(self):
+    # Read off the target's own output, so it is not trusted to be a number.
+    self.assertRaises(ValueError, checks.classify_uid, "nobody")
+
+  def test_a_command_is_wrapped_so_its_output_comes_back(self):
+    was = (settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX)
+    try:
+      settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = "$(", ")"
+      wrapped = checks.add_command_substitution("id")
+      self.assertIn("id", wrapped)
+      self.assertIn(settings.CMD_SUB_PREFIX, wrapped)
+    finally:
+      settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = was
+
 class TamperDependencies(unittest.TestCase):
   """
   Why a script cannot be applied to the target at hand, or nothing where it can.

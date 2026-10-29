@@ -97,7 +97,7 @@ def tamper(payload):
         else:
           folded = "echo" + settings.SINGLE_WHITESPACE + mixed_case + "|rev|tr" + \
                    settings.SINGLE_WHITESPACE + "'[A-Z]'" + settings.SINGLE_WHITESPACE + "'[a-z]'"
-      if settings.USE_BACKTICKS:
+      if checks.using_backticks():
         random_case_cmd = "\\`" + folded + "\\`"
       else:
         random_case_cmd = settings.CMD_SUB_PREFIX + folded + settings.CMD_SUB_SUFFIX

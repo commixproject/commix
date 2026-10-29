@@ -255,7 +255,7 @@ what a run remembers is `session_handler.py`, and state bleeding from one target
 
 ## Checking a change
 
-Two layers, neither of which needs a target.
+Four layers, none of which needs a target.
 
 `tests/` is an offline suite written against the standard library's `unittest` alone - nothing to
 install, no network, and no payload leaving the machine. It pins what reading the code does not
@@ -268,6 +268,18 @@ the word lists hold no repeat. Run it from the root with
 A sweep that finds nothing must not pass, so each one counts what it swept before it reads it -
 a suite that quietly stopped looking is the one failure none of the assertions below it would show.
 
-`--smoke-test` is the other layer, and imports every module in the tree, which catches a name that
-moved or a file that stopped parsing - neither of which the suite above would reach. Both run in
-`.github/workflows/builds.yml`, alongside the API's own start-up.
+`--smoke-test` imports every module in the tree, which catches a name that moved or a file that
+stopped parsing - neither of which the suite above would reach - and then runs the examples each
+module's own docstrings carry, as doctests. An example that stops holding fails the smoke test.
+
+`pyflakes` is the layer before either: a name that moved, an import left behind, a variable read
+before it is set. None of those raises until the line is reached, and most of those lines are only
+reached against a target, so nothing else here would find them.
+
+`coverage` measures the first two together against two floors. The whole-tree one is dominated by
+the modules that only run against a target - the orchestration, the request layer - which no
+offline suite reaches, so on its own it would ratchet nothing; the second covers what a payload is
+built out of, where a change lands and where the suite can hold a real line. Both are floors to
+raise rather than targets to argue with.
+
+All four run in `.github/workflows/builds.yml`, alongside the API's own start-up.

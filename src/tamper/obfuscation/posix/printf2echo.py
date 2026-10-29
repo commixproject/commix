@@ -17,12 +17,15 @@ from src.utils import settings
 from src.core.controller import checks
 
 """
-About: Replaces the printf-based ASCII to Decimal `printf "%d" "'$char'"` with `echo -n $char | od -An -tuC | xargs`.
+About: Replaces the printf-based ASCII to Decimal `printf '%d' "'$char"` with `echo -n $char | od -An -tuC | xargs`.
 Notes: This tamper script works against target(s) with a POSIX shell.
        The two pipes are the one thing this rewrite cannot be written without: 'od' reads a byte
        from its standard input alone, and the only way to hand it one without a pipe is awk's
-       'sprintf', which carries the very name this script exists to avoid. On a target filtering a
-       pipe as well as 'printf', this one has nothing left to offer.
+       'sprintf', which carries the very name this script exists to avoid. So it is written only
+       where a pipe is the operator the payload is already proving - under anything else the pipes
+       would be operators of this script's own, and the payload would stop being the one test it is.
+       'od' counts a byte unsigned, which is what the reading it stands in for has to be brought
+       back to, so the arithmetic around that reading goes with it.
 """
 
 __tamper__ = "printf2echo"
@@ -37,17 +40,26 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 
 # Say with 'echo' what the payload said with 'printf'.
 def tamper(payload):
-  # The rewrite itself, for the one shape this project's payloads use printf in.
-  def printf_to_echo(payload):
-    if "printf" in payload:
-      space = checks.current_whitespace()
-      payload = payload.replace(settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "printf" + space + "'%d'" + space + "\"'$" + settings.RANDOM_VAR_GENERATOR + "2'\"" + settings.CMD_SUB_SUFFIX,
-                                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo" + space + "-n" + space + "$" + settings.RANDOM_VAR_GENERATOR + "2" + space + "|" + space + "od" + space + "-An" + space + "-tuC" + space + "|" + space + "xargs" + settings.CMD_SUB_SUFFIX
-                               )
+  # A target settled as Windows after this script was accepted: 'cmd.exe' has no 'od' to read with.
+  if settings.TARGET_OS == settings.OS.WINDOWS:
     return payload
-  if settings.TARGET_OS != settings.OS.WINDOWS:
-    return printf_to_echo(payload)
-  else:
+  # The byte is handed to 'od' down a pipe, so this is only writable where a pipe is what is proving.
+  if checks.current_separator() not in ("|", "||"):
     return payload
+  space = checks.current_whitespace()
+  prefix, suffix = checks.byte_ordinal_bounds()
+  # The reading is taken whole - from the text written around it rather than by looking for a
+  # closing bracket, which the byte's own expression carries plenty of.
+  while prefix in payload:
+    opened = payload.index(prefix)
+    closed = payload.find(suffix, opened + len(prefix))
+    if closed < 0:
+      break
+    byte = payload[opened + len(prefix):closed]
+    counted = (settings.CMD_SUB_PREFIX + "echo" + space + "-n" + space + "\"" + byte + "\"" + space +
+               "|" + space + "od" + space + "-An" + space + "-tuC" + space + "|" + space + "xargs" +
+               settings.CMD_SUB_SUFFIX)
+    payload = payload[:opened] + counted + payload[closed + len(suffix):]
+  return payload
 
 # eof

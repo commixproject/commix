@@ -393,7 +393,7 @@ def validate():
   # Check if defined "--threads" option.
   if menu.options.threads > 1:
     try:
-      import concurrent.futures
+      __import__("concurrent.futures")
       threads_supported = True
     except ImportError:
       threads_supported = False

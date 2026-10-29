@@ -33,11 +33,31 @@ def dependencies():
 if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
+"""
+The substitution this script writes, settled before any payload is built rather than when it first
+rewrites one.
+
+Settled then, the choice arrives one payload late: a builder reads it as it builds, so the first
+payload of every boundary is written with '$( )' and only the ones after it carry this script at
+all. 'tamper()' calls this too, for a target settled as Windows after the script was accepted.
+"""
+def declare():
+  if not menu.options.interpreter and not settings.TARGET_OS == settings.OS.WINDOWS:
+    settings.CMD_SUB_PREFIX = settings.CMD_SUB_SUFFIX = settings.BACKTICK_SUBSTITUTION
+  elif checks.using_backticks():
+    """
+    A target settled as Windows, or an interpreter taken on, after this script was accepted.
+
+    'cmd.exe' has no backtick and an interpreter is handed its program rather than a shell line, so
+    what was chosen here no longer applies - and left standing it would go on being written into
+    every payload built from here on, by a script that has itself stopped rewriting anything.
+    """
+    settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = settings.NESTING_SUBSTITUTION
+
 # Substitute the command through backticks rather than through '$()'.
 def tamper(payload):
+  declare()
   if not menu.options.interpreter and not settings.TARGET_OS == settings.OS.WINDOWS:
-    settings.USE_BACKTICKS = True
-    settings.CMD_SUB_PREFIX = settings.CMD_SUB_SUFFIX = "`"
     whitespace = checks.current_whitespace()
     payload = payload.replace("${#" + settings.RANDOM_VAR_GENERATOR + "}",
                               settings.CMD_SUB_PREFIX + "expr" + whitespace + "length" + whitespace + "\"$" + settings.RANDOM_VAR_GENERATOR + "\"" + settings.CMD_SUB_SUFFIX

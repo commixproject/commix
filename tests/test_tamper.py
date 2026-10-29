@@ -14,6 +14,7 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import os
+import inspect
 import importlib
 import unittest
 
@@ -25,9 +26,16 @@ SMUGGLES_BY_DESIGN = {
                   # 'rev' reads from a pipe, and a filter stripping '|' has stripped '&' before it.
                   "rev": ("&", "&&"),
                   "randomcase": ("&", "&&"),
-                  # 'od' reads a byte from its standard input alone; see the script's own notes.
-                  "printf2echo": SEPARATORS,
 }
+
+"""
+A payload that measures its own output, as an extraction one does - the sweep's plain command gives
+a script that only rewrites a measurement nothing to rewrite, and it passes by never acting.
+"""
+def _measuring_payload(separator, target_os):
+  stage(separator, target_os=target_os)
+  from src.core.techniques.time_based import tb_payloads
+  return tb_payloads.get_length(separator, "id", 1, 5, "GET") or stage(separator, target_os=target_os)
 
 class TamperSeparators(unittest.TestCase):
   # 'xforwardedfor' rewrites the request's headers, not the payload, so it takes no payload at all.
@@ -61,15 +69,73 @@ class TamperSeparators(unittest.TestCase):
         if not hasattr(module, "tamper"):
           continue
         for target_os in (settings.OS.UNIX, settings.OS.WINDOWS):
-          payload = stage(separator, target_os=target_os)
+          # A script the loader would refuse cannot smuggle anything, so it is not asked to: this
+          # mirrors 'tamper_scripts()', which drops one whose dependencies() answers with a reason.
+          settings.TARGET_OS = target_os
+          if hasattr(module, "dependencies") and module.dependencies():
+            continue
+          # Two shapes, because a script that rewrites one leaves the other untouched: a plain
+          # command, and one that measures its own output the way an extraction payload does.
+          for payload in (stage(separator, target_os=target_os),
+                          _measuring_payload(separator, target_os)):
+            try:
+              tampered = module.tamper(payload)
+            except Exception:
+              continue
+            before, after = separators_in(payload), separators_in(tampered)
+            added = [_ for _ in after if after[_] > before[_] and _ != separator]
+            if added and separator not in SMUGGLES_BY_DESIGN.get(name, ()):
+              offenders.append(name + " adds " + ",".join(added) + " under " + repr(separator))
+    self.assertEqual([], offenders)
+
+  def test_the_pinned_locale_is_still_an_assignment_after_a_rewrite(self):
+    """
+    Broken up between its letters the name is quoted, and a quoted name is a command name - so the locale a measuring payload pins would go unpinned.
+    """
+    offenders = []
+    for separator in (";", settings.END_LINE.LF):
+      for name, module in tamper_modules().items():
+        if not hasattr(module, "tamper"):
+          continue
+        settings.TARGET_OS = settings.OS.UNIX
+        if hasattr(module, "dependencies") and module.dependencies():
+          continue
+        payload = _measuring_payload(separator, settings.OS.UNIX)
+        self.assertIn(settings.BYTE_LOCALE_EXPORTED, payload, "nothing to pin under " + repr(separator))
+        try:
+          tampered = module.tamper(payload)
+        except Exception:
+          continue
+        if settings.BYTE_LOCALE not in tampered or "export" not in tampered:
+          offenders.append(name + " under " + repr(separator))
+    self.assertEqual([], offenders)
+
+  def test_the_exported_pin_survives_a_rewrite_too(self):
+    """
+    Through backticks the counting is a command of its own, so the pin is exported - and 'export' is a builtin no glob of the same length can stand in for.
+    """
+    from src.core.techniques.time_based import tb_payloads
+    offenders = []
+    try:
+      for separator in ("&", "&&"):
+        for name, module in tamper_modules().items():
+          if not hasattr(module, "tamper"):
+            continue
+          stage(separator)
+          settings.CMD_SUB_PREFIX = settings.CMD_SUB_SUFFIX = settings.BACKTICK_SUBSTITUTION
+          settings.TARGET_OS = settings.OS.UNIX
+          if hasattr(module, "dependencies") and module.dependencies():
+            continue
+          payload = tb_payloads.get_length(separator, "id", 4, 5, "GET")
+          self.assertIn(settings.BYTE_LOCALE_EXPORTED, payload, "nothing to pin under " + repr(separator))
           try:
             tampered = module.tamper(payload)
           except Exception:
             continue
-          before, after = separators_in(payload), separators_in(tampered)
-          added = [_ for _ in after if after[_] > before[_] and _ != separator]
-          if added and separator not in SMUGGLES_BY_DESIGN.get(name, ()):
-            offenders.append(name + " adds " + ",".join(added) + " under " + repr(separator))
+          if settings.BYTE_LOCALE not in tampered or "export" not in tampered:
+            offenders.append(name + " under " + repr(separator))
+    finally:
+      settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = settings.NESTING_SUBSTITUTION
     self.assertEqual([], offenders)
 
   def test_fold_alone_carries_no_operator_at_all(self):
@@ -146,7 +212,15 @@ class TamperOperatingSystem(unittest.TestCase):
         with open(os.path.join(directory, filename)) as script:
           source = script.read()
         start = source.find("def tamper(payload)")
-        if start != -1 and "TARGET_OS" not in source[start:]:
+        if start == -1:
+          continue
+        guarded = "TARGET_OS" in source[start:]
+        # A script that settles something before any payload is built keeps the guard in 'declare()'
+        # and calls it from 'tamper()', so the check is still made every time one is rewritten.
+        if not guarded and "declare()" in source[start:]:
+          declared = source.find("def declare():")
+          guarded = declared != -1 and "TARGET_OS" in source[declared:start]
+        if not guarded:
           unguarded.append(filename)
     self.assertEqual([], unguarded)
 
@@ -201,3 +275,214 @@ class TamperFormSelection(unittest.TestCase):
 
 if __name__ == "__main__":
   unittest.main()
+
+class Printf2Echo(unittest.TestCase):
+  """
+  The script stands in for the reading an ordinal is taken with, so it has to go on matching the
+  shape that reading is written in - it once went on being selected, and accepted, long after the
+  payloads had stopped carrying the text it looked for, rewriting nothing at all.
+  """
+  TARGETS = (("boolean_based.bb_payloads", lambda m, s: m.get_char(s, "id", 2, 126)),
+             ("tempfile_based.tfb_payloads", lambda m, s: m.get_char(s, "/tmp/f", 2, 126, 5, "GET")))
+
+  def _payloads(self, separator):
+    stage(separator)
+    for name, build in self.TARGETS:
+      module = importlib.import_module("src.core.techniques." + name)
+      settings.EXPLOITATION_PHASE = True
+      payload = build(module, separator)
+      if payload:
+        yield name, payload
+
+  def _script(self):
+    from src.tamper.obfuscation.posix import printf2echo
+    return printf2echo
+
+  def test_it_rewrites_the_reading_it_is_named_for(self):
+    rewritten = 0
+    for separator in ("|", "||"):
+      for name, payload in self._payloads(separator):
+        if "printf '%d'" not in payload:
+          continue
+        tampered = self._script().tamper(payload)
+        self.assertNotEqual(payload, tampered, name + " under " + repr(separator))
+        self.assertNotIn("printf '%d'", tampered)
+        self.assertIn("od -An -tuC", tampered)
+        rewritten += 1
+    self.assertGreater(rewritten, 0, "nothing left for this script to rewrite - it is inert")
+
+  def test_it_is_not_written_where_a_pipe_is_not_what_is_proving(self):
+    for separator in (";", "&", "&&", settings.END_LINE.LF):
+      for name, payload in self._payloads(separator):
+        self.assertEqual(payload, self._script().tamper(payload),
+                         name + " rewritten under " + repr(separator))
+
+  def test_the_reading_it_leaves_behind_is_unsigned(self):
+    """
+    'od -tuC' answers 195 where the reading it replaces answers -61 on a shell signing its bytes,
+    so the arithmetic bringing that answer back into range goes out with the reading it corrected.
+    """
+    for separator in ("|", "||"):
+      for name, payload in self._payloads(separator):
+        tampered = self._script().tamper(payload)
+        if tampered == payload:
+          continue
+        self.assertNotIn("% " + str(settings.HIGHEST_BYTE + 1), tampered)
+
+# eof
+
+class DeclaredBeforeTheFirstPayload(unittest.TestCase):
+  """
+  A script that changes how a payload is put together, rather than how it reads, has to say so
+  before any payload is built. Said when it first rewrites one, the choice arrives a payload late:
+  the builders read it as they build, so the first payload of every boundary is put together the
+  old way - and that is the payload a target is first judged on.
+  """
+  SETTLES = ("space2htab", "space2plus", "space2vtab", "space2ifs", "space2ifsraw",
+             "multiplespaces", "backticks")
+
+  def _module(self, name):
+    modules = tamper_modules()
+    self.assertIn(name, modules, "no tamper script named " + name)
+    return modules[name]
+
+  def test_every_construction_script_declares(self):
+    for name in self.SETTLES:
+      self.assertTrue(hasattr(self._module(name), "declare"),
+                      name + " settles its choice only when it first rewrites a payload")
+
+  def test_declaring_is_what_rewriting_would_have_done(self):
+    """
+    The rewrite still calls it, so a choice that has to follow a target settled later still does.
+    """
+    for name in self.SETTLES:
+      module = self._module(name)
+      source = inspect.getsource(module.tamper)
+      self.assertIn("declare()", source, name + " no longer calls its own declaration")
+
+  def test_the_choice_lands_before_a_payload_is_built(self):
+    from src.tamper.whitespace.generic import space2htab
+    settings.TARGET_OS = settings.OS.UNIX
+    settings.WHITESPACES = [settings.SINGLE_WHITESPACE]
+    space2htab.declare()
+    self.assertNotEqual([settings.SINGLE_WHITESPACE], settings.WHITESPACES,
+                        "declaring left the whitespace as it was")
+    settings.WHITESPACES = [settings.SINGLE_WHITESPACE]
+
+  def test_settling_the_scripts_is_what_declares_them(self):
+    """
+    The hook itself: a script selected for this run has its choice settled while the scripts are
+    being settled, with no payload rewritten in between.
+    """
+    from src.core.controller import checks
+    from src.core.parse import cmdline as menu
+    was = (menu.options.tamper, list(settings.WHITESPACES), list(settings.MULTI_ENCODED_PAYLOAD))
+    try:
+      settings.TARGET_OS = settings.OS.UNIX
+      settings.WHITESPACES = [settings.SINGLE_WHITESPACE]
+      settings.MULTI_ENCODED_PAYLOAD = []
+      menu.options.tamper = "space2htab"
+      checks.tamper_scripts(stored_tamper_scripts=True)
+      self.assertNotEqual([settings.SINGLE_WHITESPACE], settings.WHITESPACES,
+                          "settling the scripts did not settle what they choose")
+    finally:
+      menu.options.tamper, settings.WHITESPACES, settings.MULTI_ENCODED_PAYLOAD = (
+        was[0], was[1], was[2])
+
+  def test_the_substitution_lands_before_a_payload_is_built(self):
+    from src.tamper.quoting.posix import backticks
+    was = (settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX)
+    try:
+      settings.TARGET_OS = settings.OS.UNIX
+      from src.core.parse import cmdline as menu
+      menu.options.interpreter = None
+      settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = "$(", ")"
+      backticks.declare()
+      self.assertEqual(settings.BACKTICK_SUBSTITUTION, settings.CMD_SUB_PREFIX)
+    finally:
+      settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = was
+
+# eof
+
+class BackticksStayExpressible(unittest.TestCase):
+  """
+  A backtick cannot hold another backtick, so a payload written with them has to carry none nested.
+  Where the substitution would have to nest, the builders keep a form that does not - and the parts
+  that are written as '$( )' outright stay that way, which is what keeps them correct rather than an
+  oversight: converted, 'printf %s "$(cmd)" | ...' would be a backtick inside a backtick.
+  """
+
+  def _payloads(self):
+    from src.core.techniques.time_based import tb_payloads
+    from src.core.techniques.boolean_based import bb_payloads
+    from src.core.techniques.tempfile_based import tfb_payloads
+    for separator in SEPARATORS:
+      stage(separator)
+      settings.EXPLOITATION_PHASE = True
+      settings.TIME_RELATED_ATTACK = True
+      yield "tb.get_char", separator, tb_payloads.get_char(separator, "id", 2, 126, 5, "GET")
+      yield "tb.get_length", separator, tb_payloads.get_length(separator, "id", 1, 5, "GET")
+      yield "tfb.get_char", separator, tfb_payloads.get_char(separator, "/tmp/f", 2, 126, 5, "GET")
+      settings.TIME_RELATED_ATTACK = False
+      yield "bb.get_char", separator, bb_payloads.get_char(separator, "id", 2, 126)
+
+  @unittest.skipUnless(os.path.exists("/bin/sh"), "needs a POSIX shell")
+  def test_a_payload_answers_the_same_whichever_substitution_is_written(self):
+    """
+    Counting backticks cannot tell nesting from adjacency - '`a``b`' and '`a`b``' read alike - so
+    the payload is asked instead. A backtick holding another answers nothing rather than erroring,
+    which is exactly the failure a textual check would miss.
+    """
+    import subprocess
+    from src.core.techniques.boolean_based import bb_payloads
+    from src.tamper.quoting.posix import backticks
+    from src.core.parse import cmdline as menu
+    was = (settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX)
+    environment = {"LC_ALL": "C", "PATH": os.environ.get("PATH", "/bin:/usr/bin")}
+
+    def answered(payload):
+      # The pipe forms read the output down the pipe, so the payload stands on its own.
+      body = payload.lstrip(settings.PIPE_SEPARATOR)
+      done = subprocess.run(["/bin/sh", "-c", "/bin/echo up" + settings.PIPE_SEPARATOR + body],
+                            env=environment, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+      return done.returncode
+
+    try:
+      menu.options.interpreter = None
+      settings.TARGET_OS = settings.OS.UNIX
+      for candidate, expected in ((126, 0), (196, 1)):
+        stage(settings.PIPE_SEPARATOR)
+        settings.EXPLOITATION_PHASE = True
+        settings.BOOLEAN_PRINTED_STATE = False
+        settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = settings.NESTING_SUBSTITUTION
+        nesting = bb_payloads.get_char(settings.PIPE_SEPARATOR, "printf 'x\\303y'", 2, candidate)
+        backticks.declare()
+        quoted = bb_payloads.get_char(settings.PIPE_SEPARATOR, "printf 'x\\303y'", 2, candidate)
+        self.assertEqual(expected, answered(nesting), "the '$( )' form answered wrongly")
+        self.assertEqual(answered(nesting), answered(quoted),
+                         "the two substitutions disagree at " + str(candidate))
+    finally:
+      settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = was
+
+  def test_the_choice_is_withdrawn_where_it_stops_applying(self):
+    """
+    The comment in the script anticipated this: a target settled as Windows after the script was
+    accepted would otherwise keep writing a backtick 'cmd.exe' has no meaning for.
+    """
+    from src.tamper.quoting.posix import backticks
+    from src.core.parse import cmdline as menu
+    was = (settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX, settings.TARGET_OS)
+    try:
+      menu.options.interpreter = None
+      settings.TARGET_OS = settings.OS.UNIX
+      backticks.declare()
+      self.assertEqual(settings.BACKTICK_SUBSTITUTION, settings.CMD_SUB_PREFIX)
+      settings.TARGET_OS = settings.OS.WINDOWS
+      backticks.declare()
+      self.assertEqual(settings.NESTING_SUBSTITUTION,
+                       (settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX),
+                       "the backtick was left standing for a target that has none")
+    finally:
+      settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX, settings.TARGET_OS = was
+
+# eof

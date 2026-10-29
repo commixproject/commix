@@ -33,13 +33,23 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 _pristine = {}
 
 # Pad the payload's own spaces out into runs of them.
-def tamper(payload):
+"""
+What this script settles before any payload is built, rather than when it first rewrites one.
+
+Called once while the scripts are being settled. 'tamper()' calls it too, so a choice that has to
+follow a target settled later - an OS, or a technique that has since been refused - still follows it.
+"""
+def declare():
   for index, whitespace in enumerate(settings.WHITESPACES):
     base = _pristine.setdefault(index, whitespace)
     # A list rebuilt for another target, or one another script has changed, replaces what was kept.
     if not whitespace.startswith(base):
       base = _pristine[index] = whitespace
     settings.WHITESPACES[index] = base * random.randrange(3, 8)
+
+
+def tamper(payload):
+  declare()
   return payload
 
 # eof

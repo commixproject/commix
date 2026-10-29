@@ -47,7 +47,7 @@ def decision(separator, TAG, randv1, randv2):
                 settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX  + TAG
                 )
     else:
-      if settings.USE_BACKTICKS or settings.WAF_ENABLED:
+      if checks.using_backticks() or settings.WAF_ENABLED:
         math_calc = settings.CMD_SUB_PREFIX + "expr " + str(randv1) + " + " + str(randv2) + settings.CMD_SUB_SUFFIX
       else:
         # Arithmetic expansion is the substitution pair with one more set of parentheses inside it.

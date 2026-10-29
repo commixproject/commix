@@ -18,7 +18,6 @@ import random
 import string
 import time
 
-from src.thirdparty.colorama import Style
 from src.utils import settings
 from src.core.parse import cmdline as menu
 

@@ -61,7 +61,7 @@ def file_write(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec,
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     shell = fire(cmd)
   else:
-    if settings.USE_BACKTICKS:
+    if checks.using_backticks():
       cmd = checks.remove_command_substitution(cmd)
     shell = fire(cmd)
   if settings.TIME_RELATED_ATTACK:

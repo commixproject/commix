@@ -18,7 +18,6 @@ import glob
 import importlib
 import unittest
 
-from src.utils import settings
 
 # What every evaluated language has to say about itself for the techniques to speak it.
 REQUIRED = ("NAME", "LABEL", "TERMINATOR", "PROBE", "PROBE_REGEX",

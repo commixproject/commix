@@ -60,7 +60,7 @@ def system_information(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, 
   if target_os:
     if settings.TARGET_OS != settings.OS.WINDOWS:
       cmd = settings.DISTRO_INFO
-      if not settings.TIME_RELATED_ATTACK and settings.USE_BACKTICKS:
+      if not settings.TIME_RELATED_ATTACK and checks.using_backticks():
         cmd = checks.remove_command_substitution(cmd)
       checks.print_enumenation().fetching_part("distribution", technique)
       distro_name, distro_fresh = execute_cmd(cmd)
@@ -99,7 +99,7 @@ def check_current_user_privs(separator, maxlen, TAG, cmd, prefix, suffix, whites
     cmd = settings.IS_ADMIN
   else:
     cmd = settings.IS_ROOT
-    if settings.USE_BACKTICKS:
+    if checks.using_backticks():
       cmd = checks.remove_command_substitution(cmd)
   """
   Undo the padding the Windows interpreter payload writes around its output, and only that.

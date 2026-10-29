@@ -56,14 +56,11 @@ try:
     import readline
     if getattr(readline, '__doc__', '') is not None and 'libedit' in getattr(readline, '__doc__', ''):
       import gnureadline as readline
-    from readline import *
   else:
     import readline
-    from readline import *
 except ImportError:
   try:
     import pyreadline as readline
-    from pyreadline import *
   except ImportError:
     settings.READLINE_ERROR = True
 
@@ -1380,6 +1377,35 @@ def heuristic_charset(page):
   except Exception:
     return None
 
+"""
+A byte the page's own encoding cannot read, written down as the escape that spells it out.
+
+Thrown away instead, every unreadable byte comes back as the one replacement character, and output
+read off a page stops being the bytes the target sent - 'caf\xc3\xa9' and 'caf\xff\xfe' arrive
+as the same two characters, and neither is recoverable. Written out, the byte is still there.
+"""
+def _keep_unreadable_bytes(error):
+  kept = "".join(settings.UNREADABLE_BYTE_FORMAT % _ for _ in bytearray(error.object[error.start:error.end]))
+  return (kept, error.end)
+
+codecs.register_error(settings.UNREADABLE_BYTE_HANDLER, _keep_unreadable_bytes)
+
+"""
+The bytes an unreadable escape stands for, back as themselves.
+
+Only a byte past ASCII is ever written out that way, so the text a target meant to send is left
+alone - an escape it printed itself spells a character the page could read perfectly well.
+
+>>> restored_unreadable_bytes("caf\\xc3\\xa9")
+'caf\xc3\xa9'
+>>> restored_unreadable_bytes("plain \\x41 text")
+'plain \\x41 text'
+"""
+def restored_unreadable_bytes(text):
+  if not isinstance(text, str) or "\\x" not in text:
+    return text
+  return re.sub(settings.UNREADABLE_BYTE_REGEX, lambda _: chr(int(_.group(1), 16)), text)
+
 def decode_page_body(body, response=None, percent_decode=True, entity_decode=True):
   """
   A page already read from its response, as text: decompressed if it was compressed, and read in
@@ -1440,12 +1466,20 @@ def decode_page_body(body, response=None, percent_decode=True, entity_decode=Tru
 
   if page_encoding:
     settings.DEFAULT_PAGE_ENCODING = page_encoding
+  """
+  Each encoding is tried as it stands, and only what none of them can read falls back on writing the
+  byte out. Read with a replacement character instead, the first encoding never fails - so the one
+  after it was never reached, and a page it could have read was taken in the wrong one regardless.
+  """
   for codec in (page_encoding or settings.DEFAULT_PAGE_ENCODING or settings.DEFAULT_CODEC, settings.DEFAULT_CODEC):
     try:
-      return body.decode(codec, errors="replace")
+      return body.decode(codec)
     except (UnicodeDecodeError, LookupError, TypeError):
       continue
-  return ""
+  try:
+    return body.decode(settings.DEFAULT_CODEC, errors=settings.UNREADABLE_BYTE_HANDLER)
+  except (LookupError, TypeError):
+    return ""
 
 """
 The page with everything that is not its text taken out: scripts, styles, comments and the tags
@@ -1583,7 +1617,7 @@ def process_page_content(response, action):
       if action == "encode" and isinstance(page, str):
         return page.encode(codec, errors="replace")
       else:
-        return page.decode(codec, errors="replace")
+        return page.decode(codec)
     except (UnicodeEncodeError, UnicodeDecodeError) as err:
       err_msg = "The " + str(err).split(":")[0] + ". "
     except (LookupError, TypeError) as err:
@@ -1591,6 +1625,17 @@ def process_page_content(response, action):
     if codec == settings.DEFAULT_CODEC:
       error_occurred = True
       break
+
+  """
+  A page none of the encodings could read is still the target's own bytes, so they are written out
+  rather than given up on - the same last resort the body read for its text falls back on. Read with
+  a replacement character instead, what a command printed stopped being what the target sent.
+  """
+  if isinstance(page, bytes):
+    try:
+      return page.decode(settings.DEFAULT_CODEC, errors=settings.UNREADABLE_BYTE_HANDLER)
+    except (LookupError, TypeError):
+      pass
 
   # If there was an error, advise the user
   if error_occurred:
@@ -2860,7 +2905,7 @@ def third_party_dependencies():
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
 
   try:
-    import sqlite3
+    __import__("sqlite3")
   except ImportError:
     err_msg = settings.APPLICATION + " requires 'sqlite3' third-party library "
     err_msg += "to store previous injection points and commands. "
@@ -2868,18 +2913,18 @@ def third_party_dependencies():
     raise SystemExit(settings.EXIT_FAILURE)
 
   try:
-    import readline
+    __import__("readline")
   except (ImportError, AttributeError):
     if settings.IS_WINDOWS:
       try:
-        import pyreadline
+        __import__("pyreadline")
       except ImportError:
         err_msg = "TAB completion and history support features require "
         err_msg += "the 'pyreadline' (third-party) library."
         settings.print_data_to_stdout(settings.print_error_msg(err_msg))
     elif settings.PLATFORM == "posix":
       try:
-        import gnureadline
+        __import__("gnureadline")
       except ImportError:
         err_msg = "TAB completion and history support features require "
         err_msg += "the 'gnureadline' (third-party) library."
@@ -3483,12 +3528,145 @@ _AWK_REVERSE_STATEMENTS = ("BEGIN{j=ARGC-1", "while(j>0){i=length(ARGV[j])",
                            "while(i>0){o=(o)(substr(ARGV[j],i,1))", "i--}",
                            "if(j>1)o=(o)(OFS)", "j--}")
 
-# Whether awk reads a program whose statements are separated by this one.
+def decoded_byte_output(value):
+  """
+  Output that was read a byte at a time, given back as the text the target printed.
+
+  Each byte arrives as a character of its own ordinal, which is a single-byte reading - so a target
+  speaking UTF-8 hands back the two characters its one accented character is written with. Reading
+  those bytes as UTF-8 returns the character. Nothing else is: text that was never UTF-8 does not
+  survive the round trip, and is handed back exactly as it came.
+
+  >>> decoded_byte_output("caf\xc3\xa9")
+  'caf\xe9'
+  >>> decoded_byte_output("plain ascii")
+  'plain ascii'
+  >>> decoded_byte_output("caf\xe9")
+  'caf\xe9'
+  """
+  try:
+    decoded = value.encode("latin-1").decode("utf-8")
+  except (UnicodeEncodeError, UnicodeDecodeError, AttributeError):
+    return value
+  return decoded if decoded != value else value
+
+def char_pool_expands():
+  """
+  Whether a byte found to sit above the pool is then looked for in the rest of the range.
+
+  The pool the search runs over is the printable characters, which is what output is made of - a
+  byte above it is reached by asking for more, and that is worth the questions while the pool is
+  commix's own. A pool the user wrote out is a statement about this output: a byte outside it is
+  outside what was asked for, and is left unresolved rather than searched for at a cost the user
+  did not ask to pay.
+  """
+  return not menu.options.charset
+
+def substitution_nests():
+  """
+  Whether a command substitution can hold another one.
+
+  '$( )' can; backticks cannot, not without escaping every inner pair, which is a quote more than
+  the payload is proving. The separators that chain on nothing - '&' and '&&' - say what the others
+  say with two commands by putting one substitution inside another, so they are only written where
+  the substitution in use allows it.
+
+  Read off the substitution itself rather than kept alongside it: the two would otherwise be two
+  answers to one question, and a run that set only one of them would skip the nesting form while
+  still writing '$( )', which nests perfectly well.
+
+  >>> substitution_nests()
+  True
+  """
+  return settings.CMD_SUB_PREFIX != settings.BACKTICK_SUBSTITUTION
+
+def using_backticks():
+  """
+  Whether the substitution in use is the backtick one - the same question substitution_nests()
+  asks, put the way the callers that escape or strip a substitution need to hear it.
+
+  >>> using_backticks()
+  False
+  """
+  return not substitution_nests()
+
+def byte_ordinal(byte_expression):
+  """
+  The ordinal of a single byte, as a number the search can rely on being between 0 and 255.
+
+  A byte comes back through 'printf', which hands it over as a plain char - signed on most builds,
+  so bash answers -61 for the same byte dash answers 195 for. Either answer lands back in range
+  once the span is added on, and the one that was already right is left where it is.
+
+  >>> byte_ordinal("${X}").startswith("$((")
+  True
+  >>> "256" in byte_ordinal("${X}")
+  True
+  >>> "|" in byte_ordinal("${X}")
+  False
+  """
+  prefix, suffix = byte_ordinal_bounds()
+  return prefix + byte_expression + suffix
+
+def byte_ordinal_term(byte_expression):
+  """
+  The same reading, written to go inside an arithmetic expansion that is already open.
+
+  An arithmetic expansion holding another one is not parsed alike everywhere - a dash of the age
+  shipped with older distributions stops at the first '))' and calls the rest a syntax error, which
+  a payload cannot be told apart from a target that simply did not answer. Opened once and the
+  reading put in as a term of it, there is nothing nested to disagree over.
+
+  >>> byte_ordinal_term("${X}").startswith("(")
+  True
+  >>> "$((" in byte_ordinal_term("${X}")
+  False
+  """
+  prefix, suffix = byte_ordinal_bounds()
+  # The bounds, less the expansion they open and close - what is left is the term itself, with the
+  # padding that only ever sat either side of it taken off too.
+  opened = prefix[len("$(("):].lstrip()
+  closed = suffix[:-len("))")].rstrip()
+  return opened + byte_expression + closed
+
+def byte_ordinal_bounds():
+  """
+  What byte_ordinal() writes around a byte, for a rewrite that has to find the reading again and
+  put its own in place of it - taken from here rather than spelled out twice and left to drift.
+
+  >>> "".join(byte_ordinal_bounds()) in byte_ordinal("")
+  True
+  """
+  span = str(settings.HIGHEST_BYTE + 1)
+  return ("$(( ( $(" + settings.BYTE_LOCALE + " printf '%d' \"'",
+          "\") + " + span + " ) % " + span + " ))")
+
 def awk_separator_usable(separator):
+  """
+  Whether awk reads a program whose statements are separated by this one.
+
+  >>> awk_separator_usable(";")
+  True
+  >>> awk_separator_usable(settings.END_LINE.LF)
+  True
+  >>> [awk_separator_usable(_) for _ in ("&", "&&", "|", "", None)]
+  [False, False, False, False, False]
+  """
   return separator in (";", settings.END_LINE.LF)
 
-# That program, written out with the separator the payload is already proving between its statements.
 def awk_reverse_program(separator, fold=False):
+  """
+  That program, written out with the separator the payload is already proving between its statements.
+
+  >>> "|" in awk_reverse_program(";")
+  False
+  >>> ";" in awk_reverse_program(settings.END_LINE.LF)
+  False
+  >>> "tolower" in awk_reverse_program(";", fold=True)
+  True
+  >>> "tolower" in awk_reverse_program(";")
+  False
+  """
   printed = "print(" + ("tolower(o)" if fold else "o") + ")}"
   return "'" + separator.join(_AWK_REVERSE_STATEMENTS + (printed,)) + "'"
 
@@ -3820,6 +3998,16 @@ def tamper_scripts(stored_tamper_scripts):
         settings.print_once(warn_msg)
         if script in settings.MULTI_ENCODED_PAYLOAD:
           settings.MULTI_ENCODED_PAYLOAD.remove(script)
+      elif hasattr(module, "declare"):
+        """
+        A script that changes how a payload is put together rather than how it reads says so now,
+        while the scripts are being settled - not when it first rewrites something.
+
+        Said then, the choice arrives one payload late: the builders read it as they build, so the
+        first payload of every boundary is put together the old way and only the ones after it
+        carry the script at all. Which is the one payload a target is first judged on.
+        """
+        module.declare()
 
     # Respect each tamper script's declared execution tier; offer to auto-sort conflicting --tamper order.
     current_order = [script for script in settings.MULTI_ENCODED_PAYLOAD if script in priorities]
@@ -3918,7 +4106,6 @@ def other_symbols(payload):
   # Check for (multiple) backticks (instead of "$()") for command substitution on the generated payloads.
   if payload.count("`") >= 2 and settings.TARGET_OS != settings.OS.WINDOWS:
     _enable_tamper_script('backticks')
-    settings.USE_BACKTICKS = True
 
   # Check for caret symbol
   if payload.count("^") >= 10:

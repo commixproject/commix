@@ -93,7 +93,7 @@ def _bisect(channel, question, low, high):
 """
 How many bytes the command's output is.
 
-Bracketed by doubling first, rather than bisecting the whole of '--maxlen' outright: a short output
+Bracketed by growing a span first, rather than bisecting the whole of '--maxlen' outright: a short output
 is then found in about as many questions as its own length takes to double past, not in however many
 the ceiling itself would need, and what the search costs reads as the answer's own size instead of a
 constant no output's length would ever explain.
@@ -111,17 +111,30 @@ def output_length(channel, cmd, ceiling=None, payloads=None):
       settings.print_data_to_stdout(".")
     return asked
   low, high = 0, 1
-  while high < ceiling:
+  """
+  Nothing caps the growing but implausibility - what this run is willing to read is a limit on the
+  reading, and is applied to that below. Capped here instead, the search had an upper bound nothing
+  had answered for: an output exactly that long settled one character short of itself.
+  """
+  sanity = settings.MAX_INFERRED_LENGTH
+  while high <= sanity:
     answer = _ask(channel, question(high))
     if answer is None:
       return ""
     if not answer:
       break
     low = high
-    high *= 2
+    high *= settings.LENGTH_SEARCH_BASE
   else:
-    high = ceiling
+    # Yes all the way up is an oracle agreeing with whatever it is asked, not a very long output.
+    return ""
   length = _bisect(channel, question, low, high)
+  if length and length > ceiling:
+    settings.INCOMPLETE_OUTPUT = True
+    warn_msg = "The output is " + str(length) + " characters long, and this run reads "
+    warn_msg += str(ceiling) + " of them. Re-run with a higher '--maxlen' to read the rest of it."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    length = ceiling
   if length and settings.VERBOSITY_LEVEL == 0:
     settings.print_data_to_stdout(" (done)")
   if length and length > 1:
@@ -141,10 +154,12 @@ def _byte_at(channel, cmd, position, payloads=None):
   question = lambda candidate: payloads.get_char(channel.separator, cmd, position, candidate, operator="-le")
   char_pool = sorted(set(checks.generate_char_pool(position)))
   low, high = char_pool[0], char_pool[-1]
-  # A pool with nothing missing between its ends is its own range: every answer inside it is one of
-  # its members, so the range is halved directly and the result needs no confirming.
+  # A pool with nothing missing between its ends is its own range, so it is halved directly rather
+  # than by index. The answer is still asked for by name: what the halving cannot tell apart is a
+  # byte inside the pool from one above it, and that is true of a pool with no gaps as much as any.
   if high - low + 1 == len(char_pool):
-    return _bisect(channel, question, low, high)
+    candidate = _bisect(channel, question, low, high)
+    return _confirmed(channel, cmd, position, payloads, candidate, high)
   # Otherwise the gaps would be halved away too, which costs more questions than the pool has
   # characters. The members themselves are halved instead - log2 of their number rather than of the
   # span they are spread over - and one more question confirms the character found is the output's
@@ -157,7 +172,33 @@ def _byte_at(channel, cmd, position, payloads=None):
   # The byte is not one of the pool's members, so it sits in one of the gaps the halving above
   # skipped over. Found the long way rather than given up on: a charset is a statement about what
   # the output is mostly made of, and a character it did not account for is still worth reading.
-  return _bisect(channel, question, low, high)
+  candidate = _bisect(channel, question, low, high)
+  return _confirmed(channel, cmd, position, payloads, candidate, high)
+
+"""
+The answer, once it has been asked for by name rather than by range.
+
+The halving asks whether the byte is at least some ordinal, so a byte above everything the pool
+holds answers yes to all of them and the search climbs to the pool's own last character - which is
+a wrong answer wearing the shape of a right one. Confirming it costs one question, and where it
+fails the byte is looked for in the range it can still be: output is mostly ASCII, which is why the
+pool stops there, but a byte that is not is worth reading rather than reporting as a '~'.
+"""
+def _confirmed(channel, cmd, position, payloads, candidate, pool_high):
+  if candidate is None:
+    return None
+  exact = lambda value: payloads.get_char(channel.separator, cmd, position, value, operator="-eq")
+  if _ask(channel, exact(candidate)):
+    return candidate
+  # Only the pool's own last character can be standing in for something above it, and only a pool
+  # of commix's own is widened to go looking: a byte outside one the user wrote out was not asked for.
+  if candidate != pool_high or not checks.char_pool_expands():
+    return None
+  question = lambda value: payloads.get_char(channel.separator, cmd, position, value, operator="-le")
+  above = _bisect(channel, question, pool_high + 1, settings.HIGHEST_BYTE)
+  if above is not None and _ask(channel, exact(above)):
+    return above
+  return None
 
 """
 The command's output, one byte at a time, each found by bisecting its ordinal.
@@ -199,7 +240,7 @@ def retrieve(channel, cmd, length=None, payloads=None):
       if position not in resolved:
         break
       out += settings.UNRESOLVED_CHAR if ascii_char is None else chr(ascii_char)
-    return out
+    return checks.decoded_byte_output(out)
 
   # Rendered the way the time-related techniques render theirs, and for the same reasons: a byte not
   # asked for yet is "_", one that could not be read is marked, a character that cannot be shown as
