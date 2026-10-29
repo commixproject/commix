@@ -3590,6 +3590,33 @@ def using_backticks():
   """
   return not substitution_nests()
 
+def windows_output_text(cmd):
+  """
+  A command's output as one line, with the whitespace the shell ends it on taken off.
+
+  Trimmed at the end alone: '.trim()' takes the leading whitespace with it, which is the output's
+  own and is kept everywhere else - a POSIX payload removes a single trailing space and no more.
+
+  >>> windows_output_text("ver").endswith(".TrimEnd()")
+  True
+  >>> ".trim()" in windows_output_text("ver")
+  False
+  """
+  return "([string](cmd /c " + cmd + ")).TrimEnd()"
+
+def windows_output_bytes(text):
+  """
+  The bytes a PowerShell string is written in, which is what every ordinal a search asks about is.
+
+  '[char]' answers the code point instead, and the pool a byte is searched in stops at 255 - so a
+  character past Latin-1 reads as one no byte can be, and the position is thrown away as if the
+  target had answered late to everything.
+
+  >>> windows_output_bytes("$x").startswith("([Text.Encoding]::UTF8.GetBytes(")
+  True
+  """
+  return "([Text.Encoding]::UTF8.GetBytes(" + text + "))"
+
 def byte_ordinal(byte_expression):
   """
   The ordinal of a single byte, as a number the search can rely on being between 0 and 255.

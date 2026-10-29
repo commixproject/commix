@@ -62,7 +62,8 @@ def windows_transform_cmd(cmd, technique, interpreter):
   elif technique == settings.INJECTION_TECHNIQUE.TIME_BASED:
     # 'write', not 'write-host': the value is read back off the payload's own standard output, and
     # only the newer PowerShell writes what the latter prints there at all.
-    cmd = "powershell.exe -InputFormat none write ([string](cmd /c " + cmd + ")).trim().length"
+    cmd = ("powershell.exe -InputFormat none write " +
+           checks.windows_output_bytes(checks.windows_output_text(cmd)) + ".length")
   # The tempfile-based payloads wrap the command themselves, in the one PowerShell they already
   # start - wrapping it here as well would cost a second process per probe, and the timing
   # measurement pays for every one of them.
