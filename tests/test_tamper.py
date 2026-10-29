@@ -299,17 +299,19 @@ class Printf2Echo(unittest.TestCase):
     return printf2echo
 
   def test_it_rewrites_the_reading_it_is_named_for(self):
-    rewritten = 0
+    """
+    Put to the script directly: no builder writes this reading under a pipe any more, where every technique reads a byte with 'od' already.
+    """
+    from src.core.controller import checks
     for separator in ("|", "||"):
-      for name, payload in self._payloads(separator):
-        if "printf '%d'" not in payload:
-          continue
-        tampered = self._script().tamper(payload)
-        self.assertNotEqual(payload, tampered, name + " under " + repr(separator))
-        self.assertNotIn("printf '%d'", tampered)
-        self.assertIn("od -An -tuC", tampered)
-        rewritten += 1
-    self.assertGreater(rewritten, 0, "nothing left for this script to rewrite - it is inert")
+      stage(separator)
+      settings.EXPLOITATION_PHASE = True
+      payload = separator + "[ 126 -gt " + checks.byte_ordinal("${" + settings.RANDOM_VAR_GENERATOR + "}") + " ]"
+      self.assertIn("printf '%d'", payload)
+      tampered = self._script().tamper(payload)
+      self.assertNotEqual(payload, tampered, "under " + repr(separator))
+      self.assertNotIn("printf '%d'", tampered)
+      self.assertIn("od -An -tuC", tampered)
 
   def test_it_is_not_written_where_a_pipe_is_not_what_is_proving(self):
     for separator in (";", "&", "&&", settings.END_LINE.LF):

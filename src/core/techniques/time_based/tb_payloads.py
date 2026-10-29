@@ -321,7 +321,9 @@ def condition_check(separator, condition, timesec, http_request_method):
               "[ " + condition + " ]" + "&&" +
               "sleep " + str(timesec)
               )
-  elif separator in ("&", "&&", ""):
+  # Not the empty separator: with nothing to chain on, what this builds hands the test to 'sleep'
+  # as arguments, which errors and never delays - an answer the caller cannot tell from "false".
+  elif separator in ("&", "&&"):
     payload = ("&" +
               "sleep 0" + separator +
               "[ " + condition + " ]" + separator +
