@@ -477,7 +477,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "270"
+REVISION = "271"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -876,6 +876,8 @@ CHAR_POOL_SINGLE = list(range(32, 127))
 # The largest ordinal a byte can be. The pools below stop at printable ASCII, which is what output
 # mostly is - a byte above that is searched for only once the pool has been ruled out.
 HIGHEST_BYTE = 255
+# The smallest, for a byte that sits under the pool's first character the same way.
+LOWEST_BYTE = 0
 
 # How a byte the page's own encoding cannot read is written down instead, so that it is still the
 # byte that was sent - and the error handler that writes it that way.

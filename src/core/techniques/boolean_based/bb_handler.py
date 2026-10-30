@@ -159,7 +159,7 @@ def _byte_at(channel, cmd, position, payloads=None):
   # byte inside the pool from one above it, and that is true of a pool with no gaps as much as any.
   if high - low + 1 == len(char_pool):
     candidate = _bisect(channel, question, low, high)
-    return _confirmed(channel, cmd, position, payloads, candidate, high)
+    return _confirmed(channel, cmd, position, payloads, candidate, low, high)
   # Otherwise the gaps would be halved away too, which costs more questions than the pool has
   # characters. The members themselves are halved instead - log2 of their number rather than of the
   # span they are spread over - and one more question confirms the character found is the output's
@@ -173,7 +173,7 @@ def _byte_at(channel, cmd, position, payloads=None):
   # skipped over. Found the long way rather than given up on: a charset is a statement about what
   # the output is mostly made of, and a character it did not account for is still worth reading.
   candidate = _bisect(channel, question, low, high)
-  return _confirmed(channel, cmd, position, payloads, candidate, high)
+  return _confirmed(channel, cmd, position, payloads, candidate, low, high)
 
 """
 The answer, once it has been asked for by name rather than by range.
@@ -183,18 +183,27 @@ holds answers yes to all of them and the search climbs to the pool's own last ch
 a wrong answer wearing the shape of a right one. Confirming it costs one question, and where it
 fails the byte is looked for in the range it can still be: output is mostly ASCII, which is why the
 pool stops there, but a byte that is not is worth reading rather than reporting as a '~'.
+
+A byte under the pool's first character is the same answer from the other end: it answers no to
+every member, so the halving settles on nothing at all rather than on a character stood in for.
 """
-def _confirmed(channel, cmd, position, payloads, candidate, pool_high):
-  if candidate is None:
-    return None
+def _confirmed(channel, cmd, position, payloads, candidate, pool_low, pool_high):
   exact = lambda value: payloads.get_char(channel.separator, cmd, position, value, operator="-eq")
+  question = lambda value: payloads.get_char(channel.separator, cmd, position, value, operator="-le")
+  # Nothing the pool holds was answered yes to, so the byte sits below the first of them.
+  if candidate is None:
+    if pool_low <= settings.LOWEST_BYTE or not checks.char_pool_expands():
+      return None
+    below = _bisect(channel, question, settings.LOWEST_BYTE, pool_low - 1)
+    if below is not None and _ask(channel, exact(below)):
+      return below
+    return None
   if _ask(channel, exact(candidate)):
     return candidate
   # Only the pool's own last character can be standing in for something above it, and only a pool
   # of commix's own is widened to go looking: a byte outside one the user wrote out was not asked for.
   if candidate != pool_high or not checks.char_pool_expands():
     return None
-  question = lambda value: payloads.get_char(channel.separator, cmd, position, value, operator="-le")
   above = _bisect(channel, question, pool_high + 1, settings.HIGHEST_BYTE)
   if above is not None and _ask(channel, exact(above)):
     return above
