@@ -39,10 +39,7 @@ def exploitation(url, timesec, filename, http_request_method, url_time_response,
   tmp_path = ""
   if url_time_response >= settings.SLOW_TARGET_RESPONSE:
     settings.RESPONSE_DELAYS = True
-    go_back = False
     while True:
-      if go_back is True:
-        return False
       message = "High response delays make time-related techniques unreliable. "
       message += "How do you want to proceed? [(C)ontinue/(s)kip] "
       proceed_option = common.read_input(message, default="C", check_batch=True)

@@ -53,11 +53,8 @@ Back off when the target answers as if it has had enough of us, and creep back o
 A time-related technique measures the very delay this changes, so it is left alone while one runs.
 """
 def adapt_delay(blocked):
-  if settings.ADAPTIVE_DELAY_FROZEN:
-    return
   if settings.TIME_RELATED_ATTACK:
-    # Freezing here, rather than skipping, keeps the baseline and the measurements comparable.
-    settings.ADAPTIVE_DELAY_FROZEN = True
+    # Left alone only while one runs, so its baseline and its measurements stay comparable.
     return
 
   if blocked:

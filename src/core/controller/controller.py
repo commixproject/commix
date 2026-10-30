@@ -1562,15 +1562,14 @@ def data_checks(url, http_request_method, filename, timesec):
   settings.CUSTOM_HEADER_INJECTION = False
 
   init_cookie_injection_status()
+  # Neither sweep reports back, so both are run rather than one gating the other.
   if settings.USER_DEFINED_POST_DATA and not settings.IGNORE_USER_DEFINED_POST_DATA:
-    if post_request(url, http_request_method, filename, timesec) is None:
-      if not settings.SKIP_NON_CUSTOM_PARAMS:
-        get_request(url, http_request_method, filename, timesec)
+    post_request(url, http_request_method, filename, timesec)
+    if not settings.SKIP_NON_CUSTOM_PARAMS:
+      get_request(url, http_request_method, filename, timesec)
   else:
-    if get_request(url, http_request_method, filename, timesec) is None:
-      if settings.USER_DEFINED_POST_DATA:
-        if not settings.SKIP_NON_CUSTOM_PARAMS:
-          post_request(url, http_request_method, filename, timesec) 
+    # The POST body is either absent or not the one under test, so only the URL is swept.
+    get_request(url, http_request_method, filename, timesec)
 
 """
 Perform checks over cookie values.
