@@ -415,7 +415,6 @@ Returns the default injection level if no stored data is found.
 """
 def applied_levels(url, http_request_method):
   level = settings.DEFAULT_INJECTION_LEVEL
-  http_header = None
   try:
     with _session_connection() as conn:
       table = table_name(url) + "_ip"
@@ -423,14 +422,19 @@ def applied_levels(url, http_request_method):
         clause, url_params = url_match(url)
         query = "SELECT http_header, is_vulnerable FROM \"" + table + "\" WHERE " + clause + " AND http_request_method = ?;"
         cursor = conn.execute(query, url_params + (http_request_method,)).fetchall()
+        # The highest any stored point was reached at, since testing there covers the ones below it.
         for session in cursor:
           http_header = session[0]
-          level = int(session[1])
-    if http_header:
-      if http_header == settings.COOKIE.lower():
-        level = settings.COOKIE_INJECTION_LEVEL
-      else:
-        level = settings.HTTP_HEADER_INJECTION_LEVEL
+          if http_header:
+            if http_header == settings.COOKIE.lower():
+              stored_level = settings.COOKIE_INJECTION_LEVEL
+            else:
+              stored_level = settings.HTTP_HEADER_INJECTION_LEVEL
+          elif str(session[1]).isdigit():
+            stored_level = int(session[1])
+          else:
+            stored_level = settings.DEFAULT_INJECTION_LEVEL
+          level = max(level, stored_level)
     return level
   except Exception:
     settings.LOAD_SESSION = None

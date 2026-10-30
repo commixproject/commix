@@ -114,8 +114,14 @@ def _challenge(execute_cmd, technique):
   marker = "".join(random.choice(string.ascii_uppercase) for _ in range(6))
   # Bracketed by a marker, so the answer cannot be mistaken for a number occurring anywhere else.
   cmd = "echo " + marker + "$((" + str(first) + "+" + str(second) + "))" + marker
+  needle = marker + expected + marker
   if settings.TARGET_OS == settings.OS.WINDOWS:
-    cmd = "set /a " + str(first) + "+" + str(second)
+    if settings.PS_ENABLED:
+      cmd = "powershell.exe -InputFormat none write ('" + marker + "'+(" + str(first) + "+" + str(second) + ")+'" + marker + "')"
+    else:
+      # 'set /a' writes the sum on its own, so there is nothing here to bracket it with.
+      cmd = "set /a " + str(first) + "+" + str(second)
+      needle = expected
 
   started = settings.TOTAL_OF_REQUESTS
   elapsed = time.time()
@@ -126,7 +132,7 @@ def _challenge(execute_cmd, technique):
   elapsed = time.time() - elapsed
   answer = "".join(str(_) for _ in answer) if answer else ""
 
-  carried = expected in answer
+  carried = needle in answer
   lines = ["The target must work out " + str(first) + " + " + str(second) + " = " + expected + ", drawn at random after the scan started.",
            "(the product is in no page, cache or reflection - only something that executes could return it.)",
            "sent: " + cmd,
