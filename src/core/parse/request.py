@@ -23,7 +23,6 @@ from src.utils import settings
 from src.thirdparty.odict import OrderedDict
 from src.core.controller import checks
 from src.thirdparty.six.moves import urllib as _urllib
-from src.thirdparty.flatten_json.flatten_json import unflatten_list
 
 """
 Extract a single header's value from a raw "Name: value" line, or None if it's a different header.
@@ -189,7 +188,7 @@ def _parse_request(request, request_file):
   if re.search(settings.JSON_RECOGNITION_REGEX, target["data"]) or re.search(settings.JSON_LIKE_RECOGNITION_REGEX, target["data"]):
     try:
       parsed = json.loads(target["data"], object_pairs_hook=OrderedDict)
-      target["data"] = json.dumps(unflatten_list(parsed), indent=2, ensure_ascii=False)
+      target["data"] = json.dumps(parsed, indent=2, ensure_ascii=False)
     except Exception:
       pass
   target["raw_headers"] = settings.END_LINE.ESCAPED_LF.join(request_headers)
@@ -253,7 +252,8 @@ def _parse_request(request, request_file):
 
     # Add extra headers
     else:
-      match = re.match(r"(.*): (.*)", line)
+      # The name ends at the first colon, so a value carrying one of its own survives whole.
+      match = re.match(r"([^:\s]+):[ \t]*(.*)", line)
       # Ignore some headers.
       if match and match.group(1).lower() not in [_.lower() for _ in (settings.CONTENT_LENGTH, settings.ACCEPT_ENCODING, \
          settings.CONNECTION, settings.PROXY_CONNECTION, settings.IF_MODIFIED_SINCE, settings.IF_NONE_MATCH)]:

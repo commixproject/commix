@@ -713,7 +713,9 @@ def do_check(request):
     request.add_header(settings.ACCEPT, settings.ACCEPT_VALUE)
 
 
-  if not checks.get_header(request.headers, settings.CONTENT_TYPE):
+  # One the target's own request carries is applied further below, and an unredirected default would override it.
+  supplied_headers = str(menu.options.headers or "") + str(menu.options.header or "") + str(settings.RAW_HTTP_HEADERS or "")
+  if not checks.get_header(request.headers, settings.CONTENT_TYPE) and settings.CONTENT_TYPE.lower() not in supplied_headers.lower():
     request.add_unredirected_header(settings.CONTENT_TYPE, settings.DEFAULT_HTTP_CONTENT_TYPE_VALUE)
 
   # The MIME media type for JSON.
