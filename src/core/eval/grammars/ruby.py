@@ -152,12 +152,13 @@ def halt(condition):
 """
 Evaluate one expression and then another, within a single expression.
 
-Concatenation, the same trick the PHP grammar uses: the first expression here is always a command
-whose own output was redirected to a file rather than captured, so what it evaluates to is empty,
-and concatenating it onto the second leaves that second value exactly as it was.
+An array of the two, read back at its second element: both are evaluated, left to right, and the
+value is the second one's. Concatenation is what the PHP grammar writes here, but this language
+adds no Integer onto a String, and the second expression is as often a 'sleep' answering with one
+as it is a string.
 """
 def sequence(first, second):
-  return first + "+" + second
+  return "[" + first + "," + second + "][1]"
 
 # The shell's comparison operators, as this language spells them.
 COMPARISON = {"-le": "<=", "-ge": ">=", "-lt": "<", "-gt": ">", "-eq": "==", "-ne": "!="}

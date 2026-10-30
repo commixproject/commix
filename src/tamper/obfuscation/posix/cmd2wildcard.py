@@ -58,7 +58,15 @@ def _wildcard_path(match):
 
 # The command with its paths spelled as globs, for the target to match back to the file.
 def rewrite_command(command):
-  wildcard_cmd = re.sub(WILDCARD_PATH, _wildcard_path, command)
+  # One word at a time, so the spacing is left as it was and a URL among them is passed over whole:
+  # what follows a scheme names nothing on the filesystem, so a glob written over it matches no file
+  # and the shell hands the word on spelled exactly as the glob left it.
+  def _word(match):
+    word = match.group(0)
+    if "://" in word:
+      return word
+    return re.sub(WILDCARD_PATH, _wildcard_path, word)
+  wildcard_cmd = re.sub(r"\S+", _word, command)
   # A command naming no path of its own has nothing here that a glob could stand in for, and
   # saying so once is worth more than leaving the script looking like it did something.
   if wildcard_cmd == command:

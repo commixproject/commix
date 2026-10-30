@@ -39,16 +39,22 @@ def _end(separator):
   return settings.EVAL_GRAMMAR.TERMINATOR if separator else ""
 
 # Delay only while the condition holds: a boolean times the delay is the delay or nothing at all.
-def _conditional_sleep(condition, timesec, separator):
+def _sleep(condition, timesec):
   # Whole seconds: the delay is counted in them, and a fractional one only reads as noise.
-  return settings.EVAL_GRAMMAR.delay(int(timesec), condition) + _end(separator)
+  return settings.EVAL_GRAMMAR.delay(int(timesec), condition)
+
+def _conditional_sleep(condition, timesec, separator):
+  return _sleep(condition, timesec) + _end(separator)
 
 # Write the output to the file and measure what landed there. Joined by the language's concatenation
 # operator, since what the boundary breaks into is an expression rather than a statement.
 def _write_and_measure(cmd, j, OUTPUT_TEXTFILE, timesec, separator, operator):
   condition = str(j) + operator + settings.EVAL_GRAMMAR.length(_contents(OUTPUT_TEXTFILE))
-  return settings.EVAL_GRAMMAR.sequence(_write(cmd, OUTPUT_TEXTFILE),
-                                        _conditional_sleep(condition, timesec, separator))
+  # The terminator ends the whole expression, so it is appended once the sequence has closed around
+  # both halves - carried inside, it would sit within the call or the tuple that wrapping writes.
+  payload = settings.EVAL_GRAMMAR.sequence(_write(cmd, OUTPUT_TEXTFILE),
+                                           _sleep(condition, timesec))
+  return payload + _end(separator)
 
 """
 Tempfile-based decision payload (check if host is vulnerable).
