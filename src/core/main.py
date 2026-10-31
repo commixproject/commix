@@ -163,7 +163,9 @@ def examine_request(request, url):
         raise SystemExit(settings.EXIT_FAILURE)
 
   except Exception as err_msg:
-    requests.request_failed(err_msg)
+    # The verdict is the answer: a caller that reads 'False' is told the request was handled and
+    # failed, where the dropped one left it reading no response at all as a response.
+    return requests.request_failed(err_msg)
 
 """
 Check internet connection before assessing the target.
@@ -187,6 +189,10 @@ def check_internet(url):
     settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     error_msg = "No internet connection detected."
     settings.print_data_to_stdout(settings.print_critical_msg(error_msg))
+  finally:
+    # Only the probe above is not the target's own first request, so the flag ends with it - left
+    # set, the target's init test reads as the probe's and is never marked as having run.
+    settings.CHECK_INTERNET = False
 
 """
 The init (URL) request.
@@ -307,6 +313,11 @@ def url_response(url, http_request_method):
   settings.INIT_CONNECTION_TIME = None
   settings.INIT_CONNECTION_FETCH_TIME = None
   settings.INIT_CONNECTION_URL = None
+  # Before the connection below rather than after it: the retry budget this target is given is read
+  # against this count, and the last target's traffic would have spent all of it before a request.
+  if settings.MULTI_TARGETS or settings.CRAWLING:
+    # initiate total of requests
+    settings.TOTAL_OF_REQUESTS = 0
 
   conn_request, conn_url = request, url
   do_waf = not menu.options.skip_waf
@@ -333,10 +344,6 @@ def url_response(url, http_request_method):
     settings.INIT_CONNECTION_TIME = _conn_end - _conn_start
     settings.INIT_CONNECTION_FETCH_TIME = _conn_end
     settings.INIT_CONNECTION_URL = conn_url
-  if settings.MULTI_TARGETS or settings.CRAWLING:
-    # initiate total of requests
-    settings.TOTAL_OF_REQUESTS = 0
-
   return response, url
 
 """
@@ -423,6 +430,11 @@ def init_injection(url):
   if not settings.USER_APPLIED_AUTH_TYPE:
     menu.options.auth_type = None
   settings.REQUIRED_AUTHENTICATION = False
+
+  # A level a stored session named belongs to the target it was read for: it outlives the target,
+  # so left set it settles the next one before that target's own session is ever consulted.
+  if not menu.options.level:
+    settings.USER_APPLIED_LEVEL = False
 
 """
 Validate and normalize a target line, returning the cleaned URL or None.
@@ -1081,14 +1093,13 @@ def run():
         for form_url, form_data in clean_output_forms:
           if check_for_injected_url(form_url):
             prompt_skip_vulnerable_host(form_url)
-
-          if settings.SKIP_VULNERABLE_HOST:
-            form_num += 1
-            info_msg = "Skipping form URL '" + form_url + "' (" + str(form_num) + "/" + str(len(clean_output_forms)) + ")."
-            settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-            continue
-
-          if not check_for_injected_url(form_url):
+            if settings.SKIP_VULNERABLE_HOST:
+              form_num += 1
+              info_msg = "Skipping form URL '" + form_url + "' (" + str(form_num) + "/" + str(len(clean_output_forms)) + ")."
+              settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+              continue
+          else:
+            # The answer was given for the host it was asked about, so it says nothing about this one.
             settings.SKIP_VULNERABLE_HOST = None
           form_num += 1
           perform_check = True
