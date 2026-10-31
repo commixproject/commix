@@ -1,6 +1,7 @@
 ## Version 4.2 (TBA)
+* Fixed: Payload generation for certain separator and tamper script combinations, which could produce a payload the shell cannot run.
 * Fixed: Retrieval of non-ASCII execution output, which could come back incomplete.
-* Added: An offline unit-test suite, run with `python -m unittest discover -s tests -t .`.
+* Added: An offline test suite, run with `python -m unittest discover -s tests -t .`, covering the payload builders, the tamper scripts, the evaluator grammars and the word lists.
 * Added: New tamper script `luadebugescape.py`, reaching a Lua sink evaluated with a restricted environment through `debug.getregistry()._LOADED`.
 * Added: New `--eval=lua` support, for a sink evaluating Lua.
 * Added: New `--eval=perl` support, for a sink evaluating Perl.
