@@ -761,11 +761,14 @@ def store_cmd(url, cmd, shell, vuln_parameter):
       with _session_connection() as conn:
         table = table_name(url) + "_ir"
         conn.execute("CREATE TABLE IF NOT EXISTS \"" + table + "\" "
-                     "(cmd VARCHAR, output VARCHAR, vuln_parameter VARCHAR);")
-        conn.execute("INSERT INTO \"" + table + "\" (cmd, output, vuln_parameter) VALUES (?, ?, ?)",
+                     "(cmd VARCHAR, output VARCHAR, vuln_parameter VARCHAR, url VARCHAR DEFAULT '');")
+        # The address the output came back from, which the table was keyed without - named for the
+        # host alone, one page's answers were handed back as another's.
+        _ensure_columns(conn, table, (("url", "VARCHAR DEFAULT ''"),))
+        conn.execute("INSERT INTO \"" + table + "\" (cmd, output, vuln_parameter, url) VALUES (?, ?, ?, ?)",
                      (base64.b64encode(cmd.encode(settings.DEFAULT_CODEC)).decode(),
                       base64.b64encode(shell.encode(settings.DEFAULT_CODEC)).decode(),
-                      vuln_parameter))
+                      vuln_parameter, split_url(url)))
         conn.commit()
     except (sqlite3.OperationalError, sqlite3.DatabaseError) as err_msg:
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
@@ -783,8 +786,9 @@ def export_stored_cmd(url, cmd, vuln_parameter):
     with _session_connection() as conn:
       table = table_name(url) + "_ir"
       encoded_cmd = base64.b64encode(cmd.encode(settings.DEFAULT_CODEC)).decode()
-      query = "SELECT output FROM \"" + table + "\" WHERE cmd = ? AND vuln_parameter = ?;"
-      cursor = conn.execute(query, (encoded_cmd, vuln_parameter)).fetchall()
+      # Matched on the address too: one host's pages are not one another's answers.
+      query = "SELECT output FROM \"" + table + "\" WHERE cmd = ? AND vuln_parameter = ? AND url = ?;"
+      cursor = conn.execute(query, (encoded_cmd, vuln_parameter, split_url(url))).fetchall()
     for session in cursor:
       output = base64.b64decode(session[0])
     try:

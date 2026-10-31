@@ -1851,13 +1851,13 @@ def escape_unquoted_dollars(payload):
 Removing the first and/or last line of the html content (in case there are/is empty).
 """
 def remove_empty_lines(content):
-  try:
-    if content[0] == settings.END_LINE.LF:
-      content = content[1:content.rfind(settings.END_LINE.LF)]
-    if content[-1] == settings.END_LINE.LF:
-      content = content[:content.rfind(settings.END_LINE.LF)]
-  except IndexError:
-    pass
+  # The empty lines themselves, and nothing else: the last line is not the text behind the last
+  # newline, which searching for one carried off with it - a body holding a single newline was
+  # emptied outright, and one not ending in a newline lost its closing line.
+  if content.startswith(settings.END_LINE.LF):
+    content = content[1:]
+  if content.endswith(settings.END_LINE.LF):
+    content = content[:-1]
   return content
 
 """

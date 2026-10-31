@@ -607,6 +607,9 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
   than guessed at a bound: the first characters of a length said outright, instead of a shorter
   output that reads like a whole one.
   """
+  # The length as measured, before the read limit below is applied to it - what a partial result is
+  # recorded against, so a later run given a higher '--maxlen' is not held to this run's limit.
+  full_output_length = output_length
   if found_chars is True and output_length is not None and int(output_length) > int(maxlen):
     settings.INCOMPLETE_OUTPUT = True
     warn_msg = "The output is " + str(int(output_length)) + " characters long, and this run reads "
@@ -695,13 +698,16 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
       body = _stored_partial[len(settings.PARTIAL_VALUE_MARKER):]
       try:
         stored_length, pairs = body.split(":", 1)
-        if int(stored_length) != output_length:
+        # Against the length as measured rather than as read: a run reading fewer of them is reading
+        # the same output, and the positions past this run's limit are not among the ones it reads.
+        if int(stored_length) != full_output_length:
           return
         for pair in pairs.split(","):
           if not pair:
             continue
           pos_str, ord_str = pair.split("=")
-          results_by_position[int(pos_str)] = int(ord_str)
+          if int(pos_str) <= output_length:
+            results_by_position[int(pos_str)] = int(ord_str)
       except ValueError:
         return
       if results_by_position:
@@ -716,11 +722,13 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
         return
       resolved = dict((pos, ordinal) for pos, ordinal in results_by_position.items()
                       if ordinal is not None and ordinal != UNRESOLVED_POSITION)
-      if len(resolved) >= len(positions):
+      if len(resolved) >= len(positions) and not settings.INCOMPLETE_OUTPUT:
         value = "".join(chr(resolved[pos]) for pos in positions)
       else:
+        # Recorded against the measured length: every position this run was willing to read can be
+        # resolved and the output still be the shorter part of a longer one.
         pairs = ",".join(str(pos) + "=" + str(ordinal) for pos, ordinal in sorted(resolved.items()))
-        value = settings.PARTIAL_VALUE_MARKER + str(output_length) + ":" + pairs
+        value = settings.PARTIAL_VALUE_MARKER + str(full_output_length) + ":" + pairs
       session_handler.store_cmd(url, cmd, value, vuln_parameter)
 
     # Resolve one character of the output, by halving the range its value lies in.
