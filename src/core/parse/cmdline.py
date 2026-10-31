@@ -1242,8 +1242,8 @@ option._long_opts = []
 How much of an option's name a mnemonic spelled, so that the shortest spelling settles a tie.
 """
 def _mnemonic_length(option, name):
-  return min(len(spelling.strip("-")) for spelling in option._long_opts + option._short_opts
-             if spelling.strip("-").startswith(name))
+  return min(len(spelling.replace("-", "")) for spelling in option._long_opts + option._short_opts
+             if spelling.replace("-", "").startswith(name))
 
 """
 Expand the short mnemonics of '-z' into the options they name.
@@ -1287,7 +1287,7 @@ def expand_mnemonics(mnemonics, parser, options):
     if len(candidates) > 1:
       # A mnemonic that is also a name in full means that one; otherwise the shortest name it
       # could be is taken, and said out loud, because the other readings were just as available.
-      spelled_out = [_ for _ in candidates if name in [spelling.strip("-") for spelling in _._long_opts + _._short_opts]]
+      spelled_out = [_ for _ in candidates if name in [spelling.replace("-", "") for spelling in _._long_opts + _._short_opts]]
       if spelled_out:
         option = spelled_out[0]
       else:

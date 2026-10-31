@@ -228,8 +228,8 @@ def _parse_request(request, request_file):
       target["referer"] = referer_value
       if "https://" in referer_value:
         scheme = "https://"
-    if re.findall(r"" + settings.AUTHORIZATION + ":" + " (.*)", line):
-      auth_provided = "".join([str(i) for i in re.findall(r"" + settings.AUTHORIZATION + ":" + " (.*)", line)]).split()
+    if re.findall(r"(?i)" + settings.AUTHORIZATION + ":" + " (.*)", line):
+      auth_provided = "".join([str(i) for i in re.findall(r"(?i)" + settings.AUTHORIZATION + ":" + " (.*)", line)]).split()
       if auth_provided:
         target["auth_type"] = auth_provided[0].lower()
         if target["auth_type"].lower() == settings.AUTH_TYPE.BASIC:
