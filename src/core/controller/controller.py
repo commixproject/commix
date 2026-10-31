@@ -207,8 +207,11 @@ def heuristic_request(url, http_request_method, check_parameter, payload, whites
   # while its injection flag is set, so that this is the only value it is given.
   if check_parameter_in_http_header(check_parameter, place):
     settings.CUSTOM_HEADER_NAME = check_parameter.title()
-    if settings.CUSTOM_HEADER_VALUE.replace(settings.INJECT_TAG, "") in settings.CUSTOM_HEADER_VALUE:
-      request.add_header(settings.CUSTOM_HEADER_NAME, settings.CUSTOM_HEADER_VALUE.replace(settings.INJECT_TAG, "").replace(settings.CUSTOM_HEADER_VALUE, payload).encode(settings.DEFAULT_CODEC))
+    if settings.INJECT_TAG in settings.CUSTOM_HEADER_VALUE:
+      # The payload goes where the marker is, so whatever static text the header carries stays with
+      # it - searched for the value as it stood, the marker having just been taken out of it, the
+      # replacement matched nothing and the header went out carrying no payload at all.
+      request.add_header(settings.CUSTOM_HEADER_NAME, settings.CUSTOM_HEADER_VALUE.replace(settings.INJECT_TAG, payload).encode(settings.DEFAULT_CODEC))
     else:
       request.add_header(settings.CUSTOM_HEADER_NAME, payload.encode(settings.DEFAULT_CODEC))
   headers.do_check(request)
@@ -432,6 +435,10 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, p
             _ for _ in languages if _ != settings.IDENTIFIED_EVAL_LANGUAGE)
       else:
         languages = (settings.EVAL_GRAMMAR.NAME,)
+      # Which language's own probe answered. The sweep goes on past a complaint to look for a
+      # version, so the grammar left in force at the end is the last language tried rather than
+      # the one that answered, and the switch below would name that one instead.
+      answered_language = None
       for language in languages:
         settings.set_eval_grammar(language)
         if len(languages) > 1 and settings.VERBOSITY_LEVEL != 0:
@@ -445,6 +452,7 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, p
             if match:
               detail = "identified " + settings.EVAL_GRAMMAR.LABEL + " version: '" + match.group(1) + "'"
               settings.IDENTIFIED_EVAL_PROBE = True
+              answered_language = language
               break
             # A plain shell error (the probe reached a shell, not an interpreter) can still contain
             # one of these words by coincidence - 'syntax error' reads the same complaint from
@@ -459,6 +467,7 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, p
                 # whatever the probe was. What the probe caused is what is not there to begin with.
                 if warning in html_data and warning not in baseline:
                   settings.IDENTIFIED_WARNINGS = True
+                  answered_language = language
                   detail = "identified evaluated language: '" + settings.EVAL_GRAMMAR.LABEL + "'"
                   break
         if settings.IDENTIFIED_EVAL_PROBE:
@@ -466,6 +475,10 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, p
 
       # Said once, whichever of the two the sweep came back with.
       if settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_EVAL_PROBE:
+        # Pointed back at the language that answered, so the switch offered below and whatever runs
+        # next both speak the one the heuristic found.
+        if answered_language:
+          settings.set_eval_grammar(answered_language)
         announce_heuristic_finding(detail)
         # Code injection is tested only where it was asked for, so what the heuristic saw is
         # named, the switch that would act on it is named too, and the run carries on testing

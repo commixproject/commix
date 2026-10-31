@@ -1175,13 +1175,15 @@ def offer_anticsrf_token(parameter):
 
 # Whether a parameter looks like an anti-CSRF token, which testing would only invalidate.
 def ignore_anticsrf_parameter(parameter):
-  if any(parameter.lower().count(token) for token in settings.CSRF_TOKEN_PARAMETER_INFIXES):
+  # Split where the name ends rather than at every '=' it holds: a value carrying one of its
+  # own - a token written in base64, most of them - is still that parameter's value, and a
+  # parameter skipped without a word said is one nobody knows went untested.
+  name, separator, value = parameter.partition("=")
+  # The name is what names a token, the way 'offer_anticsrf_token' reads it: a value that merely
+  # holds the word is ordinary input, and testing it is the whole point of being given it.
+  if any(name.lower().count(token) for token in settings.CSRF_TOKEN_PARAMETER_INFIXES):
     if not explicitly_testable(parameter):
       offer_anticsrf_token(parameter)
-      # Split where the name ends rather than at every '=' it holds: a value carrying one of its
-      # own - a token written in base64, most of them - is still that parameter's value, and a
-      # parameter skipped without a word said is one nobody knows went untested.
-      name, separator, value = parameter.partition("=")
       if separator:
         info_msg = "Ignoring the parameter '" + name
         info_msg += "' that appears to hold anti-CSRF token '" + value +  "'."
