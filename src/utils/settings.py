@@ -477,7 +477,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "274"
+REVISION = "275"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -2435,6 +2435,8 @@ SOCKS4_DNS_WARNING = False
 # The proxies read from '--proxy-file', and which of them is in use.
 PROXY_LIST = []
 PROXY_LIST_INDEX = 0
+# What '--proxy-cred' was given as, for the entries of the list that carry none of their own.
+PROXY_LIST_CRED = None
 
 # The request '--safe-req' was given, parsed once and replayed as it was written.
 SAFE_REQUEST = None
@@ -2939,8 +2941,11 @@ RUN_WIDE_STATE = frozenset((
   # Counted or noted for the run as a whole.
   "CRAWLED_SKIPPED_URLS_NUM", "CRAWLED_URLS_INJECTED", "CRAWLED_URLS_NUM", "CRAWLING",
   "CRAWLING_PHASE", "ENUMERATION_DONE", "FILE_ACCESS_DONE", "REGISTRY_ACCESS_DONE", "HANDLER", "HREF_SKIPPED",
-  "HTTP_ERROR_CODES_SUM", "IDENTIFIED_WARNINGS", "INIT_TEST", "LAST_DOT_BUCKET", "LAST_LOG_GROUP",
-  "LAST_LOGGED_PARAMETER", "LAST_SELECTED_MODULE", "LIKELY_RESUME", "LOGGED_FINDINGS_HEADER",
+  # 'LAST_LOG_GROUP', 'LAST_LOGGED_PARAMETER' and 'LOGGED_FINDINGS_HEADER' are deliberately absent:
+  # each target writes a log file of its own, so what has already been written to one says nothing
+  # about the next, and carried over they cost the second its header and its parameter line.
+  "HTTP_ERROR_CODES_SUM", "IDENTIFIED_WARNINGS", "INIT_TEST", "LAST_DOT_BUCKET",
+  "LAST_SELECTED_MODULE", "LIKELY_RESUME",
   "MULTI_REQUEST_TARGETS", "MULTI_TARGETS", "OS_CHECKS_NUM", "PROGRESS_LINE_OPEN", "READLINE_ERROR",
   "SESSION_FILE", "SHOW_LOGS_MSG", "TAMPER_SCRIPTS", "SITEMAP_CHECK", "SKIPPED_OUT_OF_SCOPE", "SKIP_VULNERABLE_HOST",
   "RESULTS_FILE_FORMAT", "RESULTS_FILE_STARTED", "TEST_FILTER", "TEST_SKIP",

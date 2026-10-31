@@ -28,7 +28,7 @@ def find_local_port(ports):
     probe = None
     try:
       try:
-        probe = socket._orig_socket(socket.AF_INET, socket.SOCK_STREAM)
+        probe = socks._orig_socket(socket.AF_INET, socket.SOCK_STREAM)
       except AttributeError:
         probe = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
       probe.settimeout(settings.TIMEOUT)

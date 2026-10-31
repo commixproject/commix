@@ -129,7 +129,9 @@ def audit(token):
     return findings
 
   header, payload = data["header"], data["payload"]
-  algorithm = (header.get("alg") or "").strip()
+  # A header is only promised to be an object, so an 'alg' that is not a string names no algorithm.
+  algorithm = header.get("alg")
+  algorithm = algorithm.strip() if isinstance(algorithm, str) else ""
 
   # An unsigned token the target itself issued means its claims need no key to restate.
   if algorithm.lower() == "none" or data["signature"] == "":

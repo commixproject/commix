@@ -193,11 +193,12 @@ def validate():
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit(settings.EXIT_FAILURE)
 
-  if not menu.options.proxy:
-    # Check if defined Tor (--tor option).
-    if menu.options.tor:
-      tor.set_proxy_settings()
-      tor.do_check()
+  # Check if defined Tor (--tor option).
+  if menu.options.tor:
+    tor.set_proxy_settings()
+  # Asked for either way: '--check-tor' is allowed alongside '--proxy', where the proxy given is
+  # the Tor front end itself, and gating the check on '--tor' left that spelling checking nothing.
+  tor.do_check()
 
   if menu.options.ignore_session and menu.options.flush_session:
     err_msg = "The '--ignore-session' switch is unlikely to work combined with the '--flush-session' switch."

@@ -47,6 +47,8 @@ def load_proxy_list():
   info_msg = "Loaded " + str(len(settings.PROXY_LIST)) + " prox" + ("ies" if len(settings.PROXY_LIST) != 1 else "y")
   info_msg += " from the '" + os.path.split(menu.options.proxy_file)[1] + "' file."
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  # Kept before the first entry is put in place, since that is what overwrites it.
+  settings.PROXY_LIST_CRED = menu.options.proxy_cred
   apply_proxy_from_list()
 
 """
@@ -58,9 +60,10 @@ def apply_proxy_from_list():
   scheme, cred, address, port = settings.PROXY_LIST[settings.PROXY_LIST_INDEX % len(settings.PROXY_LIST)]
   settings.PROXY_SCHEME = scheme
   menu.options.proxy = address + ":" + port
-  # Credentials written next to the proxy itself outrank '--proxy-cred', which speaks for the rest.
-  if cred:
-    menu.options.proxy_cred = cred
+  # Credentials written next to the proxy itself outrank '--proxy-cred', which speaks for the rest -
+  # and only for this entry, or the one that carried them would go on authenticating to every proxy
+  # after it, which is one host's password handed to another.
+  menu.options.proxy_cred = cred or settings.PROXY_LIST_CRED
   configure()
 
 """
@@ -154,7 +157,9 @@ def use_proxy(request):
       opener = _urllib.request.build_opener(proxy, redirection.RedirectHandler(), _urllib.request.HTTPSHandler(context=settings.unverified_context()))
       _urllib.request.install_opener(opener)
     elif menu.options.tor and menu.options.tor_type == settings.PROXY_TYPE.HTTP:
-      proxy = _urllib.request.ProxyHandler({settings.SCHEME:menu.options.proxy})
+      # Both schemes, not the target's own: this runs before a target has been read, and a handler
+      # keyed on the empty scheme that leaves is one urllib drops - the request then goes out direct.
+      proxy = _urllib.request.ProxyHandler({"http":menu.options.proxy, "https":menu.options.proxy})
       opener = _urllib.request.build_opener(proxy, redirection.RedirectHandler(), _urllib.request.HTTPSHandler(context=settings.unverified_context()))
       _urllib.request.install_opener(opener)
     else:

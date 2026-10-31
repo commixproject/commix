@@ -115,8 +115,10 @@ def create_log_file(url, output_dir):
   started = str(date.today()) + settings.SINGLE_WHITESPACE + datetime.now().strftime("%H:%M:%S")
   settings.REPORT_STARTED = settings.REPORT_STARTED or started
   try:
-    with open(filename, 'w' if menu.options.flush_session else 'a', encoding=settings.DEFAULT_CODEC) as output_file:
-      if not menu.options.no_logging:
+    # Opened only where there is something to write: '--no-logging' asks for the file to be left
+    # alone, and opening it to write nothing is what empties the one an earlier run filled.
+    if not menu.options.no_logging:
+      with open(filename, 'w' if menu.options.flush_session else 'a', encoding=settings.DEFAULT_CODEC) as output_file:
         output_file.write("Target: " + url + " (" + http_request_method + ")" + settings.END_LINE.LF)
         output_file.write("Command: " + command + settings.END_LINE.LF)
         output_file.write("Started: " + started + settings.END_LINE.LF)
@@ -136,7 +138,10 @@ def create_log_file(url, output_dir):
     # stands for no target yet, and is written over rather than collected.
     if _REPORT_HELD_A_TARGET[0] and report_active() and settings.REPORT_JSON.get("target"):
       finished = settings.REPORT_JSON
-      finished.setdefault("status", settings.REPORT_STATUS_COMPLETED)
+      # The target is being put away, so it is no longer the one running - said outright rather than
+      # left to 'setdefault', which never fires on a key the report is opened carrying.
+      if finished.get("status") == settings.REPORT_STATUS_RUNNING:
+        finished["status"] = settings.REPORT_STATUS_COMPLETED
       finished.setdefault("finished", str(date.today()) + settings.SINGLE_WHITESPACE + datetime.now().strftime("%H:%M:%S"))
       settings.REPORT_TARGETS.append(finished)
     settings.REPORT_JSON = {
