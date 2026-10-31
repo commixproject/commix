@@ -1272,7 +1272,9 @@ def decompress_page(body, content_encoding):
     elif content_encoding == "br":
       if settings.BROTLI_DECODER is None:
         raise ValueError("no brotli decoder available")
-      body = settings.BROTLI_DECODER.decompress(body)
+      # Bounded where it is read, the way the encodings around it are: the decoder's own ceiling is
+      # a default of its own, and the two part as soon as what this run will read moves off it.
+      body = settings.BROTLI_DECODER.decompress(body, cap + 1)
       if len(body) > cap:
         raise ValueError("size too large")
     elif content_encoding == "zstd":
