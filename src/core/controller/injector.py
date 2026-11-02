@@ -332,12 +332,17 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
       return exec_time
 
     impossible = int(maxlen) * 2 + 100
+    cannot_hold = must_hold = None
     for _ in range(settings.FALSE_POSITIVE_RETRIES):
       try:
         cannot_hold = _probe_time(impossible)
         must_hold = _probe_time(int(minlen))
       except KeyboardInterrupt:
+        # Asked again from the top: a round that was interrupted has nothing of its own to compare,
+        # and what the round before it timed says nothing about this one.
         checks.handle_exploitation_interrupt(filename, url)
+        cannot_hold = must_hold = None
+        continue
       if cannot_hold is None or must_hold is None:
         return True
       checks.record_probe_response_time(cannot_hold)

@@ -7085,7 +7085,9 @@ def use_temp_folder(no_result, url, timesec, filename, http_request_method, url_
       break
     elif tmp_upload in settings.CHOICE_QUIT:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
-      raise
+      # Asked for from inside the handling of a failed request, a bare 're-raise' handed that
+      # request's own error back up instead of quitting, which is not what was answered.
+      raise SystemExit()
     else:
       common.invalid_option(tmp_upload)
       pass
