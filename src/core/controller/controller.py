@@ -824,16 +824,22 @@ def attempt_skip_testable_value(url, http_request_method, check_parameter):
     headers.apply_request_policy()
     start = time.time()
     real_response = headers.send_raw(real_request, policy=False)
-    real_body = real_response.read()
-    real_status = real_response.getcode()
+    try:
+      real_body = real_response.read()
+      real_status = real_response.getcode()
+    finally:
+      real_response.close()
     real_time = time.time() - start
 
     placeholder_request = build(placeholder)
     headers.apply_request_policy()
     start = time.time()
     placeholder_response = headers.send_raw(placeholder_request, policy=False)
-    placeholder_body = placeholder_response.read()
-    placeholder_status = placeholder_response.getcode()
+    try:
+      placeholder_body = placeholder_response.read()
+      placeholder_status = placeholder_response.getcode()
+    finally:
+      placeholder_response.close()
     placeholder_time = time.time() - start
   except Exception:
     return url

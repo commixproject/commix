@@ -593,7 +593,9 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
           _length_delayed(output_length)
     else:
       # Experimental interpreter path only - its oracle is still exact-match, not bisectable.
-      for candidate_length in range(int(minlen), int(maxlen)):
+      # Up to and including the limit: '--maxlen' is how much this run is willing to read, which is
+      # a length it is willing to read rather than one short of it.
+      for candidate_length in range(int(minlen), int(maxlen) + 1):
         payload = payloads.cmd_execution_alter_interpreter(separator, cmd, candidate_length, OUTPUT_TEXTFILE, timesec, http_request_method)
         found = _measure_length(payload)
         if settings.VERBOSITY_LEVEL == 0:
@@ -1473,7 +1475,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec, technique):
         count = count - 1
         last_param = path_parts[count]
         output = url.replace(last_param, OUTPUT_TEXTFILE)
-        if "?" and settings.OUTPUT_FILE_EXT in output:
+        if "?" in output and settings.OUTPUT_FILE_EXT in output:
           try:
             output = output.split("?")[0]
           except (Exception, SystemExit):
@@ -1525,10 +1527,7 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec, technique):
               info_msg += "' for execution output."
               settings.print_data_to_stdout(settings.print_info_msg(info_msg))
               settings.RECHECK_FILE_FOR_EXTRACTION = True
-              if not settings.DEFINED_WEBROOT:
-                pass
-              else:
-                break
+              break
           elif procced_option in settings.CHOICE_QUIT:
             raise SystemExit()
           else:
@@ -1609,8 +1608,6 @@ def injection_test_results(response, TAG, randvcalc, technique, payload=None):
     # cleanup string / unescape html to string
     html_data = _urllib.parse.unquote(html_data)
     html_data = unescape(html_data)
-    # Replace non-ASCII characters with a single space
-    re.sub(r"[^\x00-\x7f]",r" ", html_data)
     html_data = checks.remove_reflected_values(html_data, payload)
     if settings.SKIP_CALC:
       shell = re.findall(r"" + TAG + TAG + TAG, html_data)
@@ -1736,16 +1733,12 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
       # cleanup string / unescape html to string
       html_data = _urllib.parse.unquote(html_data)
       html_data = unescape(html_data)
-      # Replace non-ASCII characters with a single space
-      re.sub(r"[^\x00-\x7f]",r" ", html_data)
       shell = re.findall(r"" + TAG + TAG + "(.*)" + TAG + TAG + settings.SINGLE_WHITESPACE, html_data)
       if not shell:
         shell = re.findall(r"" + TAG + TAG + "(.*)" + TAG + TAG + "", html_data)
       if not shell:
         return shell
       try:
-        if TAG in shell:
-          shell = re.findall(r"" + "(.*)" + TAG + TAG, shell)
         # Clear junks
         shell = [tags.replace(TAG + TAG , settings.SINGLE_WHITESPACE) for tags in shell]
         shell = [backslash.replace(r"\/","/") for backslash in shell]

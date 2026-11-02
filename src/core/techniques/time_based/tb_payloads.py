@@ -203,7 +203,9 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
                  )
     elif separator in ("&", "&&") and checks.substitution_nests():
       """
-      Measured and delayed on in the one command, so neither of these has to chain anything.
+      Measured and delayed on in the one command, so neither of these has to chain anything: a bare
+      '&' cannot hand a variable to the command after it, and chaining '&&' to carry one would prove
+      that separator rather than this one.
 
       The length asked about is what the two sides are compared on. A marker compared against itself
       answered the same way whatever length it was asked about, so the control question - the same

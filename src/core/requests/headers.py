@@ -822,8 +822,9 @@ def do_check(request):
 
               settings.INJECTION_MARKER_LOCATION.CUSTOM_HTTP_HEADERS = True
               settings.CUSTOM_HEADER_CHECK = http_header_name
+              # The names above are already the ones this branch was not entered for, and asking
+              # again with the value spliced onto the name asked something no name can answer.
               if len(http_header_name) != 0 and \
-                http_header_name + ": " + http_header_value not in [settings.ACCEPT, settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE] and \
                 http_header_name + ": " + http_header_value not in settings.CUSTOM_HEADERS_NAMES:
                 settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(http_header_name) if http_header_name not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
                 settings.CUSTOM_HEADERS_NAMES.append(http_header_name + ": " + http_header_value)

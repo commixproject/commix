@@ -174,10 +174,11 @@ class Task(object):
     command = _commix_command() + ["-c", self.config_file]
     # Kept rather than thrown away: what the run says as it goes is what '/scan/<id>/log' hands back,
     # and the run's own log file is a report of what was found, not a record of the going.
-    console = open(self.console_file, "wb")
-    self.process = subprocess.Popen(command, cwd=_commix_directory(), stdout=console,
-                                    stderr=subprocess.STDOUT, close_fds=not settings.IS_WINDOWS)
-    console.close()
+    # Closed either way: the child is given a handle of its own, and a start that failed leaves
+    # nothing here to hand back but an open file in a server that goes on running.
+    with open(self.console_file, "wb") as console:
+      self.process = subprocess.Popen(command, cwd=_commix_directory(), stdout=console,
+                                      stderr=subprocess.STDOUT, close_fds=not settings.IS_WINDOWS)
 
   """
   Whether a scan is running under this task right now.

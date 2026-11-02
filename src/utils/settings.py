@@ -334,7 +334,7 @@ def _stdout_write(data):
 Print data to stdout
 """
 def print_data_to_stdout(data):
-  global PROGRESS_LINE_OPEN, PROGRESS_DOT_COUNT, PROGRESS_INTERRUPTIONS
+  global PROGRESS_LINE_OPEN, PROGRESS_LINE_DONE, PROGRESS_DOT_COUNT, PROGRESS_INTERRUPTIONS
   if getattr(_threading.current_thread(), "commix_suppress_output", False):
     return
   with PRINT_LOCK:
@@ -386,6 +386,7 @@ def print_data_to_stdout(data):
     _stdout_write(data)
     sys.stdout.flush()
     PROGRESS_LINE_OPEN = is_spinner_style and not has_lf and not is_done_marker
+    PROGRESS_LINE_DONE = is_done_marker
 
 """
 Write back onto the line that was left blank the answer that blank stood for.
@@ -407,14 +408,15 @@ def echo_default_answer(message, answer):
 Clear the current line before printing, without adding a blank line when already empty.
 """
 def clear_current_line():
-  global PROGRESS_LINE_OPEN
+  global PROGRESS_LINE_OPEN, PROGRESS_LINE_DONE
   with PRINT_LOCK:
     if PROGRESS_LINE_OPEN:
       sys.stdout.write(END_LINE.LF)
-    else:
+    elif not PROGRESS_LINE_DONE:
       sys.stdout.write(END_LINE.CR + "\033[K")
     sys.stdout.flush()
     PROGRESS_LINE_OPEN = False
+    PROGRESS_LINE_DONE = False
 
 """
 Take the cursor back to the start of the current line and wipe it, leaving no newline behind.
@@ -424,22 +426,29 @@ again word for word is overwriting itself, not following on from anything, and t
 closing an open line would leave is exactly what stacks the two copies up.
 """
 def redraw_current_line():
-  global PROGRESS_LINE_OPEN
+  global PROGRESS_LINE_OPEN, PROGRESS_LINE_DONE
   with PRINT_LOCK:
+    # A line that closed itself with its own "(done)" took the cursor off it, so the line about to
+    # be written again is the one above: stepped back onto rather than wiped where the cursor was
+    # left, which cleared the empty line underneath and stacked the two copies up after all.
+    if PROGRESS_LINE_DONE:
+      sys.stdout.write("\033[F")
     sys.stdout.write(END_LINE.CR + "\033[K")
     sys.stdout.flush()
     PROGRESS_LINE_OPEN = False
+    PROGRESS_LINE_DONE = False
 
 """
 Close the current spinner line with a trailing newline.
 """
 def close_progress_line():
-  global PROGRESS_LINE_OPEN
+  global PROGRESS_LINE_OPEN, PROGRESS_LINE_DONE
   with PRINT_LOCK:
     if PROGRESS_LINE_OPEN:
       sys.stdout.write(END_LINE.LF)
       sys.stdout.flush()
     PROGRESS_LINE_OPEN = False
+    PROGRESS_LINE_DONE = False
 
 """
 argv input errors
@@ -477,7 +486,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "282"
+REVISION = "283"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -996,6 +1005,11 @@ REQUESTS_LOCK = _threading.Lock()
 
 # Whether the last stdout line is still open (progress refresh / spinner dot).
 PROGRESS_LINE_OPEN = False
+
+# Whether the last stdout line is a progress line that closed itself with its own "(done)". It is
+# finished, so nothing more is written onto it, but the cursor has already left it - which is the
+# line a repeat of it overwrites.
+PROGRESS_LINE_DONE = False
 
 # Dots written to the current spinner line, and where that line stops growing further ones.
 # However many requests a step actually costs, the line itself stays one a terminal never wraps.

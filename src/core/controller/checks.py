@@ -1836,8 +1836,8 @@ Fix single / double quote escaping.
 def escaped_cmd(cmd):
   if "\\\"" in cmd :
     cmd = cmd.replace("\\\"","\"")
-  if "\'" in cmd :
-    cmd = cmd.replace("\'","'")
+  if r"\'" in cmd :
+    cmd = cmd.replace(r"\'","'")
   if r"\$" in cmd :
     cmd = cmd.replace(r"\$","$")
   return cmd
@@ -2200,7 +2200,7 @@ def ps_incompatible_os():
 Check if PowerShell is enabled.
 """
 def ps_check():
-  if settings.PS_ENABLED == None and menu.options.is_admin or menu.options.users or menu.options.passwords:
+  if settings.PS_ENABLED is None and (menu.options.is_admin or menu.options.users or menu.options.passwords):
     if settings.VERBOSITY_LEVEL != 0:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
     while True:
@@ -2318,12 +2318,17 @@ def check_http_s(url):
   if settings.CHECK_INTERNET:
       url = settings.CHECK_INTERNET_ADDRESS
   else:
+    # A target given without a scheme is given one rather than refused for not carrying it, which
+    # is what asking for the scheme first and prepending it inside that answer amounted to: ':443'
+    # asks for the secure one, anything else for plain.
+    if not re.search(r"^(http|ws)s?://", url, re.I):
+      if re.search(r":443\b", url):
+        url = "https://" + url
+      else:
+        url = "http://" + url
+      # Read again, or the scheme below is taken off the URL as it stood before one was added.
+      url_split = check_url(url)
     if re.search(r'^(?:http)s?://', url, re.I):
-      if not re.search(r"^(http|ws)s?://", url, re.I):
-        if re.search(r":443\b", url):
-          url = "https://" + url
-        else:
-          url = "http://" + url
       settings.SCHEME = (url_split.scheme.strip().lower() or "http") if not menu.options.force_ssl else "https"
     else:
       err_msg = "Invalid target URL provided. "
@@ -3065,10 +3070,12 @@ def time_delay_due_to_unstable_request(timesec):
       settings.UNSTABLE_REQUEST_BUMPS = settings.UNSTABLE_REQUEST_BUMPS + 1
     return timesec, settings.UNSTABLE_REQUEST_CHOICE == "c"
 
+  # Built once: appended to inside the loop, every answer that was not one of the options asked the
+  # question again on the end of the one before it.
   message = "Unexpected time delays have been identified."
+  message += " How do you want to proceed? [(C)ontinue with a longer delay/(s)kip this candidate and try the next] "
   settings.print_data_to_stdout(settings.END_LINE.CR)
   while True:
-    message = message + " How do you want to proceed? [(C)ontinue with a longer delay/(s)kip this candidate and try the next] "
     proceed_option = common.read_input(message, default="C", check_batch=True)
     if proceed_option.lower() in settings.CHOICE_PROCEED :
       if proceed_option.lower() == "c":
@@ -6796,6 +6803,9 @@ def brute_force_target_names():
     return set()
   labels = host.split(".")
   names = {host}
+  # A bare IP has no label to drop - '192.168.0' names no host the address does.
+  if re.match(r"\A\d{1,3}(?:\.\d{1,3}){3}\Z", host):
+    return names
   if labels[0] == "www":
     names.add(".".join(labels[1:]))
     names.add(".".join(labels[1:-1]))
@@ -7460,41 +7470,6 @@ def msf_launch_msg(output):
     sys.stdin.readline().replace(settings.END_LINE.LF, "")
     # Remove the ouput file.
     os.remove(output)
-
-"""
-Check for available shell options.
-"""
-def shell_options(option):
-  if option.lower() == "?":
-    menu.reverse_tcp_options()
-  elif option.lower() == "quit" or option.lower() == "exit":
-    raise SystemExit()
-
-  elif option[0:4].lower() == "set ":
-    if option[4:10].lower() == "lhost ":
-      if option.lower() == "bind_tcp":
-        err_msg =  "The '" + option[4:9].upper() + "' option is not "
-        err_msg += "usable for '" + option.lower() + "' mode. Use the 'RHOST' option."
-        settings.print_data_to_stdout(settings.print_error_msg(err_msg))
-      else:
-        check_lhost(option[10:])
-    if option[4:10].lower() == "rhost ":
-      if option.lower() == "reverse_tcp":
-        err_msg =  "The '" + option[4:9].upper() + "' option is not "
-        err_msg += "usable for '" + option.lower() + "' mode. Use the 'LHOST' option."
-        settings.print_data_to_stdout(settings.print_error_msg(err_msg))
-      else:
-        check_rhost(option[10:])
-    if option.lower() == "reverse_tcp":
-      if option[4:10].lower() == "lport ":
-        check_lport(option[10:])
-      if option[4:12].lower() == "srvport ":
-        check_srvport(option[12:])
-      if option[4:12].lower() == "uripath ":
-        check_uripath(option[12:])
-
-  else:
-    return option
 
 """
 Set up the PHP working directory on the target host.
