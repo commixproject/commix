@@ -260,7 +260,10 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
     # were not held back, while most of the probes around them are - and a request that waits its
     # turn behind those comes back as late as one that was delayed on purpose. Lowered on the
     # strength of the quick answers, the delay stops standing out from the slow ones at all.
-    if settings.THREADS > 1:
+    # Read as the requests are actually being sent, not as '--threads' asked for them: a run that
+    # has already dropped to a single thread sends them one at a time, and left reading the option
+    # the delay it raised to clear the baseline was never lowered again.
+    if retrieval_concurrency() > 1:
       return
     if settings.ADJUST_TIME_DELAY_DISABLED or settings.ADJUST_TIME_DELAY_CHOICE is False:
       return
@@ -578,6 +581,9 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
           output_length = _bisect_length()
           if output_length is None:
             length_suspect = True
+            # Put the delay back, the way exhausting the retries above does: it was raised for a
+            # search that has now given up, and left raised every later command pays it.
+            timesec = settings.CALIBRATED_TIMESEC = original_timesec
             break
         _note_validation_result(revalidations > 0)
 
@@ -1142,7 +1148,10 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
         output.append(chr(ascii_char))
 
     boundary_char = chr(max(settings.CHAR_POOL_MULTI))
-    if output.count(boundary_char) >= 1 or conn_error_positions or lagging_detected:
+    # One of them is a character the output is entitled to - a backup name, a home path. What this
+    # looks for is an oracle agreeing to everything, which resolves most of the positions to it, and
+    # resolving every one of them the control above already refuses outright.
+    if output.count(boundary_char) > max(1, len(output) // 2) or conn_error_positions or lagging_detected:
       if threaded:
         warn_msg = "Concurrent (threaded) requests overloading the target may have corrupted the extracted data. Consider re-running with '--threads=1' to confirm it."
       else:

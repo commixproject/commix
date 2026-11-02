@@ -706,6 +706,16 @@ def sink_boundaries():
   return settings.PREFIXES, settings.SUFFIXES, settings.SEPARATORS
 
 """
+What the grammar in hand calls a separator, which is not what this target can chain on - the latter
+is what 'chainable_separators()' narrows the list to, and a suffix is dead against a payload that
+closed itself whether or not this target happens to chain on it.
+"""
+def grammar_separators():
+  if menu.options.eval_sink:
+    return settings.EVAL_SEPARATORS
+  return settings.SEPARATORS
+
+"""
 Whether a technique is one this run is testing. Two separate choices sit behind it: which sink is
 being tested, chosen with '--eval', and by which technique, chosen with '--technique'. A technique
 runs when its letter was asked for and it reaches the sink in hand, so the two compose.

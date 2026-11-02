@@ -559,7 +559,7 @@ def _oob_sweep(is_eval, injection_type, prefixes, suffixes, separators, url, tim
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
 
   TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
-  combinations = list(_boundary_combinations(whitespaces, prefixes, suffixes, separators, grammar_separators=settings.SEPARATORS))
+  combinations = list(_boundary_combinations(whitespaces, prefixes, suffixes, separators, grammar_separators=checks.grammar_separators()))
   total = len(combinations) * len(transports)
   i = 0
 
@@ -782,7 +782,7 @@ def do_boolean_based_process(url, timesec, filename, http_request_method, inject
       settings.EXPLOITATION_PHASE = False
       for printed in ((False,) if menu.options.eval_sink else (False, True)):
        settings.BOOLEAN_PRINTED_STATE = printed
-       for whitespace, stored_prefix, stored_suffix, stored_separator in _boundary_combinations(whitespaces, [prefix], [suffix], [separator]):
+       for whitespace, stored_prefix, stored_suffix, stored_separator in _boundary_combinations(whitespaces, [prefix], [suffix], [separator], grammar_separators=checks.grammar_separators()):
         confirmed = _answers_both_ways(whitespace, stored_prefix, stored_suffix, stored_separator, TAG)
         if confirmed:
           _, vuln_parameter, sent_prefix, sent_suffix = confirmed
@@ -814,7 +814,7 @@ def do_boolean_based_process(url, timesec, filename, http_request_method, inject
   shapes = (False,) if menu.options.eval_sink else (False, True)
   for printed in shapes:
     settings.BOOLEAN_PRINTED_STATE = printed
-    for whitespace, prefix, suffix, separator in _boundary_combinations(whitespaces, prefixes, suffixes, separators):
+    for whitespace, prefix, suffix, separator in _boundary_combinations(whitespaces, prefixes, suffixes, separators, grammar_separators=checks.grammar_separators()):
       settings.DETECTION_PHASE = True
       settings.EXPLOITATION_PHASE = False
       bare_prefix, bare_suffix = prefix, suffix
@@ -1011,7 +1011,6 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
     _confirm_threaded_time_retrieval(url, http_request_method, resuming_stored)
 
   counter = 1
-  num_of_chars = 1
   no_result = True
   possibly_vulnerable = False
   false_positive_warning = False
@@ -1049,7 +1048,7 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
 
   prefixes, suffixes, separators, whitespaces = _prioritize_confirmed_boundary(prefixes, suffixes, separators, whitespaces)
 
-  combinations = list(_boundary_combinations(whitespaces, prefixes, suffixes, separators, grammar_separators=settings.SEPARATORS))
+  combinations = list(_boundary_combinations(whitespaces, prefixes, suffixes, separators, grammar_separators=checks.grammar_separators()))
   i = 0
   total = len(combinations)
   for whitespace, prefix, suffix, separator in combinations:
@@ -1089,7 +1088,9 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
         pass
 
     if not resumed:
-      num_of_chars = num_of_chars + 1
+      # Counted from the one that was set aside for it: counting from a value of its own, the first
+      # combination was announced as the second, and the last closed the sweep one short of its end.
+      i = i + 1
       # Retry the same separator once with a fresh TAG before moving to the next one.
       for _false_positive_retry in range(settings.FALSE_POSITIVE_RETRIES):
         # Check for bad combination of prefix and separator
@@ -1097,7 +1098,7 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
         if combination in settings.JUNK_COMBINATION:
           prefix = ""
         # Change TAG on every request to prevent false-positive resutls.
-        TAG = ''.join(random.choice(string.ascii_uppercase) for num_of_chars in range(6))
+        TAG = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
         # Whether anything in this pass answered late, which is what a further pass could re-judge.
         answered_late = False
         # The output file for file-based injection technique.
@@ -1232,7 +1233,7 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
               if false_positive_warning:
                 timesec, false_positive_fixation = checks.time_delay_due_to_unstable_request(timesec)
 
-              checks.injection_process(injection_type, technique, i=num_of_chars, total=total)
+              checks.injection_process(injection_type, technique, i=i, total=total)
 
               # Check if false positive fixation is True.
               if false_positive_fixation:
@@ -1284,12 +1285,12 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
                   break
               # False positive
               else:
-                checks.injection_process(injection_type, technique, i=num_of_chars, total=total)
+                checks.injection_process(injection_type, technique, i=i, total=total)
                 continue
             else:
               # Feed the baseline model even during detection, not just later phases.
               checks.record_probe_response_time(exec_time)
-              checks.injection_process(injection_type, technique, i=num_of_chars, total=total)
+              checks.injection_process(injection_type, technique, i=i, total=total)
               continue
 
           except KeyboardInterrupt:
@@ -1310,7 +1311,7 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
             raise
 
           except Exception:
-            if num_of_chars >= total:
+            if i >= total:
               if no_result is True:
                 checks.injection_process(injection_type, technique, done=True)
               else:
@@ -1428,7 +1429,7 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
 
   TAG = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
   # Only the classic technique leaves its pipe payloads open, to read the result off the response.
-  combinations = list(_boundary_combinations(whitespaces, prefixes, suffixes, separators, keep_output=technique == settings.INJECTION_TECHNIQUE.RESULTS_BASED, grammar_separators=settings.SEPARATORS))
+  combinations = list(_boundary_combinations(whitespaces, prefixes, suffixes, separators, keep_output=technique == settings.INJECTION_TECHNIQUE.RESULTS_BASED, grammar_separators=checks.grammar_separators()))
   i = 0
   total = len(combinations)
   """
