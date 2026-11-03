@@ -500,7 +500,11 @@ def check_http_traffic(request):
         settings.UNAUTHORIZED = unauthorized = True
         with settings.REQUESTS_LOCK:
           stability.freeze_retry_budget()
-      else:
+      elif isinstance(err_msg, _urllib.error.HTTPError):
+        # An answer, however unwelcome: the request was spent reaching the target, so the budget it
+        # is measured against grows with it. A transport failure reached nothing and is no progress
+        # to grow it on - re-doubled on every one of those, the budget outgrew the attempts made
+        # against it, and a target that never resolves was retried for as long as it was left to.
         with settings.REQUESTS_LOCK:
           stability.expand_retry_budget()
       if [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(err_msg)]:
