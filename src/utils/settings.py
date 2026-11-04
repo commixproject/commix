@@ -486,7 +486,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "288"
+REVISION = "289"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -2292,6 +2292,9 @@ RESPONSE_TIMES = []
 # the plain requests the model is warmed up with: those two cost different amounts.
 PROBE_RESPONSE_TIMES = []
 MIN_PROBE_RESPONSES = 5
+# How much of a plain request's cost a probe has to carry before its timing is believed to be one.
+# Below this the payload never reached the sink, so the answer timed is something else's.
+MIN_PROBE_RELATIVE_COST = 0.5
 
 # Samples needed before spikes are worth stripping from a response-time model. Tied to the smaller
 # of the two models rather than the larger: the probe model is read from five samples up, and left

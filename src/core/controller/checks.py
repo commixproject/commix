@@ -3152,6 +3152,20 @@ def strip_time_outliers(values):
 Feed a genuinely non-delayed response time into the rolling baseline model.
 """
 def record_probe_response_time(exec_time):
+  """
+  Only where the request it timed actually reached the sink.
+
+  A probe is a plain request with the payload's own work added on top, so it cannot come back
+  faster than a plain one does. One that does was answered by something in front of the sink - a
+  filter rejecting the payload outright returns at once, having run no command at all - and it says
+  what that refusal costs, not what a probe costs. Taken into the model, those pull the mean toward
+  nothing and the threshold down onto its floor, so an ordinary answer reads as a delay: the delay
+  asked for is raised against a target that was answering normally, and every probe after it pays
+  the longer wait for nothing.
+  """
+  plain = strip_time_outliers(settings.RESPONSE_TIMES)
+  if len(plain) >= 2 and exec_time < statistics.mean(plain) * settings.MIN_PROBE_RELATIVE_COST:
+    return
   settings.PROBE_RESPONSE_TIMES.append(exec_time)
   if len(settings.PROBE_RESPONSE_TIMES) > settings.MAX_TIME_RESPONSES:
     settings.PROBE_RESPONSE_TIMES[:] = settings.PROBE_RESPONSE_TIMES[-(settings.MAX_TIME_RESPONSES // 2):]

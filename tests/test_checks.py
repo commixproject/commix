@@ -233,6 +233,38 @@ class Lagging(unittest.TestCase):
     self.assertTrue(self.verdict(3.1, 1.2))
     self.assertTrue(self.verdict(0.1, 0.6))
 
+class ProbeModel(unittest.TestCase):
+  """
+  Which timings are believed to be what a probe costs.
+  """
+  def setUp(self):
+    self.disable_stats = menu.options.disable_stats
+    menu.options.disable_stats = False
+    # A sink that runs a command before answering, behind a filter that rejects the payload at once.
+    settings.RESPONSE_TIMES[:] = [3.10, 3.12, 3.11, 3.13, 3.10, 3.12, 3.11, 3.12]
+    settings.PROBE_RESPONSE_TIMES[:] = []
+
+  def tearDown(self):
+    menu.options.disable_stats = self.disable_stats
+    settings.RESPONSE_TIMES[:] = []
+    settings.PROBE_RESPONSE_TIMES[:] = []
+
+  def test_an_answer_the_payload_never_reached_the_sink_for_is_not_a_probe(self):
+    """
+    A model built on what a refusal costs reads an ordinary answer as a delay, which raises the
+    delay asked for and makes every probe after it wait longer for nothing.
+    """
+    for _ in range(13):
+      checks.record_probe_response_time(0.01)
+    self.assertEqual([], settings.PROBE_RESPONSE_TIMES)
+    self.assertFalse(checks.time_related_shell(3.13, 10))
+    self.assertTrue(checks.time_related_shell(13.1, 10))
+
+  def test_a_probe_that_did_reach_it_still_counts(self):
+    for exec_time in (3.15, 3.18, 3.14, 3.16, 3.17):
+      checks.record_probe_response_time(exec_time)
+    self.assertEqual(5, len(settings.PROBE_RESPONSE_TIMES))
+
 class DelayThreshold(unittest.TestCase):
   """
   How late an answer has to be before it counts as a delay that was asked for.
