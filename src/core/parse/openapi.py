@@ -105,8 +105,13 @@ def _example(spec, schema, seen=None, depth=0, cache=None):
   ref = schema.get("$ref") if isinstance(schema, dict) else None
   if not isinstance(ref, six.string_types):
     ref = None
-  if ref is not None and ref in cache:
-    return cache[ref]
+  # Kept against the depth it was worked out at as well as the reference itself: what a shape
+  # expands to depends on how much of the depth budget is left for its children, so a reference
+  # first met near the cutoff was kept with those children collapsed, and handed back that way
+  # everywhere it appeared afterwards - including where there was room to expand it in full.
+  key = (ref, depth) if ref is not None else None
+  if key is not None and key in cache:
+    return cache[key]
 
   schema = _resolve(spec, schema or {}, seen, depth)
   if not isinstance(schema, dict):
@@ -157,8 +162,8 @@ def _example(spec, schema, seen=None, depth=0, cache=None):
       else:
         value = "1"
 
-  if ref is not None:
-    cache[ref] = value
+  if key is not None:
+    cache[key] = value
   return value
 
 """

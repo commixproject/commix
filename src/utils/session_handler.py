@@ -569,7 +569,11 @@ def load_stored_techniques(url, check_parameter, http_request_method):
         # A technique this run was not asked to test is not resumed, nor reported as resumed.
         if not checks.technique_selected(letter, letter_is_eval):
           continue
-        stored[technique] = row
+        # Kept under the name this version knows it by, which is the name the order below is written
+        # in and the name everything that looks one up asks by: filed under the one the session was
+        # written with, a row from before a rename passed every check above and was then dropped by
+        # that order, leaving a point reported as resumed with nothing to resume it from.
+        stored[settings.LEGACY_TECHNIQUE_NAMES.get(technique, technique)] = row
     return {_: stored[_] for _ in settings.TECHNIQUE_ORDER if _ in stored}
   except Exception:
     return stored
@@ -592,6 +596,9 @@ def apply_stored_technique(row):
    TAG, interpreter, payload, http_header, http_request_method, url_time_response,
    timesec, exec_time, output_length, is_vulnerable, data, cookie) = row[:20]
   injection_type = stored_injection_type(injection_type)
+  # Read the same way the injection type above is: a session written under the older name names the
+  # same technique, and what is handed back is compared against the name this version uses.
+  technique = settings.LEGACY_TECHNIQUE_NAMES.get(technique, technique)
   # Older sessions (pre-tamper-column) won't have this field - default to "".
   tamper = row[20] if len(row) > 20 else ""
   # Older sessions (pre-target_os-column) won't have this field either.
@@ -631,7 +638,12 @@ def apply_stored_technique(row):
       say_once_about_session(warn_msg)
     menu.options.tamper = tamper
   if target_os and target_os != "None":
-    if menu.options.os and menu.options.os.lower() != target_os:
+    # What the two mean rather than how each was written: '--os' takes both spellings of the family
+    # and leaves them as given, while the stored value is the one the rest of the code compares
+    # against - so 'unix-like' read as differing from a stored 'unix', and the run was warned about
+    # a conflict between two names for the same system.
+    applied_os = settings.OS.WINDOWS if (menu.options.os or "").lower() == settings.OS.WINDOWS else settings.OS.UNIX
+    if menu.options.os and applied_os != target_os.lower():
       warn_msg = ("The stored session was found against target OS '" + target_os.title() + "', "
                   "which differs from the '--os' value provided now ('" + menu.options.os.title() +
                   "'). Using the stored value to replay this technique consistently.")

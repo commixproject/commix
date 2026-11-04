@@ -83,13 +83,30 @@ def extract_vuln_param_from_pairs(text, delimiter, strip_leading_space=False, ch
 Resolve the custom-marker component to prepend/append to a prefix or suffix.
 """
 def resolve_marker_component(default_value, marker_char):
-  if settings.CUSTOM_INJECTION_MARKER and len(settings.PRE_CUSTOM_INJECTION_MARKER_CHAR) != 0:
+  # Asked of the component being resolved rather than of the one that comes before it: a marker at
+  # the very start of a value leaves nothing in front of it, and the text behind it is the suffix
+  # all the same - read off the part in front, that text was dropped from the suffix entirely.
+  if settings.CUSTOM_INJECTION_MARKER and len(marker_char) != 0:
     return marker_char
   if settings.IS_JSON or (settings.LOAD_SESSION and not any((settings.COOKIE_INJECTION, settings.USER_AGENT_INJECTION,
                                                                settings.REFERER_INJECTION, settings.HOST_INJECTION,
                                                                settings.CUSTOM_HEADER_INJECTION))):
     return None
   return default_value
+
+"""
+Put the marker inside an empty JSON string value, however the document spaces it.
+
+Read with whatever sits between the colon and the quotes rather than against one spelling of it: a
+body that was pretty-printed - which every one taken from a request file is - writes '"k": ""', and
+a replacement looking only for '"k":""' passed those leaves over and left them untested, while
+saying the value was empty as though it were about to test it. The spacing is put back as it was,
+since the body has to reach the target the way it was given.
+"""
+def tag_empty_json_value(text):
+  marker = settings.INJECT_TAG
+  text = re.sub(r':(\s*)""', lambda match: ":" + match.group(1) + "\"" + marker + "\"", text)
+  return re.sub(r':(\s*)\\"\\"', lambda match: ":" + match.group(1) + "\\\"" + marker + "\\\"", text)
 
 """
 Shield each leaf element behind a placeholder so a line/element split can't fragment it.
@@ -551,7 +568,7 @@ def handle_single_post_parameter(parameter, multi_parameters, http_request_metho
       # Replace the value of parameter with INJECT_HERE tag
       if len(value) == 0:
         if settings.IS_JSON:
-          parameter = parameter.replace(":\"\"", ":\"" + settings.INJECT_TAG + "\"")
+          parameter = tag_empty_json_value(parameter)
         else:
           parameter = parameter + settings.INJECT_TAG
       else:
@@ -618,7 +635,7 @@ def handle_multiple_post_parameters(parameter, multi_parameters, http_request_me
       if len(value) == 0:
         if not menu.options.skip_empty:
           if settings.IS_JSON:
-            all_params[param] = ''.join(all_params[param]).replace(":\"\"", ":\"" + settings.INJECT_TAG + "\"").replace(":\\\"\\\"", ":\\\"" + settings.INJECT_TAG + "\\\"")
+            all_params[param] = tag_empty_json_value(''.join(all_params[param]))
           elif settings.IS_XML:
             all_params[param] = ''.join(all_params[param]).replace("></", ">" + settings.INJECT_TAG + "</")
           else:

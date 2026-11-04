@@ -5505,13 +5505,20 @@ def run_enumeration(execute_cmd, filename, url):
     ran = True
     print_enumenation().os_info_msg()
     target_os = execute_cmd(settings.RECOGNISE_OS)
-    if target_os == "Linux":
-      distro_name = execute_cmd(settings.DISTRO_INFO)
-      if distro_name:
-        target_os = target_os + settings.SINGLE_WHITESPACE + distro_name
+    target_arch = None
+    if target_os:
+      # Only a Linux kernel has a distribution name to add to it, the way 'system_information()'
+      # reads the two apart. The architecture, and the answer itself, belong to every kernel alike -
+      # asked for inside that name, a target answering anything else ('Darwin', 'FreeBSD', 'SunOS')
+      # had its architecture left unread and nothing said about it at all, not even that the fetch
+      # had failed.
+      if target_os == "Linux":
+        distro_name = execute_cmd(settings.DISTRO_INFO)
+        if distro_name:
+          target_os = target_os + settings.SINGLE_WHITESPACE + distro_name
       target_arch = execute_cmd(settings.RECOGNISE_HP)
       set_target_arch(target_arch)
-      print_os_info(target_os, target_arch, filename, False)
+    print_os_info(target_os, target_arch, filename, False)
 
   if menu.options.current_user:
     ran = True

@@ -93,6 +93,15 @@ Options the server settles for every task, whatever it is asked. Refused rather 
 that what a task says it was given is what it was actually run with.
 """
 SERVER_OWNED_OPTIONS = ("report_json", "output_dir", "batch")
+
+"""
+Options a task's run is never given, and so cannot be set for one.
+
+The file a run is started from is written from the parser's own groups, less the ones that say what
+to do rather than how - so an option left out of it, or one hanging off the parser rather than any
+group, was taken, answered for as set, listed back as set, and then not carried into the run at all.
+"""
+UNCARRIED_OPTIONS = tuple(configfile.IGNORED) + ("ignore_stdin",)
 MAX_BODY = 16 * 1024 * 1024
 TASK_ID_BYTES = 8
 LOG_LINE_REGEX = re.compile(r"^\[(?P<time>\d{2}:\d{2}:\d{2})\]\s+\[(?P<level>[a-z]+)\]\s+(?P<message>.*)$")
@@ -144,6 +153,8 @@ class Task(object):
       return "The option '" + (option._long_opts + option._short_opts)[0] + "' cannot be set over the API: it " + REFUSED_OPTIONS[option.dest] + "."
     if option.dest in SERVER_OWNED_OPTIONS:
       return "The option '" + (option._long_opts + option._short_opts)[0] + "' is settled by the server for every task."
+    if option.dest in UNCARRIED_OPTIONS:
+      return "The option '" + (option._long_opts + option._short_opts)[0] + "' cannot be set over the API: a task's run is not given it."
     # Checked here rather than left for the run to refuse: a value the parser would not have taken
     # is a request that did not do what it was told it did.
     if option.action == "store" and not isinstance(value, bool) and value is not None:
@@ -430,9 +441,13 @@ class Api(object):
       # Refused rather than kept: the running scan was handed its options when it started, so one
       # set now would read as having changed something it cannot reach.
       return _no("That scan is running, and a scan is given its options once, when it starts.")
+    # All of them or none of them: settled one at a time, a request answered as refused had already
+    # changed the ones named before the one that was refused, and said nothing about which.
+    settled = task.options.copy()
     for name, value in body.items():
       refused = task.set_option(name, value)
       if refused:
+        task.options = settled
         return _no(refused)
     return _ok()
 
@@ -445,9 +460,12 @@ class Api(object):
     with task.lock:
       if task.running():
         return _no("That scan is already running.")
+      # All of them or none, as above: a scan refused its options is not started with some of them.
+      settled = task.options.copy()
       for name, value in (body or {}).items():
         refused = task.set_option(name, value)
         if refused:
+          task.options = settled
           return _no(refused)
       if not any(task.options.get(_) for _ in ("url", "logfile", "bulkfile", "requestfile", "sitemap_url", "openapi")):
         return _no("Nothing to scan: none of 'url', 'logfile', 'bulkfile', 'requestfile', 'sitemap_url' or 'openapi' was set.")

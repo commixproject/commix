@@ -988,7 +988,12 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
     # Resolve the character at one position, on whichever shell the run is speaking.
     def _extract_position(num_of_chars):
       nonlocal timesec
-      char_pool = checks.generate_char_pool(num_of_chars)
+      # Chosen by how long the output is, which is what the pool is picked on - not by which of its
+      # characters is being read, which is what this position is. Asked with the position, the first
+      # character of every output was read against the single-character pool, and that one leaves
+      # out the tab and the newline: an output beginning with either could not be resolved at all,
+      # after every escalation the position is allowed had been spent on it.
+      char_pool = checks.generate_char_pool(output_length)
 
       if interpreter:
         # Alternative shells are still experimental.
