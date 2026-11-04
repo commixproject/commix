@@ -137,5 +137,73 @@ class TamperDependencies(unittest.TestCase):
     finally:
       menu.options.eval_sink, settings.EVAL_BASED_STATE = eval_sink, eval_state
 
+class BooleanOracleNoise(unittest.TestCase):
+  """
+  What the page moves on its own, weighed against what the question answered.
+  """
+  def setUp(self):
+    self.markings = settings.DYNAMIC_MARKINGS
+    settings.DYNAMIC_MARKINGS = []
+
+  def tearDown(self):
+    settings.DYNAMIC_MARKINGS = self.markings
+
+  # The same page, twice, with only the command's own timing moving between them.
+  def page(self, timing):
+    return ("<html><body><p>the command was asked and answered here</p>"
+            "<b>rtt min/avg/max/mdev = " + timing + " ms</b>"
+            "<p>and the rest of this page stands perfectly still</p></body></html>")
+
+  def test_a_difference_that_moves_on_its_own_is_not_an_answer(self):
+    """
+    Two answers that are meant to differ, differing only where two answers that are meant to match
+    already did. Taken for an answer, a boundary is confirmed on the strength of a timing.
+    """
+    true_page, false_page = self.page("0.015/0.048/0.073/0.022"), self.page("0.042/0.058/0.065/0.009")
+    # Nothing learned about the page yet, so the timing reads as the two answers differing.
+    self.assertTrue(checks.calibrate_boolean_oracle(true_page, false_page))
+    # The same question asked twice is what says which part of it was never an answer.
+    checks.find_dynamic_content(true_page, self.page("0.031/0.052/0.061/0.011"))
+    self.assertTrue(settings.DYNAMIC_MARKINGS)
+    self.assertFalse(checks.calibrate_boolean_oracle(true_page, false_page))
+
+class DelayThreshold(unittest.TestCase):
+  """
+  How late an answer has to be before it counts as a delay that was asked for.
+  """
+  def setUp(self):
+    self.disable_stats = menu.options.disable_stats
+    menu.options.disable_stats = False
+    settings.PROBE_RESPONSE_TIMES[:] = []
+
+  def tearDown(self):
+    menu.options.disable_stats = self.disable_stats
+    settings.RESPONSE_TIMES[:] = []
+    settings.PROBE_RESPONSE_TIMES[:] = []
+
+  # A steady target around the given pace, varying by a hundredth of a second either way.
+  def steady_at(self, mean):
+    settings.RESPONSE_TIMES[:] = [mean + (0.01 if index % 2 else -0.01) for index in range(8)]
+
+  def test_a_delay_that_fires_is_seen_however_slow_the_target_is(self):
+    for mean in (3.0, 6.0, 11.0, 20.0, 40.0):
+      self.steady_at(mean)
+      timesec = 5
+      self.assertTrue(checks.time_related_shell(mean + timesec, timesec),
+                      "a delay of " + str(timesec) + "s was missed on a target answering in " + str(mean) + "s")
+
+  def test_an_ordinary_answer_is_not_read_as_a_delay(self):
+    for mean in (3.0, 6.0, 11.0, 20.0, 40.0):
+      self.steady_at(mean)
+      self.assertFalse(checks.time_related_shell(mean, 5),
+                       "a plain answer of " + str(mean) + "s was read as delayed")
+
+  def test_the_margin_is_not_raised_past_the_delay_being_asked_for(self):
+    self.steady_at(20.0)
+    # Half of the delay asked for, where half the target's own pace would stand well above it.
+    self.assertAlmostEqual(22.5, checks.current_delay_threshold(5), places=2)
+    # Nothing to measure it against leaves the margin read off the target alone.
+    self.assertAlmostEqual(30.0, checks.current_delay_threshold(), places=2)
+
 if __name__ == "__main__":
   unittest.main()

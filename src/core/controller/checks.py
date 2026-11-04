@@ -244,7 +244,7 @@ def final_false_positive_check(url, http_request_method, check_parameter, timese
     # technique other than time/boolean-based never needed and a filter on '$' blocks outright -
     # a confirmed file/tempfile/OOB finding would otherwise be taken back over a limitation in
     # the re-ask, not in the finding. Retried once, already-'$'-free, before giving up.
-    if not output and not settings.SKIP_SUBST and separator in (";", "\n", "\r\n", "&"):
+    if not output and not settings.SKIP_SUBST and separator in (";", "\n", "\r\n", "&", "|"):
       settings.SKIP_SUBST = True
       try:
         _, output = injector.false_positive_check(separator, "", "", prefix, suffix, whitespace, timesec, http_request_method,
@@ -3227,7 +3227,7 @@ def check_lagging():
 """
 Current adaptive delay threshold (mean + N*stdev of the baseline), or None if there's no data to compute a deviation from yet.
 """
-def _delay_threshold_from(times):
+def _delay_threshold_from(times, timesec=None):
   sample = strip_time_outliers(times)
   if len(sample) < 2:
     return None
@@ -3240,11 +3240,20 @@ def _delay_threshold_from(times):
   something that cannot be true sees a delay and calls the finding a false positive. The relative
   margin below covers the case on its own.
   """
-  margin = max(settings.TIME_STDEV_COEFF * deviation, mean * settings.MIN_RELATIVE_DELAY_MARGIN)
+  relative = mean * settings.MIN_RELATIVE_DELAY_MARGIN
+  """
+  A margin read off the target's own pace keeps climbing with it, while the delay being asked for
+  stays where it was put - so past a slow enough target the bar stands higher than any answer the
+  payload can produce, and a delay that fires every time is never once seen. Half the delay asked
+  for is the most that can be required of it, whichever of the two is the smaller.
+  """
+  if timesec:
+    relative = min(relative, timesec * settings.MIN_RELATIVE_DELAY_MARGIN)
+  margin = max(settings.TIME_STDEV_COEFF * deviation, relative)
   return max(settings.MIN_VALID_DELAYED_RESPONSE, mean + margin)
 
 # How late an answer has to be before it counts as a delay that was asked for.
-def current_delay_threshold():
+def current_delay_threshold(timesec=None):
   # Turned off with '--disable-stats': the delay asked for is then the only thing a probe is read
   # against, which is what the caller falls back to where no threshold is returned.
   if menu.options.disable_stats:
@@ -3255,10 +3264,10 @@ def current_delay_threshold():
   # two are never pooled, since a spread that wide reads as deviation and lifts the threshold above
   # the delay it exists to catch.
   if len(settings.PROBE_RESPONSE_TIMES) >= settings.MIN_PROBE_RESPONSES:
-    probe_threshold = _delay_threshold_from(settings.PROBE_RESPONSE_TIMES)
+    probe_threshold = _delay_threshold_from(settings.PROBE_RESPONSE_TIMES, timesec)
     if probe_threshold is not None:
       return probe_threshold
-  return _delay_threshold_from(settings.RESPONSE_TIMES)
+  return _delay_threshold_from(settings.RESPONSE_TIMES, timesec)
 
 """
 Time related shell condition. Uses the adaptive threshold once available, else a fixed one.
@@ -3266,7 +3275,7 @@ Time related shell condition. Uses the adaptive threshold once available, else a
 def time_related_shell(exec_time, timesec):
   if settings.BASELINE_TARGET:
     warm_up_response_baseline(*settings.BASELINE_TARGET)
-  lower_limit = current_delay_threshold()
+  lower_limit = current_delay_threshold(timesec)
   delayed = exec_time >= lower_limit if lower_limit is not None else exec_time >= timesec
 
   return delayed

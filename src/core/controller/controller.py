@@ -773,10 +773,20 @@ def check_parameter_dynamism(url, http_request_method, check_parameter):
   return True
 
 """
-Replace the parameter value with a disposable placeholder if the response stays the same but gets faster.
+Replace the parameter value with a placeholder an earlier run already confirmed the payload through.
+
+Not decided here on how the target answers the placeholder on its own. The value is what the command
+before the payload is given, so one the target was not answering on changes what that command does -
+a hostname that does not resolve where the real one did, failing where it used to succeed. A
+separator that chains on that command having succeeded then never fires, and one that chains on its
+having failed fires where the real value would never have let it, so the finding is either missed
+outright or is one that does not reproduce. Nothing available before the payload has an oracle tells
+those apart: a value worth skipping at all is one the target spends time on, and that time is the
+command's own. So the exchange is made after detection instead, where the boundary it was found on
+can re-ask the question and the answer says whether the placeholder still carries it.
 """
 def attempt_skip_testable_value(url, http_request_method, check_parameter):
-  if not settings.TESTABLE_VALUE:
+  if not settings.TESTABLE_VALUE or not settings.LOAD_SESSION:
     return url
   if any((settings.COOKIE_INJECTION, settings.USER_AGENT_INJECTION, settings.REFERER_INJECTION,
           settings.HOST_INJECTION, settings.CUSTOM_HEADER_INJECTION)):
@@ -788,81 +798,17 @@ def attempt_skip_testable_value(url, http_request_method, check_parameter):
   if not in_data and not in_url:
     return url
 
-  if settings.LOAD_SESSION:
-    # Trust a previously confirmed placeholder outright - no live probe on resume.
-    stored_placeholder = session_handler.check_stored_testable_value(url, check_parameter, http_request_method)
-    if not stored_placeholder:
-      return url
-    if in_data:
-      menu.options.data = menu.options.data.replace(marker, stored_placeholder + settings.INJECT_TAG)
-    else:
-      url = url.replace(marker, stored_placeholder + settings.INJECT_TAG)
-    settings.TESTABLE_VALUE = stored_placeholder
-    settings.TESTABLE_VALUE_OPTIMIZED = True
+  # Confirmed on the run that stored it, through the boundary it was found on, so it is taken as it
+  # stands rather than asked about again.
+  stored_placeholder = session_handler.check_stored_testable_value(url, check_parameter, http_request_method)
+  if not stored_placeholder:
     return url
-
-  param_label = ("POST" if in_data else "GET") + " parameter '" + check_parameter + "'"
-  if settings.VERBOSITY_LEVEL != 0:
-    debug_msg = "Testing if " + param_label + " requires its original value."
-    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-
-  # Build the request with the given value in place of the parameter's own.
-  def build(value):
-    if in_data:
-      data = menu.options.data.replace(marker, value)
-      request = _urllib.request.Request(url, data.encode(settings.DEFAULT_CODEC), method=http_request_method)
-    else:
-      request = _urllib.request.Request(url.replace(marker, value), method=http_request_method)
-    headers.do_check(request)
-    return request
-
-  placeholder = ''.join(random.choice(string.ascii_uppercase) for _ in range(3))
-  try:
-    # Both requests are paced before their clocks start: what is compared here is how long the
-    # target takes over either value, not how long this run was told to wait between requests.
-    real_request = build(settings.TESTABLE_VALUE)
-    headers.apply_request_policy()
-    start = time.time()
-    real_response = headers.send_raw(real_request, policy=False)
-    try:
-      real_body = real_response.read()
-      real_status = real_response.getcode()
-    finally:
-      real_response.close()
-    real_time = time.time() - start
-
-    placeholder_request = build(placeholder)
-    headers.apply_request_policy()
-    start = time.time()
-    placeholder_response = headers.send_raw(placeholder_request, policy=False)
-    try:
-      placeholder_body = placeholder_response.read()
-      placeholder_status = placeholder_response.getcode()
-    finally:
-      placeholder_response.close()
-    placeholder_time = time.time() - start
-  except Exception:
-    return url
-
-  same_status = real_status == placeholder_status
-  similar_size = abs(len(real_body) - len(placeholder_body)) <= max(50, len(real_body) * 0.2)
-  meaningfully_faster = placeholder_time < real_time * 0.7 and (real_time - placeholder_time) >= 0.5
-
-  if same_status and similar_size and meaningfully_faster:
-    if in_data:
-      menu.options.data = menu.options.data.replace(marker, placeholder + settings.INJECT_TAG)
-    else:
-      url = url.replace(marker, placeholder + settings.INJECT_TAG)
-    settings.TESTABLE_VALUE = placeholder
-    settings.TESTABLE_VALUE_OPTIMIZED = True
-    session_handler.import_testable_value_status(url, check_parameter, http_request_method, placeholder)
-    if settings.VERBOSITY_LEVEL != 0:
-      debug_msg = "The real parameter value is not required, so it is skipped for faster requests."
-      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-  elif settings.VERBOSITY_LEVEL != 0:
-    debug_msg = param_label + " appears to require its original value."
-    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-
+  if in_data:
+    menu.options.data = menu.options.data.replace(marker, stored_placeholder + settings.INJECT_TAG)
+  else:
+    url = url.replace(marker, stored_placeholder + settings.INJECT_TAG)
+  settings.TESTABLE_VALUE = stored_placeholder
+  settings.TESTABLE_VALUE_OPTIMIZED = True
   return url
 
 """

@@ -311,7 +311,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
     if not decision:
       checks.record_probe_response_time(exec_time)
     else:
-      lower_limit = checks.current_delay_threshold()
+      lower_limit = checks.current_delay_threshold(timesec)
       if lower_limit is not None:
         _adjust_time_delay(exec_time, lower_limit)
     return decision
@@ -771,7 +771,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
         if not decision:
           checks.record_probe_response_time(exec_time)
         else:
-          lower_limit = checks.current_delay_threshold()
+          lower_limit = checks.current_delay_threshold(local_timesec)
           if lower_limit is not None:
             _adjust_time_delay(exec_time, lower_limit)
         return decision

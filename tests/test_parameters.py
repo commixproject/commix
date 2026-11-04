@@ -100,5 +100,32 @@ class PostSplitting(unittest.TestCase):
     split, _ = parameters.split_post_parameters("a=1")
     self.assertEqual(["a=1"], split)
 
+class TestableValue(unittest.TestCase):
+  """
+  Whether the parameter's own value is handed to the target, or a placeholder put in its place.
+  """
+  def setUp(self):
+    from src.core.controller import controller
+    self.controller = controller
+    self.testable_value = settings.TESTABLE_VALUE
+    self.load_session = settings.LOAD_SESSION
+    settings.TESTABLE_VALUE = "127.0.0.1"
+    settings.LOAD_SESSION = False
+
+  def tearDown(self):
+    settings.TESTABLE_VALUE = self.testable_value
+    settings.LOAD_SESSION = self.load_session
+
+  def test_the_real_value_is_what_the_target_is_asked_with(self):
+    """
+    The command before the payload is given this value, so a placeholder the target was not
+    answering on makes that command fail - and a separator that chains on it having succeeded then
+    never fires, whatever the target would have carried.
+    """
+    url = "http://127.0.0.1/x.php?addr=127.0.0.1" + settings.INJECT_TAG
+    self.assertEqual(url, self.controller.attempt_skip_testable_value(url, "GET", "addr"))
+    self.assertEqual("127.0.0.1", settings.TESTABLE_VALUE)
+    self.assertFalse(settings.TESTABLE_VALUE_OPTIMIZED)
+
 if __name__ == "__main__":
   unittest.main()

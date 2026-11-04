@@ -751,8 +751,16 @@ def do_boolean_based_process(url, timesec, filename, http_request_method, inject
       asked twice here is two answers that are meant to match, so whatever differs between them is
       the page's own movement - learned before two answers that are meant to differ are weighed
       against each other, rather than after a boundary has been confirmed on the strength of it.
+
+      Held back until the two answers in hand actually differ. A pair that comes back identical has
+      nothing to teach and nothing to get wrong, since the oracle reads it as no answer either way -
+      but spending the one sample on it leaves the movement unmeasured for the pair that does differ,
+      which is the only pair that can be taken for an answer it is not. On a target that runs the
+      command only once the payload reaches it, the early pairs are the ones where it never ran, and
+      what moves there - a timing the command prints, a counter - is on neither page to be found.
       """
-      if not settings.DYNAMIC_MARKINGS and not settings.DYNAMIC_MARKINGS_RESAMPLED:
+      if not settings.DYNAMIC_MARKINGS and not settings.DYNAMIC_MARKINGS_RESAMPLED and \
+         checks.comparable_page(page_true or "") != checks.comparable_page(page_false or ""):
         settings.DYNAMIC_MARKINGS_RESAMPLED = True
         page_true_again = injector.page_of(payload, prefix, suffix, whitespace, http_request_method, url, vuln_parameter)[0]
         if page_true and page_true_again:

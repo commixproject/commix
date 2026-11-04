@@ -130,6 +130,28 @@ class PayloadSeparators(unittest.TestCase):
                            ",".join(repr(_) for _ in added) + " under " + repr(separator))
     self.assertEqual([], offenders)
 
+  def test_every_separator_is_still_asked_through_a_substitution_that_does_not_nest(self):
+    """
+    A separator the target carries is one the run has to be able to find the injection through, so
+    an empty payload here is that separator going untested and the finding being missed outright.
+    The pipe writes the marker out literally and counts it in a single substitution, which holds no
+    second one - so backticks express it just as well as '$( )' does.
+    """
+    from src.core.techniques.time_based import tb_payloads
+    for substitution in (settings.NESTING_SUBSTITUTION,
+                         (settings.BACKTICK_SUBSTITUTION, settings.BACKTICK_SUBSTITUTION)):
+      settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = substitution
+      try:
+        for separator in (";", "&", "|", "&&", "||", settings.END_LINE.LF):
+          payload = tb_payloads.decision(separator, "MARKER", 6, 5, "GET")
+          self.assertTrue(payload, "under " + repr(settings.CMD_SUB_PREFIX) +
+                          " the separator " + repr(separator) + " is asked nothing at all")
+          # The count the pipe takes is written in whichever substitution the run is using.
+          if separator in ("|", "||"):
+            self.assertIn(settings.CMD_SUB_PREFIX + "printf", payload)
+      finally:
+        settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = settings.NESTING_SUBSTITUTION
+
   def test_the_unresolved_list_names_builders_that_exist(self):
     known = set((module_name, name) for module_name, name, _, _ in builders())
     self.assertEqual(set(), UNRESOLVED - known)
