@@ -14,6 +14,7 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 from src.core.parse import cmdline as menu
+from src.utils import common
 from src.utils import settings
 from src.core.controller import handler
 from src.core.controller import checks
@@ -235,6 +236,34 @@ def exploitation(url, timesec, filename, tmp_path, http_request_method, url_time
   # Filled here in advance, the model would be built - and announced - whether or not it ends up
   # read at all.
   settings.BASELINE_TARGET = (url, http_request_method)
+
+  """
+  Asked here for the reason the time-based technique asks it.
+
+  This one reads its answer by how long the target takes too, so answers that swing by seconds hide
+  its delay inside that swing just as readily - and it was the one time-related technique never
+  asked about it at all. Read as how steadily the target answers rather than how slowly, so a
+  target that is only slow is not offered up over its latency.
+  """
+  if checks.response_times_unsteady():
+    settings.RESPONSE_DELAYS = True
+    # Lowering the delay again is read off the same times that are moving about, so it is
+    # left where it is while they are.
+    settings.ADJUST_TIME_DELAY_DISABLED = True
+    while True:
+      message = "Considerable lagging has been detected in the target's responses, which makes "
+      message += "time-related techniques unreliable - a higher '--time-sec' (10 or more) stands "
+      message += "clear of it. How do you want to proceed? [(C)ontinue/(s)kip] "
+      proceed_option = common.read_input(message, default="C", check_batch=True)
+      if proceed_option.lower() in settings.CHOICE_PROCEED :
+        if proceed_option.lower() == "c":
+          break
+        elif proceed_option.lower() == "s":
+          return False
+        elif proceed_option.lower() == "q":
+          raise SystemExit()
+      else:
+        common.invalid_option(proceed_option)
 
   if tfb_injection_handler(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path) is False:
     settings.TIME_RELATED_ATTACK = settings.TEMPFILE_BASED_STATE = False

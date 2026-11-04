@@ -15,6 +15,7 @@ For more see the file 'readme/COPYING' for copying permission.
 
 from src.utils import common
 from src.utils import settings
+from src.core.controller import checks
 from src.core.controller import handler
 
 """
@@ -37,11 +38,18 @@ def exploitation(url, timesec, filename, http_request_method, url_time_response,
     settings.TIME_RELATED_ATTACK = True
 
   tmp_path = ""
-  if url_time_response >= settings.SLOW_TARGET_RESPONSE:
+  # Asked about how steadily the target answers, not about how long it takes: a slow target that
+  # answers at the same speed every time is read as easily as a fast one, and the question was
+  # being put - and the technique offered up - over nothing but its latency.
+  if checks.response_times_unsteady():
     settings.RESPONSE_DELAYS = True
+    # Lowering the delay again is read off the same times that are moving about, so it is
+    # left where it is while they are.
+    settings.ADJUST_TIME_DELAY_DISABLED = True
     while True:
-      message = "High response delays make time-related techniques unreliable. "
-      message += "How do you want to proceed? [(C)ontinue/(s)kip] "
+      message = "Considerable lagging has been detected in the target's responses, which makes "
+      message += "time-related techniques unreliable - a higher '--time-sec' (10 or more) stands "
+      message += "clear of it. How do you want to proceed? [(C)ontinue/(s)kip] "
       proceed_option = common.read_input(message, default="C", check_batch=True)
       if proceed_option.lower() in settings.CHOICE_PROCEED :
         if proceed_option.lower() == "c":

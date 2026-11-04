@@ -631,15 +631,19 @@ def handle_multiple_post_parameters(parameter, multi_parameters, http_request_me
         if param > 0:
           all_params[param - 1] = ''.join(all_params[param - 1]).replace(settings.INJECT_TAG, "")
         continue
-      # Replace the value of parameter with INJECT_HERE tag
-      if len(value) == 0:
-        if not menu.options.skip_empty:
-          if settings.IS_JSON:
-            all_params[param] = tag_empty_json_value(''.join(all_params[param]))
-          elif settings.IS_XML:
-            all_params[param] = ''.join(all_params[param]).replace("></", ">" + settings.INJECT_TAG + "</")
-          else:
-            all_params[param] = ''.join(all_params[param] + settings.INJECT_TAG)
+      # An empty value is backfilled with RANDOM_TAG upstream, so measure it with that stripped.
+      if len(str(value).replace(settings.RANDOM_TAG, "")) == 0:
+        if menu.options.skip_empty:
+          # Mirror the anti-CSRF skip above: drop the previous tag and add no candidate of its own.
+          if param > 0:
+            all_params[param - 1] = ''.join(all_params[param - 1]).replace(settings.INJECT_TAG, "")
+          continue
+        if settings.IS_JSON:
+          all_params[param] = tag_empty_json_value(''.join(all_params[param]))
+        elif settings.IS_XML:
+          all_params[param] = ''.join(all_params[param]).replace("></", ">" + settings.INJECT_TAG + "</")
+        else:
+          all_params[param] = ''.join(all_params[param] + settings.INJECT_TAG)
       else:
         all_params[param] = apply_tag_to_value(''.join(all_params[param]), value)
         if settings.IS_JSON and len(all_params[param].split("\":")) == 2:
@@ -906,10 +910,14 @@ def do_cookie_check(cookie):
           if param > 0:
             all_params[param - 1] = ''.join(all_params[param - 1]).replace(settings.INJECT_TAG, "")
           continue
-        # Replace the value of parameter with INJECT tag
-        if len(value) == 0:
-          if not menu.options.skip_empty:
-            all_params[param] = ''.join(all_params[param] + settings.INJECT_TAG)
+        # An empty value is backfilled with RANDOM_TAG upstream, so measure it with that stripped.
+        if len(value.replace(settings.RANDOM_TAG, "")) == 0:
+          if menu.options.skip_empty:
+            # Mirror the skips above: drop the previous tag and add no untagged candidate.
+            if param > 0:
+              all_params[param - 1] = ''.join(all_params[param - 1]).replace(settings.INJECT_TAG, "")
+            continue
+          all_params[param] = ''.join(all_params[param] + settings.INJECT_TAG)
         else:
           all_params[param] = apply_tag_to_value(''.join(all_params[param]), value)
         if param > 0:

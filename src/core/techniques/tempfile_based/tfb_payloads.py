@@ -317,8 +317,11 @@ def condition_check(separator, condition, timesec, http_request_method):
   return tb_payloads.condition_check(separator, condition, timesec, http_request_method)
 
 # The Windows counterpart, likewise shared rather than restated.
-def windows_condition_check(separator, condition, timesec, http_request_method):
-  return tb_payloads.windows_condition_check(separator, condition, timesec, http_request_method)
+def windows_condition_check(separator, expr, expected, timesec):
+  # Named for what each one is, which is what the one it hands them to calls them: taken as a
+  # condition, a delay and a request method, the three lined up only because they were passed on
+  # in the order they arrived, and naming one of them in a call would have put it somewhere else.
+  return tb_payloads.windows_condition_check(separator, expr, expected, timesec)
 
 # Read one character of the file back, by asking whether its ordinal is at or below a value.
 def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http_request_method, operator="-le"):

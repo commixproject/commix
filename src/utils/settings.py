@@ -486,7 +486,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "285"
+REVISION = "286"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -773,6 +773,12 @@ STDIN_PARSING = False
 
 # Slow target response.
 SLOW_TARGET_RESPONSE = 3
+
+# How far the target's own answers may spread before a delay read against them is unreliable.
+# What makes a time-related answer hard to read is the times moving about, not how long they are:
+# a target that always takes the same three seconds tells a delay apart as cleanly as a fast one,
+# while one whose answers swing by seconds hides the delay inside its own spread.
+SLOW_TARGET_RESPONSE_STDEV = 0.5
 
 # Number of samples estimate_response_time() takes the median of.
 RESPONSE_TIME_SAMPLES = 3
@@ -2431,6 +2437,12 @@ ORIGINAL_PAGE_COMPARABLE = ""
 
 # Where the page was found to move on its own, as what sits either side of each such region.
 DYNAMIC_MARKINGS = []
+
+# Whether the regions the page moves on its own have been looked for a second time, against a
+# request shaped the way the run's own requests are. The first look is taken when the target is
+# reached, which is before a cookie or a body is in play - and a target that only runs the command
+# once it has one prints nothing that moves until then, so that look finds nothing to record.
+DYNAMIC_MARKINGS_RESAMPLED = False
 
 # How much of the text either side of a moving region is kept to anchor on.
 DYNAMICITY_BOUNDARY_LENGTH = 20

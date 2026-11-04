@@ -1097,7 +1097,12 @@ Check value inside boundaries.
 def value_inside_boundaries(parameter, http_request_method):
   try:
     if isinstance(parameter, str):
-      value_inside_boundaries = re.search(r"=" + settings.VALUE_BOUNDARIES, parameter).group()
+      # Asked whether there are boundaries at all, rather than read off a match that may not be
+      # there: a value carrying none raised on the spot, and the handler below took that for the
+      # answer - which left it unable to tell a value with no boundaries from a fault in the
+      # questions that follow, since both arrived here as the same silence.
+      bounded = re.search(r"=" + settings.VALUE_BOUNDARIES, parameter)
+      value_inside_boundaries = bounded.group() if bounded else None
       if value_inside_boundaries:
         pcre_mod_value = value_inside_boundaries + settings.PCRE_MODIFIER[1:2]
         if pcre_mod_value not in parameter:
@@ -1118,7 +1123,8 @@ def value_inside_boundaries(parameter, http_request_method):
               common.invalid_option(modifier_check)
               pass
 
-        value = re.search(settings.VALUE_BOUNDARIES, value_inside_boundaries).group(1)
+        inside = re.search(settings.VALUE_BOUNDARIES, value_inside_boundaries)
+        value = inside.group(1) if inside else None
         if value:
           value = value_inside_boundaries.replace(value, value + settings.CUSTOM_INJECTION_MARKER_CHAR)
           while True:
@@ -3101,6 +3107,20 @@ def usable_stored_cmd(stored_value):
   return bool(stored_value) and not stored_value.startswith(settings.PARTIAL_VALUE_MARKER)
 
 """
+Whether the target's own answers move about enough to hide a delay inside their spread.
+
+Read as how far the times are spread rather than as how long they are: a target that always takes
+the same three seconds answers a delay as plainly as a fast one does, and asking about it only
+because it is slow refuses a technique that would have worked. It is the swing between answers
+that a delay has to stand clear of, so that is what is measured.
+"""
+def response_times_unsteady():
+  sample = strip_time_outliers(settings.RESPONSE_TIMES)
+  if not sample or len(sample) < 2:
+    return False
+  return statistics.pstdev(sample) > settings.SLOW_TARGET_RESPONSE_STDEV
+
+"""
 Drop high-latency spikes from a response-time sample via a median/MAD cutoff.
 """
 def strip_time_outliers(values):
@@ -4745,13 +4765,20 @@ def calibrate_boolean_oracle(page_true, page_false, code_true=None, code_false=N
   # settled once, off the page this run actually has, rather than assumed.
   if settings.NULL_CONNECTION_WORTHWHILE is None:
     settings.NULL_CONNECTION_WORTHWHILE = len(page_true) >= settings.NULL_CONNECTION_MIN_LENGTH
-  # Taken from the raw pages, not the masked ones below - a length is a length whether or not the
-  # bytes it counts fall inside a region 'comparable_page' would otherwise mask out.
+  true_page, false_page = comparable_page(page_true), comparable_page(page_false)
+  """
+  Read as a length once the target's own moving parts are out of it.
+
+  A length is a length whichever bytes it counts, so the pages themselves are measured as they came
+  back - but whether that length says anything is another question. A target printing something of
+  its own that varies in width, a timing or a counter, is a different number of bytes long on two
+  identical requests, and a difference read off that is the page moving rather than the question
+  being answered: taken for an answer, any boundary at all is confirmed on the strength of it.
+  """
   true_length, false_length = len(page_true), len(page_false)
-  lengths_distinguish = true_length != false_length
+  lengths_distinguish = true_length != false_length and len(true_page) != len(false_page)
   if lengths_distinguish:
     settings.BOOLEAN_TRUE_LENGTH, settings.BOOLEAN_FALSE_LENGTH = true_length, false_length
-  true_page, false_page = comparable_page(page_true), comparable_page(page_false)
   if not true_page or true_page == false_page:
     # Content alone cannot tell the two apart - length still might, and is reported precisely
     # because it is the only one of the two that just did.
@@ -4859,10 +4886,23 @@ def inferred_boolean_oracle():
       at = page.find(candidate, at + 1)
     return False
 
-  def usable(candidate, page, other, regions):
+  """
+  The page's own moving parts are not an answer either.
+
+  Sitting where the two answers differ is not enough on its own: a target that prints something of
+  its own that moves - a timing, a counter, a clock - differs there between two identical requests
+  as well, so that text lands in the difference without having anything to do with what was asked.
+  Those regions were measured from two samples of the same request before any of this, and taken
+  out of the comparison every other reading is made through; read through it here too, text that is
+  only the page moving is gone, and what is offered is what the answer actually changed.
+  """
+  true_steady, false_steady = remove_dynamic_content(true_raw), remove_dynamic_content(false_raw)
+
+  def usable(candidate, page, other, regions, steady):
     candidate = candidate.strip()
     return (candidate and candidate in page and candidate not in other
-            and overlaps_change(candidate, page, regions))
+            and overlaps_change(candidate, page, regions)
+            and candidate in steady)
 
   # A sentence first, being the one worth reading back; then a single word.
   for pattern, sentence, extract in ((r"\A[\w.,! ]+\Z", True, lines), (r"\A\w{2,}\Z", False, words)):
@@ -4872,11 +4912,11 @@ def inferred_boolean_oracle():
         continue
       if sentence and not (settings.SINGLE_WHITESPACE in candidate and len(candidate) > settings.CANDIDATE_SENTENCE_MIN_LENGTH):
         continue
-      if usable(candidate, true_raw, false_raw, changed_true):
+      if usable(candidate, true_raw, false_raw, changed_true, true_steady):
         return "--string=" + quoted_value(candidate)
 
   for candidate in sorted((_.strip() for _ in words(false_raw) - words(true_raw) if _.strip()), key=len):
-    if re.match(r"\A\w+\Z", candidate) and usable(candidate, false_raw, true_raw, changed_false):
+    if re.match(r"\A\w+\Z", candidate) and usable(candidate, false_raw, true_raw, changed_false, false_steady):
       return "--not-string=" + quoted_value(candidate)
 
   """
@@ -4886,11 +4926,12 @@ def inferred_boolean_oracle():
   which of them it rendered - so the tag around the difference is the difference, and quoting it is
   what makes the answer nameable at all.
   """
-  for option, page, other, on_true in (("--string", true_raw, false_raw, True),
-                                       ("--not-string", false_raw, true_raw, False)):
+  for option, page, other, on_true, steady in (("--string", true_raw, false_raw, True, true_steady),
+                                               ("--not-string", false_raw, true_raw, False, false_steady)):
     for _, i1, i2, j1, j2 in opcodes:
       found = unique_around(page, other, *((j1, j2) if on_true else (i1, i2)))
-      if found:
+      # Held to what the answer changed here too, not to what the page moves on its own.
+      if found and found.strip() in steady:
         return option + "=" + quoted_value(found)
   return ""
 

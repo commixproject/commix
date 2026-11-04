@@ -449,19 +449,16 @@ def estimate_response_time(url, timesec, http_request_method):
 Convert the measured round-trip time into the slow-target warning and adjusted timesec.
 """
 def _finish_response_time_estimate(diff, timesec):
-  if int(diff) < 1:
-    url_time_response = int(diff)
-  else:
-    url_time_response = int(round(diff))
-    warn_msg = "Target's estimated response time is " + str(url_time_response)
-    warn_msg += " second" + "s"[url_time_response == 1:]
-    if settings.TARGET_OS == settings.OS.WINDOWS:
-      warn_msg += " (a relatively slow 'cmd.exe' on the target host adds to it)"
-    warn_msg += ". This may delay"
-    if url_time_response >= 3:
-      warn_msg += " and/or corrupt"
-    warn_msg += " data extraction."
-    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  """
+  Measured and kept, but not announced.
+
+  How long the target takes is not on its own something to say anything about: a target that always
+  takes the same three seconds answers a delay as plainly as a fast one, and saying its data might
+  come back corrupted was telling it something about itself that was not true. What does make a
+  delay hard to read is the answers moving about, and that is asked about where it matters, off how
+  far they spread rather than off how slow they are.
+  """
+  url_time_response = int(diff) if int(diff) < 1 else int(round(diff))
 
   # The payloads count the delay in whole seconds, so a fractional one cannot be used as given -
   # rounded rather than dropped, and said out loud instead of quietly becoming a shorter delay.

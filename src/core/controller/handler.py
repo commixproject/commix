@@ -741,6 +741,22 @@ def do_boolean_based_process(url, timesec, filename, http_request_method, inject
       # payload changed nothing at all, whatever the two probes look like beside each other.
       if not settings.BOOLEAN_PRINTED_STATE and checks.comparable_page(page_false or "") == checks.comparable_page(settings.ORIGINAL_PAGE or ""):
         return None
+      """
+      What the page moves on its own, measured again where the run can actually see it.
+
+      It is looked for once when the target is first reached, from two samples of a request that
+      carries none of this - no cookie, no body, nothing in the parameter. A target that only runs
+      the command once it has one answers those two identically, nothing is recorded, and the
+      comparison everything below is read through goes on masking nothing at all. The same question
+      asked twice here is two answers that are meant to match, so whatever differs between them is
+      the page's own movement - learned before two answers that are meant to differ are weighed
+      against each other, rather than after a boundary has been confirmed on the strength of it.
+      """
+      if not settings.DYNAMIC_MARKINGS and not settings.DYNAMIC_MARKINGS_RESAMPLED:
+        settings.DYNAMIC_MARKINGS_RESAMPLED = True
+        page_true_again = injector.page_of(payload, prefix, suffix, whitespace, http_request_method, url, vuln_parameter)[0]
+        if page_true and page_true_again:
+          checks.find_dynamic_content(page_true, page_true_again)
       # These two pages are what says which answer is which, so the target teaches the oracle first.
       if not checks.calibrate_boolean_oracle(page_true, page_false, code_true, code_false):
         return None
