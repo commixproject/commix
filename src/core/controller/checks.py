@@ -194,6 +194,11 @@ litmus it re-asks with - built on 'test', '$?' and '$((...))' - is itself blocke
 _INFERRED_TECHNIQUES = (
   settings.INJECTION_TECHNIQUE.BOOLEAN_BASED,
   settings.INJECTION_TECHNIQUE.TIME_BASED,
+  # The tag it writes is read back by a command of its own and weighed as a page, never fetched:
+  # the file is written where the file-based technique could not reach the web root, so there is no
+  # URL to ask for it through. What proves it is a difference between two pages, same as the two
+  # above, and a page that moves on its own can produce one without the command having run.
+  settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED,
 )
 
 """
@@ -3217,7 +3222,18 @@ def check_lagging():
   # says more about the pair than about the connection, so the verdict waits for a model to read.
   if not settings.LAGGING_CHECKED and len(settings.RESPONSE_TIMES) >= settings.MIN_TIME_RESPONSES // 2:
     settings.LAGGING_CHECKED = True
-    if statistics.pstdev(settings.RESPONSE_TIMES) > settings.WARN_TIME_STDEV:
+    deviation = statistics.pstdev(settings.RESPONSE_TIMES)
+    pace = statistics.mean(settings.RESPONSE_TIMES)
+    """
+    Read against the target's own pace as well as in seconds of its own.
+
+    Half a second of movement is the whole answer on a page that comes back at once, and ordinary
+    jitter on one that runs a command before answering - a sink that pings for three seconds clears
+    a fixed half-second bar on nothing more than being itself. Called laggy on that alone, the run
+    raises the delay it asks for and every probe after it pays the longer wait, which is hours of
+    waiting bought against a target that was steady all along.
+    """
+    if deviation > settings.WARN_TIME_STDEV and deviation > pace * settings.WARN_TIME_RELATIVE_STDEV:
       settings.LAGGING_DETECTED = settings.JITTER_SEEN = settings.ADJUST_TIME_DELAY_DISABLED = True
       warn_msg = "Detected considerable lagging in the connection response(s). "
       warn_msg += "Consider using a higher '--time-sec' value (e.g. '10' or more)."
@@ -7137,6 +7153,15 @@ def progress_display_text(chars, furthest, total):
 Check if to use the "/tmp/" directory for tempfile-based technique.
 """
 def use_temp_folder(no_result, url, timesec, filename, http_request_method, url_time_response):
+  """
+  Asked once for the run, not once per web root that failed.
+
+  Another directory to try is what brings this round again, and the question it asks is about the
+  temporary directory rather than about the one just tried - so the answer already given covers it,
+  and asking a second time reads as a second obstacle where there is one.
+  """
+  if settings.TEMP_FOLDER_CHOICE is False:
+    return False
   tmp_path = check_tmp_path(url, timesec, filename, http_request_method, url_time_response)
   while True:
     # Named individually only at '-v' above 0 - at default verbosity, every path already tried
@@ -7147,8 +7172,10 @@ def use_temp_folder(no_result, url, timesec, filename, http_request_method, url_
       where = "any " + settings.WEB_ROOT_CATEGORY_LABEL + " directory"
     message = "Unable to write to " + where + ". "
     message += "Do you want to use '" + tmp_path + "' instead? [Y/n] "
-    tmp_upload = common.read_input(message, default="Y", check_batch=True)
+    tmp_upload = settings.CHOICE_YES[0] if settings.TEMP_FOLDER_CHOICE else \
+                 common.read_input(message, default="Y", check_batch=True)
     if tmp_upload in settings.CHOICE_YES:
+      settings.TEMP_FOLDER_CHOICE = True
       settings.TEMPFILE_BASED_STATE = True
       call_tfb = tfb_controller(no_result, url, timesec, filename, tmp_path, http_request_method, url_time_response)
       if call_tfb is not False:
@@ -7159,6 +7186,7 @@ def use_temp_folder(no_result, url, timesec, filename, http_request_method, url_
         else:
           return True
     elif tmp_upload in settings.CHOICE_NO:
+      settings.TEMP_FOLDER_CHOICE = False
       break
     elif tmp_upload in settings.CHOICE_QUIT:
       settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)

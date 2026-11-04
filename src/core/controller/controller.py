@@ -1206,9 +1206,20 @@ def injection_process(url, check_parameter, http_request_method, filename, times
           # that one is filtered too, so naming the first reads as a promise that it is the only
           # one - each says which it loaded as it loads it, which is where that belongs.
           message = "Do you want " + settings.APPLICATION + " to try again in case plain whitespace is being filtered "
-          message += "(e.g. by using whitespace tamper script(s))? [Y/n] "
+          message += "(e.g. by using whitespace tamper scripts)? [Y/n] "
           settings.WHITESPACE_RETRY_CHOICE = common.read_input(message, default="Y", check_batch=True) not in settings.CHOICE_NO
         return settings.WHITESPACE_RETRY_CHOICE
+
+      def _accepts_dashless_retry():
+        if settings.DASHLESS_RETRY_CHOICE is None:
+          # Asked for the same reason the whitespace one above is: what was established is that
+          # nothing was confirmed, and that the target filters a dash is the guess that makes
+          # another pass worth paying for - so it belongs in the question rather than stated as
+          # something already found.
+          message = "Do you want " + settings.APPLICATION + " to try again in case a dash ('-') is being filtered "
+          message += "(e.g. by using a tamper script that writes its tests without one)? [Y/n] "
+          settings.DASHLESS_RETRY_CHOICE = common.read_input(message, default="Y", check_batch=True) not in settings.CHOICE_NO
+        return settings.DASHLESS_RETRY_CHOICE
 
       # A filter that rejects any literal whitespace blocks the heuristic test the same as every
       # technique, so gating this on a positive heuristic would never fire for the one case it
@@ -1238,7 +1249,8 @@ def injection_process(url, check_parameter, http_request_method, filename, times
       # it. 'dashlesstest' already reads those the dash-free way ('='/'!='), so this is the one
       # case left where retrying on a tamper already built for something else solves it outright.
       if not end_detection and checks.injection_techniques_status() is False and \
-            _may_adopt_tamper() and "dashlesstest" not in settings.MULTI_ENCODED_PAYLOAD:
+            _may_adopt_tamper() and "dashlesstest" not in settings.MULTI_ENCODED_PAYLOAD and \
+            _accepts_dashless_retry():
         settings.AUTO_TAMPER.append("dashlesstest")
         # Announced the way '--tamper' announces its own, rather than in a sentence of its own:
         # what is loaded is the same thing either way, and worth reading as the same line.

@@ -154,6 +154,20 @@ class BooleanOracleNoise(unittest.TestCase):
             "<b>rtt min/avg/max/mdev = " + timing + " ms</b>"
             "<p>and the rest of this page stands perfectly still</p></body></html>")
 
+  def test_two_answers_that_read_alike_are_not_an_answer(self):
+    # Nothing told them apart, so there is no question this boundary answered.
+    page = self.page("0.015/0.048/0.073/0.022")
+    self.assertFalse(checks.calibrate_boolean_oracle(page, page))
+
+  def test_a_shell_error_quoting_this_runs_own_digits_is_not_an_answer(self):
+    """
+    A filter that corrupts the payload before a shell sees it leaves the marker's own length sitting
+    in the error the shell quotes it back in, which tells two pages apart without either command
+    having run.
+    """
+    error = "sh: 1: AAAAAA%s: not found"
+    self.assertFalse(checks.calibrate_boolean_oracle(error % "123456", error % "1234567"))
+
   def test_a_difference_that_moves_on_its_own_is_not_an_answer(self):
     """
     Two answers that are meant to differ, differing only where two answers that are meant to match
@@ -166,6 +180,58 @@ class BooleanOracleNoise(unittest.TestCase):
     checks.find_dynamic_content(true_page, self.page("0.031/0.052/0.061/0.011"))
     self.assertTrue(settings.DYNAMIC_MARKINGS)
     self.assertFalse(checks.calibrate_boolean_oracle(true_page, false_page))
+
+class ReAskedTechniques(unittest.TestCase):
+  """
+  Which findings are asked their question a second time before the parameter is reported.
+  """
+  def test_a_finding_weighed_as_a_page_is_re_asked(self):
+    """
+    The tempfile-based technique reads its tag back with a command of its own and weighs the answer
+    as a page - the file is written where the web root could not be reached, so there is no URL to
+    fetch it through. That is the same kind of evidence the other two rest on, and a page that moves
+    on its own produces it without the command having run, so it is not exempt from the re-ask.
+    """
+    for technique in (settings.INJECTION_TECHNIQUE.BOOLEAN_BASED,
+                      settings.INJECTION_TECHNIQUE.TIME_BASED,
+                      settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED):
+      self.assertIn(technique, checks._INFERRED_TECHNIQUES)
+
+  def test_a_finding_that_came_back_on_its_own_is_not(self):
+    # A tag fetched out of the web root, or a hostname only this run knows being resolved, is not
+    # something a target produces without having run the command.
+    for technique in (settings.INJECTION_TECHNIQUE.RESULTS_BASED,
+                      settings.INJECTION_TECHNIQUE.FILE_BASED,
+                      settings.INJECTION_TECHNIQUE.OOB):
+      self.assertNotIn(technique, checks._INFERRED_TECHNIQUES)
+
+class Lagging(unittest.TestCase):
+  """
+  When a target's answers are called unsteady enough to raise the delay asked of it.
+  """
+  def tearDown(self):
+    settings.RESPONSE_TIMES[:] = []
+    settings.LAGGING_CHECKED = settings.LAGGING_DETECTED = False
+    settings.JITTER_SEEN = settings.ADJUST_TIME_DELAY_DISABLED = False
+
+  def verdict(self, pace, spread):
+    settings.RESPONSE_TIMES[:] = [pace - spread, pace + spread] * 8
+    settings.LAGGING_CHECKED = settings.LAGGING_DETECTED = False
+    return checks.check_lagging()
+
+  def test_a_slow_target_that_keeps_its_pace_is_not_lagging(self):
+    """
+    A sink that runs a command before answering moves by half a second on nothing more than being
+    itself. Called laggy for it, the run raises the delay and every probe after pays the wait.
+    """
+    self.assertFalse(self.verdict(3.1, 0.5))
+    self.assertFalse(self.verdict(10.0, 1.5))
+
+  def test_answers_that_move_against_their_own_pace_still_are(self):
+    # Read in seconds of its own as well, so a page answering at once is not called steady for
+    # moving by less than a slow one does.
+    self.assertTrue(self.verdict(3.1, 1.2))
+    self.assertTrue(self.verdict(0.1, 0.6))
 
 class DelayThreshold(unittest.TestCase):
   """

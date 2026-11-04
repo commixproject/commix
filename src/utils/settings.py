@@ -486,7 +486,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "287"
+REVISION = "288"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -880,6 +880,10 @@ worth offering rather than spending unannounced, and worth asking only once, sin
 about the target's own filter rather than about any one technique that just came back empty.
 """
 WHITESPACE_RETRY_CHOICE = None
+# Whether the temporary directory was already accepted or refused for this run.
+TEMP_FOLDER_CHOICE = None
+# The same consent, asked about a filter built around '-' rather than around whitespace.
+DASHLESS_RETRY_CHOICE = None
 
 # The HTTP header name.
 HTTP_HEADER = ""
@@ -2272,6 +2276,10 @@ MIN_VALID_DELAYED_RESPONSE = 0.5
 # Minimum delay-threshold margin above the mean, as a fraction of the mean.
 MIN_RELATIVE_DELAY_MARGIN = 0.5
 WARN_TIME_STDEV = 0.5
+# The same spread, read against the target's own pace. Half a second of movement is a lot on a page
+# that answers at once and nothing at all on one that runs a command first, so a target is called
+# laggy only where its answers also move by this much of what they take.
+WARN_TIME_RELATIVE_STDEV = 0.25
 
 # One escalate/shrink step, in seconds - separate from the floor above.
 TIME_DELAY_STEP = 1

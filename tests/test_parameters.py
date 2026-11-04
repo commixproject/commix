@@ -127,5 +127,24 @@ class TestableValue(unittest.TestCase):
     self.assertEqual("127.0.0.1", settings.TESTABLE_VALUE)
     self.assertFalse(settings.TESTABLE_VALUE_OPTIMIZED)
 
+  def test_a_placeholder_an_earlier_run_confirmed_is_taken_up_again(self):
+    """
+    The one exchange still made: a resumed run is handed what the run that stored it had already
+    asked the payload's own question through, so it is taken as it stands rather than measured for
+    again. Without this the stored answer is read and nothing is done with it.
+    """
+    stored = self.controller.session_handler.check_stored_testable_value
+    try:
+      self.controller.session_handler.check_stored_testable_value = lambda *_: "ABC"
+      settings.LOAD_SESSION = True
+      url = "http://127.0.0.1/x.php?addr=127.0.0.1" + settings.INJECT_TAG
+      rewritten = self.controller.attempt_skip_testable_value(url, "GET", "addr")
+      self.assertEqual("http://127.0.0.1/x.php?addr=ABC" + settings.INJECT_TAG, rewritten)
+      self.assertEqual("ABC", settings.TESTABLE_VALUE)
+      self.assertTrue(settings.TESTABLE_VALUE_OPTIMIZED)
+    finally:
+      self.controller.session_handler.check_stored_testable_value = stored
+      settings.TESTABLE_VALUE_OPTIMIZED = False
+
 if __name__ == "__main__":
   unittest.main()
