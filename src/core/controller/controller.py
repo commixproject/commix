@@ -386,9 +386,14 @@ def oob_heuristic_basic(url, http_request_method, check_parameter, place):
       debug_msg = "The target answered out-of-band over '" + transport + "'."
       settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))
     return url
-  if not menu.options.os:
+  # Settled only where the client that answered belongs to one of them: a shared one says the
+  # command ran, not which shell ran it, and the sweep is better off still asking than led by a
+  # guess it would then build every payload on.
+  if not menu.options.os and oob_payloads.transport_identifies_os(transport):
     settings.TARGET_OS = target_os
-  announce_heuristic_finding("identified command shell type: '" + checks.target_shell_label() + "'")
+    announce_heuristic_finding("identified command shell type: '" + checks.target_shell_label() + "'")
+  else:
+    announce_heuristic_finding("answered out-of-band over '" + transport + "'")
   return url
 
 """
@@ -849,9 +854,18 @@ def injection_process(url, check_parameter, http_request_method, filename, times
   # What the value stands for, once whatever it is written in has been taken off it.
   def read_value_as(description):
     nonlocal url
-    decoded = checks.strip_encoding(settings.TESTABLE_VALUE, description)
+    """
+    Read off the value the target reads, not the spelling the URL carries it in.
+
+    A query string writes a base64 value's own padding as '%3D', so taken as it arrived the value
+    is not base64 at all and a parameter that carries one perfectly well is refused for not
+    carrying one. Writing it back out is already done on the unquoted value, so reading it in is
+    done the same way here.
+    """
+    carried = _urllib.parse.unquote(settings.TESTABLE_VALUE)
+    decoded = checks.strip_encoding(carried, description)
     # Written out again it has to give back what arrived, or what was read was not the value.
-    if checks.apply_encoding(decoded, description) != settings.TESTABLE_VALUE:
+    if checks.apply_encoding(decoded, description) != carried:
       raise ValueError("the value is not written in that encoding")
     settings.VALUE_ENCODING = description
     if decoded != settings.TESTABLE_VALUE:
@@ -867,7 +881,10 @@ def injection_process(url, check_parameter, http_request_method, filename, times
       url = url.replace(settings.TESTABLE_VALUE, decoded)
       settings.TESTABLE_VALUE = decoded
 
-  named = checks.named_encoding(check_parameter, settings.TESTABLE_VALUE)
+  # Read off the value itself, not the spelling the URL carries it in: a base64 value's own padding
+  # rides as '%3D', and a descriptor worked out from that reads the value as carrying none - so
+  # writing it back out drops the padding and the value no longer matches what arrived.
+  named = checks.named_encoding(check_parameter, _urllib.parse.unquote(settings.TESTABLE_VALUE))
   if settings.LOAD_SESSION:
     """
     A finding read back from a session carries the encoding it was made with, so there is nothing

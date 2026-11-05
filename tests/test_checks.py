@@ -282,6 +282,21 @@ class ProbeModel(unittest.TestCase):
       checks.record_probe_response_time(exec_time)
     self.assertEqual(5, len(settings.PROBE_RESPONSE_TIMES))
 
+class CarriedEncoding(unittest.TestCase):
+  """
+  How a value written in an encoding is read back off the request it rode in.
+  """
+  def test_padding_is_read_as_padding_however_the_url_spells_it(self):
+    """
+    A query string writes '=' as '%3D', so a descriptor worked out from the raw spelling reads a
+    padded value as carrying no padding - and writing it back out then drops the padding, leaving
+    the value not matching what arrived, so a parameter that carries base64 is refused for not.
+    """
+    for value in ("Z3Vlc3Q=", "YWJj", "YQ=="):
+      described = checks.encoding_from_name("base64", value)
+      self.assertEqual(value, checks.apply_encoding(checks.strip_encoding(value, described), described),
+                       "the value " + repr(value) + " did not survive being read and written back")
+
 class DelayThreshold(unittest.TestCase):
   """
   How late an answer has to be before it counts as a delay that was asked for.

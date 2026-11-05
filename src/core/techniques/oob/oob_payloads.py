@@ -42,6 +42,17 @@ UNIX_TRANSPORTS = ["curl", "wget", "python", "dns", "php", "ruby", "openssl"]
 # changes. They are asked once a boundary is confirmed, where a target without the common ones still
 # needs something that carries output back whole rather than a name at a time.
 FALLBACK_TRANSPORTS = ("php", "ruby", "openssl")
+"""
+Whether answering over this client says which operating system answered.
+
+A client both lists carry - 'curl' is on either platform, and a DNS lookup is asked for everywhere -
+proves the command ran and nothing more. Read as an answer to "which one", the probe that happened to
+be asked first settles it, and a POSIX target taken for a Windows one is then sent cmd.exe payloads
+for the rest of the run with its own tamper scripts skipped for needing a POSIX shell.
+"""
+def transport_identifies_os(transport):
+  return transport not in set(UNIX_TRANSPORTS) & set(WINDOWS_TRANSPORTS)
+
 # 's_client' opens a TLS connection and has no plaintext mode, so this one has nothing to offer a
 # server reached over plain HTTP - it would hand a TLS handshake to a port that speaks none, and
 # fail every time. Left out wherever the scheme in use is not HTTPS.

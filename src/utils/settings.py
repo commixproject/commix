@@ -486,7 +486,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "290"
+REVISION = "291"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -626,6 +626,8 @@ CMD_NUL = "<nul"
 
 # The substitution that cannot hold another one - see checks.substitution_nests().
 BACKTICK_SUBSTITUTION = "`"
+# Said once, where a confirmed pipe cannot carry the retrieval the finding would be read with.
+PIPE_RETRIEVAL_NOTICE_GIVEN = False
 # The one that can, to go back to where a script that chose otherwise turns out not to apply.
 NESTING_SUBSTITUTION = ("$(", ")")
 CMD_SUB_PREFIX = "$("

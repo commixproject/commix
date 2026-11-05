@@ -3797,6 +3797,22 @@ used to prove the injection is just as necessary to use it.
 """
 def confirm_boundary(bare_prefix, bare_suffix, separator, whitespace):
   settings.CONFIRMED_BOUNDARY[settings.CHECKING_PARAMETER] = (bare_prefix, bare_suffix, separator, whitespace)
+  """
+  A pipe proves the injection but cannot carry the retrieval, where the substitution in use holds
+  no second one inside it.
+
+  Measuring a command's own output means putting the command inside the expression that counts it,
+  which backticks cannot express without escaping every inner pair. Counting the pipeline instead
+  would count the newline the other spelling drops, and the retrieval indexes by that count - so it
+  is left alone and said out loud rather than answered with nothing and no reason given.
+  """
+  if (separator in ("|", "||") and not substitution_nests()
+      and not settings.PIPE_RETRIEVAL_NOTICE_GIVEN):
+    settings.PIPE_RETRIEVAL_NOTICE_GIVEN = True
+    warn_msg = "The pipe this finding was confirmed on cannot carry the retrieval of a command's "
+    warn_msg += "output while the payload is written with backticks, so execution is proved but "
+    warn_msg += "nothing is read back through it. Another substitution reaches both."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
   if whitespace and settings.WHITESPACES and settings.WHITESPACES[0] != whitespace:
     settings.WHITESPACES = [whitespace] + [_ for _ in settings.WHITESPACES if _ != whitespace]
 

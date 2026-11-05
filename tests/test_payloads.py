@@ -174,6 +174,62 @@ class PayloadSeparators(unittest.TestCase):
           still_offending.add((module_name, name))
     self.assertEqual(UNRESOLVED, still_offending)
 
+class OutOfBandTransports(unittest.TestCase):
+  """
+  What answering over a client says, and what it does not.
+  """
+  def test_a_client_both_platforms_carry_says_nothing_about_which(self):
+    """
+    Read as an answer to "which operating system", the probe asked first settles it - and a POSIX
+    target taken for a Windows one is sent cmd.exe payloads for the rest of the run, with its own
+    tamper scripts skipped for needing a POSIX shell.
+    """
+    from src.core.techniques.oob import oob_payloads
+    shared = set(oob_payloads.UNIX_TRANSPORTS) & set(oob_payloads.WINDOWS_TRANSPORTS)
+    self.assertTrue(shared, "the lists share nothing, so this guard is checking an empty set")
+    for transport in sorted(shared):
+      self.assertFalse(oob_payloads.transport_identifies_os(transport),
+                       repr(transport) + " is on both platforms and cannot say which answered")
+
+  def test_a_client_only_one_of_them_carries_does(self):
+    from src.core.techniques.oob import oob_payloads
+    exclusive = set(oob_payloads.UNIX_TRANSPORTS) ^ set(oob_payloads.WINDOWS_TRANSPORTS)
+    for transport in sorted(exclusive):
+      self.assertTrue(oob_payloads.transport_identifies_os(transport))
+
+  def test_each_platform_keeps_a_client_of_its_own(self):
+    """
+    The guard above is only useful while each list still holds something the other does not - a
+    Windows target is identified by 'powershell' answering and by nothing else, and no target here
+    can show that, so it is held to here instead.
+    """
+    from src.core.techniques.oob import oob_payloads
+    windows_only = set(oob_payloads.WINDOWS_TRANSPORTS) - set(oob_payloads.UNIX_TRANSPORTS)
+    unix_only = set(oob_payloads.UNIX_TRANSPORTS) - set(oob_payloads.WINDOWS_TRANSPORTS)
+    self.assertTrue(windows_only, "nothing identifies a Windows target any more")
+    self.assertTrue(unix_only, "nothing identifies a POSIX target any more")
+    for transport in windows_only | unix_only:
+      self.assertTrue(oob_payloads.transport_identifies_os(transport))
+
+class EvalStatementTerminators(unittest.TestCase):
+  """
+  Where a payload that carries no separator is allowed to end a statement.
+  """
+  def test_no_grammar_ends_a_statement_it_never_started(self):
+    """
+    Without a separator the payload goes where one value is read from - inside PHP's '{${ }}' it is
+    the name of a variable - and a terminator there ends a statement that was never started, which
+    the interpreter refuses outright. That is what kept every level-1 PHP eval payload malformed.
+    """
+    from src.core import eval as _eval
+    for language in sorted(_eval.supported()):
+      grammar = _eval.grammar(language)
+      statement = grammar.print_statement("", ["echo MARKER"])
+      terminator = getattr(grammar, "TERMINATOR", "")
+      if terminator:
+        self.assertFalse(statement.endswith(terminator),
+                         language + " ends a statement the boundary never started: " + repr(statement))
+
 class AwkExpressions(unittest.TestCase):
   """
   The measurements a payload makes when it cannot carry a variable from one command to the next.
