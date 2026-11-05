@@ -486,7 +486,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "293"
+REVISION = "294"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -940,12 +940,12 @@ first level. Levels two and three carry exactly what they carried before; the qu
 rather than being added to theirs.
 """
 PREFIXES = []
-PREFIXES_LVL1 = [""]
+PREFIXES_LVL1 = ["", "'", "\""]
 PREFIXES_LVL2 = PREFIXES_LVL1 + SEPARATORS_LVL1
 PREFIXES_LVL3 = PREFIXES_LVL2
 
 SUFFIXES = []
-SUFFIXES_LVL1 = [""]
+SUFFIXES_LVL1 = ["", "'", "\""]
 SUFFIXES_LVL2 = SUFFIXES_LVL1 + SEPARATORS_LVL1
 # A comment is what the shell in hand calls one. '//' and '\\' were added for the evaluation sinks
 # back when those had no grammar of their own to carry them, and every grammar carries them now -
