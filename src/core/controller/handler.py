@@ -836,14 +836,27 @@ def do_boolean_based_process(url, timesec, filename, http_request_method, inject
   # An evaluation sink halts the target's own code, which shortens the page it renders whether or
   # not the target branches - so there is nothing the second shape would reach that the first cannot.
   shapes = (False,) if menu.options.eval_sink else (False, True)
+  """
+  Counted off the way the other techniques count theirs.
+
+  A dot per boundary asked, across both shapes rather than restarting on the second. Reporting only
+  the boundary that answered left the line holding whatever two or three dots something else had
+  printed, so a sweep of a hundred questions read exactly like one that asked three - and on a
+  parameter that answers none of them, that is the whole of what the line ever said.
+  """
+  boundaries = list(_boundary_combinations(whitespaces, prefixes, suffixes, separators, grammar_separators=checks.grammar_separators()))
+  total = len(boundaries) * len(shapes)
+  i = 0
   for printed in shapes:
     settings.BOOLEAN_PRINTED_STATE = printed
-    for whitespace, prefix, suffix, separator in _boundary_combinations(whitespaces, prefixes, suffixes, separators, grammar_separators=checks.grammar_separators()):
+    for whitespace, prefix, suffix, separator in boundaries:
+      i += 1
       settings.DETECTION_PHASE = True
       settings.EXPLOITATION_PHASE = False
       bare_prefix, bare_suffix = prefix, suffix
       confirmed = _answers_both_ways(whitespace, prefix, suffix, separator, TAG)
       if not confirmed:
+        checks.injection_process(injection_type, technique, done=bool(i >= total), i=i, total=total)
         continue
       payload, vuln_parameter, prefix, suffix = confirmed
       checks.injection_process(injection_type, technique, done=True)

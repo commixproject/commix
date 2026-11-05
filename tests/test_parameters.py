@@ -23,6 +23,7 @@ import unittest
 
 from src.core.requests import parameters
 from src.utils import settings
+from src.core.parse import cmdline as menu
 
 class UrlParts(unittest.TestCase):
   def test_the_query_is_cut_from_the_path(self):
@@ -99,6 +100,37 @@ class PostSplitting(unittest.TestCase):
   def test_a_single_pair_stays_one(self):
     split, _ = parameters.split_post_parameters("a=1")
     self.assertEqual(["a=1"], split)
+
+class NamedBoundary(unittest.TestCase):
+  """
+  What '--prefix' and '--suffix' do to the boundary the sweep was going to send.
+  """
+  def setUp(self):
+    self.prefix, self.suffix = menu.options.prefix, menu.options.suffix
+    self.load_session = settings.LOAD_SESSION
+    settings.LOAD_SESSION = False
+
+  def tearDown(self):
+    menu.options.prefix, menu.options.suffix = self.prefix, self.suffix
+    settings.LOAD_SESSION = self.load_session
+
+  def test_a_named_boundary_stands_in_place_of_the_one_being_tried(self):
+    """
+    Added to it instead, what the user named arrives behind whatever each boundary already carried,
+    so the sweep sends combinations nobody asked for and never once sends the one that was.
+    """
+    menu.options.prefix, menu.options.suffix = "'", "'"
+    _, prefix = parameters.prefixes("payload", ";")
+    _, suffix = parameters.suffixes("payload", "&")
+    self.assertEqual("'", prefix)
+    self.assertEqual("'", suffix)
+
+  def test_an_unnamed_boundary_is_left_as_it_was(self):
+    menu.options.prefix = menu.options.suffix = None
+    _, prefix = parameters.prefixes("payload", ";")
+    _, suffix = parameters.suffixes("payload", "&")
+    self.assertEqual(";", prefix)
+    self.assertEqual("&", suffix)
 
 class TestableValue(unittest.TestCase):
   """

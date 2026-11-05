@@ -100,5 +100,27 @@ class TamperMetadata(unittest.TestCase):
           missing.append(name)
     self.assertEqual([], missing)
 
+class FirstLevelBoundaries(unittest.TestCase):
+  """
+  What the level nobody has to ask for is willing to try.
+  """
+  def test_the_first_level_can_open_and_close_a_quote(self):
+    """
+    The commonest shape a real sink has is a value spliced into a quoted string. Without a quote
+    here those targets answer every boundary the same way and are reported as not injectable, which
+    is true of what was tried and false of the target.
+    """
+    for quote in settings.QUOTES:
+      self.assertIn(quote, settings.PREFIXES_LVL1)
+      self.assertIn(quote, settings.SUFFIXES_LVL1)
+
+  def test_the_levels_above_it_lost_nothing(self):
+    # The quotes moved down rather than being added, so the wider levels carry what they carried.
+    for quote in settings.QUOTES:
+      self.assertIn(quote, settings.PREFIXES_LVL3)
+      self.assertIn(quote, settings.SUFFIXES_LVL3)
+    for comment in (" #", "//"):
+      self.assertIn(comment, settings.SUFFIXES_LVL3)
+
 if __name__ == "__main__":
   unittest.main()

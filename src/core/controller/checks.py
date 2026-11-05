@@ -1070,7 +1070,17 @@ def injection_process(injection_type, technique, done=False, i=None, total=None)
     # close in that case: the technique was already announced, and that other output already
     # ended the line - neither re-announcing it nor a bare "(done)" with nothing before it on the
     # line says anything the user was not already told.
-    if done and already_announced and settings.TOTAL_OF_REQUESTS == settings.LAST_ANNOUNCED_REQUESTS:
+    """
+    Nothing left to close, either because nothing happened since the title or because what did
+    happen already printed itself out.
+
+    A sweep that counted its boundaries off marked them on a line that something else then ended -
+    the dots are behind it either way. Announcing the technique a second time to put "(done)" after
+    it writes the title again with the three dots of "please wait..." and nothing of the work, so a
+    sweep of a hundred questions is signed off looking like one that asked none.
+    """
+    if done and already_announced and (settings.TOTAL_OF_REQUESTS == settings.LAST_ANNOUNCED_REQUESTS
+                                       or settings.LAST_DOT_BUCKET != -1):
       settings.LAST_COMPLETED_TECHNIQUE = technique
       return
     # Said a second time where something came between the title and the testing it announced, and

@@ -804,12 +804,16 @@ def prefixes(payload, prefix):
   pre_custom = resolve_marker_component(settings.TESTABLE_VALUE, settings.PRE_CUSTOM_INJECTION_MARKER_CHAR)
   if pre_custom is not None and pre_custom not in prefix and not menu.options.prefix:
     prefix = pre_custom + prefix
-  # Check if defined "--prefix" option.
-  if menu.options.prefix and not settings.LOAD_SESSION:
-    # Containment is not the question: a boundary that happens to hold the same character is not
-    # the boundary the user asked for.
-    if not prefix.endswith(menu.options.prefix):
-      prefix = prefix + menu.options.prefix 
+  """
+  Named with '--prefix', which stands in place of the boundary's own rather than beside it.
+
+  Appended instead, the prefix the user asked for arrives behind whatever each boundary already
+  carried - ';' and '&' and a quote in turn - so the sweep sends combinations nobody asked for and
+  never once sends the one that was. Naming it settles the question the sweep exists to ask, the
+  same way naming a technique settles which techniques run.
+  """
+  if menu.options.prefix is not None and not settings.LOAD_SESSION:
+    prefix = menu.options.prefix
 
   payload = prefix + payload
   # Fixation for specific payload.
@@ -830,10 +834,9 @@ def suffixes(payload, suffix):
   if post_custom:
     if post_custom not in suffix:
       suffix = suffix + post_custom
-  # Check if defined "--suffix" option, the way a prefix is handled just above.
-  if menu.options.suffix and not settings.LOAD_SESSION:
-    if not suffix.endswith(menu.options.suffix):
-      suffix = suffix + menu.options.suffix
+  # Named with '--suffix', standing in place of the boundary's own, the way a prefix does above.
+  if menu.options.suffix is not None and not settings.LOAD_SESSION:
+    suffix = menu.options.suffix
 
   payload = payload + suffix
 

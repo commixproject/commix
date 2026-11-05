@@ -486,7 +486,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "291"
+REVISION = "292"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -926,17 +926,28 @@ SPECIAL_SEPARATORS = ["&&", "||", "\n", "\r\n", CTRL_Z]
 SEPARATORS_LVL1 = DEFAULT_SEPARATORS + SPECIAL_SEPARATORS
 SEPARATORS_LVL3 = SEPARATORS_LVL2 = SEPARATORS_LVL1
 
-# The command injection prefixes.
-PREFIXES = []
-PREFIXES_LVL1 = [""]
-PREFIXES_LVL2 = PREFIXES_LVL1 + SEPARATORS_LVL1
-PREFIXES_LVL3 = PREFIXES_LVL2 + ["'", "\""]
+"""
+The command injection prefixes and suffixes.
 
-# The command injection suffixes.
+A quote is carried from the first level, as the reference carries one in its own. The commonest
+shape a real sink has is a value spliced into a quoted string, and a boundary that never opens the
+quote reaches none of them - held back to a level nobody runs by default, those targets are
+reported as not injectable, which is true of what was tried and false of the target.
+
+It costs little: a quote suffix is kept only beside its own prefix, so the first level asks five
+prefix/suffix pairs where the cross-product would be nine - the count the reference asks at its own
+first level. Levels two and three carry exactly what they carried before; the quotes moved down
+rather than being added to theirs.
+"""
+PREFIXES = []
+PREFIXES_LVL1 = ["", "'", "\""]
+PREFIXES_LVL2 = PREFIXES_LVL1 + SEPARATORS_LVL1
+PREFIXES_LVL3 = PREFIXES_LVL2
+
 SUFFIXES = []
-SUFFIXES_LVL1 = [""]
+SUFFIXES_LVL1 = ["", "'", "\""]
 SUFFIXES_LVL2 = SUFFIXES_LVL1 + SEPARATORS_LVL1
-SUFFIXES_LVL3 = SUFFIXES_LVL2 + ["'", "\"", " #", "//", "\\\\"]
+SUFFIXES_LVL3 = SUFFIXES_LVL2 + [" #", "//", "\\\\"]
 
 # A quote closes only its own kind.
 QUOTES = ("'", "\"")
