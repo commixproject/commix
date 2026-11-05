@@ -383,3 +383,31 @@ class DelayThreshold(unittest.TestCase):
 
 if __name__ == "__main__":
   unittest.main()
+
+class EmptyTestableValue(unittest.TestCase):
+  """
+  Where the payload goes when the parameter it is testing arrived with no value at all.
+  """
+  def setUp(self):
+    self.testable_value = settings.TESTABLE_VALUE
+
+  def tearDown(self):
+    settings.TESTABLE_VALUE = self.testable_value
+
+  def test_an_empty_value_puts_the_payload_at_the_front(self):
+    """
+    Stood in for by a single whitespace, an empty value reached the target as the first byte of
+    every payload - and a sink reading that byte for itself, an interpreter's own open() handed a
+    leading '|', was never once sent the separator it was being tested with.
+    """
+    settings.TESTABLE_VALUE = ""
+    carrier = "page=" + settings.INJECT_TAG
+    spliced = checks.process_injectable_value("|echo Hello", carrier)
+    self.assertEqual("page=|echo Hello", spliced)
+    self.assertEqual("", settings.TESTABLE_VALUE)
+
+  def test_a_value_of_its_own_still_carries_the_payload_behind_it(self):
+    settings.TESTABLE_VALUE = "127.0.0.1"
+    carrier = "addr=127.0.0.1" + settings.INJECT_TAG
+    spliced = checks.process_injectable_value("127.0.0.1;echo Hello", carrier)
+    self.assertEqual("addr=127.0.0.1;echo Hello", spliced)

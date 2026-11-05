@@ -488,3 +488,38 @@ class BackticksStayExpressible(unittest.TestCase):
       settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX, settings.TARGET_OS = was
 
 # eof
+
+class NashornParsesWhatItIsSent(unittest.TestCase):
+  """
+  The engine behind '--tamper=nashornexec' stops at the ECMAScript version before arrow functions,
+  so anything the grammar writes that postdates it has to be rewritten on the way out. A construct
+  the engine cannot parse is worse than one it cannot run: the parse fails before the payload is
+  evaluated at all, so every boundary comes back as the same error page and a technique reading one
+  answer against another is told nothing by it.
+  """
+  def setUp(self):
+    self.grammar = settings.EVAL_GRAMMAR
+    settings.EVAL_GRAMMAR = importlib.import_module("src.core.eval.grammars.javascript")
+
+  def tearDown(self):
+    settings.EVAL_GRAMMAR = self.grammar
+
+  def _tamper(self, payload):
+    from src.tamper.eval.javascript import nashornexec
+    return nashornexec.tamper(payload)
+
+  def test_the_grammar_is_left_with_no_arrow_function(self):
+    # Asked of the grammar rather than of a spelling written out here, so a payload that starts
+    # carrying an arrow somewhere else is caught by this too.
+    grammar = settings.EVAL_GRAMMAR
+    written = [grammar.halt(grammar.length(grammar.run("id")) + "==2"),
+               grammar.print_statement(";", ["id"]),
+               grammar.delay(5, "1==1"),
+               grammar.sequence(grammar.run("id"), grammar.read_file("/etc/passwd"))]
+    for payload in written:
+      self.assertNotIn("=>", self._tamper(payload), "an arrow reaches the engine in " + payload[:60])
+
+  def test_the_rewrite_still_throws_where_the_condition_does_not_hold(self):
+    grammar = settings.EVAL_GRAMMAR
+    tampered = self._tamper(grammar.halt("1==2"))
+    self.assertIn("function(){throw new Error()}", tampered)

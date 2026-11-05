@@ -404,8 +404,15 @@ cookie separates with ';', and a second '&name=' there is not another cookie but
 of the first - so a carrier that was not asked to be polluted is left as it is.
 """
 def process_injectable_value(payload, data, pollute=False):
+  # An empty value has nothing to mask, and masking on one would put the tag between every
+  # character of the carrier - the injection tag already says where the payload goes, so an empty
+  # value is spliced on that alone. Stood in for by a single whitespace, as it was, that space
+  # reached the target as the value's own first byte, in front of every payload: a sink reading
+  # that byte for itself - a leading '|' handed to an interpreter's own open() - was never once
+  # sent the separator it was being tested with.
   if len(settings.TESTABLE_VALUE) == 0:
-    settings.TESTABLE_VALUE = settings.SINGLE_WHITESPACE
+    spliced = data.replace(settings.INJECT_TAG, payload)
+    return polluted_parameter(spliced, payload) if pollute else spliced
   # Regenerate the tag if it overlaps the testable value.
   random_tag = settings.RANDOM_TAG
   while random_tag in settings.TESTABLE_VALUE or settings.TESTABLE_VALUE in random_tag:
