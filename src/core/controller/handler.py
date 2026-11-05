@@ -93,7 +93,7 @@ has it.
 """
 def _order_by_value_shape(prefixes, suffixes):
   value = (settings.TESTABLE_VALUE or "").strip()
-  if value.isdigit():
+  if checks.is_digit(value):
     quoted_last = True
   elif value.isalpha():
     quoted_last = False
@@ -117,8 +117,19 @@ def _prioritize_confirmed_boundary(prefixes, suffixes, separators, whitespaces):
   _boundary = settings.CONFIRMED_BOUNDARY.get(settings.CHECKING_PARAMETER)
   if _boundary:
     _b_prefix, _b_suffix, _b_separator, _b_whitespace = _boundary
-    prefixes = _prioritize(prefixes, _b_prefix)
-    suffixes = _prioritize(suffixes, _b_suffix)
+    """
+    Settled for this parameter, not merely tried first.
+
+    A technique that broke out of the string already answered which prefix and suffix this sink
+    reads; the techniques after it are asked through that one rather than through one more ordering
+    of the whole space, which is what the reference does once an injection has a boundary of its own.
+
+    The separator is left to the sweep. It is not part of that answer here the way a prefix is: what
+    chains at this sink is a question each technique settles for itself, and one that refuses an
+    operator another proved - boolean-based will not take a bare '&' - still needs its own turn.
+    """
+    prefixes = [_b_prefix] if _b_prefix in prefixes else _prioritize(prefixes, _b_prefix)
+    suffixes = [_b_suffix] if _b_suffix in suffixes else _prioritize(suffixes, _b_suffix)
     separators = _prioritize(separators, _b_separator)
     whitespaces = _prioritize(whitespaces, _b_whitespace)
   return prefixes, suffixes, separators, whitespaces

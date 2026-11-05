@@ -119,8 +119,19 @@ class FirstLevelBoundaries(unittest.TestCase):
     for quote in settings.QUOTES:
       self.assertIn(quote, settings.PREFIXES_LVL3)
       self.assertIn(quote, settings.SUFFIXES_LVL3)
-    for comment in (" #", "//"):
-      self.assertIn(comment, settings.SUFFIXES_LVL3)
+    self.assertIn(" #", settings.SUFFIXES_LVL3)
+
+  def test_the_shell_list_carries_only_a_comment_the_shell_reads(self):
+    """
+    '//' and '\\' were added for the evaluation sinks before those had grammars of their own, and
+    every grammar carries them now - so in the shell's own list they were boundaries no shell reads
+    as an ending, asked once per separator on every parameter tested.
+    """
+    for borrowed in ("//", "\\"):
+      self.assertNotIn(borrowed, settings.SUFFIXES_LVL3)
+    from src.core import eval as _eval
+    self.assertIn("//", _eval.grammar("php").SUFFIXES_LVL3)
+    self.assertIn("//", _eval.grammar("javascript").SUFFIXES_LVL3)
 
 if __name__ == "__main__":
   unittest.main()

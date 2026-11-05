@@ -297,6 +297,52 @@ class CarriedEncoding(unittest.TestCase):
       self.assertEqual(value, checks.apply_encoding(checks.strip_encoding(value, described), described),
                        "the value " + repr(value) + " did not survive being read and written back")
 
+class DigitValues(unittest.TestCase):
+  """
+  Which values are read as a number, since that is what decides the boundaries tried first.
+  """
+  def test_only_the_digits_a_shell_would_read_as_one(self):
+    """
+    'str.isdigit()' answers for every character Unicode calls a digit - a superscript two among
+    them - so a value no shell would take for a number was read as one, and the boundaries a quoted
+    value needs were ordered last on the strength of it.
+    """
+    for value in ("0", "4", "0042", "123456"):
+      self.assertTrue(checks.is_digit(value), value + " is written out of digits")
+    for value in (u"\xb2", u"\u0660", "3b3", "127.0.0.1", "-5", "1.5", "", " 4"):
+      self.assertFalse(checks.is_digit(value), repr(value) + " is not")
+
+class SinkBoundaries(unittest.TestCase):
+  """
+  Which boundaries are worth asking of the shell in hand.
+  """
+  def setUp(self):
+    self.target_os = settings.TARGET_OS
+    self.eval_sink = menu.options.eval_sink
+    menu.options.eval_sink = None
+    settings.apply_injection_level(settings.HTTP_HEADER_INJECTION_LEVEL)
+
+  def tearDown(self):
+    settings.TARGET_OS = self.target_os
+    menu.options.eval_sink = self.eval_sink
+    settings.apply_injection_level(settings.DEFAULT_INJECTION_LEVEL)
+
+  def commented(self):
+    _, suffixes, _ = checks.sink_boundaries()
+    return [candidate for candidate in suffixes if candidate.strip() == settings.COMMENT]
+
+  def test_a_shell_with_a_comment_is_offered_one(self):
+    settings.TARGET_OS = settings.OS.UNIX
+    self.assertTrue(self.commented())
+
+  def test_a_shell_without_one_is_not(self):
+    """
+    'cmd.exe' has no comment a trailing marker can use, so a POSIX '#' asked of it is a boundary it
+    cannot honour - sent once per separator, on every parameter tested.
+    """
+    settings.TARGET_OS = settings.OS.WINDOWS
+    self.assertEqual([], self.commented())
+
 class DelayThreshold(unittest.TestCase):
   """
   How late an answer has to be before it counts as a delay that was asked for.

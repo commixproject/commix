@@ -708,7 +708,16 @@ string the target evaluates, so the sink chooses them rather than the technique.
 def sink_boundaries():
   if menu.options.eval_sink:
     return settings.EVAL_PREFIXES, settings.EVAL_SUFFIXES, settings.EVAL_SEPARATORS
-  return settings.PREFIXES, settings.SUFFIXES, settings.SEPARATORS
+  """
+  A suffix whose whole job is to comment out what follows it is a suffix only where the shell has a
+  comment to write. 'cmd.exe' has none that a trailing marker can use - 'REM' begins a statement
+  rather than ending one - so a POSIX '#' asked of a Windows target is a boundary it cannot honour,
+  sent once per separator on every parameter tested.
+  """
+  suffixes = settings.SUFFIXES
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    suffixes = [candidate for candidate in suffixes if candidate.strip() != settings.COMMENT]
+  return settings.PREFIXES, suffixes, settings.SEPARATORS
 
 """
 What the grammar in hand calls a separator, which is not what this target can chain on - the latter
@@ -2092,6 +2101,16 @@ An HTTP error code together with the reason phrase the server sent with it, wher
 def http_error_code_label(code, err=None):
   reason = str(getattr(err, "reason", "") or "").strip()
   return str(code) + (" " + reason if reason else "")
+
+"""
+Whether a value is written out of nothing but digits.
+
+Asked with a pattern rather than with 'str.isdigit()', which answers for every character Unicode
+calls a digit - a superscript two among them - and so reads a value no shell would take for a
+number as one, ordering the boundaries that are tried first off it.
+"""
+def is_digit(value):
+  return re.search(r"\A[0-9]+\Z", value or "") is not None
 
 """
 Whether an HTTP error code is one the user chose to ignore, with '--ignore-code'.
