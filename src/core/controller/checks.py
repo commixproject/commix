@@ -3123,7 +3123,17 @@ def response_times_unsteady():
   sample = strip_time_outliers(settings.RESPONSE_TIMES)
   if not sample or len(sample) < 2:
     return False
-  return statistics.pstdev(sample) > settings.SLOW_TARGET_RESPONSE_STDEV
+  """
+  Read against the target's own pace as well as in seconds of its own.
+
+  Half a second of movement is the whole answer on a page that comes back at once, and a sixth of
+  one on a sink that runs a command first - so a fixed bar in seconds is cleared by a slow target
+  on nothing but its latency, which is the one reading this question exists to avoid. Both have to
+  hold: a spread too small to matter is not lagging whatever share of the answer it is.
+  """
+  deviation = statistics.pstdev(sample)
+  return (deviation > settings.SLOW_TARGET_RESPONSE_STDEV
+          and deviation > statistics.mean(sample) * settings.WARN_TIME_RELATIVE_STDEV)
 
 """
 Drop high-latency spikes from a response-time sample via a median/MAD cutoff.

@@ -249,7 +249,20 @@ def quick_response_time_sample(url, http_request_method):
     # Paced before the clock starts, so the delay this run keeps is not measured as the target's.
     headers.apply_request_policy()
     start = time.time()
-    response = headers.send_raw(request, policy=False)
+    try:
+      response = headers.send_raw(request, policy=False)
+    except _urllib.error.HTTPError as err:
+      """
+      An error code the run was told to ignore is still an answer, and it was still timed.
+
+      Every technique above reads such a response as the target speaking; only the model that times
+      them threw it away. A target answering each request with the same error filled nothing in, and
+      the run was then stopped for having had no answer at all - on a parameter two techniques had
+      already been confirmed on.
+      """
+      if not checks.ignored_http_error_code(getattr(err, "code", None)):
+        raise
+      response = err
     response.read(1)
     response.close()
     return time.time() - start

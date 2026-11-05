@@ -80,9 +80,18 @@ Every command has to leave its output on a line of its own: the results are read
 output and marker separated by newlines, so anything printed without one runs into the next marker.
 """
 def print_statement(separator, commands, chain=None):
+  """
+  Ended only where the boundary it lands in can carry a statement.
+
+  Without a separator the payload goes where one value is read from - inside '{${ }}' it is the
+  name of a variable - and a terminator there ends a statement that was never started, which the
+  interpreter refuses outright. The techniques that chain their own commands already ask for it
+  this way, so a boundary carrying nothing is spelled the same here.
+  """
+  terminator = TERMINATOR if separator else ""
   if separator == "":
-    return "print(" + ".".join("`" + command + "`" for command in commands) + ")" + TERMINATOR
-  return "print(`" + (chain or separator).join(commands) + "`)" + TERMINATOR
+    return "print(" + ".".join("`" + command + "`" for command in commands) + ")" + terminator
+  return "print(`" + (chain or separator).join(commands) + "`)" + terminator
 
 """
 The expressions every payload is built out of, spelled the way this language spells them.

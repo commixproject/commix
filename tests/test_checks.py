@@ -227,6 +227,23 @@ class Lagging(unittest.TestCase):
     self.assertFalse(self.verdict(3.1, 0.5))
     self.assertFalse(self.verdict(10.0, 1.5))
 
+  def test_a_slow_steady_target_is_not_offered_up_for_skipping(self):
+    """
+    The same question the time-based and tempfile-based handlers put before offering to skip the
+    technique: a target that answers at the same speed every time is read as easily as a fast one,
+    however long that speed is.
+    """
+    settings.RESPONSE_TIMES[:] = [10.0 - 1.5, 10.0 + 1.5] * 8
+    self.assertFalse(checks.response_times_unsteady())
+    settings.RESPONSE_TIMES[:] = [3.1 - 0.5, 3.1 + 0.5] * 8
+    self.assertFalse(checks.response_times_unsteady())
+
+  def test_answers_that_really_do_move_are_offered_up(self):
+    settings.RESPONSE_TIMES[:] = [10.0 - 4.0, 10.0 + 4.0] * 8
+    self.assertTrue(checks.response_times_unsteady())
+    settings.RESPONSE_TIMES[:] = [0.8 - 0.6, 0.8 + 0.6] * 8
+    self.assertTrue(checks.response_times_unsteady())
+
   def test_answers_that_move_against_their_own_pace_still_are(self):
     # Read in seconds of its own as well, so a page answering at once is not called steady for
     # moving by less than a slow one does.
