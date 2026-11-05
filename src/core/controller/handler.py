@@ -753,6 +753,14 @@ def do_boolean_based_process(url, timesec, filename, http_request_method, inject
       if not settings.BOOLEAN_PRINTED_STATE and checks.comparable_page(page_false or "") == checks.comparable_page(settings.ORIGINAL_PAGE or ""):
         return None
       """
+      And a true answer that does not read like that page is the payload breaking the sink, not
+      answering through it. Where it does not parse, the interpreter prints its complaint instead,
+      and the false question draws another carrying different digits of this run's own - read as two
+      answers, that one error confirms a boundary nothing ever ran through.
+      """
+      if not settings.BOOLEAN_PRINTED_STATE and checks.comparable_page(page_true or "") != checks.comparable_page(settings.ORIGINAL_PAGE or ""):
+        return None
+      """
       What the page moves on its own, measured again where the run can actually see it.
 
       It is looked for once when the target is first reached, from two samples of a request that
