@@ -68,7 +68,11 @@ PREFIXES_LVL2 = PREFIXES_LVL1 + [")'}", "');}", "\".", "${"]
 # Ending the statement outright, and leaving a comment the value was written into.
 PREFIXES_LVL3 = PREFIXES_LVL2 + ["')", "\")", ");}", "\");}", ")", ";", "'", "\";", "';", "*/"]
 
-SUFFIXES_LVL1 = [ "",  ".'", "}}"]
+# The close tag ends a statement exactly as the terminator below does, and is the only way to end
+# one where ';' cannot be written - a value read as the whole statement has to be ended somehow, and
+# this grammar's own level 1 otherwise pairs an unwrapped value with nothing that ends it, which the
+# interpreter refuses as readily as it refuses a half-written one.
+SUFFIXES_LVL1 = [ "",  ".'", "}}", "?>"]
 # Closing the interpolation, and commenting out whatever the application appends behind it.
 SUFFIXES_LVL2 = SUFFIXES_LVL1 + ["'#", "}", "}\""]
 SUFFIXES_LVL3 = SUFFIXES_LVL2 + [".\"", "\\\\", "//", ")}", "#", ";//", ";#", "/*"]

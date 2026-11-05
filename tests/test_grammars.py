@@ -157,3 +157,25 @@ class GrammarPayloads(unittest.TestCase):
 
 if __name__ == "__main__":
   unittest.main()
+
+class StatementEnders(unittest.TestCase):
+  """
+  A value a sink reads as the whole statement has to be ended somehow, and the grammar's own
+  terminator is not always available - a filter that rejects ';' takes it away while leaving the
+  sink itself reachable. Where the language has a second way to end a statement, level 1 carries it
+  beside the unwrapped prefix it belongs to, since the two are only useful together.
+  """
+  def test_php_can_end_a_statement_without_its_terminator(self):
+    """
+    PHP's close tag ends a statement exactly as ';' does. Without it the first level pairs an
+    unwrapped value with nothing that ends one, and 'print(`cmd`)' reaches eval() half-written -
+    which the interpreter refuses as readily as it refuses a payload that never closed its quote.
+    """
+    php = grammars()["php"]
+    self.assertIn("", php.PREFIXES_LVL1, "the unwrapped value is a first-level prefix")
+    enders = [s for s in php.SUFFIXES_LVL1 if s and php.TERMINATOR not in s]
+    self.assertIn("?>", enders, "the close tag ends a statement where ';' cannot be written")
+
+  def test_every_grammar_states_its_own_terminator(self):
+    for name, grammar in sorted(grammars().items()):
+      self.assertTrue(getattr(grammar, "TERMINATOR", ""), name + " declares no terminator")
