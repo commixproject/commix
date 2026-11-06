@@ -180,3 +180,40 @@ class TestableValue(unittest.TestCase):
 
 if __name__ == "__main__":
   unittest.main()
+
+class ReplacedValue(unittest.TestCase):
+  """
+  Where the payload goes relative to the value the parameter arrived with.
+
+  Behind it is what nearly every sink wants. A sink reading the value's own first byte is the
+  exception, and there the value has to go rather than sit in front of the payload - an
+  interpreter's two-argument open() handed a leading '|' runs what follows, while the same pipe with
+  a value before it is read as a filename and nothing runs at all.
+  """
+  def setUp(self):
+    self.testable_value = settings.TESTABLE_VALUE
+    self.replace_value = settings.REPLACE_VALUE
+    self.prefix = menu.options.prefix
+    menu.options.prefix = None
+    settings.TESTABLE_VALUE = "127.0.0.1"
+
+  def tearDown(self):
+    settings.TESTABLE_VALUE = self.testable_value
+    settings.REPLACE_VALUE = self.replace_value
+    menu.options.prefix = self.prefix
+
+  def test_the_value_is_carried_in_front_of_the_payload_by_default(self):
+    settings.REPLACE_VALUE = False
+    payload, prefix = parameters.prefixes(";echo Hello", "")
+    self.assertTrue(payload.startswith("127.0.0.1"), repr(payload) + " drops the value")
+
+  def test_the_payload_stands_alone_where_it_replaces_the_value(self):
+    settings.REPLACE_VALUE = True
+    payload, prefix = parameters.prefixes("|echo Hello", "")
+    self.assertEqual("|echo Hello", payload)
+    self.assertTrue(payload.startswith("|"), "the separator is not the value's first byte")
+
+  def test_a_boundary_prefix_is_still_carried_when_the_value_is_replaced(self):
+    settings.REPLACE_VALUE = True
+    payload, prefix = parameters.prefixes(";echo Hello", "'")
+    self.assertEqual("';echo Hello", payload)

@@ -230,8 +230,13 @@ def _parse_request(request, request_file):
       target["referer"] = referer_value
       if "https://" in referer_value:
         scheme = "https://"
-    if re.findall(r"(?i)" + settings.AUTHORIZATION + ":" + " (.*)", line):
-      auth_provided = "".join([str(i) for i in re.findall(r"(?i)" + settings.AUTHORIZATION + ":" + " (.*)", line)]).split()
+    # Read through the same helper as the fields above, rather than against a pattern of its own:
+    # unanchored and unescaped, as it was, the name matched anywhere in the line, so 'X-Authorization'
+    # was taken for this field - its credentials adopted as the ones to authenticate with, and the
+    # header itself dropped from the request, since what is read here is never added as an extra one.
+    auth_value = _extract_header_value(settings.AUTHORIZATION, line)
+    if auth_value is not None:
+      auth_provided = auth_value.split()
       if auth_provided:
         target["auth_type"] = auth_provided[0].lower()
         if target["auth_type"].lower() == settings.AUTH_TYPE.BASIC:
