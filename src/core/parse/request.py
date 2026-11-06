@@ -29,8 +29,10 @@ Extract a single header's value from a raw "Name: value" line, or None if it's a
 """
 def _extract_header_value(header_name, line):
   # Header names are case-insensitive, so match them as sent rather than reshaping them.
-  match = re.findall(r"(?i)^" + header_name + ":" + " (.*)", line)
-  return "".join([str(i) for i in match]) if match else None
+  # A field name ends at the colon and the whitespace around its value is optional (RFC 9112),
+  # so neither the literal space this used to require, nor that whitespace, is part of the value.
+  match = re.findall(r"(?i)^" + re.escape(header_name) + r":[ \t]*(.*)", line)
+  return "".join([str(i) for i in match]).strip(" \t") if match else None
 
 """
 Error message for invalid data.
