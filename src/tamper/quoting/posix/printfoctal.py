@@ -18,7 +18,8 @@ from src.utils import settings
 from src.core.controller import checks
 
 r"""
-About: Rewrites the command names and paths in a given payload as a command substitution of printf's own octal escapes ($(printf '\143\141\164')).
+About: Rewrites the command names and paths in a given payload as a command substitution of printf's
+       own octal escapes ($(printf '\143\141\164')).
 Notes: Unlike 'ansiquote'/'ansiquoteoctal', this needs nothing a strict POSIX shell (e.g. 'dash',
        the '/bin/sh' of most Debian/Ubuntu targets) does not already have - no ANSI-C quoting, just
        "$()" and a "printf" whose octal escapes POSIX itself requires.

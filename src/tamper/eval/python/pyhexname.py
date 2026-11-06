@@ -18,7 +18,8 @@ from src.utils import settings
 from src.core.controller import checks
 
 r"""
-About: Runs the command through a Python module and function named in hex ("\x6f\x73", "\x70\x6f\x70\x65\x6e").
+About: Runs the command through a Python module and function named in hex ("\x6f\x73",
+       "\x70\x6f\x70\x65\x6e").
 Notes: This tamper script works against target(s) evaluating Python (i.e. option '--eval=python').
 """
 

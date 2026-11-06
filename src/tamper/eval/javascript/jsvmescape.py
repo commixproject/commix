@@ -17,7 +17,8 @@ from src.utils import settings
 from src.core.controller import checks
 
 """
-About: Reaches the payload's own require() through the constructor chain, for a sink evaluating inside a Node 'vm' sandbox rather than a plain eval().
+About: Reaches the payload's own require() through the constructor chain, for a sink evaluating
+       inside a Node 'vm' sandbox rather than a plain eval().
 Notes: This tamper script works against target(s) evaluating JavaScript (i.e. option '--eval=javascript').
        A 'vm' context built from a plain object still inherits 'constructor' from the host
        realm's own Object.prototype, and Function's own constructor compiles new code outside the

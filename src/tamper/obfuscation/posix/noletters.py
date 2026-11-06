@@ -18,7 +18,8 @@ from src.utils import settings
 from src.core.controller import checks
 
 r"""
-About: Rewrites a bare command name in a given payload as a filename glob of the same length ('echo' -> '/???/????'), resolved by the shell against '/bin' rather than typed as a word.
+About: Rewrites a bare command name in a given payload as a filename glob of the same length ('echo'
+       -> '/???/????'), resolved by the shell against '/bin' rather than typed as a word.
 Notes: This only reaches a target whose '/bin' holds exactly one file of that length - every POSIX
        shell keyword capable of trying more than one candidate ('for', 'while', 'case', 'set') is
        itself spelled in letters a filter blocking all of them also blocks, so an ambiguous match

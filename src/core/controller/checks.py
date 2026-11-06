@@ -3532,6 +3532,31 @@ def testable_parameters(url, check_parameters):
         settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
+The one sentence a tamper script is listed by, read off its own 'About:'.
+
+However many lines that sentence was written over: read as the first line alone, a description long
+enough to wrap was listed cut off, which reads as a truncated answer from commix rather than as a
+description that is merely long. The block itself ends where the next key does, or where the
+docstring does - a script whose 'About:' is the only key it carries has nothing but the latter. The
+lines a script adds under its opening sentence, a bullet apiece for the target families it treats
+differently, elaborate rather than continue it, and belong to neither.
+"""
+def tamper_description(content):
+  match = re.search(r'About:(.*?)(?=\n[A-Z][A-Za-z]*:|\n""")', content, re.S)
+  if not match:
+    return ""
+  description = ""
+  for line in match.group(1).split(settings.END_LINE.LF):
+    line = line.strip()
+    # A bullet is the marker and then a space; '->' and '-An' are a sentence carrying on.
+    if not line or line.split(settings.SINGLE_WHITESPACE)[0] in ("*", "-"):
+      break
+    description = (description + settings.SINGLE_WHITESPACE + line).strip()
+    if description.endswith("."):
+      break
+  return description[0].upper() + description[1:] if description else description
+
+"""
 Lists available tamper scripts
 """
 def list_tamper_scripts():
@@ -3547,11 +3572,8 @@ def list_tamper_scripts():
     for _, script in sorted(tamper_script_paths().items()):
       with open(script, "rb") as script_file:
         content = script_file.read().decode(settings.DEFAULT_CODEC)
-      match = re.search(r"About:(.*)\n", content)
-      if match:
-        comment = match.group(1).strip()
-        # Capitalize the first letter of the comment
-        comment = comment[0].upper() + comment[1:] if comment else comment
+      comment = tamper_description(content)
+      if comment:
         script_name = os.path.basename(script)
         message += (
           "* "

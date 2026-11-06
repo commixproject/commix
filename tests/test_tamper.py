@@ -14,6 +14,7 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import os
+import re
 import inspect
 import importlib
 import unittest
@@ -523,3 +524,27 @@ class NashornParsesWhatItIsSent(unittest.TestCase):
     grammar = settings.EVAL_GRAMMAR
     tampered = self._tamper(grammar.halt("1==2"))
     self.assertIn("function(){throw new Error()}", tampered)
+
+class ListedDescriptions(unittest.TestCase):
+  """
+  Whatever '--list-tampers' prints for a script has to be the whole sentence the script opens with,
+  however many lines it was written over - a description listed cut off mid-sentence reads as a
+  truncated answer from commix rather than as a description that happens to be long.
+  """
+  def _about(self, module):
+    # Asked of the reader the listing itself uses, not of a second copy of it here - a test with its
+    # own idea of where the description ends would pass while the listing printed something else.
+    from src.core.controller import checks
+    with open(module.__file__.replace(".pyc", ".py"), encoding="utf-8") as handle:
+      return checks.tamper_description(handle.read())
+
+  def test_every_script_says_what_it_does_in_the_line_that_is_printed(self):
+    unfinished = []
+    for name, module in sorted(tamper_modules().items()):
+      about = self._about(module)
+      if not about:
+        unfinished.append(name + " (no 'About:' at all)")
+      elif not about.endswith("."):
+        unfinished.append(name + " (cut off: ..." + about[-40:] + ")")
+    self.assertEqual([], unfinished,
+                     "listed description is not a whole sentence: " + ", ".join(unfinished))

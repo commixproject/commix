@@ -1227,6 +1227,15 @@ def injection_process(url, check_parameter, http_request_method, filename, times
           settings.WHITESPACE_RETRY_CHOICE = common.read_input(message, default="Y", check_batch=True) not in settings.CHOICE_NO
         return settings.WHITESPACE_RETRY_CHOICE
 
+      def _accepts_replaced_value_retry():
+        if settings.REPLACE_VALUE_RETRY_CHOICE is None:
+          # Asked for the same reason the two above are: nothing was confirmed, and that the sink
+          # reads the value's own first byte is the guess that makes another pass worth paying for.
+          message = "Do you want " + settings.APPLICATION + " to try again with the payload in place of "
+          message += "the parameter's value rather than behind it? [Y/n] "
+          settings.REPLACE_VALUE_RETRY_CHOICE = common.read_input(message, default="Y", check_batch=True) not in settings.CHOICE_NO
+        return settings.REPLACE_VALUE_RETRY_CHOICE
+
       def _accepts_dashless_retry():
         if settings.DASHLESS_RETRY_CHOICE is None:
           # Asked for the same reason the whitespace one above is: what was established is that
@@ -1275,6 +1284,18 @@ def injection_process(url, check_parameter, http_request_method, filename, times
         _reset_web_root_detection()
         end_detection = _run_and_verify()
 
+      # Not a filter at all, unlike the three passes above: the value is reaching the sink intact
+      # and is the problem itself, because this sink reads its first byte rather than the end of it.
+      # Left set only where it confirmed something - a pass that found nothing would otherwise hand
+      # the next parameter a value already replaced, and have it tested that way alone.
+      if not end_detection and checks.injection_techniques_status() is False and \
+            not settings.REPLACE_VALUE and settings.TESTABLE_VALUE and \
+            _accepts_replaced_value_retry():
+        settings.REPLACE_VALUE = True
+        _reset_web_root_detection()
+        end_detection = _run_and_verify()
+        if checks.injection_techniques_status() is False:
+          settings.REPLACE_VALUE = False
 
       # All injection techniques seems to be failed!
       if checks.injection_techniques_status() is False:

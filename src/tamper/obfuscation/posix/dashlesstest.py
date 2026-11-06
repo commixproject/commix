@@ -17,7 +17,8 @@ from src.utils import settings
 from src.core.controller import checks
 
 """
-About: Runs 'test's numeric comparisons ('-eq'/'-ne'/'-le'/'-ge'/'-lt'/'-gt') without a '-' of their own, for a target that strips a bare '-' outright.
+About: Runs 'test's numeric comparisons ('-eq'/'-ne'/'-le'/'-ge'/'-lt'/'-gt') without a '-' of their
+       own, for a target that strips a bare '-' outright.
 Notes: This tamper script works against target(s) with a POSIX shell. Equality is read as '='/'!=', which agrees with '-eq'/'-ne' exactly for the plain, unpadded decimal integers commix always compares this way - it would not for a value written with a leading zero. Ordering has no dash-free spelling of its own in 'test', so it is read instead from 'expr's own comparison, whose "<="/">="/"<"/">" need no '-' either - quoted, since unquoted they are shell redirections.
 References: [1] https://github.com/digininja/DVWA/blob/master/vulnerabilities/exec/source/high.php
 """

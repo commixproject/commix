@@ -486,7 +486,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "298"
+REVISION = "299"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -867,6 +867,19 @@ TESTABLE_VALUE = ""
 
 # Whether TESTABLE_VALUE has already been swapped for a disposable placeholder for this parameter.
 TESTABLE_VALUE_OPTIMIZED = False
+
+"""
+Whether the payload stands in place of the parameter's own value rather than behind it.
+
+Behind it is the shape nearly every sink wants: what the application built around the value is still
+there, and the payload chains onto the end of it. A sink that reads the value's own first byte is the
+exception - an interpreter's two-argument open() handed a leading '|' runs what follows as a command,
+and a value in front of that pipe is read as a filename instead - so there the value has to go.
+"""
+REPLACE_VALUE = False
+
+# Asked once for the run, like the whitespace and dash retries' own answers.
+REPLACE_VALUE_RETRY_CHOICE = None
 
 # The techniques the run was given, kept for the parameters that follow one tested with fewer.
 TECHNIQUES_BEFORE_NARROWING = None

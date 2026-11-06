@@ -18,7 +18,9 @@ from src.utils import settings
 from src.core.controller import checks
 
 r"""
-About: Rewrites the three places a PHP eval-sink payload still carries a digit, a quote or a semicolon, for a target rejecting all three at once (along with '$' and '_', which the payload never needed in the first place).
+About: Rewrites the three places a PHP eval-sink payload still carries a digit, a quote or a
+       semicolon, for a target rejecting all three at once (along with '$' and '_', which the
+       payload never needed in the first place).
 Notes: This tamper script works against target(s) evaluating PHP (i.e. option '--eval=php').
        A literal integer becomes a parenthesised sum of 'true' added to itself, since a boolean is an
        integer the moment arithmetic or a comparison is done on it; the empty string a halted

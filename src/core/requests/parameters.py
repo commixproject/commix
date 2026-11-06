@@ -802,6 +802,12 @@ def prefixes(payload, prefix):
   # what the parameter's own required value would otherwise glue on, not stack in front of it, and
   # a filter anchored on the shape of the value as a whole has no other way to be satisfied.
   pre_custom = resolve_marker_component(settings.TESTABLE_VALUE, settings.PRE_CUSTOM_INJECTION_MARKER_CHAR)
+  # The value the parameter arrived with is glued on here, in front of the boundary's own prefix, so
+  # that the payload reaches the sink behind it. Standing in its place instead is simply that glue
+  # left off: the carrier itself already drops the value it is replacing, which is what makes the
+  # payload the whole of what the parameter now carries.
+  if settings.REPLACE_VALUE:
+    pre_custom = ""
   if pre_custom is not None and pre_custom not in prefix and not menu.options.prefix:
     prefix = pre_custom + prefix
   """

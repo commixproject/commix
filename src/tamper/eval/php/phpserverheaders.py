@@ -22,7 +22,8 @@ from src.utils import settings
 from src.core.controller import checks
 
 r"""
-About: Moves the function and the command out of the payload and into HTTP headers it reads back through '$_SERVER'.
+About: Moves the function and the command out of the payload and into HTTP headers it reads back
+       through '$_SERVER'.
 Notes: This tamper script works against target(s) evaluating PHP (i.e. option '--eval=php').
 """
 

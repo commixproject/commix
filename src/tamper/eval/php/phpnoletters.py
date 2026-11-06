@@ -18,7 +18,8 @@ from src.utils import settings
 from src.core.controller import checks
 
 r"""
-About: Runs the command without a single a-z/A-Z character reaching the target, by octal-escaping every letter the payload needs and calling functions by a name built that way.
+About: Runs the command without a single a-z/A-Z character reaching the target, by octal-escaping
+       every letter the payload needs and calling functions by a name built that way.
 Notes: This tamper script works against target(s) rejecting any letter in the evaluated string before it is evaluated (i.e. option '--eval=php'), since PHP decodes a double-quoted or backtick string's own '\NNN' octal escapes only once that check has already passed. 'print' and 'eval' are language constructs rather than functions, so nothing dynamic can call them by name - the wrapper classic.py's payloads put around a result is rebuilt through 'printf' instead, but one of the probe's own boundaries calls 'eval' by that literal name and is not covered.
 References: [1] https://securityonline.info/bypass-waf-php-webshell-without-numbers-letters/
 """

@@ -17,7 +17,9 @@ from src.utils import settings
 from src.core.controller import checks
 
 """
-About: Rewrites the grammar's require() calls into a Java-interop shim, and its arrow function and trimEnd() into ECMAScript-5 equivalents, for a sink evaluating JavaScript through Java's Nashorn engine rather than Node.
+About: Rewrites the grammar's require() calls into a Java-interop shim, and its arrow function and
+       trimEnd() into ECMAScript-5 equivalents, for a sink evaluating JavaScript through Java's
+       Nashorn engine rather than Node.
 Notes: This tamper script works against target(s) evaluating JavaScript (i.e. option '--eval=javascript').
        'require("child_process")' and 'require("fs")' resolve to nothing, since neither module
        exists outside Node; Nashorn exposes the whole Java classpath as plain globals by default

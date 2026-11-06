@@ -19,8 +19,8 @@ from src.utils import settings
 from src.core.controller import checks
 
 """
-About: Replaces every occurrence of the payload's own whitespace with one drawn independently from
-       a small set of equivalents, rather than the one substitute every other space2* script settles
+About: Replaces every occurrence of the payload's own whitespace with one drawn independently from a
+       small set of equivalents, rather than the one substitute every other space2* script settles
        on for the whole payload.
 Notes: This tamper script works against target(s) with a POSIX shell.
        'if'/'then'/'fi' and friends are recognised before '${IFS}' expands, so 'if${IFS}' is never

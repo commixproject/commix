@@ -19,9 +19,9 @@ from src.utils import settings
 from src.core.controller import checks
 
 """
-About: Reaches every bare builtin the grammar calls - __import__ and open to run a command or read
-       a file, len/ord/chr/int to measure and compare the answer - through the subclasses of
-       object, for a sink evaluating Python with no builtins at all.
+About: Reaches every bare builtin the grammar calls - __import__ and open to run a command or read a
+       file, len/ord/chr/int to measure and compare the answer - through the subclasses of object,
+       for a sink evaluating Python with no builtins at all.
 Notes: This tamper script works against target(s) evaluating Python (i.e. option '--eval=python').
        'eval(value, {"__builtins__": {}})' is a common way to let a value run as code without
        touching anything else on the system - but an empty __builtins__ only blocks every builtin

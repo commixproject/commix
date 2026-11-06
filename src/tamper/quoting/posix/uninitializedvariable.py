@@ -20,7 +20,8 @@ from src.utils import settings
 from src.core.controller import checks
 
 """
-About: Adds (randomly generated) uninitialized bash variables between the characters of each command in a given payload.
+About: Adds (randomly generated) uninitialized bash variables between the characters of each command
+       in a given payload.
 Notes: This tamper script works against target(s) with a POSIX shell.
 Reference: https://www.secjuice.com/web-application-firewall-waf-evasion/
 """
