@@ -820,6 +820,10 @@ def attempt_skip_testable_value(url, http_request_method, check_parameter):
 Proceed to the injection process for the appropriate parameter.
 """
 def injection_process(url, check_parameter, http_request_method, filename, timesec, place):
+  # Every parameter starts with its value kept, whatever the one before it needed: the pass that
+  # replaces it is reached per parameter, and exploitation follows within this same call, so leaving
+  # the mode set would only decide how the parameters after this one are tested.
+  settings.REPLACE_VALUE = False
   # Named with '--param-filter': a parameter is tested only where it travels in one of the places
   # asked for, and nothing is said about the rest - naming them is saying which ones matter.
   if settings.PARAM_FILTER_PLACES and str(place).upper() not in settings.PARAM_FILTER_PLACES:
