@@ -1292,9 +1292,12 @@ def injection_process(url, check_parameter, http_request_method, filename, times
       # and is the problem itself, because this sink reads its first byte rather than the end of it.
       # Left set only where it confirmed something - a pass that found nothing would otherwise hand
       # the next parameter a value already replaced, and have it tested that way alone.
+      # Left alone where the user named a prefix of their own: that already stands in place of the
+      # value rather than behind it, so this pass would send the very same requests a second time
+      # and ask a question about something already settled.
       if not end_detection and checks.injection_techniques_status() is False and \
             not settings.REPLACE_VALUE and settings.TESTABLE_VALUE and \
-            _accepts_replaced_value_retry():
+            not menu.options.prefix and _accepts_replaced_value_retry():
         settings.REPLACE_VALUE = True
         _reset_web_root_detection()
         end_detection = _run_and_verify()

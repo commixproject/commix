@@ -486,7 +486,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "301"
+REVISION = "302"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1085,6 +1085,11 @@ USER_APPLIED_INTERPRETER = False
 # confirmed - a guess is worth offering first, not worth skipping the directory-choice menu for,
 # since it is wrong often enough that silently trusting it just delays finding that out.
 WEB_ROOT_IS_GUESS = False
+
+# Runs one command through a technique already confirmed on this parameter, set once that happens and
+# called only where the document root is actually needed - a root worked out from the target's own
+# answer costs a request, and a run never reaching the file-based technique should not pay for it.
+WEB_ROOT_PROBE = None
 USER_APPLIED_TIMESEC = False
 USER_APPLIED_TMP_PATH = False
 
@@ -1151,6 +1156,10 @@ WIN_CURRENT_USER = "echo %USERNAME%"
 # The hostname
 HOSTNAME = "hostname"
 WIN_HOSTNAME = "echo %COMPUTERNAME%"
+
+# The directory the script itself runs in - what the document root is worked back from
+CURRENT_DIRECTORY = "pwd"
+WIN_CURRENT_DIRECTORY = "echo %CD%"
 
 # Check if Current user is privileged
 # Unix-like: root

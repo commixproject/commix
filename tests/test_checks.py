@@ -381,6 +381,70 @@ class DelayThreshold(unittest.TestCase):
     # Nothing to measure it against leaves the margin read off the target alone.
     self.assertAlmostEqual(30.0, checks.current_delay_threshold(), places=2)
 
+
+class DocumentRootFromTheTarget(unittest.TestCase):
+  """
+  Working the document root back from the directory the script says it runs in.
+  """
+  def setUp(self):
+    self._os = settings.TARGET_OS
+    self._probe = settings.WEB_ROOT_PROBE
+
+  def tearDown(self):
+    settings.TARGET_OS = self._os
+    settings.WEB_ROOT_PROBE = self._probe
+
+  def arm(self, answer):
+    settings.WEB_ROOT_PROBE = lambda cmd: answer
+
+  def test_the_url_depth_comes_off_the_end(self):
+    self.arm("/var/www/commix-testbed.com/public_html/scenarios/regular/GET")
+    self.assertEqual("/var/www/commix-testbed.com/public_html/",
+                     checks.web_root_from_target_cwd("http://t/scenarios/regular/GET/classic.php?addr=1"))
+
+  def test_a_script_in_the_root_itself_leaves_the_root(self):
+    self.arm("/var/www/html")
+    self.assertEqual("/var/www/html/", checks.web_root_from_target_cwd("http://t/classic.php"))
+
+  def test_a_directory_url_counts_as_its_own_directory(self):
+    self.arm("/srv/app/admin")
+    self.assertEqual("/srv/app/", checks.web_root_from_target_cwd("http://t/admin/"))
+
+  def test_a_path_the_url_does_not_end_in_is_not_guessed_at(self):
+    # An alias or a rewrite - the script is not stored under the path it was reached by, so the
+    # depth says nothing about where the root is.
+    self.arm("/opt/legacy/cgi")
+    self.assertIsNone(checks.web_root_from_target_cwd("http://t/scenarios/regular/GET/classic.php"))
+
+  def test_an_error_instead_of_a_path_is_not_a_root(self):
+    for answer in ("sh: 1: pwd: not found", "", None, "   ", "relative/path"):
+      self.arm(answer)
+      self.assertIsNone(checks.web_root_from_target_cwd("http://t/a/b.php"))
+
+  def test_windows_keeps_its_own_separator(self):
+    settings.TARGET_OS = settings.OS.WINDOWS
+    self.arm("C:\\AppServ\\www\\scenarios\\regular")
+    self.assertEqual("C:\\AppServ\\www\\",
+                     checks.web_root_from_target_cwd("http://t/scenarios/regular/classic.php"))
+
+  def test_the_probe_is_spent_once_it_has_been_asked(self):
+    # A root that fails is asked about again - the same answer twice over would keep handing back
+    # the root that just failed instead of moving on to the candidates.
+    self.arm("/var/www/html")
+    self.assertEqual("/var/www/html/", checks.web_root_from_target_cwd("http://t/a.php"))
+    self.assertIsNone(settings.WEB_ROOT_PROBE)
+    self.assertIsNone(checks.web_root_from_target_cwd("http://t/a.php"))
+
+  def test_nothing_is_asked_where_no_technique_armed_it(self):
+    settings.WEB_ROOT_PROBE = None
+    self.assertIsNone(checks.web_root_from_target_cwd("http://t/a/b.php"))
+
+  def test_a_probe_that_raises_is_not_fatal(self):
+    def boom(cmd):
+      raise RuntimeError("no channel")
+    settings.WEB_ROOT_PROBE = boom
+    self.assertIsNone(checks.web_root_from_target_cwd("http://t/a/b.php"))
+
 if __name__ == "__main__":
   unittest.main()
 

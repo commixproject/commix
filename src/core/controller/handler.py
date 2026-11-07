@@ -32,6 +32,7 @@ from src.thirdparty.six.moves import html_parser as _html_parser
 from src.core.controller import file_access
 from src.core.controller import registry_access
 from src.core.controller import enumeration
+from src.core.controller import execution
 from src.core.techniques.tempfile_based import tfb_handler
 
 """
@@ -1597,6 +1598,18 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
           shell = injector.injection_test_results(response, TAG, randvcalc, technique, payload)
           done = bool(shell) or (no_result and i >= total)
           checks.injection_process(injection_type, technique, done=done, i=i, total=total)
+          # Armed, not fired: the boundary this technique was confirmed on is in hand here and
+          # nowhere near the file-based technique that needs the document root, so what can carry a
+          # command is kept for it to ask with - and only where the root is not already settled.
+          if shell and not settings.USER_APPLIED_WEB_ROOT and not settings.WEB_ROOT_SETTLED_ONCE:
+            # Neither an output file nor a baseline response time of its own: only the file-based
+            # technique writes one, and only the time-related ones measure the other - this is armed
+            # on the techniques that read their answer straight off the page, which need neither.
+            #
+            # 'results_based_injector' because of when it is called rather than what it is: the
+            # time-based technique has run by then and left its own flag standing, and the injector
+            # kept here reads the page back - handed the time-related argument list, it raises.
+            settings.WEB_ROOT_PROBE = execution.make_simple_execute_cmd(injector, separator, 0, TAG, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, interpreter, filename, 0, technique, "", results_based_injector=True)
         else:
           try:
             time.sleep(timesec)

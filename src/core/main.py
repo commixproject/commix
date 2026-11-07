@@ -418,6 +418,7 @@ def init_injection(url):
   settings.WEB_ROOT_CANDIDATES = []
   settings.WEB_ROOT_SETTLED_ONCE = False
   settings.WEB_ROOT_IS_GUESS = False
+  settings.WEB_ROOT_PROBE = None
   settings.WRITABLE_DIR_ATTEMPT_SAID = False
   settings.WEB_ROOT_CATEGORY_LABEL = ""
   settings.JWT_CHECKED = False
