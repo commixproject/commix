@@ -7126,12 +7126,29 @@ def web_root_from_leaked_path(url):
   markers = ["/" + name + "/" for name in settings.GENERIC_DOC_ROOT_DIRECTORY_NAMES]
   if parsed.hostname:
     markers.append("/" + parsed.hostname + "/")
+  # What the URL puts between the root and the script, kept for the fallback below.
+  below = re.sub(r"/[^/]*\Z", "", parsed.path or "").rstrip("/")
 
   for match in re.finditer(settings.DIRECTORY_REGEX, body or ""):
     path = match.group(0)
+    # A leaked path is written the target's own way - a drive letter and backslashes on Windows.
+    # Read in one spelling and handed back in the other, so what is returned is a path that target
+    # would recognise.
+    native_separator = "\\" if "\\" in path else "/"
+    drive = ""
+    if re.match(r"\A[A-Za-z]:", path):
+      drive, path = path[:2], path[2:]
+    path = path.replace("\\", "/")
     for marker in markers:
       if marker in path:
-        return path.split(marker)[0] + marker
+        return (drive + path.split(marker)[0] + marker).replace("/", native_separator)
+    # No document-root name in it and not the host's own: what the URL asked for is still on the
+    # end of it, and taking that off leaves the root, the same way the script's own directory does.
+    # Matched at the end rather than anywhere in it - a path merely carrying those names somewhere
+    # in the middle says nothing about where the root is, and one starting with them cuts to "/".
+    directory = re.sub(r"/[^/]*\Z", "", path)
+    if below and directory.endswith(below) and len(directory) > len(below):
+      return (drive + directory[:len(directory) - len(below)] + "/").replace("/", native_separator)
 
   return None
 

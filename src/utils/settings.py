@@ -486,7 +486,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "302"
+REVISION = "303"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1767,7 +1767,16 @@ PARAMETER_ENCODING_DEFAULT = None
 # Whitespace, angle brackets and quotes cannot be in a path worth reading back, and letting them in
 # is what turns a page that merely mentions a path in its prose into a match running across the
 # markup around it - tags, newlines and all - rather than the path itself.
-DIRECTORY_REGEX = r'(?:/[^/\s<>"\x27]+)+?/\w+\.\w+'
+#
+# Either separator, and a drive letter where one is written: a Windows target names its own paths
+# with backslashes, and a pattern spelled in forward slashes alone never matches one - leaving the
+# only route that reads a root off the target's own output dead on the platform whose candidate
+# lists are the thinnest.
+#
+# Greedy, so the whole path is taken: a directory with a dot in its name - a host-named one above
+# all, which is the very thing the hostname is matched against - otherwise ends the match where
+# that name does, leaving a root to be cut out of a path stopping short of it.
+DIRECTORY_REGEX = r'(?:[A-Za-z]:)?(?:[\\/][^\\/\s<>"\x27]+)+[\\/]\w+\.\w+'
 
 # Directory names a leaked absolute path (an error message naming the running script's own path is
 # the most common way) is cut at, the same document-root name the target itself is likely using.
@@ -2720,9 +2729,9 @@ LINUX_DEFAULT_DOC_ROOTS = [
 # independent of, and wider than, the common-location lists above.
 BRUTE_DOC_ROOT_PREFIXES = {
   OS.WINDOWS: ("C:\\inetpub\\wwwroot", "C:\\xampp\\htdocs", "C:\\wamp\\www", "C:\\wamp64\\www", "C:\\laragon\\www", "C:\\Program Files\\Apache Group\\Apache2\\htdocs", "C:\\inetpub\\vhosts\\" + DOC_ROOT_TARGET_MARK),
-  OS.UNIX: ("/var/www", "/var/www/" + DOC_ROOT_TARGET_MARK, "/var/www/vhosts/" + DOC_ROOT_TARGET_MARK, "/var/www/html", "/usr/local/apache2/htdocs", "/usr/local/www/data", "/srv/www", "/srv/http", "/usr/share/nginx/html", "/opt/lampp/htdocs"),
+  OS.UNIX: ("/var/www", "/var/www/" + DOC_ROOT_TARGET_MARK, "/var/www/vhosts/" + DOC_ROOT_TARGET_MARK, "/var/www/virtual/" + DOC_ROOT_TARGET_MARK, "/var/www/clients/vhosts/" + DOC_ROOT_TARGET_MARK, "/var/www/clients/virtual/" + DOC_ROOT_TARGET_MARK, "/var/www/html", "/usr/local/apache2/htdocs", "/usr/local/www/data", "/srv/www", "/srv/http", "/usr/share/nginx/html", "/opt/lampp/htdocs", "/Library/WebServer/Documents", "/opt/homebrew/var/www"),
 }
-BRUTE_DOC_ROOT_SUFFIXES = ("", "html", "htdocs", "httpdocs", "public", "public_html", "web", "www", "site", "data")
+BRUTE_DOC_ROOT_SUFFIXES = ("", "html", "htdocs", "httpdocs", "php", "public", "public_html", "src", "site", "build", "web", "www", "data", "sites/all", "www/build")
 
 # The candidate directories still untried from the last directory-choice menu, nearest first - the
 # one commix is already using is not in it, so a write failure pops straight to the next untried one.

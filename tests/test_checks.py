@@ -382,6 +382,54 @@ class DelayThreshold(unittest.TestCase):
     self.assertAlmostEqual(30.0, checks.current_delay_threshold(), places=2)
 
 
+class DocumentRootFromALeakedPath(unittest.TestCase):
+  """
+  Cutting a root out of an absolute path the target printed about itself.
+  """
+  def root(self, body, url):
+    class _Response(object):
+      def read(self):
+        return body.encode()
+    original = checks.get_response, checks.decode_page_body
+    checks.get_response = lambda _url: _Response()
+    checks.decode_page_body = lambda raw, response: raw.decode()
+    try:
+      return checks.web_root_from_leaked_path(url)
+    finally:
+      checks.get_response, checks.decode_page_body = original
+
+  def test_a_generic_name_is_what_it_is_cut_at(self):
+    # Cut at "/www/", which is one of those names itself - not at the deeper "/html/", which is not.
+    self.assertEqual("/var/www/",
+                     self.root("Warning: in /var/www/html/a/b.php on line 2", "http://t/a/b.php"))
+
+  def test_the_first_generic_name_in_the_list_wins(self):
+    self.assertEqual("/srv/htdocs/",
+                     self.root("Warning: /srv/htdocs/app/b.php", "http://t/app/b.php"))
+
+  def test_the_host_names_its_own_root(self):
+    self.assertEqual("/srv/t.example/",
+                     self.root("Warning: /srv/t.example/a/b.php", "http://t.example/a/b.php"))
+
+  def test_the_url_path_cuts_one_with_no_generic_name_in_it(self):
+    self.assertEqual("/opt/app/current/",
+                     self.root("Warning: /opt/app/current/scenarios/GET/classic.php on line 2",
+                               "http://t/scenarios/GET/classic.php"))
+
+  def test_a_windows_path_keeps_its_drive_and_separators(self):
+    self.assertEqual("C:\\inetpub\\wwwroot\\",
+                     self.root("Warning: C:\\inetpub\\wwwroot\\a\\b.php on line 2", "http://t/a/b.php"))
+
+  def test_nothing_resembling_a_path_gives_nothing(self):
+    self.assertIsNone(self.root("<html>no paths here</html>", "http://t/a/b.php"))
+
+  def test_a_path_that_does_not_end_where_the_url_does_is_left_alone(self):
+    # "/a" sits in the middle of it, which says nothing about where the root is.
+    self.assertIsNone(self.root("Warning: /opt/a/deeper/elsewhere.php", "http://t/a/b.php"))
+
+  def test_a_url_path_filling_the_whole_leaked_path_cuts_to_nothing(self):
+    self.assertIsNone(self.root("Warning: /a/b.php on line 2", "http://t/a/b.php"))
+
 class DocumentRootFromTheTarget(unittest.TestCase):
   """
   Working the document root back from the directory the script says it runs in.
