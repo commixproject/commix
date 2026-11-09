@@ -7107,6 +7107,16 @@ def _ask_web_root_candidates():
   return common_roots
 
 """
+What the URL puts between the document root and the script it names - the script's own name dropped,
+since a directory URL has none and one that names a script is not part of the directory it sits in.
+
+Both routes below cut a root with this, one off a path the target leaked and one off the directory
+it says it runs in, so it is worked out the same way for either rather than twice over.
+"""
+def url_path_below_web_root(url):
+  return re.sub(r"/[^/]*\Z", "", _urllib.parse.urlparse(url).path or "").rstrip("/")
+
+"""
 Try to work out the web root from an absolute file path the target has already leaked somewhere
 in its own output - a PHP warning naming the script's own path is the most common way - checked
 before ever asking the operator, since an answer the target gave itself beats one guessed at. A match
@@ -7126,13 +7136,12 @@ def web_root_from_leaked_path(url):
   markers = ["/" + name + "/" for name in settings.GENERIC_DOC_ROOT_DIRECTORY_NAMES]
   if parsed.hostname:
     markers.append("/" + parsed.hostname + "/")
-  # What the URL puts between the root and the script, kept for the fallback below.
-  below = re.sub(r"/[^/]*\Z", "", parsed.path or "").rstrip("/")
+  below = url_path_below_web_root(url)
 
   for match in re.finditer(settings.DIRECTORY_REGEX, body or ""):
     path = match.group(0)
     # A leaked path is written the target's own way - a drive letter and backslashes on Windows.
-    # Read in one spelling and handed back in the other, so what is returned is a path that target
+    # Read in one spelling and handed back in the other, so what is returned is a path that the target
     # would recognise.
     native_separator = "\\" if "\\" in path else "/"
     drive = ""
@@ -7190,9 +7199,7 @@ def web_root_from_target_cwd(url):
     return None
   native_separator = "\\" if "\\" in cwd else "/"
   cwd = cwd.replace("\\", "/").rstrip("/")
-  # What the URL puts between the document root and the script - the script's own name dropped,
-  # since a directory URL has none and one that names a script is not part of the path it sits in.
-  below = re.sub(r"/[^/]*\Z", "", _urllib.parse.urlparse(url).path or "").rstrip("/")
+  below = url_path_below_web_root(url)
   if below and not cwd.endswith(below):
     return None
   root = cwd[:len(cwd) - len(below)] if below else cwd
