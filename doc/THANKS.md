@@ -24,6 +24,7 @@ John Brinton &middot; Joseph Disser &middot; [Himself132](https://github.com/Him
 [fuero](https://github.com/fuero) &middot;
 [g0tmi1k](https://github.com/g0tmi1k) &middot;
 [Jean Helie](https://github.com/jhelie) &middot;
+[liangzaihuanyv](https://github.com/liangzaihuanyv) &middot;
 [raeph123](https://github.com/raeph123) &middot;
 [Raymond-JV](https://github.com/Raymond-JV) &middot;
 [shelld3v](https://github.com/shelld3v) &middot;
