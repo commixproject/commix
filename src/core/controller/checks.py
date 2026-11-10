@@ -2037,6 +2037,18 @@ def _injection_points_summary(header_msg, rows, decode_payload=False):
       payload = str(url_decode(payload))
     for line in finding_summary_lines(technique, injection_type, payload):
       settings.print_data_to_stdout(line)
+  """
+  Said under the payloads it explains, rather than only at '-v1'.
+
+  Where the parameter's own value turns out not to be needed, it is dropped from every request built
+  after that point - so a payload found before it carries the real value and one found after carries
+  the short random one that stands in, and the two sit side by side here with nothing to say why
+  they differ. Read without this, the value looks like one more thing the techniques disagree on.
+  """
+  if settings.TESTABLE_VALUE_OPTIMIZED and settings.TESTABLE_VALUE:
+    info_msg = "The parameter's own value was not required to reach the sink, so '"
+    info_msg += settings.TESTABLE_VALUE + "' stands in for it in the payload(s) above."
+    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   target_fingerprint_summary()
 
 """

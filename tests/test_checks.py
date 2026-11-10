@@ -382,6 +382,49 @@ class DelayThreshold(unittest.TestCase):
     self.assertAlmostEqual(30.0, checks.current_delay_threshold(), places=2)
 
 
+class SkippedValueIsAccountedFor(unittest.TestCase):
+  """
+  What the summary says where the parameter's own value was dropped from later requests.
+  """
+  def setUp(self):
+    self._flag = settings.TESTABLE_VALUE_OPTIMIZED
+    self._value = settings.TESTABLE_VALUE
+    self._points = settings.CONFIRMED_INJECTION_POINTS
+    self._out = settings.print_data_to_stdout
+    self.printed = []
+    settings.print_data_to_stdout = lambda line: self.printed.append(line)
+
+  def tearDown(self):
+    settings.TESTABLE_VALUE_OPTIMIZED = self._flag
+    settings.TESTABLE_VALUE = self._value
+    settings.CONFIRMED_INJECTION_POINTS = self._points
+    settings.print_data_to_stdout = self._out
+
+  def summarise(self, optimized, value):
+    settings.TESTABLE_VALUE_OPTIMIZED = optimized
+    settings.TESTABLE_VALUE = value
+    settings.CONFIRMED_INJECTION_POINTS = [
+      ("File-based", "Blind command injection", "addr", "JGX;echo T >/var/www/html/T.txt;", "GET", 63)
+    ]
+    original = checks.target_fingerprint_summary
+    checks.target_fingerprint_summary = lambda: None
+    try:
+      checks.confirmed_injection_points_summary()
+    finally:
+      checks.target_fingerprint_summary = original
+    return "\n".join(str(line) for line in self.printed)
+
+  def test_the_stand_in_value_is_named(self):
+    output = self.summarise(True, "JGX")
+    self.assertIn("was not required", output)
+    self.assertIn("'JGX'", output)
+
+  def test_nothing_is_said_where_the_real_value_was_used(self):
+    self.assertNotIn("was not required", self.summarise(False, "127.0.0.1"))
+
+  def test_nothing_is_said_where_there_is_no_value_to_name(self):
+    self.assertNotIn("was not required", self.summarise(True, ""))
+
 class DocumentRootFromALeakedPath(unittest.TestCase):
   """
   Cutting a root out of an absolute path the target printed about itself.
