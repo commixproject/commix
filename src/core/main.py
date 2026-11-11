@@ -720,8 +720,9 @@ def main(filename, url, http_request_method):
     which is the one that asks for all of them.
     """
 
+    # Named by the constant the technique's letter lives in, so the letter is written once.
     if menu.options.oob:
-      menu.options.tech = 'o'
+      menu.options.tech = settings.OOB_TECHNIQUE_LETTER
 
     # Check the file-destination
     if menu.options.file_write is not None and not menu.options.file_dest:

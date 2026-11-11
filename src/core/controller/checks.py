@@ -359,7 +359,7 @@ query, so nothing sent this way would run.
 def polluted_parameter(target, payload):
   if not menu.options.hpp or not payload:
     return target
-  if settings.IS_JSON or settings.IS_XML:
+  if settings.IS_JSON or settings.IS_XML or settings.IS_GRAPHQL:
     if not settings.HPP_POSITION_SAID:
       settings.HPP_POSITION_SAID = True
       warn_msg = "Parameter pollution applies to ordinary GET and POST parameters, not to a structured body."
@@ -753,10 +753,10 @@ Whether a technique is one this run is testing. Two separate choices sit behind 
 being tested, chosen with '--eval', and by which technique, chosen with '--technique'. A technique
 runs when its letter was asked for and it reaches the sink in hand, so the two compose.
 
-Out-of-band is not one of the techniques '--technique' names - 'o' is not even in
-settings.AVAILABLE_TECHNIQUES, so a user can never ask for it there. Whether it runs is '--oob'
-alone to say, independent of whatever '--technique' was given: '--oob --technique=r' still tries
-out-of-band, rather than reading the 'r' as leaving it out.
+Out-of-band is not one of the techniques '--technique' names - its letter is not in
+settings.AVAILABLE_TECHNIQUES, so a user can never ask for it there, and naming a technique
+alongside '--oob' is refused rather than merged. The switch selects the out-of-band technique on
+its own, which leaves it the only one this run is testing.
 """
 def technique_selected(tech_letter, eval_sink=False):
   if tech_letter == settings.OOB_TECHNIQUE_LETTER:
@@ -2715,25 +2715,6 @@ def set_target_arch(identified):
   if not menu.options.ignore_session and settings.TARGET_NETLOC:
     from src.utils import session_handler
     session_handler.import_target_arch(settings.TARGET_NETLOC, identified)
-
-"""
-The word size of the target's hardware platform - 64, 32, or None where it has not been established
-or is a name that says neither. Read from what the target answered, never guessed from the host.
-"""
-def target_word_size():
-  name = (settings.TARGET_ARCH or "").strip().lower()
-  if not name:
-    return None
-  if name in settings.ARCH_64:
-    return 64
-  if name in settings.ARCH_32:
-    return 32
-  # A name that was never in either list still says which it is, where it says so plainly.
-  if "64" in name:
-    return 64
-  if re.search(r"\b(i[3-6]86|x86|arm(v[0-7]l?)?)\b", name):
-    return 32
-  return None
 
 """
 Decision if the user-defined operating system name,

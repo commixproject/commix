@@ -25,12 +25,6 @@ def _output(cmd):
 def _end(separator):
   return settings.EVAL_GRAMMAR.TERMINATOR if separator else ""
 
-# Stated in the shell's spelling by every caller, so it is rewritten into the language's here.
-def _as_expression(condition):
-  for shell_operator, operator in settings.EVAL_GRAMMAR.COMPARISON.items():
-    condition = condition.replace(settings.SINGLE_WHITESPACE + shell_operator + settings.SINGLE_WHITESPACE, operator)
-  return condition
-
 """
 A question whose answer is known, for telling a target that answers at all from one that does not.
 """

@@ -154,6 +154,10 @@ def check_for_stored_sessions(url, check_parameter, http_request_method):
 
 """
 Heuristic request(s)
+
+Carried the way the exploitation requests carry it, pollution included: under '--smart' a negative
+answer here is what leaves the parameter untested, so deciding that on an unpolluted request would
+skip the parameter over an answer '--hpp' was given to change.
 """
 def heuristic_request(url, http_request_method, check_parameter, payload, whitespace, place):
   data = None
@@ -187,7 +191,7 @@ def heuristic_request(url, http_request_method, check_parameter, payload, whites
       body_payload = checks.xml_encode_payload(checks.strip_xml_forbidden(payload))
     else:
       body_payload = checks.encode_payload(payload)
-    data = checks.restore_xml_layout(checks.process_injectable_value(body_payload, menu.options.data)).encode(settings.DEFAULT_CODEC)
+    data = checks.restore_xml_layout(checks.process_injectable_value(body_payload, menu.options.data, pollute=True)).encode(settings.DEFAULT_CODEC)
   else:
     if settings.USER_DEFINED_POST_DATA:
       settings.USER_DEFINED_POST_DATA = checks.remove_tags(settings.USER_DEFINED_POST_DATA)
@@ -195,7 +199,7 @@ def heuristic_request(url, http_request_method, check_parameter, payload, whites
   if settings.INJECT_TAG in url:
     # Encode query string, preserving delimiters and configured parameter delimiter
     encoded_payload = checks.encode_payload(payload)
-    tmp_url = checks.process_injectable_value(encoded_payload, url)
+    tmp_url = checks.process_injectable_value(encoded_payload, url, pollute=True)
   else:
     tmp_url = checks.remove_tags(tmp_url)
     url = checks.remove_tags(url)
@@ -718,7 +722,8 @@ def oob_command_injection_technique(url, timesec, filename, http_request_method)
     if result is not False:
       settings.IDENTIFIED_COMMAND_INJECTION = True
     return result
-  run_technique(injection_type, technique, "OOB_STATE", "SKIP_OOB_INJECTIONS", "o", exploit)
+  run_technique(injection_type, technique, "OOB_STATE", "SKIP_OOB_INJECTIONS",
+                settings.OOB_TECHNIQUE_LETTER, exploit)
 
 """
 Check parameter in HTTP header.

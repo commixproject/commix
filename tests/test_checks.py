@@ -13,6 +13,7 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import io
 import unittest
 
 from tests._testutils import stage
@@ -798,7 +799,7 @@ class ParameterPollutionStatesOnlyWhatTheBannerSaid(unittest.TestCase):
 
   def setUp(self):
     self._state = (settings.SERVER_BANNER, settings.HPP_POSITION_SAID, settings.TESTABLE_VALUE,
-                   settings.IS_JSON, settings.IS_XML, menu.options.hpp)
+                   settings.IS_JSON, settings.IS_XML, settings.IS_GRAPHQL, menu.options.hpp)
     self._out = settings.print_data_to_stdout
     self.said = []
     settings.print_data_to_stdout = self.said.append
@@ -806,11 +807,12 @@ class ParameterPollutionStatesOnlyWhatTheBannerSaid(unittest.TestCase):
     settings.TESTABLE_VALUE = "127.0.0.1"
     settings.IS_JSON = False
     settings.IS_XML = False
+    settings.IS_GRAPHQL = False
     menu.options.hpp = True
 
   def tearDown(self):
     (settings.SERVER_BANNER, settings.HPP_POSITION_SAID, settings.TESTABLE_VALUE,
-     settings.IS_JSON, settings.IS_XML, menu.options.hpp) = self._state
+     settings.IS_JSON, settings.IS_XML, settings.IS_GRAPHQL, menu.options.hpp) = self._state
     settings.print_data_to_stdout = self._out
 
   def pollute(self, banner):
@@ -852,6 +854,15 @@ class ParameterPollutionStatesOnlyWhatTheBannerSaid(unittest.TestCase):
     self.assertEqual(self.TARGET + self.PAYLOAD, polluted)
     self.assertIn("cannot help here", said)
 
+  def test_a_document_body_is_told_about_the_way_the_other_structured_ones_are(self):
+    # A GraphQL document carries no second occurrence any more than JSON or XML does, and saying
+    # so is what tells the switch apart from one that was applied and changed nothing.
+    settings.IS_GRAPHQL = True
+    polluted, said = self.pollute("Apache/2.4.7 (Ubuntu) PHP/5.5.9")
+    self.assertEqual(self.TARGET + self.PAYLOAD, polluted)
+    self.assertIn("not to a structured body", said)
+    self.assertNotIn("Sending 'addr' twice", said)
+
 if __name__ == "__main__":
   unittest.main()
 
@@ -882,3 +893,66 @@ class EmptyTestableValue(unittest.TestCase):
     carrier = "addr=127.0.0.1" + settings.INJECT_TAG
     spliced = checks.process_injectable_value("127.0.0.1;echo Hello", carrier)
     self.assertEqual("addr=127.0.0.1;echo Hello", spliced)
+
+class TheOutOfBandTechniqueIsAskedForOnItsOwn(unittest.TestCase):
+  """
+  Out-of-band is reached by '--oob' rather than by a letter of '--technique', and the letter it is
+  written down as lives in one place, so the switch and what runs it cannot drift apart.
+  """
+  def setUp(self):
+    self._state = (menu.options.oob, menu.options.tech)
+
+  def tearDown(self):
+    (menu.options.oob, menu.options.tech) = self._state
+
+  def test_the_letter_is_not_one_the_user_can_name(self):
+    self.assertNotIn(settings.OOB_TECHNIQUE_LETTER, settings.AVAILABLE_TECHNIQUES)
+
+  def test_the_letter_is_written_down_in_one_place_only(self):
+    # Spelled again at either end, the switch and the technique it reaches are free to drift apart
+    # without anything failing, so both read it from the constant.
+    import inspect
+    from src.core import main
+    from src.core.controller import controller
+    self.assertIn("settings.OOB_TECHNIQUE_LETTER",
+                  inspect.getsource(controller.oob_command_injection_technique))
+    self.assertIn("menu.options.tech = settings.OOB_TECHNIQUE_LETTER",
+                  io.open(inspect.getsourcefile(main), encoding="utf-8").read())
+
+  def test_the_switch_alone_says_whether_it_runs(self):
+    menu.options.tech = ""
+    menu.options.oob = False
+    self.assertFalse(checks.technique_selected(settings.OOB_TECHNIQUE_LETTER))
+    menu.options.oob = True
+    self.assertTrue(checks.technique_selected(settings.OOB_TECHNIQUE_LETTER))
+
+  def test_what_the_switch_writes_down_is_read_back_as_the_same_technique(self):
+    # What '--oob' leaves in the technique list is the letter the run then asks about, and asking
+    # about any other one is answered no - the switch selects the out-of-band technique on its own.
+    menu.options.oob = True
+    menu.options.tech = settings.OOB_TECHNIQUE_LETTER
+    self.assertTrue(checks.technique_selected(settings.OOB_TECHNIQUE_LETTER))
+    for letter in settings.AVAILABLE_TECHNIQUES:
+      self.assertFalse(checks.technique_selected(letter), letter + " ran alongside out-of-band")
+
+class TheHeuristicProbeIsSentTheWayTheTestsAre(unittest.TestCase):
+  """
+  The probe decides whether a parameter is worth testing at all under '--smart', so it is carried
+  the way the requests that follow it are carried - pollution included, since deciding on an
+  unpolluted answer skips the parameter over the very request '--hpp' was given to replace.
+  """
+  def source(self):
+    import inspect
+    from src.core.controller import controller
+    return inspect.getsource(controller.heuristic_request)
+
+  def test_the_query_and_the_body_both_ask_for_pollution(self):
+    source = self.source()
+    self.assertIn("process_injectable_value(encoded_payload, url, pollute=True)", source)
+    self.assertIn("process_injectable_value(body_payload, menu.options.data, pollute=True)", source)
+
+  def test_the_cookie_is_left_alone(self):
+    # A cookie separates with ';', so a second '&name=' in one is more of the first cookie's value
+    # rather than another cookie - and nothing is gained by sending it.
+    source = self.source()
+    self.assertIn("process_injectable_value(encoded_payload, menu.options.cookie)", source)

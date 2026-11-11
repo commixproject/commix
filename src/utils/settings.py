@@ -486,7 +486,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "314"
+REVISION = "315"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -772,9 +772,6 @@ MAX_INFERRED_LENGTH = 50 * 1024 * 1024
 LENGTH_SEARCH_BASE = 4
 
 STDIN_PARSING = False
-
-# Slow target response.
-SLOW_TARGET_RESPONSE = 3
 
 # How far the target's own answers may spread before a delay read against them is unreliable.
 # What makes a time-related answer hard to read is the times moving about, not how long they are:
@@ -1210,12 +1207,6 @@ WIN_RECOGNISE_HP = "echo %PROCESSOR_ARCHITECTURE%"
 
 # What the target answered the hardware platform question with, kept as it came back.
 TARGET_ARCH = ""
-
-"""
-The word sizes a hardware platform name stands for, whichever way the target spells it.
-"""
-ARCH_64 = ("x86_64", "amd64", "x64", "aarch64", "arm64", "ppc64", "ppc64le", "s390x", "riscv64", "ia64", "sparc64", "mips64")
-ARCH_32 = ("i386", "i486", "i586", "i686", "x86", "armv6l", "armv7l", "arm", "ppc", "s390", "mips", "sparc")
 
 # File System access options
 # Read file
@@ -2455,9 +2446,6 @@ FAILED_HISTORY_FILE = None
 # How much of git's own complaint is repeated when an update fails.
 MAX_UPDATE_REASON_LENGTH = 200
 
-# Longer than this and a retrieved value is shown fenced, rather than running off the label's line.
-MAX_INLINE_VALUE_LENGTH = 200
-
 # How many answers the concurrency probe times on each side, and the total below which it cannot say.
 CONCURRENCY_PROBE_REQUESTS = 16
 CONCURRENCY_PROBE_FLOOR = 0.05
@@ -2958,7 +2946,7 @@ SHELLSHOCK_HTTP_HEADERS =[ COOKIE, USER_AGENT, REFERER ]
 CUSTOM_HEADER_PLACE = "(custom) HEADER"
 HTTP_HEADER_PLACES = [ USER_AGENT, REFERER, HOST, CUSTOM_HEADER_PLACE ]
 
-# The names a standard header answers to, so '-p'/'--skip-parameter' can name one as it is written.
+# The names a standard header answers to, so '-p'/'--skip' can name one as it is written.
 HTTP_HEADER_ALIASES = {
                         USER_AGENT : ( "ua", "useragent", "user-agent" ),
                         REFERER : ( "ref", "referer", "referrer" ),
