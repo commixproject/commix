@@ -278,7 +278,8 @@ def probe_skip_testable_value_early(url, http_request_method, check_parameter, p
     return original_url
   settings.TESTABLE_VALUE_OPTIMIZED = True
   settings.VALUE_SKIPPED_EARLY = (original_value, placeholder, original_url, original_data)
-  session_handler.import_testable_value_status(url, check_parameter, http_request_method, placeholder)
+  # Not recorded in the session here: what the sink answered is not yet what a technique confirmed,
+  # and a stand-in this run goes on to refuse would be left for the next one to replay.
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "The parameter's own value is not required to reach the sink, so it is skipped for faster requests."
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))

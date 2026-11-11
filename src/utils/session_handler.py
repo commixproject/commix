@@ -332,6 +332,15 @@ def import_injection_points(url, technique, injection_type, filename, separator,
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", params)
         conn.commit()
 
+    # Any stand-in for the parameter's value is recorded with the finding rather than before it, so
+    # the two cannot disagree on a replay: a run that dropped the value, confirmed nothing and put
+    # it back arrives here un-optimised, and the row is cleared instead of outliving its refusal.
+    if vuln_parameter:
+      if settings.TESTABLE_VALUE_OPTIMIZED and settings.TESTABLE_VALUE:
+        import_testable_value_status(url, vuln_parameter, http_request_method, settings.TESTABLE_VALUE)
+      else:
+        clear_testable_value_status(url, vuln_parameter, http_request_method)
+
     # Mark injection checker as True to indicate session contains injection data
     if not settings.INJECTION_CHECKER:
       settings.INJECTION_CHECKER = True
@@ -960,6 +969,21 @@ def import_testable_value_status(url, vuln_parameter, http_request_method, place
     pass
 
 """
+Forget a stand-in recorded for this parameter, where the point was found with its own value
+instead - the two cannot both describe the same finding.
+"""
+def clear_testable_value_status(url, vuln_parameter, http_request_method):
+  try:
+    with _session_connection() as conn:
+      table = table_name(url) + "_tv"
+      if not table_exists(conn, table):
+        return
+      conn.execute("DELETE FROM \"" + table + "\" WHERE vuln_parameter = ? AND http_request_method = ?;", (vuln_parameter, http_request_method))
+      conn.commit()
+  except (sqlite3.OperationalError, sqlite3.DatabaseError):
+    pass
+
+"""
 Retrieve a previously confirmed testable-value placeholder. Returns None if nothing is stored.
 """
 def check_stored_testable_value(url, vuln_parameter, http_request_method):
@@ -980,23 +1004,35 @@ def reapply_testable_value(url, vuln_parameter, http_request_method, prefix=None
   placeholder = check_stored_testable_value(url, vuln_parameter, http_request_method)
   if not placeholder:
     return (url, prefix) if prefix is not None else url
-  # Use the reloaded row's value; settings.TESTABLE_VALUE may already be a placeholder.
   tag_pattern = r'([^&=]*)' + re.escape(settings.INJECT_TAG)
+  # What the request being replayed carries in place of the value, which says what it was found with.
+  carried = None
   if menu.options.data and settings.INJECT_TAG in menu.options.data:
     match = re.search(tag_pattern, menu.options.data)
-    if match and match.group(1) != placeholder:
-      menu.options.data = menu.options.data.replace(match.group(1) + settings.INJECT_TAG, placeholder + settings.INJECT_TAG)
-      settings.TESTABLE_VALUE = placeholder
-      settings.TESTABLE_VALUE_OPTIMIZED = True
+    if match:
+      # The body is the one given now, not the stored one, so it carries the value and is rewritten.
+      carried = match.group(1)
+      if carried != placeholder:
+        menu.options.data = menu.options.data.replace(carried + settings.INJECT_TAG, placeholder + settings.INJECT_TAG)
   elif settings.INJECT_TAG in url:
     match = re.search(tag_pattern, url)
-    if match and match.group(1) != placeholder:
-      url = url.replace(match.group(1) + settings.INJECT_TAG, placeholder + settings.INJECT_TAG)
-      settings.TESTABLE_VALUE = placeholder
-      settings.TESTABLE_VALUE_OPTIMIZED = True
+    if match:
+      carried = match.group(1)
+      # The address is the stored finding's own, so one carrying anything but the stand-in was found
+      # without it - whatever an older row, written before the finding was, still says.
+      if carried != placeholder:
+        return (url, prefix) if prefix is not None else url
+  if carried is None:
+    return (url, prefix) if prefix is not None else url
+  # Only the value being stood in for is rewritten: a prefix naming anything else is the boundary's
+  # own or the one '--prefix' asked for, and standing in for that sends a payload nobody asked for.
   if prefix is not None and prefix and prefix != placeholder:
-    prefix = placeholder
-    settings.TESTABLE_VALUE_OPTIMIZED = True
+    if prefix == settings.TESTABLE_VALUE:
+      prefix = placeholder
+    else:
+      announce_replay_conflict(prefix, menu.options.prefix, "prefix", "--prefix")
+  settings.TESTABLE_VALUE = placeholder
+  settings.TESTABLE_VALUE_OPTIMIZED = True
   return (url, prefix) if prefix is not None else url
 
 """
