@@ -101,14 +101,25 @@ def make_simple_execute_cmd(injector, separator, maxlen, TAG, prefix, suffix, wh
         shell = ""
       return postprocess_time(shell)
     else:
-      if technique == settings.INJECTION_TECHNIQUE.FILE_BASED and not results_based_injector:
-        response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, technique)
-      else:
-        response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, interpreter, filename, technique)
-        if settings.URL_RELOAD:
-          response = requests.url_reload(url, timesec)
-      shell = injector.injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, timesec)
-      return "".join(str(p) for p in shell)
+      def send():
+        if technique == settings.INJECTION_TECHNIQUE.FILE_BASED and not results_based_injector:
+          response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, technique)
+        else:
+          response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, interpreter, filename, technique)
+          if settings.URL_RELOAD:
+            response = requests.url_reload(url, timesec)
+        shell = injector.injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, timesec)
+        return "".join(str(p) for p in shell)
+      shell = send()
+      # The reading that hands the output back whole asks a tool of the target, and a target
+      # without it answers nothing where the plainer reading would have answered something. Asked
+      # again the once, with the rest of this target kept to the plainer form; an output that is
+      # genuinely empty pays that one request to establish that it is.
+      if not shell and settings.RESULTS_BASED_EXACT_OUTPUT \
+         and technique == settings.INJECTION_TECHNIQUE.RESULTS_BASED:
+        settings.RESULTS_BASED_EXACT_OUTPUT = False
+        shell = send()
+      return shell
   return execute_cmd
 
 """

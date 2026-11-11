@@ -118,3 +118,58 @@ class TechniquesCarryingEitherSink(unittest.TestCase):
 
 if __name__ == "__main__":
   unittest.main()
+
+class AReadingThatNeedsAToolFallsBackWhenItIsNotThere(unittest.TestCase):
+  """
+  The exact reading of a command's output asks 'awk' of the target. A target without it answers
+  nothing, where the reading that asks for none would have answered something - so an empty answer
+  is asked again the once, and the rest of that target is read the plainer way.
+  """
+  def setUp(self):
+    from src.core.controller import execution
+    self.execution = execution
+    self._exact = settings.RESULTS_BASED_EXACT_OUTPUT
+    self._time = settings.TIME_RELATED_ATTACK
+    self._reload = settings.URL_RELOAD
+    settings.RESULTS_BASED_EXACT_OUTPUT = True
+    settings.TIME_RELATED_ATTACK = False
+    settings.URL_RELOAD = False
+    self.sent = []
+
+  def tearDown(self):
+    settings.RESULTS_BASED_EXACT_OUTPUT = self._exact
+    settings.TIME_RELATED_ATTACK = self._time
+    settings.URL_RELOAD = self._reload
+
+  def injector(self, answers):
+    sent, said = self.sent, list(answers)
+    class Injector(object):
+      @staticmethod
+      def injection(*args, **kwargs):
+        sent.append(settings.RESULTS_BASED_EXACT_OUTPUT)
+        return "response"
+      @staticmethod
+      def injection_results(*args, **kwargs):
+        return said.pop(0)
+    return Injector
+
+  def fire(self, answers):
+    run = self.execution.make_simple_execute_cmd(
+      self.injector(answers), ";", 10, "TAG", "", "", " ", 5, "GET", "http://t/", "p", None, "f",
+      0, settings.INJECTION_TECHNIQUE.RESULTS_BASED, "")
+    return run("id")
+
+  def test_an_empty_answer_is_asked_again_without_the_tool(self):
+    self.assertEqual("plain", self.fire(["", "plain"]))
+    self.assertEqual([True, False], self.sent)
+    self.assertFalse(settings.RESULTS_BASED_EXACT_OUTPUT)
+
+  def test_an_answer_that_came_back_is_not_asked_twice(self):
+    self.assertEqual("exact  output", self.fire(["exact  output"]))
+    self.assertEqual([True], self.sent)
+    self.assertTrue(settings.RESULTS_BASED_EXACT_OUTPUT)
+
+  def test_a_target_already_read_the_plain_way_asks_once(self):
+    settings.RESULTS_BASED_EXACT_OUTPUT = False
+    self.assertEqual("", self.fire([""]))
+    self.assertEqual([False], self.sent)

@@ -114,6 +114,19 @@ class PayloadSeparators(unittest.TestCase):
     settings.TARGET_OS = settings.OS.UNIX
     settings.WHITESPACES = [settings.SINGLE_WHITESPACE]
     settings.TIME_RELATED_ATTACK = True
+    # A builder that reads its answer back differently where nothing is rewriting the payload has
+    # that branch swept too, rather than whichever one the state left behind happens to select.
+    self._reading = (settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX,
+                     settings.RESULTS_BASED_EXACT_OUTPUT, dict(settings.TAMPER_SCRIPTS))
+    settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = settings.NESTING_SUBSTITUTION
+    settings.RESULTS_BASED_EXACT_OUTPUT = True
+    for name in settings.TAMPER_SCRIPTS:
+      settings.TAMPER_SCRIPTS[name] = False
+
+  def tearDown(self):
+    (settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX,
+     settings.RESULTS_BASED_EXACT_OUTPUT, scripts) = self._reading
+    settings.TAMPER_SCRIPTS.update(scripts)
 
   # Builders that answer with nothing on a POSIX target, because that is not what they are for.
   INERT = ("windows_condition_check", "oracle_supported", "_supported", "_var_chain")
@@ -266,10 +279,12 @@ class AwkExpressions(unittest.TestCase):
   def _programs(self):
     from src.core.techniques.time_based import tb_payloads
     from src.core.techniques.tempfile_based import tfb_payloads
+    from src.core.techniques.results_based import rb_payloads
     return {
       "length": tb_payloads._length_arg_expr("WORD"),
       "ordinal": tb_payloads._ordinal_arg_expr("WORD", 3),
       "flatten": tfb_payloads.flattened_trimmed_text("FILE"),
+      "single line": rb_payloads.single_line_output("WORD"),
     }
 
   def test_none_of_them_pipes(self):
@@ -1227,3 +1242,65 @@ class FileOracleLengthIsBytes(unittest.TestCase):
       os.unlink(name)
 
 # eof
+
+class ResultsBasedReadsTheOutputAsItWasPrinted(unittest.TestCase):
+  """
+  What the target printed is what the run reports. Handed straight to 'echo' the output is split
+  into words and joined back with one space each, so runs of whitespace collapse and the ends are
+  dropped - and 'echo' reads the backslashes of what is left. Quoting alone is no answer: the
+  newlines then survive too, and a sink handing back only the last line of what it ran answers
+  with nothing at all.
+  """
+  def setUp(self):
+    from src.core.techniques.results_based import rb_payloads
+    self.rb_payloads = rb_payloads
+    self._state = (settings.TARGET_OS, settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX,
+                   settings.RESULTS_BASED_EXACT_OUTPUT, dict(settings.TAMPER_SCRIPTS))
+    settings.TARGET_OS = settings.OS.UNIX
+    settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = "$(", ")"
+    settings.RESULTS_BASED_EXACT_OUTPUT = True
+    for name in settings.TAMPER_SCRIPTS:
+      settings.TAMPER_SCRIPTS[name] = False
+
+  def tearDown(self):
+    (settings.TARGET_OS, settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX,
+     settings.RESULTS_BASED_EXACT_OUTPUT, scripts) = self._state
+    settings.TAMPER_SCRIPTS.update(scripts)
+
+  def payload(self):
+    return self.rb_payloads.cmd_execution(";", "TAG", "ls /")
+
+  def test_the_output_is_written_a_byte_at_a_time(self):
+    # 'echo' reads the backslashes of what it is handed and the leading '-n'/'-e' of it as options
+    # of its own; a format with the output as its argument reads neither.
+    payload = self.payload()
+    self.assertIn("printf TAG", payload)
+    self.assertIn("%s", payload)
+
+  def test_the_newlines_are_replaced_before_the_page_can_lose_them(self):
+    self.assertIn("gsub(/" + settings.END_LINE.ESCAPED_LF + "/,OFS,ARGV[1])", self.payload())
+
+  def test_the_output_goes_in_quoted_and_the_markers_do_not(self):
+    # A script that writes the payload out differently puts its own characters inside the markers
+    # too, and those are stripped only where the shell still reads them.
+    payload = self.payload()
+    self.assertIn('%s' + settings.CMD_SUB_PREFIX + 'echo TAG' + settings.CMD_SUB_SUFFIX + 'TAG', payload)
+    self.assertIn('"' + settings.CMD_SUB_PREFIX + 'LC_ALL=C awk', payload)
+
+  def test_a_substitution_that_cannot_nest_reads_it_the_plain_way(self):
+    settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = "`", "`"
+    payload = self.payload()
+    self.assertIn("echo TAG", payload)
+    self.assertNotIn("awk", payload)
+
+  def test_a_script_rewriting_the_payload_reads_it_the_plain_way(self):
+    # Six of them take the nesting apart and one turns it into a command that waits, so where any
+    # is in effect the output goes in as it always did - a collapsed answer, not no answer.
+    settings.TAMPER_SCRIPTS["space2ifs"] = True
+    payload = self.payload()
+    self.assertIn("echo TAG", payload)
+    self.assertNotIn("awk", payload)
+
+  def test_a_target_without_the_tool_reads_it_the_plain_way(self):
+    settings.RESULTS_BASED_EXACT_OUTPUT = False
+    self.assertNotIn("awk", self.payload())

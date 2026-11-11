@@ -500,7 +500,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "318"
+REVISION = "319"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -662,6 +662,11 @@ BASIC_COMMAND_INJECTION_PAYLOADS = []
 ALTER_INTERPRETER_BASIC_COMMAND_INJECTION_PAYLOADS = []
 BASIC_COMMAND_INJECTION_RESULT = ""
 IDENTIFIED_COMMAND_INJECTION = False
+
+# Whether the results-based technique still asks the target to hand its output back a line at a
+# time. Turned off for the rest of this target once a reading comes back empty, which is how a
+# target without the tool that reading needs answers.
+RESULTS_BASED_EXACT_OUTPUT = True
 
 # Basic heuristic checks for code injection: the probe that says code was evaluated, what its
 # answer looks like coming back, and the interpreter's own complaints that give the same away.
