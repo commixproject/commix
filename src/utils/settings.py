@@ -486,7 +486,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "309"
+REVISION = "310"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -888,6 +888,15 @@ TESTABLE_VALUE = ""
 
 # Whether TESTABLE_VALUE has already been swapped for a disposable placeholder for this parameter.
 TESTABLE_VALUE_OPTIMIZED = False
+
+# What the early probe put aside when it dropped the parameter's own value: the value, what stands in
+# for it, and the request as it read beforehand - so a pass that confirms nothing can be made again
+# with the value back in place rather than written off on the strength of an optimisation.
+VALUE_SKIPPED_EARLY = None
+
+# Set once the value has been put back and the pass made again, so the probe does not drop it a
+# second time and send the run round the same loop.
+VALUE_SKIP_REFUSED = False
 
 """
 Whether the payload stands in place of the parameter's own value rather than behind it.

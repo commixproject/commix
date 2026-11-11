@@ -425,6 +425,72 @@ class SkippedValueIsAccountedFor(unittest.TestCase):
   def test_nothing_is_said_where_there_is_no_value_to_name(self):
     self.assertNotIn("was not required", self.summarise(True, ""))
 
+class ValueSkippedOnlyOnEvidence(unittest.TestCase):
+  """
+  Dropping the parameter's own value is an optimisation, so it is taken only where the sink answered
+  without it - and put back wherever it was taken and nothing was confirmed.
+  """
+  def setUp(self):
+    from src.core.controller import controller
+    self.controller = controller
+    self._state = (settings.TESTABLE_VALUE, settings.TESTABLE_VALUE_OPTIMIZED,
+                   settings.VALUE_SKIPPED_EARLY, settings.VALUE_SKIP_REFUSED, menu.options.data)
+    self._request = controller.heuristic_request
+    self._out = settings.print_data_to_stdout
+    settings.print_data_to_stdout = lambda *a, **k: None
+    settings.TESTABLE_VALUE = "127.0.0.1"
+    settings.TESTABLE_VALUE_OPTIMIZED = False
+    settings.VALUE_SKIPPED_EARLY = None
+    settings.VALUE_SKIP_REFUSED = False
+    menu.options.data = None
+
+  def tearDown(self):
+    (settings.TESTABLE_VALUE, settings.TESTABLE_VALUE_OPTIMIZED, settings.VALUE_SKIPPED_EARLY,
+     settings.VALUE_SKIP_REFUSED, menu.options.data) = self._state
+    self.controller.heuristic_request = self._request
+    settings.print_data_to_stdout = self._out
+
+  def answer(self, with_marker):
+    class _Response(object):
+      def read(self):
+        return b""
+    def _request(url, http_request_method, check_parameter, payload, whitespace, place):
+      return (_Response() if with_marker else False), url
+    self.controller.heuristic_request = _request
+    original = checks.process_page_content
+    checks.process_page_content = lambda response, action=None: "ok" if not with_marker else "uid=0(root) gid=0(root)"
+    try:
+      return self.controller.probe_skip_testable_value_early(
+        "http://t/a.php?addr=127.0.0.1" + settings.INJECT_TAG, "GET", "addr", ";echo X", " ", None)
+    finally:
+      checks.process_page_content = original
+
+  def test_a_sink_that_answered_without_it_has_it_dropped(self):
+    url = self.answer(with_marker=True)
+    self.assertTrue(settings.TESTABLE_VALUE_OPTIMIZED)
+    self.assertNotIn("127.0.0.1", url)
+    self.assertIsNotNone(settings.VALUE_SKIPPED_EARLY)
+
+  def test_a_sink_that_did_not_answer_keeps_it(self):
+    url = self.answer(with_marker=False)
+    self.assertFalse(settings.TESTABLE_VALUE_OPTIMIZED)
+    self.assertEqual("127.0.0.1", settings.TESTABLE_VALUE)
+    self.assertIn("127.0.0.1", url)
+    self.assertIsNone(settings.VALUE_SKIPPED_EARLY)
+
+  def test_what_is_put_aside_restores_the_request_as_it_read(self):
+    self.answer(with_marker=True)
+    original_value, placeholder, original_url, original_data = settings.VALUE_SKIPPED_EARLY
+    self.assertEqual("127.0.0.1", original_value)
+    self.assertIn("127.0.0.1", original_url)
+    self.assertEqual(3, len(placeholder))
+
+  def test_it_is_not_dropped_a_second_time_once_refused(self):
+    settings.VALUE_SKIP_REFUSED = True
+    url = self.answer(with_marker=True)
+    self.assertFalse(settings.TESTABLE_VALUE_OPTIMIZED)
+    self.assertIn("127.0.0.1", url)
+
 class EscapesInAnOptionValue(unittest.TestCase):
   """
   A value given as an escape, where the shell would have eaten the character itself.

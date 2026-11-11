@@ -232,6 +232,58 @@ def announce_heuristic_finding(detail):
 """
 Heuristic (basic) test for command injection
 """
+"""
+Whether the parameter's own value is needed to reach the sink, asked while the heuristic still holds
+the payload that reached it.
+
+The value belongs to the target, and what the target does with it is what takes the time: an address
+it pings answers in seconds where one it cannot resolve answers at once, and a scan sends hundreds of
+requests before it is finished. The same question asked twice, once with the value and once with a
+short random one, says whether any of that waiting buys anything.
+
+Asked here rather than once a technique is confirmed, which is where it was asked before: by then the
+heuristics, every boundary and the whole timing model have been paid for at the slow value's price,
+and only what came after could be made cheap.
+
+Nothing is assumed from it. The value is dropped only where the same marker comes back without it,
+the sink having demonstrably run either way - and where the pass that follows confirms nothing at
+all, the value is put back and the pass is made again, so no sink is lost to an optimisation.
+"""
+def probe_skip_testable_value_early(url, http_request_method, check_parameter, payload, whitespace, place):
+  if settings.TESTABLE_VALUE_OPTIMIZED or not settings.TESTABLE_VALUE or settings.VALUE_SKIP_REFUSED:
+    return url
+  marker = settings.TESTABLE_VALUE + settings.INJECT_TAG
+  in_data = bool(menu.options.data) and marker in menu.options.data
+  in_url = marker in url
+  if not in_data and not in_url:
+    return url
+  placeholder = ''.join(random.choice(string.ascii_uppercase) for _ in range(3))
+  original_data, original_url, original_value = menu.options.data, url, settings.TESTABLE_VALUE
+  if in_data:
+    menu.options.data = menu.options.data.replace(marker, placeholder + settings.INJECT_TAG)
+  else:
+    url = url.replace(marker, placeholder + settings.INJECT_TAG)
+  settings.TESTABLE_VALUE = placeholder
+  answered = False
+  try:
+    response, _ = heuristic_request(url, http_request_method, check_parameter, payload, whitespace, place)
+    if type(response) is not bool and response is not None:
+      html_data = checks.process_page_content(response, action="decode")
+      answered = bool(re.search(settings.BASIC_COMMAND_INJECTION_RESULT, html_data))
+  except Exception:
+    answered = False
+  if not answered:
+    menu.options.data = original_data
+    settings.TESTABLE_VALUE = original_value
+    return original_url
+  settings.TESTABLE_VALUE_OPTIMIZED = True
+  settings.VALUE_SKIPPED_EARLY = (original_value, placeholder, original_url, original_data)
+  session_handler.import_testable_value_status(url, check_parameter, http_request_method, placeholder)
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "The parameter's own value is not required to reach the sink, so it is skipped for faster requests."
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+  return url
+
 def command_injection_heuristic_basic(url, http_request_method, check_parameter, place):
   check_parameter = check_parameter.lstrip().rstrip()
   checks.perform_payload_modification(payload="")
@@ -266,6 +318,9 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
             match = re.search(settings.BASIC_COMMAND_INJECTION_RESULT, html_data)
             if match:
               settings.IDENTIFIED_COMMAND_INJECTION = True
+              # Asked while the payload that answered is still in hand, and before a technique has
+              # spent a single request at the slow value's price.
+              url = probe_skip_testable_value_early(url, http_request_method, check_parameter, payload, whitespace, place)
               # The token the rest of the code compares against, and then what was really shown.
               checks.set_target_os(shell_os)
               # A payload that ran answers what the banner could not, so nothing need be asked.
@@ -824,6 +879,10 @@ def injection_process(url, check_parameter, http_request_method, filename, times
   # replaces it is reached per parameter, and exploitation follows within this same call, so leaving
   # the mode set would only decide how the parameters after this one are tested.
   settings.REPLACE_VALUE = False
+  # Every parameter is asked the value question for itself: one that needed its value says nothing
+  # about the next, and a refusal carried over would have the next parameter pay the slow price too.
+  settings.VALUE_SKIPPED_EARLY = None
+  settings.VALUE_SKIP_REFUSED = False
   # Named with '--param-filter': a parameter is tested only where it travels in one of the places
   # asked for, and nothing is said about the rest - naming them is saying which ones matter.
   if settings.PARAM_FILTER_PLACES and str(place).upper() not in settings.PARAM_FILTER_PLACES:
@@ -1303,6 +1362,32 @@ def injection_process(url, check_parameter, http_request_method, filename, times
         end_detection = _run_and_verify()
         if checks.injection_techniques_status() is False:
           settings.REPLACE_VALUE = False
+
+      """
+      The optimisation put back, where the pass that took it confirmed nothing.
+
+      Dropping the value is an optimisation and never evidence: the heuristic showed the sink runs
+      without it, which is not the same as every technique reaching that sink without it. A target
+      that validates what it is given can answer the heuristic and still take another path once the
+      value is three random letters, and a run that stopped there would report a parameter as not
+      injectable on the strength of a request it sent in order to go faster.
+
+      So the value goes back and the pass is made again, at the price it would have cost all along.
+      Refused afterwards, so the probe does not drop it a second time and send this round in a loop.
+      """
+      if not end_detection and checks.injection_techniques_status() is False and settings.VALUE_SKIPPED_EARLY:
+        original_value, placeholder, original_url, original_data = settings.VALUE_SKIPPED_EARLY
+        settings.VALUE_SKIPPED_EARLY = None
+        settings.VALUE_SKIP_REFUSED = True
+        settings.TESTABLE_VALUE_OPTIMIZED = False
+        settings.TESTABLE_VALUE = original_value
+        menu.options.data = original_data
+        url = original_url
+        if settings.VERBOSITY_LEVEL != 0:
+          debug_msg = "Nothing was confirmed without the parameter's own value, so it is restored and tested again."
+          settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+        _reset_web_root_detection()
+        end_detection = _run_and_verify()
 
       # All injection techniques seems to be failed!
       if checks.injection_techniques_status() is False:
