@@ -93,7 +93,17 @@ than from the order the lists happen to carry. Worked out once per shape, for ev
 has it.
 """
 def _order_by_value_shape(prefixes, suffixes):
+  # Read off the parameter's own value, which is what the shape is a fact about. Where the sink
+  # turned out not to need that value it has been stood in for by three random letters, and three
+  # letters of the alphabet are alphabetic every time - so reading the stand-in put the quoted
+  # boundaries first on every target that optimisation fired on, leaving the bare one last behind
+  # four pairs and every separator of each. The value it stands for is kept, and is read instead;
+  # where it was not kept, nothing is known about the shape and the lists are left as written.
   value = (settings.TESTABLE_VALUE or "").strip()
+  if settings.VALUE_SKIPPED_EARLY:
+    value = (settings.VALUE_SKIPPED_EARLY[0] or "").strip()
+  elif settings.TESTABLE_VALUE_OPTIMIZED:
+    return prefixes, suffixes
   if checks.is_digit(value):
     quoted_last = True
   elif value.isalpha():
