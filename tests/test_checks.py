@@ -425,6 +425,58 @@ class SkippedValueIsAccountedFor(unittest.TestCase):
   def test_nothing_is_said_where_there_is_no_value_to_name(self):
     self.assertNotIn("was not required", self.summarise(True, ""))
 
+class ReflectionsTheTargetRewrote(unittest.TestCase):
+  """
+  Taking the payload back out of a page that did not hand it back verbatim.
+  """
+  PAYLOAD = "127.0.0.1;echo ABCDEF"
+
+  def setUp(self):
+    self._found = settings.REFLECTIVE_VALUE_FOUND
+    self._out = settings.print_data_to_stdout
+    settings.print_data_to_stdout = lambda *a, **k: None
+
+  def tearDown(self):
+    settings.REFLECTIVE_VALUE_FOUND = self._found
+    settings.print_data_to_stdout = self._out
+
+  def filtered(self, page, payload=None):
+    settings.REFLECTIVE_VALUE_FOUND = False
+    return checks.remove_reflected_values(page, payload or self.PAYLOAD)
+
+  def test_the_payload_as_it_went_out(self):
+    self.assertIn(settings.REFLECTED_VALUE_MARKER, self.filtered("a <b>127.0.0.1;echo ABCDEF</b> z"))
+
+  def test_a_space_that_came_back_as_a_plus(self):
+    self.assertIn(settings.REFLECTED_VALUE_MARKER, self.filtered("a <b>127.0.0.1;echo+ABCDEF</b> z"))
+
+  def test_a_command_the_target_upper_cased(self):
+    self.assertIn(settings.REFLECTED_VALUE_MARKER, self.filtered("a <b>127.0.0.1;ECHO ABCDEF</b> z"))
+
+  def test_a_space_of_another_width(self):
+    self.assertIn(settings.REFLECTED_VALUE_MARKER, self.filtered("a <b>127.0.0.1;echo\xa0ABCDEF</b> z"))
+
+  def test_runs_scattered_through_unrelated_text_are_left_alone(self):
+    # The payload's own runs are words a page says for itself - the value sent back, 'echo', a tag.
+    page = "host 127.0.0.1 is up. " + "x" * 60 + " please echo this. " + "y" * 40 + " ABCDEF is the code."
+    self.assertEqual(page, self.filtered(page))
+
+  def test_a_page_without_the_payload_is_untouched(self):
+    page = "nothing of the sort here"
+    self.assertEqual(page, self.filtered(page))
+
+  def test_a_payload_of_punctuation_alone_builds_no_pattern(self):
+    # An open pattern with no run to anchor it would match at every position of every page.
+    self.assertIsNone(checks.reflection_pattern(";|&"))
+    page = "a perfectly ordinary page"
+    self.assertEqual(page, self.filtered(page, ";|&"))
+
+  def test_the_marker_is_the_same_length_whatever_the_payload(self):
+    short = self.filtered("x 127.0.0.1;echo ABCDEF y")
+    long_payload = "127.0.0.1;echo ABCDEFGHIJKLMNOP"
+    longer = self.filtered("x " + long_payload + " y", long_payload)
+    self.assertEqual(len(short), len(longer))
+
 class DocumentRootFromALeakedPath(unittest.TestCase):
   """
   Cutting a root out of an absolute path the target printed about itself.

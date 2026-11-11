@@ -273,13 +273,20 @@ def validate():
 
   # Check if defined "--ignore-code" option.
   if menu.options.ignore_code:
+    wildcard = menu.options.ignore_code.strip() == settings.IGNORE_CODE_WILDCARD
     try:
-      settings.IGNORE_CODE = [int(_) for _ in re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.ignore_code)]
+      settings.IGNORE_CODE = list(range(0, 1000)) if wildcard else [int(_) for _ in re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.ignore_code)]
       if settings.VERBOSITY_LEVEL != 0:
-        debug_msg = "Ignoring '" + str(', '.join(str(x) for x in settings.IGNORE_CODE)) + "' HTTP error code"+('', 's')[len(settings.IGNORE_CODE) > 1]+ "."
+        # Said as the wildcard it was given as - the thousand codes it stands for are not a list
+        # anybody asked to read.
+        if wildcard:
+          debug_msg = "Ignoring every HTTP error code."
+        else:
+          debug_msg = "Ignoring '" + str(', '.join(str(x) for x in settings.IGNORE_CODE)) + "' HTTP error code"+('', 's')[len(settings.IGNORE_CODE) > 1]+ "."
         settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
     except ValueError:
-      err_msg = "The option '--ignore-code' should contain a list of integer values."
+      err_msg = "The option '--ignore-code' should contain a list of integer values, or '"
+      err_msg += settings.IGNORE_CODE_WILDCARD + "' for every code."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit(settings.EXIT_FAILURE)
 

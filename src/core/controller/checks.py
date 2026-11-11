@@ -1698,19 +1698,56 @@ def process_page_content(response, action):
     raise SystemExit(settings.EXIT_FAILURE)
 
 """
-Ignore verbatim payload reflections so they cannot trigger a false positive.
+The payload as a pattern that still matches what the target made of it.
+
+Its alphanumeric runs are kept as they are and whatever sat between them is left open, because that
+is the part a target rewrites: a space arriving as '+', a character escaped on the way back, a
+filter that upper-cased what it passed on. The runs themselves are what the payload is recognised
+by. Nothing is built from a payload with no such run - an open pattern alone matches every page at
+every position, and would take the page out rather than the reflection in it.
+"""
+def reflection_pattern(payload):
+  parts = [re.escape(part) for part in re.split(r"[^A-Za-z0-9]+", payload) if part]
+  if not parts:
+    return None
+  if len(parts) > settings.REFLECTED_MAX_PATTERN_PARTS:
+    half = settings.REFLECTED_MAX_PATTERN_PARTS // 2
+    parts = parts[:half] + parts[-half:]
+  return settings.REFLECTED_GAP_REGEX.join(parts)
+
+"""
+Ignore payload reflections so they cannot trigger a false positive.
+
+A page carrying the payload back differs from one that does not by the payload, whatever the command
+did - so a technique reading an answer off two pages would be reading the reflection as well as the
+answer. Taken out of both, and replaced by a marker rather than by what it replaces, so two payloads
+of unequal length leave pages of equal length behind them.
 """
 def remove_reflected_values(html_data, payload):
-  if not payload:
+  if not payload or not html_data:
     return html_data
-  decoded_payload = _urllib.parse.unquote(payload)
-  if decoded_payload and decoded_payload in html_data:
-    if not settings.REFLECTIVE_VALUE_FOUND:
-      settings.REFLECTIVE_VALUE_FOUND = True
-      warn_msg = "The response appears to reflect the target parameter value(s). Filtering reflected content."
-      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-    html_data = html_data.replace(decoded_payload, settings.SINGLE_WHITESPACE)
-  return html_data
+  decoded_payload = _urllib.parse.unquote_plus(payload)
+  filtered = html_data
+  # The payload exactly as it went out, which is the common case and costs one scan of the page.
+  if decoded_payload and decoded_payload in filtered:
+    filtered = filtered.replace(decoded_payload, settings.REFLECTED_VALUE_MARKER)
+  # Then the payload as the target may have rewritten it, which only a pattern can find.
+  if filtered == html_data:
+    pattern = reflection_pattern(decoded_payload)
+    if pattern:
+      # Taken only where what matched is the length of a reflection rather than of a paragraph.
+      cap = len(decoded_payload) * settings.REFLECTED_MAX_LENGTH_FACTOR + settings.REFLECTED_LENGTH_ALLOWANCE
+      def _bounded(match):
+        return settings.REFLECTED_VALUE_MARKER if len(match.group(0)) <= cap else match.group(0)
+      try:
+        filtered = re.sub("(?i)" + pattern, _bounded, filtered)
+      except Exception:
+        filtered = html_data
+  if filtered != html_data and not settings.REFLECTIVE_VALUE_FOUND:
+    settings.REFLECTIVE_VALUE_FOUND = True
+    warn_msg = "The response appears to reflect the target parameter value(s). Filtering reflected content."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  return filtered
 
 """
 Returns header value ignoring the letter case

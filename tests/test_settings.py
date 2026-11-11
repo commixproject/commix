@@ -19,6 +19,16 @@ import unittest
 from tests._testutils import tamper_modules
 from src.utils import settings
 
+class IgnoreCodeWildcard(unittest.TestCase):
+  """
+  What '--ignore-code' is given to mean every code rather than a list of them.
+  """
+  def test_the_wildcard_is_one_character(self):
+    self.assertEqual("*", settings.IGNORE_CODE_WILDCARD)
+
+  def test_it_is_not_a_code_any_list_could_hold(self):
+    self.assertFalse(settings.IGNORE_CODE_WILDCARD.isdigit())
+
 class TamperTables(unittest.TestCase):
   """
   Every table that names a tamper script has to name one that exists, or the run reaches for a

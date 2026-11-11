@@ -486,7 +486,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "307"
+REVISION = "308"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -856,6 +856,27 @@ NULL_CONNECTION_MIN_LENGTH = 32768
 
 # One-time "reflected value(s) found" notice already shown this run.
 REFLECTIVE_VALUE_FOUND = False
+
+# What stands in for a reflected payload once it is taken out of a page - a marker of its own rather
+# than the text it replaces, so two pages whose payloads differ in length still read as one page
+# where the reflection was the only thing telling them apart.
+REFLECTED_VALUE_MARKER = "__REFLECTED_VALUE__"
+
+# A run of anything but a newline, standing in for whatever the target put between the payload's own
+# alphanumeric runs: a '+' where a space went in, an entity for a character it escaped, a space of
+# another width. The payload that comes back is rarely the payload that went out.
+REFLECTED_GAP_REGEX = r"[^\n]{1,168}?"
+
+# How many of those runs the pattern is built from, taken half from each end past it - one segment
+# per run leaves a pattern with a page's worth of positions to try for every one of them.
+REFLECTED_MAX_PATTERN_PARTS = 10
+
+# How much longer than the payload a match may be before it is left alone. A payload's own
+# alphanumeric runs are words a page says for itself - the value that was sent back, 'echo', a tag -
+# and a pattern made of them matches those scattered across unrelated text as readily as the
+# reflection. Escaping stretches a reflection; it does not stretch it into paragraphs.
+REFLECTED_MAX_LENGTH_FACTOR = 4
+REFLECTED_LENGTH_ALLOWANCE = 32
 
 # Whether the caveat about an evaluated finding that a shell could equally explain has been given.
 EVAL_OVER_SHELL_SAID = False
@@ -2968,6 +2989,10 @@ ABORT_CODE = []
 
 # Ignore on (problematic) HTTP error code (e.g. 401).
 IGNORE_CODE = []
+
+# What '--ignore-code' is given to mean every code rather than a list of them - a target answering
+# with a different error for each of several reasons is one nobody wants to enumerate by hand.
+IGNORE_CODE_WILDCARD = "*"
 # HTTP error codes already warned about, kept apart from what the user chose to ignore.
 WARNED_HTTP_ERROR_CODES = set()
 
