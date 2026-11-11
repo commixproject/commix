@@ -254,6 +254,13 @@ def prove(filename, url):
     if settings.TARGET_ARCH:
       platform += " (" + settings.TARGET_ARCH + ")"
     fields.append(_field("Back-end", platform, bullet=False))
+  # Stated above the findings, where what the run itself is described by belongs: every point below
+  # was reached under these conditions, so repeating them per parameter would say the same thing as
+  # many times as there are parameters. Left out where there was nothing in the way, rather than
+  # written as an empty field.
+  conditions = _evasion()
+  if conditions:
+    fields.append(_field("Conditions", conditions, bullet=False))
   fields.append(_field("Verified", time.strftime("%Y-%m-%d %H:%M:%S"), bullet=False))
 
   proven = 0

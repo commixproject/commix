@@ -486,7 +486,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "312"
+REVISION = "313"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -3053,10 +3053,14 @@ RUN_WIDE_STATE = frozenset((
   "USER_APPLIED_TAMPER",
   "USER_APPLIED_TECHNIQUE", "USER_APPLIED_WEB_ROOT", "USER_APPLIED_INTERPRETER",
   "USER_APPLIED_TIMESEC", "USER_APPLIED_TMP_PATH",
-  # Answered once by the user, and not worth asking again for every target.
-  "ADJUST_TIME_DELAY_CHOICE", "FILE_BASED_NARROWING_CHOICE", "IGNORE_IDENTIFIED_TARGET_OS",
-  "IGNORE_NOT_FOUND", "NOT_FOUND_PROMPTED", "UNSTABLE_PROMPTED",
-  "RECOGNISE_OS", "THREADED_TIME_RETRIEVAL_CHOICE", "USE_BIN_SUBDIR_CHOICE", "WAF_EVASION_CONSENT",
+  # Answered once by the user, and not worth asking again for every target. The three retry consents
+  # belong here for the reason the WAF/IPS one does: each asks whether to pay for another pass around
+  # an obstacle, and an answer given once covers every target the same way, since what is being
+  # answered is whether that pass is worth its cost at all.
+  "ADJUST_TIME_DELAY_CHOICE", "DASHLESS_RETRY_CHOICE", "FILE_BASED_NARROWING_CHOICE",
+  "IGNORE_IDENTIFIED_TARGET_OS", "IGNORE_NOT_FOUND", "NOT_FOUND_PROMPTED", "UNSTABLE_PROMPTED",
+  "RECOGNISE_OS", "REPLACE_VALUE_RETRY_CHOICE", "THREADED_TIME_RETRIEVAL_CHOICE",
+  "USE_BIN_SUBDIR_CHOICE", "WAF_EVASION_CONSENT", "WHITESPACE_RETRY_CHOICE",
   # Counted or noted for the run as a whole.
   "CRAWLED_SKIPPED_URLS_NUM", "CRAWLED_URLS_INJECTED", "CRAWLED_URLS_NUM", "CRAWLING",
   "CRAWLING_PHASE", "ENUMERATION_DONE", "FILE_ACCESS_DONE", "REGISTRY_ACCESS_DONE", "HANDLER", "HREF_SKIPPED",

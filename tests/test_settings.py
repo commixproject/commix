@@ -143,5 +143,47 @@ class FirstLevelBoundaries(unittest.TestCase):
     self.assertIn("//", _eval.grammar("php").SUFFIXES_LVL3)
     self.assertIn("//", _eval.grammar("javascript").SUFFIXES_LVL3)
 
+class ConsentCarriesAcrossTargets(unittest.TestCase):
+  """
+  Each retry consent asks whether another pass around an obstacle is worth what it costs, which is
+  the question the WAF/IPS consent asks about a filter it identified. Asked once and held for the
+  run, as all four say they are - a list, a crawl or a page of forms otherwise puts the same three
+  questions to the user once per target.
+  """
+  CONSENTS = ("WHITESPACE_RETRY_CHOICE", "REPLACE_VALUE_RETRY_CHOICE", "DASHLESS_RETRY_CHOICE")
+
+  def setUp(self):
+    self._baseline = dict(settings._TARGET_STATE_BASELINE)
+    self._answers = {name: getattr(settings, name) for name in self.CONSENTS}
+    self._arch = settings.TARGET_ARCH
+    settings._TARGET_STATE_BASELINE.clear()
+    for name in self.CONSENTS:
+      setattr(settings, name, None)
+
+  def tearDown(self):
+    settings._TARGET_STATE_BASELINE.clear()
+    settings._TARGET_STATE_BASELINE.update(self._baseline)
+    for name, answer in self._answers.items():
+      setattr(settings, name, answer)
+    settings.TARGET_ARCH = self._arch
+
+  def test_each_consent_is_listed_beside_the_one_it_is_modelled_on(self):
+    self.assertIn("WAF_EVASION_CONSENT", settings.RUN_WIDE_STATE)
+    for name in self.CONSENTS:
+      self.assertIn(name, settings.RUN_WIDE_STATE)
+
+  def test_an_answer_given_for_one_target_is_not_asked_again_for_the_next(self):
+    # The first call records the baseline, every call after it is the next target starting.
+    settings.reset_target_state()
+    settings.TARGET_ARCH = "x86_64"
+    for name in self.CONSENTS:
+      setattr(settings, name, False)
+    settings.reset_target_state()
+    for name in self.CONSENTS:
+      self.assertIs(False, getattr(settings, name), name + " was asked again")
+    # What the target itself answered does go back, or the next one is tested as though it were this
+    # one - which is what the reset exists for.
+    self.assertEqual("", settings.TARGET_ARCH)
+
 if __name__ == "__main__":
   unittest.main()
