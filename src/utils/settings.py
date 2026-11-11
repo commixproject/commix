@@ -486,7 +486,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "313"
+REVISION = "314"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1261,7 +1261,9 @@ WIN_REG_QUERY = "reg query "
 WIN_REG_ADD = "reg add "
 WIN_REG_DEL = "reg delete "
 REG_ACCESS_DENIED = ["Access is denied", "ERROR: Access is denied", "requires elevation"]
-REG_VALUE_NOT_FOUND = "ERROR: The system was unable to find the specified registry key or value."
+# Listed the way the denied phrases above are, and without the "ERROR: " prefix or the full stop
+# 'reg' writes around it, so the phrase is found in an answer a shell wrapped or truncated.
+REG_VALUE_NOT_FOUND = ["The system was unable to find the specified registry key or value"]
 REG_VALUE_TYPES = ("REG_SZ", "REG_EXPAND_SZ", "REG_DWORD", "REG_QWORD", "REG_BINARY", "REG_MULTI_SZ", "REG_NONE")
 
 # Accepts 'YES','YE','Y','yes','ye','y'

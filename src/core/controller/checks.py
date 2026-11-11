@@ -381,13 +381,25 @@ def polluted_parameter(target, payload):
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     return target
   first_wins = any(_ in banner for _ in settings.HPP_FIRST_WINS)
+  last_wins = any(_ in banner for _ in settings.HPP_LAST_WINS)
   name = named.group(1)
   original = settings.TESTABLE_VALUE if settings.TESTABLE_VALUE.strip() else ""
   if not settings.HPP_POSITION_SAID:
     settings.HPP_POSITION_SAID = True
     info_msg = "Sending '" + name + "' twice, with the payload "
     info_msg += "first" if first_wins else "last"
-    info_msg += " - which is the one this target reads."
+    # Which occurrence is read was established only where the banner named a platform that is known
+    # to choose one. A banner that named nothing, or nothing recognised, leaves the position where
+    # the most commonly tested platforms read it - which is a guess, and is said as one rather than
+    # as something the target was asked.
+    if first_wins or last_wins:
+      info_msg += " - which is the one '" + settings.SERVER_BANNER + "' reads."
+    elif settings.SERVER_BANNER:
+      info_msg += ", which is where the platforms most often tested read it - '" + settings.SERVER_BANNER
+      info_msg += "' names nothing that says which of the two it chooses."
+    else:
+      info_msg += ", which is where the platforms most often tested read it - this target named "
+      info_msg += "nothing to decide it by."
     settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   if first_wins:
     polluted = payload + "&" + name + "=" + original
@@ -6476,6 +6488,9 @@ def registry_read_status(shell, key, value, filename, newline_first=False):
   if settings.VERBOSITY_LEVEL == 0 and newline_first:
     settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
   denied = shell and any(phrase.lower() in str(shell).lower() for phrase in settings.REG_ACCESS_DENIED)
+  # 'reg' names a key or value it could not find, so where it said that, which of the two reasons
+  # applies was established and is not left to the reader to guess between.
+  missing = shell and any(phrase.lower() in str(shell).lower() for phrase in settings.REG_VALUE_NOT_FOUND)
   match = re.search(r"^\s*" + re.escape(value) + r"\s+(REG_\S+)\s+(.*?)\s*$", str(shell), re.MULTILINE) if shell else None
   if match:
     reg_type, data = match.group(1), match.group(2)
@@ -6485,6 +6500,10 @@ def registry_read_status(shell, key, value, filename, newline_first=False):
     logs.report_add_enumeration("registry", {"key": key, "value": value, "type": reg_type, "data": data})
   elif denied:
     warn_msg = "It seems you do not have permission to read the registry key '" + key + "'."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  elif missing:
+    # Which of the two is absent is not said, because 'reg' does not say it either.
+    warn_msg = "The target has no registry key '" + key + "', or no value '" + value + "' under it."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
   else:
     warn_msg = "Retrieved no data for the registry value '" + value + "' of the key '" + key + "'. "
@@ -6576,6 +6595,10 @@ def registry_delete_status(shell, key, value, newline_first=False):
   elif shell and "operation completed successfully" in str(shell).lower():
     info_msg = "The registry " + target + " has been successfully deleted."
     settings.print_data_to_stdout(settings.print_bold_info_msg(info_msg))
+  elif shell and any(phrase.lower() in str(shell).lower() for phrase in settings.REG_VALUE_NOT_FOUND):
+    # Nothing was deleted because there was nothing there, which the target said rather than left open.
+    warn_msg = "The target has no registry " + target + " to delete."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
   else:
     warn_msg = "The registry " + target + " does not appear to have been deleted. "
     warn_msg += "This could mean it does not exist, or you do not have permission to delete it."

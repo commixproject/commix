@@ -739,6 +739,119 @@ class DocumentRootFromTheTarget(unittest.TestCase):
     settings.WEB_ROOT_PROBE = boom
     self.assertIsNone(checks.web_root_from_target_cwd("http://t/a/b.php"))
 
+class RegistryAnswersAreReadForWhatTheySay(unittest.TestCase):
+  """
+  'reg' answers a missing key or value by name, and a refused one by name. An answer that said which
+  of the two it was is not reported as either-or - the hedge is for an answer that said neither.
+  """
+  KEY = "HKLM\\SOFTWARE\\Nope"
+  VALUE = "Version"
+  NOT_FOUND = "ERROR: The system was unable to find the specified registry key or value."
+
+  def setUp(self):
+    self._out = settings.print_data_to_stdout
+    self.said = []
+    settings.print_data_to_stdout = self.said.append
+    self._verbosity = settings.VERBOSITY_LEVEL
+
+  def tearDown(self):
+    settings.print_data_to_stdout = self._out
+    settings.VERBOSITY_LEVEL = self._verbosity
+
+  def read(self, shell):
+    checks.registry_read_status(shell, self.KEY, self.VALUE, "commix.log")
+    return settings.strip_ansi_codes("\n".join(str(_) for _ in self.said))
+
+  def delete(self, shell, value=""):
+    checks.registry_delete_status(shell, self.KEY, value)
+    return settings.strip_ansi_codes("\n".join(str(_) for _ in self.said))
+
+  def test_a_read_the_target_said_was_not_there_is_stated_as_that(self):
+    said = self.read(self.NOT_FOUND)
+    self.assertIn("The target has no registry key '" + self.KEY + "'", said)
+    self.assertNotIn("you do not have permission to read it", said)
+
+  def test_a_read_the_target_refused_is_still_stated_as_that(self):
+    self.assertIn("do not have permission to read", self.read("ERROR: Access is denied."))
+
+  def test_an_answer_that_said_neither_keeps_the_hedge(self):
+    self.assertIn("This could mean the key/value does not exist", self.read(""))
+
+  def test_the_phrase_is_found_without_the_prefix_the_shell_may_have_dropped(self):
+    said = self.read("the system was unable to find the specified registry key or value")
+    self.assertIn("The target has no registry key", said)
+
+  def test_a_deletion_of_something_that_was_not_there_is_stated_as_that(self):
+    said = self.delete(self.NOT_FOUND, value=self.VALUE)
+    self.assertIn("to delete.", said)
+    self.assertNotIn("does not appear to have been deleted", said)
+
+class ParameterPollutionStatesOnlyWhatTheBannerSaid(unittest.TestCase):
+  """
+  Sending the parameter twice only evades anything where the application reads one occurrence and
+  the filter another, and which one that is belongs to the platform. Where the banner named one that
+  is known to choose, the position is a fact about the target; where it named nothing recognised,
+  the position is where the platforms most often tested read it, and is said as the guess it is.
+  """
+  TARGET = "http://t/a.php?addr="
+  PAYLOAD = ";echo TAG;"
+
+  def setUp(self):
+    self._state = (settings.SERVER_BANNER, settings.HPP_POSITION_SAID, settings.TESTABLE_VALUE,
+                   settings.IS_JSON, settings.IS_XML, menu.options.hpp)
+    self._out = settings.print_data_to_stdout
+    self.said = []
+    settings.print_data_to_stdout = self.said.append
+    settings.HPP_POSITION_SAID = False
+    settings.TESTABLE_VALUE = "127.0.0.1"
+    settings.IS_JSON = False
+    settings.IS_XML = False
+    menu.options.hpp = True
+
+  def tearDown(self):
+    (settings.SERVER_BANNER, settings.HPP_POSITION_SAID, settings.TESTABLE_VALUE,
+     settings.IS_JSON, settings.IS_XML, menu.options.hpp) = self._state
+    settings.print_data_to_stdout = self._out
+
+  def pollute(self, banner):
+    settings.SERVER_BANNER = banner
+    polluted = checks.polluted_parameter(self.TARGET + self.PAYLOAD, self.PAYLOAD)
+    return polluted, settings.strip_ansi_codes("\n".join(str(_) for _ in self.said))
+
+  def test_a_platform_known_to_read_the_last_one_is_named_as_the_reason(self):
+    polluted, said = self.pollute("Apache/2.4.7 (Ubuntu) PHP/5.5.9")
+    self.assertTrue(polluted.endswith("addr=" + self.PAYLOAD))
+    self.assertIn("with the payload last - which is the one 'Apache/2.4.7 (Ubuntu) PHP/5.5.9' reads.", said)
+
+  def test_a_platform_known_to_read_the_first_one_is_named_as_the_reason(self):
+    polluted, said = self.pollute("Jetty(9.4.z-SNAPSHOT)")
+    self.assertTrue(polluted.endswith("addr=127.0.0.1"))
+    self.assertIn("with the payload first - which is the one 'Jetty(9.4.z-SNAPSHOT)' reads.", said)
+
+  def test_the_platform_decides_over_the_server_carrying_it(self):
+    # 'Apache Tomcat' names both lists; the one that is a platform rather than a web server is the
+    # one that reads the parameter, so the payload goes where Java reads it.
+    polluted, said = self.pollute("Apache Tomcat/9.0.50")
+    self.assertTrue(polluted.endswith("addr=127.0.0.1"))
+    self.assertIn("with the payload first", said)
+
+  def test_a_banner_naming_nothing_recognised_does_not_claim_the_target_reads_it(self):
+    polluted, said = self.pollute("lighttpd/1.4.55")
+    self.assertTrue(polluted.endswith("addr=" + self.PAYLOAD))
+    self.assertNotIn("which is the one", said)
+    self.assertIn("names nothing that says which of the two it chooses", said)
+
+  def test_no_banner_at_all_is_said_to_have_decided_nothing(self):
+    polluted, said = self.pollute("")
+    self.assertTrue(polluted.endswith("addr=" + self.PAYLOAD))
+    self.assertNotIn("which is the one", said)
+    self.assertIn("this target named nothing to decide it by", said)
+
+  def test_a_platform_that_joins_the_two_is_told_about_instead(self):
+    polluted, said = self.pollute("Microsoft-IIS/8.5")
+    self.assertEqual(self.TARGET + self.PAYLOAD, polluted)
+    self.assertIn("cannot help here", said)
+
 if __name__ == "__main__":
   unittest.main()
 
