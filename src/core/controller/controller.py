@@ -281,6 +281,7 @@ def probe_skip_testable_value_early(url, http_request_method, check_parameter, p
     settings.TESTABLE_VALUE = original_value
     return original_url
   settings.TESTABLE_VALUE_OPTIMIZED = True
+  settings.TESTABLE_VALUE_STOOD_IN_FOR = original_value
   settings.VALUE_SKIPPED_EARLY = (original_value, placeholder, original_url, original_data)
   # Not recorded in the session here: what the sink answered is not yet what a technique confirmed,
   # and a stand-in this run goes on to refuse would be left for the next one to replay.
@@ -884,6 +885,7 @@ def attempt_skip_testable_value(url, http_request_method, check_parameter):
     menu.options.data = menu.options.data.replace(marker, stored_placeholder + settings.INJECT_TAG)
   else:
     url = url.replace(marker, stored_placeholder + settings.INJECT_TAG)
+  settings.TESTABLE_VALUE_STOOD_IN_FOR = settings.TESTABLE_VALUE
   settings.TESTABLE_VALUE = stored_placeholder
   settings.TESTABLE_VALUE_OPTIMIZED = True
   return url

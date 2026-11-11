@@ -500,7 +500,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "320"
+REVISION = "321"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -908,6 +908,10 @@ TESTABLE_VALUE_OPTIMIZED = False
 # for it, and the request as it read beforehand - so a pass that confirms nothing can be made again
 # with the value back in place rather than written off on the strength of an optimisation.
 VALUE_SKIPPED_EARLY = None
+
+# The parameter's own value, kept where a short random one stands in for it, so that what is
+# written out at the end reads as the value the target was given rather than as the stand-in.
+TESTABLE_VALUE_STOOD_IN_FOR = ""
 
 # Set once the value has been put back and the pass made again, so the probe does not drop it a
 # second time and send the run round the same loop.

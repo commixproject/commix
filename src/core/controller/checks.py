@@ -383,7 +383,12 @@ def polluted_parameter(target, payload):
   first_wins = any(_ in banner for _ in settings.HPP_FIRST_WINS)
   last_wins = any(_ in banner for _ in settings.HPP_LAST_WINS)
   name = named.group(1)
-  original = settings.TESTABLE_VALUE if settings.TESTABLE_VALUE.strip() else ""
+  # The parameter's own value, not the stand-in that replaces it where the sink turned out not to
+  # need it: this occurrence is the one meant to read as the value the application was sent, and a
+  # filter that checks the shape of what it is given rejects three random letters where it would
+  # have passed an address. The payload's own occurrence still carries whatever is in the carrier.
+  original = settings.VALUE_SKIPPED_EARLY[0] if settings.VALUE_SKIPPED_EARLY else settings.TESTABLE_VALUE
+  original = original if original and original.strip() else ""
   if not settings.HPP_POSITION_SAID:
     settings.HPP_POSITION_SAID = True
     info_msg = "Sending '" + name + "' twice, with the payload "
@@ -2102,6 +2107,23 @@ def target_fingerprint_summary():
   if shell_identified:
     settings.print_data_to_stdout(settings.print_retrieved_data("Command shell type", target_shell_label()))
 
+"""
+A payload written out with the parameter's own value at the front of it.
+
+Where the sink turned out not to need that value, it was stood in for by three random letters in
+every request built after that, and the payloads kept here carry the stand-in. What this format is
+modelled on writes the parameter's value into the line it prints, and a reader copying the line out
+wants the value the target was given - which the sink ignores either way, since not needing it is
+why it was dropped. Only the one at the front is rewritten; anything further in belongs to the
+payload itself.
+"""
+def payload_with_own_value(payload):
+  payload = str(payload)
+  original, placeholder = settings.TESTABLE_VALUE_STOOD_IN_FOR, settings.TESTABLE_VALUE
+  if not original or not placeholder or not payload.startswith(placeholder):
+    return payload
+  return original + payload[len(placeholder):]
+
 def _injection_points_summary(header_msg, rows, decode_payload=False):
   settings.print_data_to_stdout(header_msg)
   prev_parameter = None
@@ -2115,20 +2137,22 @@ def _injection_points_summary(header_msg, rows, decode_payload=False):
       prev_parameter = current_parameter
     if decode_payload:
       payload = str(url_decode(payload))
+    payload = payload_with_own_value(payload)
     for line in finding_summary_lines(technique, injection_type, payload):
       settings.print_data_to_stdout(line)
   """
-  Said under the payloads it explains, rather than only at '-v1'.
+  Said under the payloads it explains, for a reader following how they were built.
 
   Where the parameter's own value turns out not to be needed, it is dropped from every request built
   after that point - so a payload found before it carries the real value and one found after carries
   the short random one that stands in, and the two sit side by side here with nothing to say why
-  they differ. Read without this, the value looks like one more thing the techniques disagree on.
+  they differ. It is about how the run went rather than about the target, so it is said where the
+  rest of that is said.
   """
-  if settings.TESTABLE_VALUE_OPTIMIZED and settings.TESTABLE_VALUE:
-    info_msg = "The parameter's own value was not required to reach the sink, so '"
-    info_msg += settings.TESTABLE_VALUE + "' stands in for it in the payload(s) above."
-    settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  if settings.TESTABLE_VALUE_OPTIMIZED and settings.TESTABLE_VALUE and settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "The parameter's own value was not required to reach the sink, so the requests "
+    debug_msg += "carried '" + settings.TESTABLE_VALUE + "' in its place."
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
   target_fingerprint_summary()
 
 """

@@ -479,6 +479,7 @@ def probe_skip_testable_value_post_detection(separator, timesec, http_request_me
     return original_url, prefix
 
   settings.TESTABLE_VALUE_OPTIMIZED = True
+  settings.TESTABLE_VALUE_STOOD_IN_FOR = original_value
   session_handler.import_testable_value_status(url, vuln_parameter, http_request_method, placeholder)
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "The real parameter value is not required, so it is skipped for faster requests."

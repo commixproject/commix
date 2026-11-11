@@ -391,14 +391,17 @@ class SkippedValueIsAccountedFor(unittest.TestCase):
     self._flag = settings.TESTABLE_VALUE_OPTIMIZED
     self._value = settings.TESTABLE_VALUE
     self._points = settings.CONFIRMED_INJECTION_POINTS
+    self._verbosity = settings.VERBOSITY_LEVEL
     self._out = settings.print_data_to_stdout
     self.printed = []
     settings.print_data_to_stdout = lambda line: self.printed.append(line)
+    settings.VERBOSITY_LEVEL = 1
 
   def tearDown(self):
     settings.TESTABLE_VALUE_OPTIMIZED = self._flag
     settings.TESTABLE_VALUE = self._value
     settings.CONFIRMED_INJECTION_POINTS = self._points
+    settings.VERBOSITY_LEVEL = self._verbosity
     settings.print_data_to_stdout = self._out
 
   def summarise(self, optimized, value):
@@ -425,6 +428,11 @@ class SkippedValueIsAccountedFor(unittest.TestCase):
 
   def test_nothing_is_said_where_there_is_no_value_to_name(self):
     self.assertNotIn("was not required", self.summarise(True, ""))
+
+  def test_it_is_kept_for_a_reader_following_the_run(self):
+    # About how the run went rather than about the target, so a default run does not carry it.
+    settings.VERBOSITY_LEVEL = 0
+    self.assertNotIn("was not required", self.summarise(True, "JGX"))
 
 class PagesComparedByTitleAlone(unittest.TestCase):
   """
@@ -1027,3 +1035,77 @@ class ANamedModuleIsNotDroppedByAHeuristic(unittest.TestCase):
     menu.options.module = "Shellshock"
     checks.validate_modules()
     self.assertEqual(("shellshock",), settings.USER_APPLIED_MODULE)
+
+class PollutionCarriesTheParametersOwnValue(unittest.TestCase):
+  """
+  The occurrence that is not the payload is the one meant to read as the value the application was
+  sent. Where the sink turned out not to need that value a short random stand-in replaces it in
+  every later request - and a filter checking the shape of what it is given passes an address and
+  refuses three letters, which is the evasion defeating itself.
+  """
+  TARGET = "http://t/a.php?addr="
+  PAYLOAD = ";echo TAG;"
+
+  def setUp(self):
+    self._state = (settings.SERVER_BANNER, settings.HPP_POSITION_SAID, settings.TESTABLE_VALUE,
+                   settings.VALUE_SKIPPED_EARLY, settings.IS_JSON, settings.IS_XML,
+                   settings.IS_GRAPHQL, menu.options.hpp)
+    self._out = settings.print_data_to_stdout
+    settings.print_data_to_stdout = lambda *_: None
+    settings.SERVER_BANNER = "Apache/2.4.7 (Ubuntu) PHP/5.5.9"
+    settings.HPP_POSITION_SAID = True
+    settings.IS_JSON = settings.IS_XML = settings.IS_GRAPHQL = False
+    menu.options.hpp = True
+
+  def tearDown(self):
+    (settings.SERVER_BANNER, settings.HPP_POSITION_SAID, settings.TESTABLE_VALUE,
+     settings.VALUE_SKIPPED_EARLY, settings.IS_JSON, settings.IS_XML,
+     settings.IS_GRAPHQL, menu.options.hpp) = self._state
+    settings.print_data_to_stdout = self._out
+
+  def test_the_clean_occurrence_carries_the_value_that_was_stood_in_for(self):
+    settings.TESTABLE_VALUE = "QIF"
+    settings.VALUE_SKIPPED_EARLY = ("127.0.0.1", "QIF", "", "")
+    polluted = checks.polluted_parameter(self.TARGET + self.PAYLOAD, self.PAYLOAD)
+    self.assertEqual("http://t/a.php?addr=127.0.0.1&addr=" + self.PAYLOAD, polluted)
+
+  def test_a_value_that_was_never_stood_in_for_is_carried_as_it_is(self):
+    settings.TESTABLE_VALUE = "127.0.0.1"
+    settings.VALUE_SKIPPED_EARLY = None
+    polluted = checks.polluted_parameter(self.TARGET + self.PAYLOAD, self.PAYLOAD)
+    self.assertEqual("http://t/a.php?addr=127.0.0.1&addr=" + self.PAYLOAD, polluted)
+
+  def test_an_empty_value_still_pollutes_with_nothing(self):
+    settings.TESTABLE_VALUE = " "
+    settings.VALUE_SKIPPED_EARLY = None
+    polluted = checks.polluted_parameter(self.TARGET + self.PAYLOAD, self.PAYLOAD)
+    self.assertEqual("http://t/a.php?addr=&addr=" + self.PAYLOAD, polluted)
+
+class ThePayloadIsWrittenOutWithTheParametersOwnValue(unittest.TestCase):
+  """
+  What is printed at the end carries the value the target was given, the way the format this one
+  follows writes it. The stand-in belongs to how the requests were built, which the run says in its
+  own line rather than inside a payload somebody is going to copy out.
+  """
+  def setUp(self):
+    self._state = (settings.TESTABLE_VALUE, settings.TESTABLE_VALUE_STOOD_IN_FOR)
+
+  def tearDown(self):
+    (settings.TESTABLE_VALUE, settings.TESTABLE_VALUE_STOOD_IN_FOR) = self._state
+
+  def test_the_stand_in_at_the_front_is_the_value_it_stood_for(self):
+    settings.TESTABLE_VALUE, settings.TESTABLE_VALUE_STOOD_IN_FOR = "QQE", "127.0.0.1"
+    self.assertEqual("127.0.0.1;echo TAG;", checks.payload_with_own_value("QQE;echo TAG;"))
+
+  def test_nothing_is_rewritten_where_no_value_was_stood_in_for(self):
+    settings.TESTABLE_VALUE, settings.TESTABLE_VALUE_STOOD_IN_FOR = "127.0.0.1", ""
+    self.assertEqual("127.0.0.1;echo TAG;", checks.payload_with_own_value("127.0.0.1;echo TAG;"))
+
+  def test_only_the_one_at_the_front_is_rewritten(self):
+    # Anything further in belongs to the payload, whatever it happens to read like.
+    settings.TESTABLE_VALUE, settings.TESTABLE_VALUE_STOOD_IN_FOR = "QQE", "127.0.0.1"
+    self.assertEqual("127.0.0.1;echo QQE;", checks.payload_with_own_value("QQE;echo QQE;"))
+
+  def test_a_payload_that_does_not_start_with_it_is_left_alone(self):
+    settings.TESTABLE_VALUE, settings.TESTABLE_VALUE_STOOD_IN_FOR = "QQE", "127.0.0.1"
+    self.assertEqual("'QQE;echo TAG;", checks.payload_with_own_value("'QQE;echo TAG;"))

@@ -1013,6 +1013,8 @@ def reapply_testable_value(url, vuln_parameter, http_request_method, prefix=None
       # The body is the one given now, not the stored one, so it carries the value and is rewritten.
       carried = match.group(1)
       if carried != placeholder:
+        # Kept so that what is written out at the end reads as the value this run was given.
+        settings.TESTABLE_VALUE_STOOD_IN_FOR = carried
         menu.options.data = menu.options.data.replace(carried + settings.INJECT_TAG, placeholder + settings.INJECT_TAG)
   elif settings.INJECT_TAG in url:
     match = re.search(tag_pattern, url)
