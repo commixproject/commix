@@ -108,8 +108,17 @@ character it was never shown to accept, and a boundary reported as one separator
 have needed two.
 """
 def _var_chain(separator, word, qmarks):
+  """
+  Assigned without quotes of its own, and stripped with them.
+
+  An assignment is not field-split, so quoting what it is given changes nothing about the value it
+  holds - spaces, runs of spaces, a '*' and a newline all survive either way - and a '"' a filter
+  strips is one the payload need not have carried. The pattern below is the exception: unquoted,
+  the tail it takes off is read as a pattern rather than as the text it is, and a value carrying a
+  '*' loses more than the one character this is meant to leave behind.
+  """
   var = settings.RANDOM_VAR_GENERATOR
-  return (var + "=\"" + word + "\"" + separator +
+  return (var + "=" + word + separator +
           var + "=\"${" + var + "#" + qmarks + "}\"" + separator +
           var + "=\"${" + var + "%\"${" + var + "#?}\"}\"" + separator)
 
@@ -153,7 +162,7 @@ def decision(separator, TAG, output_length, holds=True):
                                   settings.SINGLE_WHITESPACE + expected,
                                   arithmetic=measured + "==" + expected)
   else:
-    payload = (separator + var + "=\"" + word + "\"" + separator +
+    payload = (separator + var + "=" + word + separator +
                _decide(separator, "${#" + var + "}" + settings.SINGLE_WHITESPACE + "-eq" + settings.SINGLE_WHITESPACE + expected))
   return checks.terminate_payload(payload, separator, keep_output=separator == settings.PIPE_SEPARATOR)
 
@@ -184,7 +193,7 @@ def get_length(separator, cmd, candidate_length, operator="-eq"):
                                   arithmetic=measured + _ARITHMETIC[operator] + str(candidate_length))
   else:
     # Counted in bytes, as the reading beside it indexes - exported, since a rewrite can move the counting into a command of its own.
-    payload = separator + settings.BYTE_LOCALE_EXPORTED + separator + var + "=\"" + word + "\"" + separator + compare
+    payload = separator + settings.BYTE_LOCALE_EXPORTED + separator + var + "=" + word + separator + compare
   return checks.terminate_payload(payload, separator, keep_output=separator == settings.PIPE_SEPARATOR)
 
 """

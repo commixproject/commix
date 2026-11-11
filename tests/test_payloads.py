@@ -77,6 +77,33 @@ def builders():
         found.append((technique.split(".")[-1], name, function, parameters))
   return found
 
+class QuotesOnlyWhereTheyAreLoadBearing(unittest.TestCase):
+  """
+  A '"' a filter strips is one the payload should not have carried without needing it.
+  """
+  def setUp(self):
+    from src.core.techniques.boolean_based import bb_payloads
+    self.bb_payloads = bb_payloads
+    self._os = settings.TARGET_OS
+    settings.TARGET_OS = settings.OS.UNIX
+
+  def tearDown(self):
+    settings.TARGET_OS = self._os
+
+  def test_the_length_probe_carries_no_quote_at_all(self):
+    payload = self.bb_payloads.decision(";", "ABCDEF", 6)
+    self.assertNotIn('"', payload)
+
+  def test_the_length_question_carries_no_quote_at_all(self):
+    payload = self.bb_payloads.get_length(";", "echo ABCDEF", 6)
+    self.assertNotIn('"', payload)
+
+  def test_the_per_character_read_keeps_the_pattern_quoted(self):
+    # Unquoted, the tail it strips is read as a pattern - a value carrying '*' would lose more
+    # than the single character the chain is there to leave behind.
+    payload = self.bb_payloads.get_char(";", "echo ABCDEF", 2, 65)
+    self.assertIn('%"${', payload)
+
 class PayloadSeparators(unittest.TestCase):
   """
   A payload exists to prove that one separator chains commands at the sink, so that is the only one
