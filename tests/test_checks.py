@@ -425,6 +425,68 @@ class SkippedValueIsAccountedFor(unittest.TestCase):
   def test_nothing_is_said_where_there_is_no_value_to_name(self):
     self.assertNotIn("was not required", self.summarise(True, ""))
 
+class PagesComparedByTitleAlone(unittest.TestCase):
+  """
+  What '--titles' compares, where everything around the title moves by itself.
+  """
+  def setUp(self):
+    self._titles, self._text_only = menu.options.titles, menu.options.text_only
+    menu.options.titles, menu.options.text_only = True, False
+
+  def tearDown(self):
+    menu.options.titles, menu.options.text_only = self._titles, self._text_only
+
+  def test_the_title_is_what_is_left(self):
+    page = "<html><head><title> Results for 1 </title></head><body>counter 4821</body></html>"
+    self.assertEqual("Results for 1", checks.comparable_page(page))
+
+  def test_the_tag_is_found_whatever_its_case(self):
+    self.assertEqual("No results", checks.page_title("<HTML><TITLE>No results</TITLE>"))
+
+  def test_a_page_with_no_title_compares_as_nothing(self):
+    self.assertEqual("", checks.comparable_page("<html>no title here</html>"))
+
+  def test_two_pages_differing_only_below_the_title_read_as_one(self):
+    a = "<html><title>Same</title><body>counter 1</body></html>"
+    b = "<html><title>Same</title><body>counter 9999</body></html>"
+    self.assertEqual(checks.comparable_page(a), checks.comparable_page(b))
+
+  def test_two_pages_differing_in_the_title_do_not(self):
+    a = "<html><title>Found</title><body>x</body></html>"
+    b = "<html><title>Nothing</title><body>x</body></html>"
+    self.assertNotEqual(checks.comparable_page(a), checks.comparable_page(b))
+
+class NullConnectionIsNotAskedWhatItCannotSee(unittest.TestCase):
+  """
+  A length read off a header cannot answer a question about the body it did not fetch.
+  """
+  OPTIONS = ("string", "not_string", "regexp", "text_only", "titles")
+
+  def setUp(self):
+    from src.core import options as commix_options
+    self.commix_options = commix_options
+    self._saved = dict((name, getattr(menu.options, name)) for name in self.OPTIONS)
+    self._null = menu.options.null_connection
+    self._out = settings.print_data_to_stdout
+    self.printed = []
+    settings.print_data_to_stdout = lambda line: self.printed.append(str(line))
+
+  def tearDown(self):
+    for name, value in self._saved.items():
+      setattr(menu.options, name, value)
+    menu.options.null_connection = self._null
+    settings.print_data_to_stdout = self._out
+
+  def test_the_oracle_cannot_answer_a_body_question_without_a_body(self):
+    # Why the guard exists: every answer is the same answer, whichever way it is fixed.
+    settings.BOOLEAN_TRUE_LENGTH, settings.BOOLEAN_FALSE_LENGTH = 1000, 900
+    for name in ("string", "not_string", "regexp"):
+      for other in ("string", "not_string", "regexp", "code"):
+        setattr(menu.options, other, None)
+      setattr(menu.options, name, "root" if name != "regexp" else "ro+t")
+      answers = set(checks.boolean_oracle(None, 200, page_length=_) for _ in (1000, 900, 950))
+      self.assertEqual(1, len(answers), name + " gave more than one answer without a body")
+
 class ValueSkippedOnlyOnEvidence(unittest.TestCase):
   """
   Dropping the parameter's own value is an optimisation, so it is taken only where the sink answered

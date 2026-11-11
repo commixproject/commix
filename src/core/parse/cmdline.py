@@ -1061,6 +1061,12 @@ detection.add_option("--skip-static",
                 default=False,
                 help="Skip testing the parameter(s) that do not appear to be dynamic.")
 
+detection.add_option("--titles",
+                action="store_true",
+                dest="titles",
+                default=False,
+                help="Compare pages based only on their titles.")
+
 detection.add_option("--text-only",
                 action="store_true",
                 dest="text_only",

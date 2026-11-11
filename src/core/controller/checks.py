@@ -1617,10 +1617,24 @@ def remove_dynamic_content(page):
   return page
 
 """
+The page's own title, or nothing where it has none.
+
+A page can carry a counter, a session id and an advert and still be the same page, while its title is
+the one line that names what the target decided to render - so where everything else moves, the title
+is what a yes and a no can still be told apart by.
+"""
+def page_title(page):
+  match = re.search(r"(?i)<title\b[^>]*>(?P<result>[^<]*)</title>", page or "")
+  return (match.group("result") or "").strip() if match else ""
+
+"""
 The page as it is worth comparing: without the regions that move by themselves, and - where
-'--text-only' was given - without the layout they sit in either.
+'--text-only' was given - without the layout they sit in either, or - where '--titles' was given -
+nothing but the line that names what was rendered.
 """
 def comparable_page(page):
+  if menu.options.titles:
+    return page_title(page)
   if menu.options.text_only:
     page = filtered_page_content(page)
   return remove_dynamic_content(page)

@@ -161,6 +161,30 @@ def validate():
       raise SystemExit(settings.EXIT_FAILURE)
     checks.set_anticsrf_token(menu.options.csrf_token)
 
+  """
+  A question the oracle could not answer, refused before it is asked.
+
+  '--null-connection' reads the length off the header and never reads a body, which is the whole
+  point of it - so a discriminator that looks inside the body has nothing to look at. Left to run,
+  '--string' and '--regexp' find nothing in an empty page and every answer reads no, while
+  '--not-string' finds nothing to object to and every answer reads yes: a constant the oracle then
+  calibrates on, and a retrieval built on a constant is invented rather than read.
+
+  Dropped rather than refused, since the two were given for the same end - telling a yes from a no -
+  and the one that can still be answered is the one to keep.
+  """
+  if menu.options.null_connection:
+    body_bound = [name for name, given in (("--string", menu.options.string),
+                                           ("--not-string", menu.options.not_string),
+                                           ("--regexp", menu.options.regexp),
+                                           ("--text-only", menu.options.text_only),
+                                           ("--titles", menu.options.titles)) if given]
+    if body_bound:
+      menu.options.null_connection = False
+      warn_msg = "The switch '--null-connection' reads no page body, so it cannot be used with "
+      warn_msg += ', '.join("'" + name + "'" for name in body_bound) + ". Skipping it."
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
   checks.parse_param_encoding()
   checks.absorb_encoding_tampers()
 

@@ -1,4 +1,6 @@
 ## Version 4.2 (TBA)
+* Fixed: The switch `--null-connection`, which reads no page body, was left to run alongside an option that reads one (`--string`, `--not-string`, `--regexp`, `--text-only`, `--titles`), leaving every boolean answer the same.
+* Added: New switch `--titles`, comparing pages by their title alone - for a target whose page moves by itself everywhere except the line naming what it rendered.
 * Fixed: Payload generation for certain separator and tamper script combinations, which could produce a payload the shell cannot run.
 * Fixed: Retrieval of non-ASCII execution output, which could come back incomplete.
 * Added: An offline test suite, run with `python -m unittest discover -s tests -t .`, covering the payload builders, the tamper scripts, the evaluator grammars and the word lists.
