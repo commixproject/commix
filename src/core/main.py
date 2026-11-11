@@ -324,12 +324,10 @@ def url_response(url, http_request_method):
   if do_waf:
     settings.COOKIE_INJECTION = None
     conn_request, conn_url = checks.check_waf(url, http_request_method)
-    settings.WAF_DETECTION_PHASE = True
 
   _conn_start = time.time()
   response = examine_request(conn_request, conn_url)
   if do_waf:
-    settings.WAF_DETECTION_PHASE = False
     # The probe being blocked is the detection doing its job, not the target being unreachable:
     # answer the protection and reconnect with the request that was asked for.
     if response is False and settings.WAF_ENABLED:

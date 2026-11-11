@@ -240,3 +240,12 @@ class ColoringIsDroppedHoweverTheSwitchArrives(unittest.TestCase):
       for name in os.listdir(directory):
         os.unlink(os.path.join(directory, name))
       os.rmdir(directory)
+
+class NothingIsKeptThatNothingReads(unittest.TestCase):
+  """
+  A value written on every finding and never read once is weight the next reader has to account
+  for, and reads as state something depends on.
+  """
+  def test_the_write_only_names_are_gone(self):
+    for name in ("FOUND_EXEC_TIME", "FOUND_DIFF", "IDENTIFIED_SERVER_OS", "WAF_DETECTION_PHASE"):
+      self.assertFalse(hasattr(settings, name), name + " is written and never read")

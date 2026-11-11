@@ -988,3 +988,42 @@ class EveryTechniqueLeftOutIsNamed(unittest.TestCase):
 
   def test_a_run_that_leaves_nothing_out_says_nothing(self):
     self.assertEqual("", self.untested("".join(settings.AVAILABLE_TECHNIQUES)))
+
+class ANamedModuleIsNotDroppedByAHeuristic(unittest.TestCase):
+  """
+  The CGI heuristic is there to offer the module where the path looks like it calls for it, not to
+  take back one the user named: the list it reads is what commix knows of, not what the target
+  serves, so a path missing from it says nothing about whether the module is worth running.
+  """
+  URL = "http://t/index.php?x=1"
+
+  def setUp(self):
+    self._state = (settings.USER_APPLIED_MODULE, settings.VERBOSITY_LEVEL,
+                   menu.options.module, menu.options.shellshock)
+    self._out = settings.print_data_to_stdout
+    settings.print_data_to_stdout = lambda *_: None
+    settings.VERBOSITY_LEVEL = 0
+
+  def tearDown(self):
+    (settings.USER_APPLIED_MODULE, settings.VERBOSITY_LEVEL,
+     menu.options.module, menu.options.shellshock) = self._state
+    settings.print_data_to_stdout = self._out
+
+  def test_a_path_with_no_known_cgi_script_still_turns_it_off(self):
+    settings.USER_APPLIED_MODULE = ()
+    menu.options.shellshock = True
+    checks.check_CGI_scripts(self.URL)
+    self.assertFalse(menu.options.shellshock)
+
+  def test_the_module_the_user_named_is_left_alone(self):
+    # Turned off here, the module the run was started for was never loaded, and the only word about
+    # it was a debug line about a list the target had nothing to do with.
+    settings.USER_APPLIED_MODULE = ("shellshock",)
+    menu.options.shellshock = True
+    checks.check_CGI_scripts(self.URL)
+    self.assertTrue(menu.options.shellshock)
+
+  def test_what_was_named_is_recorded_by_name(self):
+    menu.options.module = "Shellshock"
+    checks.validate_modules()
+    self.assertEqual(("shellshock",), settings.USER_APPLIED_MODULE)

@@ -1135,8 +1135,6 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
         checks.check_for_stored_tamper(payload)
 
         # Trust the stored session outright.
-        settings.FOUND_EXEC_TIME = exec_time
-        settings.FOUND_DIFF = exec_time - timesec
         possibly_vulnerable = True
         resumed = True
       except TypeError:
@@ -1180,8 +1178,6 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
               # carry forward either - left the way a resumed finding leaves them.
               cmd = shell = output = ""
               exec_time = original_exec_time = timesec
-              settings.FOUND_EXEC_TIME = exec_time
-              settings.FOUND_DIFF = exec_time - timesec
               oracle_confirmed = possibly_vulnerable = True
               # Closes the "Continuing with..." spinner the same way a delay-based confirmation
               # closes its own - nothing here was timed, but the line it left open still needs it.
@@ -1295,8 +1291,6 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
               # Check if false positive fixation is True.
               if false_positive_fixation:
                 false_positive_fixation = False
-                settings.FOUND_EXEC_TIME = exec_time
-                settings.FOUND_DIFF = exec_time - timesec
                 if false_positive_warning:
                   time.sleep(timesec)
                 randv1 = random.randrange(0, 4)

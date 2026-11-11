@@ -1138,7 +1138,6 @@ def check_os(server_header):
     if match:
       # What the banner spells out, rather than the family it puts the target in.
       named = match.group(0)
-      settings.IDENTIFIED_SERVER_OS = named
       checks.set_target_os(named)
 
       if settings.TARGET_OS == settings.OS.WINDOWS and menu.options.shellshock:

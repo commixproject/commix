@@ -500,7 +500,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "317"
+REVISION = "318"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -725,7 +725,6 @@ IGNORE_IDENTIFIED_TARGET_OS = None
 VERBOSITY_LEVEL = 0
 
 # Detection / Exploitation phase(s)
-WAF_DETECTION_PHASE = False
 DETECTION_PHASE = False
 EXPLOITATION_PHASE = False
 
@@ -1840,8 +1839,6 @@ WIN_DEL = "powershell.exe Remove-Item "
 DEL = "rm "
 
 # Time-based Variables
-FOUND_EXEC_TIME = ""
-FOUND_DIFF = ""
 
 # Check for PowerShell
 PS_ENABLED = None
@@ -1997,7 +1994,8 @@ MULTI_REQUEST_TARGETS = []
 SKIPPED_OUT_OF_SCOPE = set()
 
 USER_APPLIED_TAMPER = ""
-USER_APPLIED_MODULE = ""
+# The modules named with "--module", by name, so a heuristic does not drop one that was asked for.
+USER_APPLIED_MODULE = ()
 
 """
 Tamper scripts this run reached for on its own, kept apart from the ones '--tamper' named.
@@ -2936,9 +2934,6 @@ HPP_POSITION_SAID = False
 PKI_FAILURE_SAID = False
 # The version that server named for itself, where it named one.
 SERVER_VERSION = ""
-# The distribution a banner spelled out, kept as the banner wrote it rather than as the family it
-# puts the target in - "Ubuntu" is a name for a banner, "Unix-like" is what it makes of the target.
-IDENTIFIED_SERVER_OS = ""
 SERVER_BANNERS = [
     "Microsoft-IIS",
     # Ahead of the bare "Apache" below: Tomcat names itself with it, and keeps its own document root.

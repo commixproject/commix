@@ -2378,6 +2378,11 @@ def ps_check_failed():
 Perform basic heuristic checks for CGI scripts potentially vulnerable to Shellshock.
 """
 def check_CGI_scripts(url):
+  # Named by the user, the module is on already and this is not here to take it back: the list read
+  # below is what commix knows of, not what the target serves, so a path missing from it is no
+  # reason to drop what '--module' asked for.
+  if "shellshock" in settings.USER_APPLIED_MODULE:
+    return
 
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Checking the target URL for known CGI scripts."
@@ -2830,7 +2835,9 @@ def validate_modules():
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit(settings.EXIT_FAILURE)
     setattr(menu.options, module, True)
-  settings.USER_APPLIED_MODULE = menu.options.module
+  # Kept as the names themselves rather than as what was typed, so whatever asks later whether a
+  # module was named does not parse the option a second time.
+  settings.USER_APPLIED_MODULE = tuple(provided_modules)
   return provided_modules
 
 """
