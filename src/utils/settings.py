@@ -63,6 +63,20 @@ if not colors.ENABLE_COLORING:
   # build them in, regardless of this flag.
   init(strip=True, convert=False)
 
+"""
+Turn coloring off once the command line has been read.
+
+The switch is answered from sys.argv above, before anything is parsed, so that the first message is
+already written the way it was asked for. A profile names it too, and that value is known only once
+the file has been read - late, but still before the banner, so it is honoured there rather than
+parsed and dropped.
+"""
+def drop_coloring():
+  if not colors.ENABLE_COLORING:
+    return
+  colors.ENABLE_COLORING = False
+  init(strip=True, convert=False)
+
 class HTTPMETHOD(object):
   GET = "GET"
   POST = "POST"
@@ -486,7 +500,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "315"
+REVISION = "316"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1305,6 +1319,10 @@ def resolve_language(name):
 # Available injection techniques. Out-of-band is not one of them - it is the '--oob' switch, so that
 # it can serve the modules too, which never go through '--technique'.
 AVAILABLE_TECHNIQUES = ['r','b','t','f']
+# What each one is called where a message names it. Keyed by the letters of the list above and read
+# through that list, so a technique cannot be added there and left out of what a run says it did
+# not test - which is how the boolean-based one came to be missing from that sentence.
+TECHNIQUE_LETTER_NAMES = {'r': "results-based", 'b': "boolean-based", 't': "time-based", 'f': "file-based"}
 # The letter that used to name the evaluation sink before '--eval' did, the technique that reaches
 # that sink today, and the one whose technique carries whichever sink it is given.
 EVAL_TECHNIQUE_LETTER = 'e'

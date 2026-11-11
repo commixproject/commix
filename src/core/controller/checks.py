@@ -650,8 +650,7 @@ def finish_target():
 Technique letters written out. Used to name what a run did not look at.
 """
 def technique_names(letters):
-  plain = {"r": "results-based", "t": "time-based", "f": "file-based"}
-  chosen = [plain[_] for _ in ("r", "t", "f") if _ in letters]
+  chosen = [settings.TECHNIQUE_LETTER_NAMES[_] for _ in settings.AVAILABLE_TECHNIQUES if _ in letters]
   if not chosen:
     return ""
   name = chosen[0] if len(chosen) == 1 else ", ".join(chosen[:-1]) + " and " + chosen[-1]
@@ -659,7 +658,7 @@ def technique_names(letters):
 
 # The techniques this run was told to leave out, named for the message that says so.
 def untested_techniques():
-  return technique_names([_ for _ in ("r", "t", "f") if _ not in menu.options.tech])
+  return technique_names([_ for _ in settings.AVAILABLE_TECHNIQUES if _ not in menu.options.tech])
 
 """
 The payload builder the time-based technique uses: the same technique reaches either sink, and what

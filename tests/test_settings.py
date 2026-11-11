@@ -13,7 +13,11 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import os
 import re
+import subprocess
+import sys
+import tempfile
 import unittest
 
 from tests._testutils import tamper_modules
@@ -187,3 +191,52 @@ class ConsentCarriesAcrossTargets(unittest.TestCase):
 
 if __name__ == "__main__":
   unittest.main()
+
+class ColoringIsDroppedHoweverTheSwitchArrives(unittest.TestCase):
+  """
+  The switch is answered from the command line before anything is parsed, so that the first message
+  is already written the way it was asked for - and a profile naming it is answered once the file
+  has been read, rather than parsed and dropped.
+  """
+  PROBE = ("import sys, os\n"
+           "sys.path.insert(0, sys.argv[2])\n"
+           "sys.argv = ['commix.py', '-c', sys.argv[1], '--batch']\n"
+           "from src.core.parse import cmdline\n"
+           "from src.utils import colors\n"
+           "print('CARRIED', cmdline.options.disable_coloring, colors.ENABLE_COLORING)\n")
+
+  def setUp(self):
+    from src.utils import colors
+    self.colors = colors
+    self._enabled = colors.ENABLE_COLORING
+
+  def tearDown(self):
+    self.colors.ENABLE_COLORING = self._enabled
+
+  def test_dropping_it_holds_and_asks_nothing_of_a_second_call(self):
+    self.colors.ENABLE_COLORING = True
+    settings.drop_coloring()
+    self.assertFalse(self.colors.ENABLE_COLORING)
+    settings.drop_coloring()
+    self.assertFalse(self.colors.ENABLE_COLORING)
+
+  def test_a_profile_naming_it_turns_coloring_off(self):
+    # Parsed into the option and never read, the value reached the run as an answer it did not act
+    # on: the switch worked written out on the command line and did nothing from a file.
+    directory = tempfile.mkdtemp()
+    try:
+      profile = os.path.join(directory, "profile.ini")
+      with open(profile, "w") as handle:
+        handle.write("[Target]\nurl = http://127.0.0.1/?x=1\n\n[Miscellaneous]\ndisable_coloring = True\n")
+      probe = os.path.join(directory, "probe.py")
+      with open(probe, "w") as handle:
+        handle.write(self.PROBE)
+      root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+      said = subprocess.check_output([sys.executable, "-I", probe, profile, root],
+                                     stderr=subprocess.STDOUT).decode("utf-8", "replace")
+      carried = [_ for _ in said.splitlines() if _.startswith("CARRIED")]
+      self.assertEqual(["CARRIED True False"], carried, said)
+    finally:
+      for name in os.listdir(directory):
+        os.unlink(os.path.join(directory, name))
+      os.rmdir(directory)

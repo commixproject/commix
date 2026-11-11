@@ -956,3 +956,35 @@ class TheHeuristicProbeIsSentTheWayTheTestsAre(unittest.TestCase):
     # rather than another cookie - and nothing is gained by sending it.
     source = self.source()
     self.assertIn("process_injectable_value(encoded_payload, menu.options.cookie)", source)
+
+class EveryTechniqueLeftOutIsNamed(unittest.TestCase):
+  """
+  What a run says it did not test is read from the one list of techniques, so a letter cannot be
+  selectable with '--technique' and missing from the sentence that offers to test it.
+  """
+  def setUp(self):
+    self._tech = menu.options.tech
+
+  def tearDown(self):
+    menu.options.tech = self._tech
+
+  def untested(self, tech):
+    menu.options.tech = tech
+    return checks.untested_techniques()
+
+  def test_every_selectable_letter_has_a_name(self):
+    for letter in settings.AVAILABLE_TECHNIQUES:
+      self.assertIn(letter, settings.TECHNIQUE_LETTER_NAMES, letter + " has no name to be said by")
+
+  def test_the_one_technique_left_out_is_the_one_named(self):
+    # Everything but boolean-based: the sentence read empty here, so a run was told to drop
+    # '--technique' without being told what dropping it would add.
+    self.assertEqual("boolean-based technique", self.untested("rtf"))
+    self.assertEqual("file-based technique", self.untested("rbt"))
+
+  def test_the_three_left_out_are_all_named(self):
+    self.assertEqual("boolean-based, time-based and file-based techniques", self.untested("r"))
+    self.assertEqual("results-based, time-based and file-based techniques", self.untested("b"))
+
+  def test_a_run_that_leaves_nothing_out_says_nothing(self):
+    self.assertEqual("", self.untested("".join(settings.AVAILABLE_TECHNIQUES)))

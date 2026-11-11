@@ -1386,6 +1386,11 @@ if options.config_file:
   from src.core.parse import configfile
   _from_config = configfile.load(parser, options, options.config_file)
 
+# Read again here because a profile carries it too, and a value the file named is known only once it
+# has been loaded - still ahead of the banner below, so it covers every line the run writes.
+if options.disable_coloring:
+  settings.drop_coloring()
+
 # Remember whether '--web-root' was explicitly supplied on the CLI
 settings.USER_APPLIED_WEB_ROOT = bool(options.web_root)
 
