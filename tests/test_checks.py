@@ -425,6 +425,29 @@ class SkippedValueIsAccountedFor(unittest.TestCase):
   def test_nothing_is_said_where_there_is_no_value_to_name(self):
     self.assertNotIn("was not required", self.summarise(True, ""))
 
+class EscapesInAnOptionValue(unittest.TestCase):
+  """
+  A value given as an escape, where the shell would have eaten the character itself.
+  """
+  def test_a_whitespace_escape_becomes_the_character(self):
+    self.assertEqual("\n", checks.decode_string_escape("\\n"))
+    self.assertEqual("\t", checks.decode_string_escape("\\t"))
+    self.assertEqual("\r", checks.decode_string_escape("\\r"))
+
+  def test_it_is_decoded_in_place(self):
+    self.assertEqual("a\tb", checks.decode_string_escape("a\\tb"))
+
+  def test_an_escaped_backslash_shields_what_follows(self):
+    # Two passes would read this as a newline; one pass leaves the text it stands for.
+    self.assertEqual("\\n", checks.decode_string_escape("\\\\n"))
+
+  def test_a_value_with_no_escape_is_handed_back_as_it_is(self):
+    for value in ("&", ";", "plain", "", None):
+      self.assertEqual(value, checks.decode_string_escape(value))
+
+  def test_a_non_ascii_byte_is_not_an_escape(self):
+    self.assertEqual("\u00a7", checks.decode_string_escape("\u00a7"))
+
 class ReflectionsTheTargetRewrote(unittest.TestCase):
   """
   Taking the payload back out of a page that did not hand it back verbatim.

@@ -271,6 +271,12 @@ def validate():
   if menu.options.retry_on and settings.ABORT_CODE:
     settings.ABORT_CODE = []
 
+  # A delimiter is written as an escape where the shell would otherwise eat the character itself, so
+  # what arrives is two characters that no request data holds - leaving the option unused and the
+  # parameters it was meant to split reported as absent.
+  if menu.options.pdel:
+    menu.options.pdel = checks.decode_string_escape(menu.options.pdel)
+
   # Check if defined "--ignore-code" option.
   if menu.options.ignore_code:
     wildcard = menu.options.ignore_code.strip() == settings.IGNORE_CODE_WILDCARD

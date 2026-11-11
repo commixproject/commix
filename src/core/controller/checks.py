@@ -1716,6 +1716,24 @@ def reflection_pattern(payload):
   return settings.REFLECTED_GAP_REGEX.join(parts)
 
 """
+A value given as an escape, as the character it stands for.
+
+A newline or a tab cannot be put into an option on most shells without the shell eating it first, so
+it is written "\\n" - two characters, which no request data holds, leaving the delimiter unused and
+the parameters it was meant to split reported as absent instead.
+
+Read left to right in one pass, so an escaped backslash shields what follows rather than being
+decoded a second time, and with nothing but the whitespace escapes in the mapping: a NUL or a
+non-ASCII byte in a value is the byte it is, not an escape to be rewritten.
+"""
+def decode_string_escape(value):
+  if not value or "\\" not in value:
+    return value
+  mapping = dict((repr(_).strip("'"), _) for _ in string.whitespace.replace(settings.SINGLE_WHITESPACE, ""))
+  mapping["\\\\"] = "\\"
+  return re.sub("|".join(re.escape(_) for _ in ["\\\\"] + list(mapping)), lambda match: mapping[match.group(0)], value)
+
+"""
 Ignore payload reflections so they cannot trigger a false positive.
 
 A page carrying the payload back differs from one that does not by the payload, whatever the command
