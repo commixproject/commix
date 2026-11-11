@@ -440,7 +440,12 @@ def oob_heuristic_basic(url, http_request_method, check_parameter, place):
   already_identified = settings.IDENTIFIED_COMMAND_INJECTION
   settings.IDENTIFIED_COMMAND_INJECTION = True
   settings.OOB_HEURISTIC_TRANSPORT = transport
-  settings.SKIP_CODE_INJECTIONS = True
+  # A shell reaching out says nothing about whether a string is also evaluated as code, so it
+  # settles the question only where the code injection sink was not asked for by name - the
+  # technique carrying that sink reads this flag, and would otherwise skip itself over an answer
+  # given in the shell's own language, the way the results-based heuristic above already guards.
+  if not menu.options.eval_sink:
+    settings.SKIP_CODE_INJECTIONS = True
   if already_identified:
     if settings.VERBOSITY_LEVEL != 0:
       debug_msg = "The target answered out-of-band over '" + transport + "'."
@@ -651,17 +656,17 @@ def dynamic_code_evaluation_technique(url, timesec, filename, http_request_metho
 Check if it's exploitable via boolean-based blind command injection technique.
 """
 def boolean_based_technique(url, timesec, filename, http_request_method):
-  injection_type = settings.INJECTION_TYPE.BLIND
+  # The branch proves execution either way - what the sink changes is only whether the command the
+  # target branches on is written in the shell's language or in the one it evaluates.
+  eval_sink = bool(menu.options.eval_sink)
+  injection_type = settings.INJECTION_TYPE.BLIND_CE if eval_sink else settings.INJECTION_TYPE.BLIND
   technique = settings.INJECTION_TECHNIQUE.BOOLEAN_BASED
   # Prove the injection by what the page says, where the target branches on the command it ran.
   def exploit():
     result = bb_handler.exploitation(url, timesec, filename, http_request_method, injection_type, technique)
-    if result is not False:
+    if result is not False and not eval_sink:
       settings.IDENTIFIED_COMMAND_INJECTION = True
     return result
-  eval_sink = bool(menu.options.eval_sink)
-  if eval_sink:
-    injection_type = settings.INJECTION_TYPE.BLIND_CE
   run_technique(injection_type, technique, "BOOLEAN_BASED_STATE",
                 "SKIP_CODE_INJECTIONS" if eval_sink else "SKIP_COMMAND_INJECTIONS", "b", exploit, eval_sink=eval_sink)
 
@@ -714,16 +719,22 @@ def filebased_command_injection_technique(url, timesec, filename, http_request_m
 Check if it's exploitable via out-of-band technique.
 """
 def oob_command_injection_technique(url, timesec, filename, http_request_method):
-  injection_type = settings.INJECTION_TYPE.BLIND
+  # The interaction proves execution either way - what the sink changes is only whether the command
+  # that reaches out is written in the shell's language or in the one the target evaluates.
+  eval_sink = bool(menu.options.eval_sink)
+  injection_type = settings.INJECTION_TYPE.BLIND_CE if eval_sink else settings.INJECTION_TYPE.BLIND
   technique = settings.INJECTION_TECHNIQUE.OOB
   # Prove the injection by the target reaching out to somewhere else.
   def exploit():
     result = oob_handler.exploitation(url, timesec, filename, http_request_method, injection_type, technique)
-    if result is not False:
+    if result is not False and not eval_sink:
       settings.IDENTIFIED_COMMAND_INJECTION = True
     return result
-  run_technique(injection_type, technique, "OOB_STATE", "SKIP_OOB_INJECTIONS",
-                settings.OOB_TECHNIQUE_LETTER, exploit)
+  # Carrying the evaluation sink, this technique is skipped by whatever skips code injection - not
+  # by the flag that skips command injection, which the code injection heuristic sets on its way past.
+  skip_flag = "SKIP_CODE_INJECTIONS" if eval_sink else "SKIP_COMMAND_INJECTIONS"
+  run_technique(injection_type, technique, "OOB_STATE", skip_flag,
+                settings.OOB_TECHNIQUE_LETTER, exploit, eval_sink=eval_sink)
 
 """
 Check parameter in HTTP header.

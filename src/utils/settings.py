@@ -500,7 +500,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "316"
+REVISION = "317"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -1511,7 +1511,6 @@ def verified_context():
       if os.path.exists(bundle):
         return ssl.create_default_context(cafile=bundle)
   return context
-SKIP_OOB_INJECTIONS = False
 
 # Raised by checks.handle_detection_interrupt() to unwind to the right point
 # in the detection loop.
