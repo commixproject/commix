@@ -762,7 +762,7 @@ def do_boolean_based_process(url, timesec, filename, http_request_method, inject
     if not checks.boolean_oracle_given():
       # A false answer that reads exactly like the page the parameter's own value returns means the
       # payload changed nothing at all, whatever the two probes look like beside each other.
-      if not settings.BOOLEAN_PRINTED_STATE and checks.comparable_page(page_false or "") == checks.comparable_page(settings.ORIGINAL_PAGE or ""):
+      if not settings.BOOLEAN_PRINTED_STATE and checks.comparable_page(page_false or "") == checks.comparable_page(checks.comparison_baseline(url, http_request_method)):
         return None
       """
       And a true answer that does not read like that page is the payload breaking the sink, not
@@ -770,7 +770,7 @@ def do_boolean_based_process(url, timesec, filename, http_request_method, inject
       and the false question draws another carrying different digits of this run's own - read as two
       answers, that one error confirms a boundary nothing ever ran through.
       """
-      if not settings.BOOLEAN_PRINTED_STATE and checks.comparable_page(page_true or "") != checks.comparable_page(settings.ORIGINAL_PAGE or ""):
+      if not settings.BOOLEAN_PRINTED_STATE and checks.comparable_page(page_true or "") != checks.comparable_page(checks.comparison_baseline(url, http_request_method)):
         return None
       """
       What the page moves on its own, measured again where the run can actually see it.

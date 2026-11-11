@@ -1473,6 +1473,25 @@ def restored_unreadable_bytes(text):
     return text
   return re.sub(settings.UNREADABLE_BYTE_REGEX, lambda _: chr(int(_.group(1), 16)), text)
 
+"""
+The page a boolean answer is read against.
+
+It has to be what the same request returns without a payload, which is the page kept at startup
+only while the parameter still carries the value it arrived with. Where the sink turned out not to
+need that value, a short random one stands in for it in every later request, and a target that
+writes the value back answers the two differently whatever the payload did - so a true answer never
+reads like the page it is compared against and every boundary is thrown away as one that broke the
+sink. Asked once per value that stands in, the way the reference for this keeps one answer per
+shape of request rather than one per test.
+"""
+def comparison_baseline(url, http_request_method):
+  if not settings.TESTABLE_VALUE_OPTIMIZED:
+    return settings.ORIGINAL_PAGE or ""
+  if settings.STAND_IN_PAGE_FOR != settings.TESTABLE_VALUE:
+    settings.STAND_IN_PAGE_FOR = settings.TESTABLE_VALUE
+    settings.STAND_IN_PAGE = requests.page_without_payload(url, http_request_method) or settings.ORIGINAL_PAGE or ""
+  return settings.STAND_IN_PAGE
+
 def decode_page_body(body, response=None, percent_decode=True, entity_decode=True):
   """
   A page already read from its response, as text: decompressed if it was compressed, and read in

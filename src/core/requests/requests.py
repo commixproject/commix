@@ -236,6 +236,27 @@ def _attach_injection_point_placeholder(request):
     request.add_header(settings.CUSTOM_HEADER_NAME, checks.remove_tags(settings.CUSTOM_HEADER_VALUE))
 
 """
+The page this request answers with when the parameter carries no payload.
+
+Built the way every other request is and with the payload left out, so what comes back is the
+answer to the value the parameter is carrying right now rather than to the one it arrived with.
+Best-effort: a target that will not answer this leaves the caller with what it already had.
+"""
+def page_without_payload(url, http_request_method):
+  try:
+    if menu.options.data:
+      request = _urllib.request.Request(url, menu.options.data.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.TESTABLE_VALUE).encode(settings.DEFAULT_CODEC), method=http_request_method)
+    else:
+      request = _urllib.request.Request(url.replace(settings.TESTABLE_VALUE + settings.INJECT_TAG, settings.TESTABLE_VALUE), method=http_request_method)
+    headers.do_check(request)
+    _attach_injection_point_placeholder(request)
+    headers.apply_request_policy()
+    response = headers.send_raw(request)
+    return checks.decode_page_body(response.read(), response)
+  except Exception:
+    return None
+
+"""
 A single, best-effort clean response-time sample; returns None on failure instead of raising.
 """
 def quick_response_time_sample(url, http_request_method):

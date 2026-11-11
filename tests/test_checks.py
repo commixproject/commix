@@ -1109,3 +1109,57 @@ class ThePayloadIsWrittenOutWithTheParametersOwnValue(unittest.TestCase):
   def test_a_payload_that_does_not_start_with_it_is_left_alone(self):
     settings.TESTABLE_VALUE, settings.TESTABLE_VALUE_STOOD_IN_FOR = "QQE", "127.0.0.1"
     self.assertEqual("'QQE;echo TAG;", checks.payload_with_own_value("'QQE;echo TAG;"))
+
+class ABooleanAnswerIsReadAgainstTheSameRequest(unittest.TestCase):
+  """
+  What a boolean answer is compared with has to be what the same request returns with no payload.
+  The page kept at startup is the target as it was given, which stops being that request once a
+  short random value stands in for the parameter's own - and a target that writes the value back
+  answers the two differently whatever the payload did.
+  """
+  def setUp(self):
+    from src.core.requests import requests
+    self.requests = requests
+    self._state = (settings.TESTABLE_VALUE_OPTIMIZED, settings.TESTABLE_VALUE,
+                   settings.ORIGINAL_PAGE, settings.STAND_IN_PAGE, settings.STAND_IN_PAGE_FOR)
+    self._fetch = requests.page_without_payload
+    self.asked = []
+    settings.ORIGINAL_PAGE = "the page as it arrived"
+    settings.STAND_IN_PAGE, settings.STAND_IN_PAGE_FOR = "", None
+
+  def tearDown(self):
+    (settings.TESTABLE_VALUE_OPTIMIZED, settings.TESTABLE_VALUE,
+     settings.ORIGINAL_PAGE, settings.STAND_IN_PAGE, settings.STAND_IN_PAGE_FOR) = self._state
+    self.requests.page_without_payload = self._fetch
+
+  def answering(self, page):
+    def fetch(url, http_request_method):
+      self.asked.append((url, http_request_method))
+      return page
+    self.requests.page_without_payload = fetch
+
+  def test_the_page_it_arrived_with_is_used_while_it_still_carries_its_own_value(self):
+    settings.TESTABLE_VALUE_OPTIMIZED = False
+    self.answering("never asked for")
+    self.assertEqual("the page as it arrived", checks.comparison_baseline("http://t/", "GET"))
+    self.assertEqual([], self.asked)
+
+  def test_a_stand_in_is_asked_for_its_own_page_once(self):
+    settings.TESTABLE_VALUE_OPTIMIZED, settings.TESTABLE_VALUE = True, "QQE"
+    self.answering("the page the stand-in returns")
+    for _ in range(3):
+      self.assertEqual("the page the stand-in returns", checks.comparison_baseline("http://t/", "GET"))
+    self.assertEqual(1, len(self.asked))
+
+  def test_a_different_stand_in_is_asked_again(self):
+    settings.TESTABLE_VALUE_OPTIMIZED, settings.TESTABLE_VALUE = True, "QQE"
+    self.answering("first")
+    checks.comparison_baseline("http://t/", "GET")
+    settings.TESTABLE_VALUE = "ZZT"
+    self.answering("second")
+    self.assertEqual("second", checks.comparison_baseline("http://t/", "GET"))
+
+  def test_a_target_that_will_not_answer_leaves_what_was_already_there(self):
+    settings.TESTABLE_VALUE_OPTIMIZED, settings.TESTABLE_VALUE = True, "QQE"
+    self.answering(None)
+    self.assertEqual("the page as it arrived", checks.comparison_baseline("http://t/", "GET"))

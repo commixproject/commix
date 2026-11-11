@@ -500,7 +500,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "321"
+REVISION = "322"
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
@@ -2537,6 +2537,12 @@ PAGE_NOISE_RATIO = 1.0
 
 # The target's page as it is worth comparing: its text, with the regions that move by themselves out.
 ORIGINAL_PAGE_COMPARABLE = ""
+
+# The page the parameter answers with while a short random value stands in for its own, and the
+# value that was taken for - the page kept at startup is the target as it was given, which is a
+# different request once the stand-in is in place.
+STAND_IN_PAGE = ""
+STAND_IN_PAGE_FOR = None
 
 # Where the page was found to move on its own, as what sits either side of each such region.
 DYNAMIC_MARKINGS = []

@@ -97,7 +97,7 @@ def _calibrate_file_oracle(separator, prefix, suffix, whitespace, http_request_m
     # at all - but only where nothing is ever printed either way (the bare test). The shape that
     # prints a marker on a true answer is built so the false answer looks like that same baseline
     # on purpose, so this would throw away the one signal it is there for.
-    if not settings.BOOLEAN_PRINTED_STATE and checks.comparable_page(page_false or "") == checks.comparable_page(settings.ORIGINAL_PAGE or ""):
+    if not settings.BOOLEAN_PRINTED_STATE and checks.comparable_page(page_false or "") == checks.comparable_page(checks.comparison_baseline(url, http_request_method)):
       continue
     if not checks.calibrate_boolean_oracle(page_true, page_false, code_true, code_false):
       continue
