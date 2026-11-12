@@ -13,7 +13,9 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import os
 import sys
+import time
 from src.utils import settings
 
 """
@@ -22,6 +24,31 @@ Show version number and exit.
 def show_version():
   settings.print_data_to_stdout(settings.VERSION)
   raise SystemExit()
+
+"""
+How long this install has gone without being updated, in whole days.
+
+Taken from when the file holding the version was last written, which an update rewrites - so what
+is measured is the install itself rather than anything a server would have to be asked for. None
+where that cannot be read at all, which is a copy that says nothing about its own age rather than
+one that is up to date.
+"""
+def days_since_update():
+  try:
+    return int(time.time() - os.path.getmtime(os.path.abspath(settings.__file__.replace(".pyc", ".py")))) // (3600 * 24)
+  except (OSError, AttributeError, TypeError):
+    return None
+
+"""
+Said at the end of the run, where what it is about is the install rather than the target.
+"""
+def announce_if_outdated():
+  days = days_since_update()
+  if days is None or days <= settings.LAST_UPDATE_NAGGING_DAYS:
+    return
+  warn_msg = "This copy of " + settings.APPLICATION + " was last updated " + str(days)
+  warn_msg += " days ago. Run it with the '--update' switch to bring it up to date."
+  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
 Check python version number.

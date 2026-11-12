@@ -36,6 +36,7 @@ import tempfile
 from glob import glob
 from src.utils import common
 from src.utils import logs
+from src.utils import version
 from src.utils import crypt_algos
 from src.utils import jwt_audit
 from src.core.parse import cmdline as menu
@@ -68,6 +69,8 @@ except ImportError:
 Exiting, with the code the run ended on - which is how a caller tells an error from a finished run.
 """
 def exit(code=0):
+  # Said before the line that closes the run, so it is the last thing about the run itself.
+  version.announce_if_outdated()
   if settings.VERBOSITY_LEVEL != 0:
     settings.print_data_to_stdout(settings.execution("Ending"))
   # Nothing runs after the line below, so the report is settled before it.
