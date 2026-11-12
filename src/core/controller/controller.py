@@ -1940,16 +1940,18 @@ def do_check(url, http_request_method, filename):
           err_msg += "."
         if not menu.options.eval_sink:
           err_msg += " Code injection was not tested; the '--eval' option tests for it."
-        err_msg += " If you suspect that there is some kind of protection mechanism involved, maybe you could try to"
+        # The header one is only worth raising while the request still names this tool: a run that
+        # already carries a browser's own - asked for, or settled by the evasion - has nothing to
+        # gain by it. Said at all only where one of the two is left to suggest, since a run already
+        # carrying both would otherwise be told to try something and not told what.
+        suggestions = []
         if not menu.options.tamper:
-          err_msg += " use option '--tamper'"
-        # Only worth raising while the request still names this tool: a run that already carries a
-        # browser's own header - asked for, or settled by the evasion - has nothing to gain by it.
+          suggestions.append("use option '--tamper'")
         if not menu.options.random_agent and not settings.BROWSER_LIKE_HEADERS:
-          if not menu.options.tamper:
-            err_msg += " and/or"
-          err_msg += " switch '--random-agent'"
-        err_msg += "."
+          suggestions.append("switch '--random-agent'")
+        if suggestions:
+          err_msg += " If you suspect that there is some kind of protection mechanism involved, maybe you could try to "
+          err_msg += " and/or ".join(suggestions) + "."
         err_msg += checks.tamper_shell_feature_note()
         """
         A page that is mostly layout answers the comparison badly: what a command prints is a
