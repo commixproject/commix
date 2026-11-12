@@ -500,7 +500,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "326"
+REVISION = "327"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -2132,6 +2132,17 @@ WAF_BLOCKS_SINCE_EVASION = 0
 WAF_ESCALATION_THRESHOLD = 1
 # Set when the evasion was just stepped up, so the technique that was blocked is tried again.
 WAF_EVASION_ESCALATED = False
+# Whether the evasion has already taken this tool's name off the request itself.
+WAF_EVASION_FINGERPRINT_APPLIED = False
+"""
+Whether the request is meant to read as a browser's rather than as this tool's: set by switch
+'--random-agent', by switch '--mobile', and by the evasion once a WAF/IPS is being answered.
+
+A browser's "User-Agent" over a "*/*" nothing but a scanner sends, and with no "Accept-Language"
+at all, is still a scanner to anything weighing the headers as a set - so the headers that go with
+the one being replaced follow the same switch.
+"""
+BROWSER_LIKE_HEADERS = False
 
 # Scripts that rewrite the user's command in place, in the order their rewrites are applied. The
 # paths go first, so that what the name-splitting script is handed is a name and not a glob; the
@@ -2852,6 +2863,7 @@ HOST = "Host"
 USER_AGENT = "User-Agent"
 REFERER = "Referer"
 ACCEPT = "Accept"
+ACCEPT_LANGUAGE = "Accept-Language"
 ACCEPT_ENCODING = "Accept-Encoding"
 AUTHORIZATION = "Authorization"
 CONTENT_LENGTH = "Content-Length"
@@ -2869,6 +2881,12 @@ SET_COOKIE = "Set-Cookie"
 X_POWERED_BY = "X-Powered-By"
 # HTTP Headers values
 ACCEPT_VALUE = "*/*"
+"""
+What a browser asks for, sent in place of the catch-all above once the request is meant to read as
+one. Kept to what every browser sends, so what the target is asked for does not change with it.
+"""
+HTTP_ACCEPT_BROWSER_VALUE = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+HTTP_ACCEPT_LANGUAGE_BROWSER_VALUE = "en-US,en;q=0.5"
 # What a body is sent as, unless it is recognised as one of the two below.
 DEFAULT_HTTP_CONTENT_TYPE_VALUE = "application/x-www-form-urlencoded"
 HTTP_CONTENT_TYPE_JSON_HEADER_VALUE = "application/json"

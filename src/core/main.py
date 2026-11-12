@@ -17,7 +17,6 @@ import re
 import os
 import sys
 import time
-import random
 from src.thirdparty.six.moves import http_client as _http_client
 # accept overly long result lines
 _http_client._MAXLINE = 1 * 1024 * 1024
@@ -116,14 +115,17 @@ def defined_http_headers(url):
         raise SystemExit(settings.EXIT_FAILURE)
 
     # Set the User-Agent
+    # Either switch puts a browser's own value in the header, so the headers that go with it are
+    # sent as that browser would send them - the point of both is to stop reading as a scanner.
     if mobile_agent:
       menu.options.agent = checks.mobile_user_agents()
+      settings.BROWSER_LIKE_HEADERS = True
     elif random_agent:
       if settings.VERBOSITY_LEVEL != 0:
         debug_msg = "Fetching random HTTP User-Agent header. "
         settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
-      user_agents = common.load_list_from_file(settings.USER_AGENT_LIST, "user-agent list")
-      menu.options.agent = random.choice(user_agents)
+      menu.options.agent = checks.random_user_agent()
+      settings.BROWSER_LIKE_HEADERS = True
       info_msg = "The fetched random HTTP User-Agent header value is '" + menu.options.agent + "'."
       settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
@@ -195,22 +197,22 @@ def check_internet(url):
     settings.CHECK_INTERNET = False
 
 """
+A request built the way the run's own requests are, body and all - used for the first one to the
+target, for the redirect probe, where a request carrying nothing is not evidence of where the
+target sends the one that will be tested, and for the one the evasion is answered with.
+"""
+def build_request(url, http_request_method):
+  if settings.USER_DEFINED_POST_DATA:
+    request = _urllib.request.Request(url, settings.USER_DEFINED_POST_DATA.encode(), method=http_request_method)
+  else:
+    request = _urllib.request.Request(url, method=http_request_method)
+  headers.do_check(request)
+  return request
+
+"""
 The init (URL) request.
 """
 def init_request(url, http_request_method):
-
-  """
-  A request built the way the run's own requests are, body and all - used both for the first one to
-  the target and for the redirect probe, where a request carrying nothing is not evidence of where
-  the target sends the one that will be tested.
-  """
-  def build_request(url, http_request_method):
-    if settings.USER_DEFINED_POST_DATA:
-      request = _urllib.request.Request(url, settings.USER_DEFINED_POST_DATA.encode(), method=http_request_method)
-    else:
-      request = _urllib.request.Request(url, method=http_request_method)
-    headers.do_check(request)
-    return request
 
   if settings.VERBOSITY_LEVEL != 0:
     debug_msg = "Setting the HTTP timeout."
@@ -331,7 +333,14 @@ def url_response(url, http_request_method):
     # The probe being blocked is the detection doing its job, not the target being unreachable:
     # answer the protection and reconnect with the request that was asked for.
     if response is False and settings.WAF_ENABLED:
+      # Asked before the request is sent again, and whether or not there is a body to frame as
+      # chunks: what the request says about itself is read before anything it carries is.
+      checks.waf_evasion_consent()
       checks.apply_waf_transport_evasion()
+      # Built again rather than sent again: what the evasion settles - the headers the request
+      # names itself with, and whether its body goes as chunks - is put on a request as it is
+      # built, and this one was built before any of it was known.
+      request = build_request(url, http_request_method)
       _conn_start = time.time()
       response = examine_request(request, url)
   # Found unusable rather than merely unanswered, so the phases behind this are not spent on it.

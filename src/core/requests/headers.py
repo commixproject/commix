@@ -713,9 +713,13 @@ def do_check(request):
   if menu.options.host and not settings.HOST_INJECTION:
     request.add_header(settings.HOST, checks.remove_tags(menu.options.host))
 
+  # Sent as a set rather than one at a time: a browser's "User-Agent" over a "*/*" only a scanner
+  # sends, with no "Accept-Language" behind it, is a scanner to anything reading the three together.
   if not checks.get_header(request.headers, settings.ACCEPT):
-    request.add_header(settings.ACCEPT, settings.ACCEPT_VALUE)
+    request.add_header(settings.ACCEPT, settings.HTTP_ACCEPT_BROWSER_VALUE if settings.BROWSER_LIKE_HEADERS else settings.ACCEPT_VALUE)
 
+  if settings.BROWSER_LIKE_HEADERS and not checks.get_header(request.headers, settings.ACCEPT_LANGUAGE):
+    request.add_header(settings.ACCEPT_LANGUAGE, settings.HTTP_ACCEPT_LANGUAGE_BROWSER_VALUE)
 
   # One the target's own request carries is applied further below, and an unredirected default would override it.
   supplied_headers = str(menu.options.headers or "") + str(menu.options.header or "") + str(settings.RAW_HTTP_HEADERS or "")

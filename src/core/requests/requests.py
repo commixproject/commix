@@ -714,7 +714,7 @@ def request_failed(err_msg):
     else:
       error_msg = "The provided target URL does not seem reachable. "
       items = []
-      if not menu.options.random_agent:
+      if not menu.options.random_agent and not settings.BROWSER_LIKE_HEADERS:
           items.append("'--random-agent' switch")
       if not any((menu.options.proxy, menu.options.ignore_proxy, menu.options.tor)):
         items.append("proxy switches ('--proxy', '--ignore-proxy'...).")

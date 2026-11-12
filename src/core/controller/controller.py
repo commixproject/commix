@@ -1943,7 +1943,9 @@ def do_check(url, http_request_method, filename):
         err_msg += " If you suspect that there is some kind of protection mechanism involved, maybe you could try to"
         if not menu.options.tamper:
           err_msg += " use option '--tamper'"
-        if not menu.options.random_agent:
+        # Only worth raising while the request still names this tool: a run that already carries a
+        # browser's own header - asked for, or settled by the evasion - has nothing to gain by it.
+        if not menu.options.random_agent and not settings.BROWSER_LIKE_HEADERS:
           if not menu.options.tamper:
             err_msg += " and/or"
           err_msg += " switch '--random-agent'"

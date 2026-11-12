@@ -224,6 +224,21 @@ def validate():
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit(settings.EXIT_FAILURE)
 
+  if menu.options.tor_port and not menu.options.tor:
+    err_msg = "The option '--tor-port' requires the switch '--tor'."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit(settings.EXIT_FAILURE)
+
+  # A port is a number within a range, and the probe below is handed it as one - so a value that
+  # is not a number reaches it as an error of a kind it does not answer for, and one outside the
+  # range reaches it as a Tor that is not listening, which is not what is wrong with it.
+  if menu.options.tor_port:
+    if not str(menu.options.tor_port).isdigit() or int(menu.options.tor_port) > 65535:
+      err_msg = "The option '--tor-port' takes a port number, between 0 and 65535."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit(settings.EXIT_FAILURE)
+    menu.options.tor_port = int(menu.options.tor_port)
+
   # Check if defined Tor (--tor option).
   if menu.options.tor:
     tor.set_proxy_settings()
@@ -307,6 +322,15 @@ def validate():
   # parameters it was meant to split reported as absent.
   if menu.options.pdel:
     menu.options.pdel = checks.decode_string_escape(menu.options.pdel)
+
+  # The same escape, and a character rather than a string: a longer one splits the cookie where
+  # nothing asked it to, leaving every parameter behind the first one reported as absent.
+  if menu.options.cdel:
+    menu.options.cdel = checks.decode_string_escape(menu.options.cdel)
+    if len(menu.options.cdel) != 1:
+      err_msg = "The option '--cookie-del' takes a single character (e.g. ';')."
+      settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+      raise SystemExit(settings.EXIT_FAILURE)
 
   # Check if defined "--ignore-code" option.
   if menu.options.ignore_code:

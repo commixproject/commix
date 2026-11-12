@@ -4229,7 +4229,41 @@ def waf_evasion_consent():
       return False
     message = "Do you want " + settings.APPLICATION + " to try bypassing it? [Y/n] "
     settings.WAF_EVASION_CONSENT = common.read_input(message, default="Y", check_batch=True).lower() != "n"
+  # Answered here or in the run this one was resumed from - either way, what the request says about
+  # itself is the first thing to answer, and is answered once.
+  if settings.WAF_EVASION_CONSENT:
+    neutralize_request_fingerprint()
   return settings.WAF_EVASION_CONSENT
+
+"""
+A browser's User-Agent, drawn from the list switch '--random-agent' reads.
+"""
+def random_user_agent():
+  return random.choice(common.load_list_from_file(settings.USER_AGENT_LIST, "user-agent list"))
+
+"""
+Take this tool's name off the request itself, once the protection in front of the target is being
+answered. A filter reading the "User-Agent" has already settled what to do with the request before
+anything it carries is looked at, so no amount of rewriting the payload is an answer to one.
+
+What the user settled themselves is left alone, and so is a header the parameter is being injected
+through: the rest of the fingerprint is then left to match whatever that says.
+"""
+def neutralize_request_fingerprint():
+  if settings.WAF_EVASION_FINGERPRINT_APPLIED:
+    return False
+  if settings.USER_AGENT_INJECTION or menu.options.requestfile or menu.options.logfile or \
+     menu.options.agent != settings.DEFAULT_USER_AGENT:
+    return False
+  settings.WAF_EVASION_FINGERPRINT_APPLIED = True
+  settings.BROWSER_LIKE_HEADERS = True
+  menu.options.agent = random_user_agent()
+  info_msg = "Making the request read as a browser's, so it does not name " + settings.APPLICATION + " itself."
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "The HTTP " + settings.USER_AGENT + " header value is '" + menu.options.agent + "'."
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+  return True
 
 """
 Frame the payload as chunks, which hides it from a filter without changing what the target
