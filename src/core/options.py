@@ -81,6 +81,13 @@ def validate():
   if menu.options.answers:
     settings.ANSWERS = menu.options.answers
 
+  # Asked for a proxy and told to ignore one: the switch sets a proxy of its own, which the option
+  # then discards, so what runs is a plain run that was asked to be anything but.
+  if menu.options.tor and menu.options.ignore_proxy:
+    err_msg = "The switch '--tor' is incompatible with switch '--ignore-proxy'."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit(settings.EXIT_FAILURE)
+
   # Check if defined "--proxy" option.
   if menu.options.proxy:
     if menu.options.tor:

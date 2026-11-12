@@ -2183,6 +2183,24 @@ Print a summary of the injection points restored from a stored session.
 def resumed_injection_points_summary(rows):
   # Stored payloads are url-encoded, unlike the ones held in memory this run.
   _injection_points_summary("Resumed the following injection point(s) from stored session:", rows, decode_payload=True)
+  announce_stale_session()
+
+"""
+Said where what was just shown was read back rather than found.
+
+Nothing above it was sent to the target this run, so how old the file it came out of is, is the
+only thing that says how much of it still holds - a target that was patched a month ago answers
+the same stored finding as one that was not. Read off that file, the way the age of the install
+itself is read off its own.
+"""
+def announce_stale_session():
+  days = settings.SESSION_FILE_AGE_DAYS
+  if days is None or days < settings.STALE_SESSION_DAYS:
+    return
+  warn_msg = "What is above was read back from a session file last written to " + str(days)
+  warn_msg += " days ago, so it may no longer hold. Re-run with the '--flush-session' switch to "
+  warn_msg += "test again, or '--ignore-session' to leave what is stored out of it."
+  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
 Print a summary of every injection point confirmed this run, deferred until quit() (one block per technique).

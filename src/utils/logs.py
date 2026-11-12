@@ -13,6 +13,7 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 import os
+import time
 import sys
 import json
 import shlex
@@ -105,6 +106,17 @@ def create_log_file(url, output_dir):
       raise SystemExit(settings.EXIT_FAILURE)
   else:
     settings.SESSION_FILE = logs_path + "session.db"
+
+  """
+  How old the stored findings were before this run touched them.
+
+  Taken here because a run that replays one writes to the file as it goes, so by the time anything
+  is reported the file is this run's own age rather than the findings'.
+  """
+  try:
+    settings.SESSION_FILE_AGE_DAYS = int(time.time() - os.path.getmtime(settings.SESSION_FILE)) // (3600 * 24)
+  except (OSError, TypeError, ValueError):
+    settings.SESSION_FILE_AGE_DAYS = None
 
   checks.load_cmd_history()
 

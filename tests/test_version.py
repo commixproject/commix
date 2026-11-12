@@ -63,3 +63,39 @@ class HowLongSinceThisCopyWasUpdated(unittest.TestCase):
 
 if __name__ == "__main__":
   unittest.main()
+
+class HowOldTheStoredFindingsWere(unittest.TestCase):
+  """
+  Nothing shown from a session was sent to the target this run, so how old the file it came out of
+  is, is the only thing that says how much of it still holds.
+  """
+  def setUp(self):
+    from src.core.controller import checks
+    self.checks = checks
+    self._state = (settings.SESSION_FILE_AGE_DAYS, settings.print_data_to_stdout)
+    self.said = []
+    settings.print_data_to_stdout = self.said.append
+
+  def tearDown(self):
+    (settings.SESSION_FILE_AGE_DAYS, settings.print_data_to_stdout) = self._state
+
+  def written(self):
+    return settings.strip_ansi_codes("\n".join(str(line) for line in self.said))
+
+  def test_a_session_written_today_says_nothing(self):
+    settings.SESSION_FILE_AGE_DAYS = settings.STALE_SESSION_DAYS - 1
+    self.checks.announce_stale_session()
+    self.assertEqual("", self.written())
+
+  def test_an_old_one_says_how_old_and_what_to_do(self):
+    settings.SESSION_FILE_AGE_DAYS = 23
+    self.checks.announce_stale_session()
+    written = self.written()
+    self.assertIn("23 days ago", written)
+    self.assertIn("'--flush-session'", written)
+    self.assertIn("'--ignore-session'", written)
+
+  def test_a_run_with_no_session_behind_it_says_nothing(self):
+    settings.SESSION_FILE_AGE_DAYS = None
+    self.checks.announce_stale_session()
+    self.assertEqual("", self.written())

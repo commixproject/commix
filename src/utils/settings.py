@@ -500,11 +500,18 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "324"
+REVISION = "325"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
 LAST_UPDATE_NAGGING_DAYS = 180
+
+# How old a stored finding may be before a run that replayed it says so. Read the same way, off the
+# file the findings were written to rather than asked of anything.
+STALE_SESSION_DAYS = 7
+
+# How old the session file was before this run wrote anything to it, or None where there was none.
+SESSION_FILE_AGE_DAYS = None
 STABLE_RELEASE = False
 VERSION = "v"
 if STABLE_RELEASE:
