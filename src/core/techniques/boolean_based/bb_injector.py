@@ -61,13 +61,14 @@ def answer(payload, prefix, suffix, whitespace, http_request_method, url, vuln_p
       length = None
     else:
       response.close()
-      return checks.boolean_oracle(None, code, page_length=length), vuln_parameter
+      return checks.boolean_oracle(None, code, page_length=length, headers=response.info()), vuln_parameter
   try:
     page = checks.remove_reflected_values(checks.decode_page_body(response.read(), response), payload)
     code = response.getcode()
+    answered_headers = response.info()
   except Exception:
     return None, vuln_parameter
-  return checks.boolean_oracle(page, code), vuln_parameter
+  return checks.boolean_oracle(page, code, headers=answered_headers), vuln_parameter
 
 """
 The page a question came back with, for learning what a yes and a no look like on this target.

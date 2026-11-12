@@ -1163,3 +1163,81 @@ class ABooleanAnswerIsReadAgainstTheSameRequest(unittest.TestCase):
     settings.TESTABLE_VALUE_OPTIMIZED, settings.TESTABLE_VALUE = True, "QQE"
     self.answering(None)
     self.assertEqual("the page as it arrived", checks.comparison_baseline("http://t/", "GET"))
+
+class TheDelayThresholdIsTakenOverASample(unittest.TestCase):
+  """
+  The answers in hand are a sample of what the target does, not all of it, so the spread is taken
+  over one fewer than there are. The coefficient the spread is multiplied by was chosen for that
+  estimator; taking it over the count instead narrows the margin without saying so.
+  """
+  def setUp(self):
+    self._state = (list(settings.RESPONSE_TIMES), list(settings.PROBE_RESPONSE_TIMES),
+                   menu.options.disable_stats)
+    menu.options.disable_stats = False
+    settings.PROBE_RESPONSE_TIMES = []
+
+  def tearDown(self):
+    (settings.RESPONSE_TIMES, settings.PROBE_RESPONSE_TIMES, menu.options.disable_stats) = self._state
+
+  def test_the_margin_is_the_wider_of_the_two_estimators(self):
+    # A sample whose own spread is what the margin is made of, rather than one where the share of
+    # the target's pace below it is the larger of the two and the estimator changes nothing.
+    import statistics
+    times = [0.4, 0.9, 0.5, 1.2, 0.6, 0.7, 0.5, 1.1, 0.8, 0.6, 0.9, 0.5, 0.7, 1.0, 0.6]
+    settings.RESPONSE_TIMES = list(times)
+    threshold = checks.current_delay_threshold()
+    mean = statistics.mean(times)
+    population = mean + settings.TIME_STDEV_COEFF * statistics.pstdev(times)
+    sample = mean + settings.TIME_STDEV_COEFF * statistics.stdev(times)
+    self.assertAlmostEqual(sample, threshold, places=6)
+    self.assertGreater(threshold, population)
+
+  def test_a_sample_too_small_to_spread_has_no_threshold_of_its_own(self):
+    settings.RESPONSE_TIMES = [0.5]
+    self.assertIsNone(checks.current_delay_threshold())
+
+class TheOracleReadsTheWholeAnswer(unittest.TestCase):
+  """
+  What tells a true answer from a false one is as often something the application set in a header
+  as anything it rendered, so the whole answer is read - and a pattern is matched the way the
+  reference for this matches one, without regard to case and line by line.
+  """
+  class Headers(object):
+    def __init__(self, lines):
+      self.headers = lines
+
+  def setUp(self):
+    self._state = (menu.options.string, menu.options.not_string, menu.options.regexp,
+                   menu.options.code, menu.options.lengths)
+    menu.options.string = menu.options.not_string = menu.options.regexp = None
+    menu.options.code = None
+    menu.options.lengths = False
+
+  def tearDown(self):
+    (menu.options.string, menu.options.not_string, menu.options.regexp,
+     menu.options.code, menu.options.lengths) = self._state
+
+  def headers(self):
+    return self.Headers(["Set-Cookie: answered=yes\r\n", "Server: Apache\r\n"])
+
+  def test_a_string_is_looked_for_in_the_headers_as_well(self):
+    menu.options.string = "answered=yes"
+    self.assertTrue(checks.boolean_oracle("nothing in the body", headers=self.headers()))
+    self.assertFalse(checks.boolean_oracle("nothing in the body"))
+
+  def test_a_string_that_is_not_to_be_there_counts_the_headers_too(self):
+    menu.options.not_string = "answered=yes"
+    self.assertFalse(checks.boolean_oracle("nothing in the body", headers=self.headers()))
+
+  def test_a_pattern_reads_the_headers_and_ignores_case(self):
+    menu.options.regexp = r"set-cookie: ANSWERED"
+    self.assertTrue(checks.boolean_oracle("nothing in the body", headers=self.headers()))
+
+  def test_a_pattern_anchors_on_the_lines_of_the_answer(self):
+    # '^' reading the whole answer rather than each of its lines matches nothing below the first.
+    menu.options.regexp = r"^Server: Apache"
+    self.assertTrue(checks.boolean_oracle("", headers=self.headers()))
+
+  def test_a_pattern_that_does_not_compile_answers_nothing(self):
+    menu.options.regexp = "([unclosed"
+    self.assertIsNone(checks.boolean_oracle("body", headers=self.headers()))

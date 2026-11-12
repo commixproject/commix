@@ -3290,7 +3290,7 @@ def response_times_unsteady():
   on nothing but its latency, which is the one reading this question exists to avoid. Both have to
   hold: a spread too small to matter is not lagging whatever share of the answer it is.
   """
-  deviation = statistics.pstdev(sample)
+  deviation = statistics.stdev(sample)
   return (deviation > settings.SLOW_TARGET_RESPONSE_STDEV
           and deviation > statistics.mean(sample) * settings.WARN_TIME_RELATIVE_STDEV)
 
@@ -3405,7 +3405,7 @@ def check_lagging():
   # says more about the pair than about the connection, so the verdict waits for a model to read.
   if not settings.LAGGING_CHECKED and len(settings.RESPONSE_TIMES) >= settings.MIN_TIME_RESPONSES // 2:
     settings.LAGGING_CHECKED = True
-    deviation = statistics.pstdev(settings.RESPONSE_TIMES)
+    deviation = statistics.stdev(settings.RESPONSE_TIMES)
     pace = statistics.mean(settings.RESPONSE_TIMES)
     """
     Read against the target's own pace as well as in seconds of its own.
@@ -3430,7 +3430,13 @@ def _delay_threshold_from(times, timesec=None):
   sample = strip_time_outliers(times)
   if len(sample) < 2:
     return None
-  deviation = statistics.pstdev(sample)
+  # Taken over one fewer than the sample holds, the way the reference for this takes it: what is in
+  # hand is a sample of the target's answers rather than all of them, and dividing by the count
+  # understates how far the rest of them spread. The coefficient this is multiplied by was chosen
+  # for that estimator, so taking it the other way quietly narrows the margin it stands for - a
+  # tenth of it on the five answers a probe model starts from, which is the model a delay asked for
+  # is read against.
+  deviation = statistics.stdev(sample)
   mean = statistics.mean(sample)
   """
   A sample that does not vary is a steady target, not an unusable one. Answering "no threshold"
@@ -4953,14 +4959,27 @@ Whether the page says the injected condition held.
 The answer a target gives where it branches on the command rather than printing what it returned -
 the page it renders, or the status it answers with, stands in for the output a blind sink withholds.
 """
-def boolean_oracle(page, code=None, page_length=None):
+def boolean_oracle(page, code=None, page_length=None, headers=None):
+  """
+  Read against the headers as well as the body, the way the reference for this reads it: what tells
+  a true answer from a false one is as often something the application set in a header - a cookie
+  it drops, a location it redirects to, a length it reports - as anything it rendered, and a body
+  read on its own never sees it. The pattern is matched the way that one matches it too, without
+  regard to case and with '^' and '$' reading the lines of the answer rather than the whole of it.
+  """
+  answered = page or ""
+  if headers:
+    try:
+      answered = "".join(str(line) for line in headers.headers) + answered
+    except AttributeError:
+      answered = str(headers) + answered
   if menu.options.string:
-    return menu.options.string in (page or "")
+    return menu.options.string in answered
   if menu.options.not_string:
-    return menu.options.not_string not in (page or "")
+    return menu.options.not_string not in answered
   if menu.options.regexp:
     try:
-      return bool(re.search(menu.options.regexp, page or ""))
+      return bool(re.search(menu.options.regexp, answered, re.IGNORECASE | re.MULTILINE))
     except re.error:
       return None
   if menu.options.code is not None:
