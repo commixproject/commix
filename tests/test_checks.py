@@ -1110,6 +1110,43 @@ class ThePayloadIsWrittenOutWithTheParametersOwnValue(unittest.TestCase):
     settings.TESTABLE_VALUE, settings.TESTABLE_VALUE_STOOD_IN_FOR = "QQE", "127.0.0.1"
     self.assertEqual("'QQE;echo TAG;", checks.payload_with_own_value("'QQE;echo TAG;"))
 
+  def test_a_parameter_tested_with_its_own_value_is_left_alone(self):
+    # Where the two are the same there was no stand-in, whatever a value carried over from an
+    # earlier parameter happens to say.
+    settings.TESTABLE_VALUE, settings.TESTABLE_VALUE_STOOD_IN_FOR = "127.0.0.1", "127.0.0.1"
+    self.assertEqual("127.0.0.1;echo TAG;", checks.payload_with_own_value("127.0.0.1;echo TAG;"))
+
+class ATamperedStandInIsStillWrittenOutAsTheValue(unittest.TestCase):
+  """
+  A tamper script rewrites the stand-in along with the rest of the payload it is given, so looking
+  for the three letters at the front finds nothing and the finding goes out carrying them - beside
+  an untampered one that goes out carrying the value, which is the whole of what this is for.
+  """
+  def setUp(self):
+    self._state = (settings.TESTABLE_VALUE, settings.TESTABLE_VALUE_STOOD_IN_FOR,
+                   settings.MULTI_ENCODED_PAYLOAD, settings.TARGET_OS, settings.RAW_PAYLOAD)
+    settings.TESTABLE_VALUE, settings.TESTABLE_VALUE_STOOD_IN_FOR = "QQE", "127.0.0.1"
+    settings.TARGET_OS = settings.OS.UNIX
+    settings.MULTI_ENCODED_PAYLOAD = ["uninitializedvariable"]
+
+  def tearDown(self):
+    (settings.TESTABLE_VALUE, settings.TESTABLE_VALUE_STOOD_IN_FOR,
+     settings.MULTI_ENCODED_PAYLOAD, settings.TARGET_OS, settings.RAW_PAYLOAD) = self._state
+
+  def test_the_script_rewrites_the_stand_in_too(self):
+    # What makes the plain search for it fail in the first place.
+    self.assertNotIn("QQE", checks.perform_payload_modification("QQE;echo TAG;"))
+
+  def test_the_value_goes_back_where_the_tampered_stand_in_was(self):
+    sent = checks.perform_payload_modification("QQE;echo TAG;")
+    written = checks.payload_with_own_value(sent)
+    self.assertTrue(written.startswith("127.0.0.1;"))
+    self.assertEqual(sent[len(checks.perform_payload_modification("QQE")):], written[len("127.0.0.1"):])
+
+  def test_nothing_is_rewritten_where_no_script_is_applied(self):
+    settings.MULTI_ENCODED_PAYLOAD = []
+    self.assertEqual("${AB}Q;echo TAG;", checks.payload_with_own_value("${AB}Q;echo TAG;"))
+
 class ABooleanAnswerIsReadAgainstTheSameRequest(unittest.TestCase):
   """
   What a boolean answer is compared with has to be what the same request returns with no payload.

@@ -118,6 +118,10 @@ def reset_parameter_state():
   settings.VALUE_ENCODING = None
   # Whether a parameter needs the value it was given is asked of that parameter alone.
   settings.TESTABLE_VALUE_OPTIMIZED = False
+  # And what stood in for the last parameter's value says nothing about this one's, which is tested
+  # with its own until a probe of its own drops it - a finding of this parameter's written out with
+  # the last one's value in front of it names a request nobody sent.
+  settings.TESTABLE_VALUE_STOOD_IN_FOR = ""
   # Narrowed below for one parameter at a time, and put back here so the next one is tested with
   # the techniques the run was given rather than with what the last parameter settled on.
   if settings.TECHNIQUES_BEFORE_NARROWING is None:
@@ -1400,6 +1404,8 @@ def injection_process(url, check_parameter, http_request_method, filename, times
         settings.VALUE_SKIP_REFUSED = True
         settings.TESTABLE_VALUE_OPTIMIZED = False
         settings.TESTABLE_VALUE = original_value
+        # Nothing stood in for it in the end, so nothing is left to write back into a payload.
+        settings.TESTABLE_VALUE_STOOD_IN_FOR = ""
         menu.options.data = original_data
         url = original_url
         if settings.VERBOSITY_LEVEL != 0:

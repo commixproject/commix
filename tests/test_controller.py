@@ -173,3 +173,24 @@ class AReadingThatNeedsAToolFallsBackWhenItIsNotThere(unittest.TestCase):
     settings.RESULTS_BASED_EXACT_OUTPUT = False
     self.assertEqual("", self.fire([""]))
     self.assertEqual([False], self.sent)
+
+class WhatStoodInForOneParametersValueIsNotCarriedToTheNext(unittest.TestCase):
+  """
+  A parameter the sink did not need the value of leaves that value on record. The next parameter is
+  tested with its own value from the first request, so a finding of its own written out with the
+  last one's value in front of it names a request that was never sent.
+  """
+  def setUp(self):
+    self._state = (settings.TESTABLE_VALUE_OPTIMIZED, settings.TESTABLE_VALUE_STOOD_IN_FOR,
+                   settings.TECHNIQUES_BEFORE_NARROWING, menu.options.tech)
+
+  def tearDown(self):
+    (settings.TESTABLE_VALUE_OPTIMIZED, settings.TESTABLE_VALUE_STOOD_IN_FOR,
+     settings.TECHNIQUES_BEFORE_NARROWING, menu.options.tech) = self._state
+
+  def test_the_value_that_was_stood_in_for_is_put_down_with_the_parameter(self):
+    settings.TESTABLE_VALUE_OPTIMIZED = True
+    settings.TESTABLE_VALUE_STOOD_IN_FOR = "127.0.0.1"
+    controller.reset_parameter_state()
+    self.assertFalse(settings.TESTABLE_VALUE_OPTIMIZED)
+    self.assertEqual("", settings.TESTABLE_VALUE_STOOD_IN_FOR)

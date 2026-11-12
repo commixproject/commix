@@ -318,11 +318,17 @@ def add_finding(filename, injection_type, technique, http_request_method, vuln_p
   else:
     add_line(filename, "", group="findings")
   payload = str(checks.url_decode(payload)).replace(settings.END_LINE.LF, settings.END_LINE.ESCAPED_LF)
-  for line in checks.finding_summary_lines(technique, injection_type, payload, title):
+  # The same line the summary prints, so a finding read out of a file and one read off the screen
+  # cannot say different things about what was sent. The command below is built from the payload as
+  # it went out instead, since a stand-in the sink ignores is still what reproduces the finding.
+  reported = checks.payload_with_own_value(payload)
+  for line in checks.finding_summary_lines(technique, injection_type, reported, title):
     add_line(filename, settings.strip_ansi_codes(line), group="findings")
   # Built here rather than when the report is written, since the cookies and headers move during a run.
   command = reproduce.curl_command(menu.options.url, http_request_method, vuln_parameter, payload)
   caveats = reproduce.curl_command_caveats() if command else []
+  if command and reported != payload:
+    caveats.append("the sink did not need the parameter's own value, so this command carries the '" + settings.TESTABLE_VALUE + "' that was sent in its place")
   if command:
     add_line(filename, settings.strip_ansi_codes(settings.SUB_CONTENT_SIGN_TYPE + "Reproduce: " + command), group="findings")
     for caveat in caveats:
@@ -335,7 +341,7 @@ def add_finding(filename, injection_type, technique, http_request_method, vuln_p
       "technique": checks.summary_technique_label(technique),
       "type": injection_type[0].upper() + injection_type[1:],
       "boundary": title,
-      "payload": payload,
+      "payload": reported,
     }
     if command:
       finding["reproduce"] = command

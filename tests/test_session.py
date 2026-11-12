@@ -23,6 +23,7 @@ from tests import _testutils
 from src.core.parse import cmdline as menu
 from src.utils import settings
 from src.utils import session_handler
+from src.core.controller import checks
 
 class SessionFixture(unittest.TestCase):
   """
@@ -122,6 +123,32 @@ class AReplayUsesWhatTheFindingWasMadeWith(SessionFixture):
     url, prefix = session_handler.reapply_testable_value(self.tagged("127.0.0.1"), "addr", "GET", "ZZZ")
     self.assertEqual(self.tagged("127.0.0.1"), url)
     self.assertEqual("ZZZ", prefix)
+
+class AReplayedFindingIsWrittenOutWithTheValueTheRunWasGiven(SessionFixture):
+  """
+  The address a replay carries is the stored finding's own, holding the stand-in rather than the
+  value - so what this run was given is kept as the stand-in takes its place. Without it a resumed
+  finding goes out carrying three letters where the run that first found it wrote the value.
+  """
+  def setUp(self):
+    SessionFixture.setUp(self)
+    self._stood_in_for = settings.TESTABLE_VALUE_STOOD_IN_FOR
+    settings.TESTABLE_VALUE_STOOD_IN_FOR = ""
+
+  def tearDown(self):
+    settings.TESTABLE_VALUE_STOOD_IN_FOR = self._stood_in_for
+    SessionFixture.tearDown(self)
+
+  def test_the_value_is_kept_as_the_stand_in_takes_its_place(self):
+    session_handler.import_testable_value_status(self.URL, "addr", "GET", "ABC")
+    session_handler.reapply_testable_value("http://t/a.php?addr=ABC" + settings.INJECT_TAG, "addr", "GET")
+    self.assertEqual("127.0.0.1", settings.TESTABLE_VALUE_STOOD_IN_FOR)
+    self.assertEqual("127.0.0.1;echo TAG;", checks.payload_with_own_value("ABC;echo TAG;"))
+
+  def test_nothing_is_kept_where_the_finding_was_made_with_the_value(self):
+    session_handler.import_testable_value_status(self.URL, "addr", "GET", "ABC")
+    session_handler.reapply_testable_value("http://t/a.php?addr=127.0.0.1" + settings.INJECT_TAG, "addr", "GET", "127.0.0.1")
+    self.assertEqual("", settings.TESTABLE_VALUE_STOOD_IN_FOR)
 
 class APrefixOfTheUsersOwnOutranksTheStandIn(SessionFixture):
   """

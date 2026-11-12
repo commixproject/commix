@@ -1033,6 +1033,12 @@ def reapply_testable_value(url, vuln_parameter, http_request_method, prefix=None
       prefix = placeholder
     else:
       announce_replay_conflict(prefix, menu.options.prefix, "prefix", "--prefix")
+  # The address replayed here is the stored finding's own, carrying the stand-in rather than the
+  # value - so what the run was given is read off the value this still holds, one line before the
+  # stand-in takes its place. Without it a resumed finding is written out carrying three letters
+  # where the run that first found it wrote the value.
+  if settings.TESTABLE_VALUE and settings.TESTABLE_VALUE != placeholder:
+    settings.TESTABLE_VALUE_STOOD_IN_FOR = settings.TESTABLE_VALUE
   settings.TESTABLE_VALUE = placeholder
   settings.TESTABLE_VALUE_OPTIMIZED = True
   return (url, prefix) if prefix is not None else url

@@ -2138,13 +2138,36 @@ modelled on writes the parameter's value into the line it prints, and a reader c
 wants the value the target was given - which the sink ignores either way, since not needing it is
 why it was dropped. Only the one at the front is rewritten; anything further in belongs to the
 payload itself.
+
+A tamper script rewrites the stand-in along with everything else it is given, so the three letters
+are no longer there to be found - and the payload would be written out carrying them while an
+untampered one is written out carrying the value, which is the difference this is here to remove.
+Putting the same scripts over the stand-in on its own says what they made of it, and what they make
+of the real value goes back in its place. A script that reads more of a payload than the part it
+rewrites leaves the two unable to line up, and the payload is then left as it is rather than
+guessed at.
 """
 def payload_with_own_value(payload):
   payload = str(payload)
   original, placeholder = settings.TESTABLE_VALUE_STOOD_IN_FOR, settings.TESTABLE_VALUE
-  if not original or not placeholder or not payload.startswith(placeholder):
+  if not original or not placeholder or original == placeholder:
     return payload
-  return original + payload[len(placeholder):]
+  if payload.startswith(placeholder):
+    return original + payload[len(placeholder):]
+  if not settings.MULTI_ENCODED_PAYLOAD:
+    return payload
+  # The scripts are handed a value rather than a payload here, so what they record about the last
+  # one they rewrote is put back - nothing else is meant to read this as a payload that was sent.
+  raw_payload = settings.RAW_PAYLOAD
+  try:
+    stood_in = perform_payload_modification(placeholder)
+    if stood_in != placeholder and payload.startswith(stood_in):
+      return perform_payload_modification(original) + payload[len(stood_in):]
+  except Exception:
+    pass
+  finally:
+    settings.RAW_PAYLOAD = raw_payload
+  return payload
 
 def _injection_points_summary(header_msg, rows, decode_payload=False):
   settings.print_data_to_stdout(header_msg)
@@ -2157,9 +2180,12 @@ def _injection_points_summary(header_msg, rows, decode_payload=False):
     if current_parameter != prev_parameter:
       settings.print_data_to_stdout(finding_parameter_line(vuln_parameter, http_request_method))
       prev_parameter = current_parameter
+    # A row read back from a stored session holds the payload as it was sent, so the value goes in
+    # here. One confirmed this run had that settled as it was recorded, while the parameter it was
+    # found on was still the one being tested - by the time this prints, another parameter's own
+    # value is what is on record, and a second rewrite here would read the wrong one back.
     if decode_payload:
-      payload = str(url_decode(payload))
-    payload = payload_with_own_value(payload)
+      payload = payload_with_own_value(str(url_decode(payload)))
     for line in finding_summary_lines(technique, injection_type, payload):
       settings.print_data_to_stdout(line)
   """
@@ -7059,7 +7085,7 @@ def announce_vulnerable_finding(filename, injection_type, technique, the_type, h
   announce_leftover_file(technique)
   decoded_payload = str(url_decode(payload)) if decode_payload else payload
   if not settings.LOAD_SESSION:
-    settings.CONFIRMED_INJECTION_POINTS.append((technique, injection_type, vuln_parameter, decoded_payload, display_method, settings.TOTAL_OF_REQUESTS, title))
+    settings.CONFIRMED_INJECTION_POINTS.append((technique, injection_type, vuln_parameter, payload_with_own_value(decoded_payload), display_method, settings.TOTAL_OF_REQUESTS, title))
 
 """
 Whether the output file still answers on its URL. Only the file-based technique has one to ask, so
