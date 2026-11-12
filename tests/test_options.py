@@ -22,7 +22,7 @@ from src.core.requests import tor
 from src.core.parse import cmdline as menu
 
 OPTIONS_STATE = ("url", "cdel", "pdel", "tor", "tor_port", "tor_type", "proxy", "ignore_proxy",
-                 "check_tor")
+                 "check_tor", "failed_tries")
 
 class _AValidatedRun(unittest.TestCase):
   """
@@ -49,6 +49,7 @@ class _AValidatedRun(unittest.TestCase):
     menu.options.proxy = None
     menu.options.ignore_proxy = False
     menu.options.check_tor = False
+    menu.options.failed_tries = None
 
   def tearDown(self):
     settings.print_data_to_stdout = self._print
@@ -81,6 +82,25 @@ class ADelimiterIsOneCharacter(_AValidatedRun):
     menu.options.cdel = "\\n"
     options.validate()
     self.assertEqual("\n", menu.options.cdel)
+
+class ANumberThatCannotMeanWhatItSaysIsRefused(_AValidatedRun):
+  """
+  Left to run, a count of less than one reaches the loop it bounds and stops it before its first
+  turn - and what is reported is a target that answered nothing rather than a value that could
+  never have been asked for.
+  """
+  def test_a_count_of_none_is_refused_by_name(self):
+    menu.options.failed_tries = 0
+    self.assertIn("'--failed-tries'", self.refused())
+
+  def test_a_negative_count_is_refused_too(self):
+    menu.options.failed_tries = -1
+    self.assertIn("'--failed-tries'", self.refused())
+
+  def test_a_count_of_one_is_what_it_asks_for(self):
+    menu.options.failed_tries = 1
+    options.validate()
+    self.assertEqual(1, menu.options.failed_tries)
 
 class APortIsANumberInARange(_AValidatedRun):
   """

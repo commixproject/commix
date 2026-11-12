@@ -763,13 +763,7 @@ def main(filename, url, http_request_method):
 
     # Check if defined "--url" or "-m" option.
     if url:
-      if menu.options.auth_cred and menu.options.auth_type:
-        username, password = menu.options.auth_cred.split(":", 1)
-        if not settings.LOAD_SESSION:
-          session_handler.import_valid_credentials(url, authentication_type=menu.options.auth_type, \
-                                                   admin_panel=url, username=username, \
-                                                   password=password
-                                                   )
+      session_handler.store_given_credentials(url)
       try:
         try:
           # The page the target answered with, kept off the response already in hand.

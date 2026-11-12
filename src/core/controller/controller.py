@@ -1148,6 +1148,21 @@ def injection_process(url, check_parameter, http_request_method, filename, times
           settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
           checks.define_target_os()
 
+        # The probe above is written with the same '$(...)' every payload after it is, so a filter
+        # on that one character refuses it before the sink is reached - and the parameter is put
+        # down as not injectable rather than as asked the wrong way. One more ask, with the
+        # substitution written as backticks, settles which of the two it was. Paid for only where
+        # the probe already found nothing, and only once the user has said it is worth paying.
+        if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_EVAL_PROBE and \
+           checks.may_retry_through_backticks() and checks.backtick_retry_consent():
+          settings.AUTO_TAMPER.append("backticks")
+          checks.tamper_scripts(stored_tamper_scripts=False)
+          url = command_injection_heuristic_basic(url, http_request_method, check_parameter, place)
+          if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_EVAL_PROBE:
+            # It answered nothing either, so the rest of this parameter is not carried through a
+            # script that turned out to be about something else.
+            checks.drop_auto_tampers()
+
         if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_EVAL_PROBE:
           settings.HEURISTIC_TEST.POSITIVE = False
           warn_msg = "Heuristic (basic) test shows that "
@@ -1333,6 +1348,7 @@ def injection_process(url, check_parameter, http_request_method, filename, times
           settings.DASHLESS_RETRY_CHOICE = common.read_input(message, default="Y", check_batch=True) not in settings.CHOICE_NO
         return settings.DASHLESS_RETRY_CHOICE
 
+
       # A filter that rejects any literal whitespace blocks the heuristic test the same as every
       # technique, so gating this on a positive heuristic would never fire for the one case it
       # exists for. 'MULTI_ENCODED_PAYLOAD' already carrying the script is what keeps it from
@@ -1370,7 +1386,20 @@ def injection_process(url, check_parameter, http_request_method, filename, times
         _reset_web_root_detection()
         end_detection = _run_and_verify()
 
-      # Not a filter at all, unlike the three passes above: the value is reaching the sink intact
+      # The one obstacle none of the passes above can be written around: every command substitution
+      # commix writes is opened with '$', and so is the '${IFS}' the first whitespace pass reaches
+      # for - so a filter built on that character refuses them all, the dash-free tests included.
+      # A backtick opens the same substitution and is a different character, which is the whole of
+      # what is being asked here. Not offered where the substitution is not the shell's to make:
+      # 'cmd.exe' has no backtick, and an interpreter is handed a program rather than a shell line.
+      if not end_detection and checks.injection_techniques_status() is False and \
+            checks.may_retry_through_backticks() and checks.backtick_retry_consent():
+        settings.AUTO_TAMPER.append("backticks")
+        checks.tamper_scripts(stored_tamper_scripts=False)
+        _reset_web_root_detection()
+        end_detection = _run_and_verify()
+
+      # Not a filter at all, unlike the four passes above: the value is reaching the sink intact
       # and is the problem itself, because this sink reads its first byte rather than the end of it.
       # Left set only where it confirmed something - a pass that found nothing would otherwise hand
       # the next parameter a value already replaced, and have it tested that way alone.

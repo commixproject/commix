@@ -500,7 +500,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "329"
+REVISION = "330"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -959,6 +959,9 @@ WHITESPACE_RETRY_CHOICE = None
 TEMP_FOLDER_CHOICE = None
 # The same consent, asked about a filter built around '-' rather than around whitespace.
 DASHLESS_RETRY_CHOICE = None
+# And the same again for one built around '$', which is what every command substitution this writes
+# is opened with - and what the whitespace pass above reaches for first, in '${IFS}'.
+BACKTICK_RETRY_CHOICE = None
 
 # The HTTP header name.
 HTTP_HEADER = ""
@@ -3118,11 +3121,12 @@ RUN_WIDE_STATE = frozenset((
   "USER_APPLIED_TAMPER",
   "USER_APPLIED_TECHNIQUE", "USER_APPLIED_WEB_ROOT", "USER_APPLIED_INTERPRETER",
   "USER_APPLIED_TIMESEC", "USER_APPLIED_TMP_PATH",
-  # Answered once by the user, and not worth asking again for every target. The three retry consents
+  # Answered once by the user, and not worth asking again for every target. The four retry consents
   # belong here for the reason the WAF/IPS one does: each asks whether to pay for another pass around
   # an obstacle, and an answer given once covers every target the same way, since what is being
   # answered is whether that pass is worth its cost at all.
-  "ADJUST_TIME_DELAY_CHOICE", "DASHLESS_RETRY_CHOICE", "FILE_BASED_NARROWING_CHOICE",
+  "ADJUST_TIME_DELAY_CHOICE", "BACKTICK_RETRY_CHOICE", "DASHLESS_RETRY_CHOICE",
+  "FILE_BASED_NARROWING_CHOICE",
   "IGNORE_IDENTIFIED_TARGET_OS", "IGNORE_NOT_FOUND", "NOT_FOUND_PROMPTED", "UNSTABLE_PROMPTED",
   "RECOGNISE_OS", "REPLACE_VALUE_RETRY_CHOICE", "THREADED_TIME_RETRIEVAL_CHOICE",
   "USE_BIN_SUBDIR_CHOICE", "WAF_EVASION_CONSENT", "WHITESPACE_RETRY_CHOICE",

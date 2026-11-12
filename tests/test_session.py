@@ -58,6 +58,44 @@ class SessionFixture(unittest.TestCase):
   def stored_placeholder(self):
     return session_handler.check_stored_testable_value(self.URL, "addr", "GET")
 
+class OnlyCredentialsThatAreAPairAreKept(SessionFixture):
+  """
+  What the store holds is a username and a password. A bearer token is neither half of one - it is
+  a single value, with no colon in it to split on.
+  """
+  def setUp(self):
+    SessionFixture.setUp(self)
+    self._auth = (menu.options.auth_cred, menu.options.auth_type, settings.LOAD_SESSION)
+    settings.LOAD_SESSION = False
+
+  def tearDown(self):
+    (menu.options.auth_cred, menu.options.auth_type, settings.LOAD_SESSION) = self._auth
+    SessionFixture.tearDown(self)
+
+  def _stored(self):
+    return session_handler.export_valid_credentials(self.URL, menu.options.auth_type)
+
+  def test_a_bearer_token_is_left_alone(self):
+    menu.options.auth_type, menu.options.auth_cred = "Bearer", "eyJhbGciOiJIUzI1NiJ9.e30.abc"
+    self.assertFalse(session_handler.store_given_credentials(self.URL))
+    self.assertIsNone(self._stored())
+
+  def test_a_username_and_password_are_kept_as_the_pair_they_are(self):
+    menu.options.auth_type, menu.options.auth_cred = "Basic", "admin:s3cr3t"
+    self.assertTrue(session_handler.store_given_credentials(self.URL))
+    self.assertEqual("admin:s3cr3t", self._stored())
+
+  def test_a_password_carrying_a_colon_keeps_the_rest_of_it(self):
+    menu.options.auth_type, menu.options.auth_cred = "Digest", "admin:a:b"
+    self.assertTrue(session_handler.store_given_credentials(self.URL))
+    self.assertEqual("admin:a:b", self._stored())
+
+  def test_nothing_is_kept_from_a_session_that_is_being_read_back(self):
+    menu.options.auth_type, menu.options.auth_cred = "Basic", "admin:s3cr3t"
+    settings.LOAD_SESSION = True
+    self.assertFalse(session_handler.store_given_credentials(self.URL))
+    self.assertIsNone(self._stored())
+
 class AStandInIsRememberedOnlyWhereItHeld(SessionFixture):
   """
   The parameter's own value is dropped on what the heuristic answered, and a technique may still

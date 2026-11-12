@@ -4219,6 +4219,37 @@ def tamper_shell_spans(payload, transform, nested=False, literal=False):
   return re.sub(SHELL_SPAN_HELD_REGEX, lambda x: held[int(x.group(1))], walked)
 
 """
+Whether a substitution written with backticks is one the target could even be asked about.
+
+Only where the substitution is the shell's to make: 'cmd.exe' has no backtick, and an interpreter
+is handed a program rather than a shell line. And only while the scripts in use are ours to choose.
+"""
+def may_retry_through_backticks():
+  return not menu.options.interpreter and settings.TARGET_OS != settings.OS.WINDOWS and \
+         not (settings.USER_APPLIED_TAMPER or menu.options.tamper) and \
+         "backticks" not in settings.MULTI_ENCODED_PAYLOAD
+
+"""
+Whether to ask the target the same question again with the substitution written as backticks.
+
+Every command substitution written here is opened with '$', the heuristic's own probe included, and
+so is the '${IFS}' a filtered whitespace is first worked around with - so a single filter on that
+one character refuses all of them, and what gets reported is a parameter that is not injectable
+rather than one that was asked the wrong way. A backtick opens the same substitution and is a
+different character.
+
+Asked once and held for the run, the way the other retry consents are: what is being answered is
+whether another pass around an obstacle is worth its cost at all, which is the same answer for
+every target.
+"""
+def backtick_retry_consent():
+  if settings.BACKTICK_RETRY_CHOICE is None:
+    message = "Do you want " + settings.APPLICATION + " to try again in case a dollar sign ('$') is being "
+    message += "filtered (e.g. by using a tamper script that substitutes through backticks instead)? [Y/n] "
+    settings.BACKTICK_RETRY_CHOICE = common.read_input(message, default="Y", check_batch=True) not in settings.CHOICE_NO
+  return settings.BACKTICK_RETRY_CHOICE
+
+"""
 Whether to answer the detected WAF/IPS with evasion, asked once and kept for the rest of the run.
 A tamper script provided by the user is left alone - the combination is their call, not ours.
 """

@@ -1147,6 +1147,66 @@ class ATamperedStandInIsStillWrittenOutAsTheValue(unittest.TestCase):
     settings.MULTI_ENCODED_PAYLOAD = []
     self.assertEqual("${AB}Q;echo TAG;", checks.payload_with_own_value("${AB}Q;echo TAG;"))
 
+class ASubstitutionWrittenAnotherWayIsWorthOneMoreAsk(unittest.TestCase):
+  """
+  Every substitution written here opens with '$', and so does the '${IFS}' a filtered whitespace is
+  first worked around with - so one filter on that character refuses the lot, the heuristic's own
+  probe included. A backtick opens the same substitution and is a different character.
+  """
+  def setUp(self):
+    from src.utils import common
+    self._common = common
+    self._state = (settings.BACKTICK_RETRY_CHOICE, settings.TARGET_OS, settings.USER_APPLIED_TAMPER,
+                   list(settings.MULTI_ENCODED_PAYLOAD), menu.options.interpreter, menu.options.tamper,
+                   common.read_input)
+    settings.BACKTICK_RETRY_CHOICE = None
+    settings.TARGET_OS = settings.OS.UNIX
+    settings.USER_APPLIED_TAMPER = ""
+    settings.MULTI_ENCODED_PAYLOAD = []
+    menu.options.interpreter = None
+    menu.options.tamper = None
+    self.asked = []
+    common.read_input = lambda message, **kwargs: self.asked.append(message) or "Y"
+
+  def tearDown(self):
+    (settings.BACKTICK_RETRY_CHOICE, settings.TARGET_OS, settings.USER_APPLIED_TAMPER,
+     settings.MULTI_ENCODED_PAYLOAD, menu.options.interpreter, menu.options.tamper,
+     self._common.read_input) = self._state
+
+  def test_a_posix_target_with_no_scripts_of_its_own_is_worth_asking_about(self):
+    self.assertTrue(checks.may_retry_through_backticks())
+
+  def test_a_shell_without_one_is_not_asked_about(self):
+    settings.TARGET_OS = settings.OS.WINDOWS
+    self.assertFalse(checks.may_retry_through_backticks())
+
+  def test_an_interpreter_is_handed_a_program_rather_than_a_shell_line(self):
+    menu.options.interpreter = "php"
+    self.assertFalse(checks.may_retry_through_backticks())
+
+  def test_scripts_the_user_chose_are_left_as_they_were_chosen(self):
+    menu.options.tamper = "space2ifs"
+    self.assertFalse(checks.may_retry_through_backticks())
+    menu.options.tamper = None
+    settings.USER_APPLIED_TAMPER = "space2ifs"
+    self.assertFalse(checks.may_retry_through_backticks())
+
+  def test_it_is_not_asked_about_twice_over(self):
+    settings.MULTI_ENCODED_PAYLOAD = ["backticks"]
+    self.assertFalse(checks.may_retry_through_backticks())
+
+  def test_the_answer_is_asked_for_once_and_held(self):
+    self.assertTrue(checks.backtick_retry_consent())
+    self.assertTrue(checks.backtick_retry_consent())
+    self.assertEqual(1, len(self.asked))
+    self.assertIn("'$'", self.asked[0])
+
+  def test_a_no_is_held_just_the_same(self):
+    self._common.read_input = lambda message, **kwargs: self.asked.append(message) or "n"
+    self.assertFalse(checks.backtick_retry_consent())
+    self.assertFalse(checks.backtick_retry_consent())
+    self.assertEqual(1, len(self.asked))
+
 class ABooleanAnswerIsReadAgainstTheSameRequest(unittest.TestCase):
   """
   What a boolean answer is compared with has to be what the same request returns with no payload.

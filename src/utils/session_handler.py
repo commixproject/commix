@@ -1066,6 +1066,24 @@ def import_valid_credentials(url, authentication_type, admin_panel, username, pa
     checks.error_loading_session_file()
 
 """
+Keep the credentials this run was given, so that a target asking for them again is answered without
+asking the user a second time.
+
+Only for the types that have a username and a password to keep: what is stored is that pair, and a
+bearer token is neither half of one - it is a single value with no colon in it, and asking it for a
+second half is asking for one that was never there.
+"""
+def store_given_credentials(url):
+  if settings.LOAD_SESSION or not (menu.options.auth_cred and menu.options.auth_type):
+    return False
+  if menu.options.auth_type.lower() not in (settings.AUTH_TYPE.BASIC, settings.AUTH_TYPE.DIGEST):
+    return False
+  username, _sep, password = menu.options.auth_cred.partition(":")
+  import_valid_credentials(url, authentication_type=menu.options.auth_type, admin_panel=url,
+                           username=username, password=password)
+  return True
+
+"""
 Retrieve valid stored authentication credentials for a given URL and authentication type from the session database.
 Returns the credentials as a colon-separated string if found.
 """

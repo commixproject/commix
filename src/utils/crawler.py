@@ -12,6 +12,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 For more see the file 'readme/COPYING' for copying permission.
 """
+import os
 import re
 import random
 import string
@@ -126,10 +127,14 @@ def store_crawling(output_href):
       message += "(for eventual further processing with other tools)? [y/N] "
       message = common.read_input(message, default="N", check_batch=True)
       if message in settings.CHOICE_YES:
-        filename = tempfile.mkstemp(suffix=settings.OUTPUT_FILE_EXT)[1]
+        handle, filename = tempfile.mkstemp(suffix=settings.OUTPUT_FILE_EXT)
         info_msg = "Writing crawling results to a temporary file '" + str(filename) + "'."
         settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-        with open(filename, 'a', encoding=settings.DEFAULT_CODEC) as crawling_results:
+        # Written through the one the file was made with, the way the other two of these are: a
+        # file opened again by its name is a second opening of one already open, and the first is
+        # then left open for the rest of the run - along with the exclusive creation that is the
+        # whole reason for asking for it this way.
+        with os.fdopen(handle, 'w', encoding=settings.DEFAULT_CODEC) as crawling_results:
           for url in output_href:
             crawling_results.write(str(url.encode(settings.DEFAULT_CODEC).decode()) + settings.END_LINE.LF)
         return

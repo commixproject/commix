@@ -251,11 +251,6 @@ def validate():
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit(settings.EXIT_FAILURE)
 
-  if menu.options.failed_tries == 0:
-    err_msg = "You must specify '--failed-tries' value, greater than zero."
-    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-    raise SystemExit(settings.EXIT_FAILURE)
-
   """
   A certificate is the credential, so it is not asked for beside one.
 
@@ -410,7 +405,8 @@ def validate():
                                  ("--time-limit", menu.options.time_limit, 0),
                                  ("--timeout", menu.options.timeout, 1),
                                  ("--maxlen", menu.options.maxlen, 1),
-                                 ("--threads", menu.options.threads, 1)):
+                                 ("--threads", menu.options.threads, 1),
+                                 ("--failed-tries", menu.options.failed_tries, 1)):
     if value is None or value >= minimum:
       continue
     err_msg = "The value of the '" + option + "' option must "
