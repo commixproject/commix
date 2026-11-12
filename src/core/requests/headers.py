@@ -246,7 +246,7 @@ def count_request():
   with settings.REQUESTS_LOCK:
     settings.REQUEST_COUNTER += 1
     counter = settings.REQUEST_COUNTER
-    if settings.SENDING_SAFE_REQUEST:
+    if settings.in_side_request():
       return
 
   if menu.options.proxy_freq and counter % menu.options.proxy_freq == 0:
@@ -262,9 +262,9 @@ What it is for is the session: a target that logs out, locks an account or expir
 many odd-looking requests sees an ordinary one in between them.
 """
 def send_safe_request():
-  if settings.SENDING_SAFE_REQUEST:
+  if settings.in_side_request("safe_request"):
     return
-  settings.SENDING_SAFE_REQUEST = True
+  settings.set_side_request("safe_request", True)
   try:
     if settings.SAFE_REQUEST:
       safe = settings.SAFE_REQUEST
@@ -276,7 +276,7 @@ def send_safe_request():
       data = menu.options.safe_post.encode(settings.DEFAULT_CODEC) if menu.options.safe_post else None
       method = settings.HTTPMETHOD.POST if menu.options.safe_post else settings.HTTPMETHOD.GET
       request = _urllib.request.Request(menu.options.safe_url, data, method=method)
-      do_check(request)
+      do_check(request, safe=True)
     if settings.VERBOSITY_LEVEL >= 2:
       debug_msg = "Visiting the safe URL '" + request.get_full_url() + "'."
       settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
@@ -293,7 +293,7 @@ def send_safe_request():
     # it was sent between is the one that matters.
     pass
   finally:
-    settings.SENDING_SAFE_REQUEST = False
+    settings.set_side_request("safe_request", False)
 
 """
 What holds for a request whatever it was sent for: the pacing that was asked for, the count it is
@@ -680,16 +680,25 @@ def send_request(request):
   return response
 
 """
-Check for added headers.
+What every request the run makes carries: the headers the options ask for, the body framing, and
+whatever the evasion has turned on.
+
+'safe' marks the visit that keeps the session alive. It is sent for the session rather than to
+test anything, so what belongs to a test - the token, the randomised parameters - and what belongs
+to the evasion - the chunked body, the headers a tamper script adds - is left off it. An ordinary
+visit is the whole point of it, and a filter that is being evaded is not reading it.
 """
-def do_check(request):
+def do_check(request, safe=False):
 
   request = encode_non_ascii_url(request)
-  randomize_parameters(request)
-  anticsrf.apply_token(request)
+  # The address this one was given is the user's own, asked for as it was written, and the token
+  # belongs to the request being tested rather than to the one sent between them.
+  if not safe:
+    randomize_parameters(request)
+    anticsrf.apply_token(request)
 
   # Frame the body as chunks, so a filter inspecting it never sees the payload in one piece.
-  if menu.options.chunked and request.data and not request.has_header(settings.TRANSFER_ENCODING):
+  if menu.options.chunked and request.data and not safe and not request.has_header(settings.TRANSFER_ENCODING):
     request.data = chunked.split_post_data(request.data.decode(settings.DEFAULT_CODEC, errors="replace")).encode(settings.DEFAULT_CODEC)
     request.add_unredirected_header(settings.TRANSFER_ENCODING, "chunked")
 
@@ -722,12 +731,14 @@ def do_check(request):
     request.add_header(settings.ACCEPT_LANGUAGE, settings.HTTP_ACCEPT_LANGUAGE_BROWSER_VALUE)
 
   # One the target's own request carries is applied further below, and an unredirected default would override it.
+  # Said of a body: a request carrying none describes nothing by naming a type for it, and no browser
+  # names one on a request it sends empty.
   supplied_headers = str(menu.options.headers or "") + str(menu.options.header or "") + str(settings.RAW_HTTP_HEADERS or "")
-  if not checks.get_header(request.headers, settings.CONTENT_TYPE) and settings.CONTENT_TYPE.lower() not in supplied_headers.lower():
+  if request.data is not None and not checks.get_header(request.headers, settings.CONTENT_TYPE) and settings.CONTENT_TYPE.lower() not in supplied_headers.lower():
     request.add_unredirected_header(settings.CONTENT_TYPE, settings.DEFAULT_HTTP_CONTENT_TYPE_VALUE)
 
   # The MIME media type for JSON.
-  if menu.options.data and not (menu.options.requestfile or menu.options.logfile):
+  if request.data is not None and menu.options.data and not (menu.options.requestfile or menu.options.logfile):
     if re.search(settings.JSON_RECOGNITION_REGEX, menu.options.data) or \
        re.search(settings.JSON_LIKE_RECOGNITION_REGEX, menu.options.data):
       request.add_unredirected_header(settings.CONTENT_TYPE, settings.HTTP_CONTENT_TYPE_JSON_HEADER_VALUE)
@@ -741,13 +752,13 @@ def do_check(request):
     request.add_header(settings.ACCEPT_ENCODING, settings.HTTP_ACCEPT_ENCODING_HEADER_VALUE if settings.PAGE_COMPRESSION else settings.HTTP_ACCEPT_ENCODING_IDENTITY)
 
   # Appends a fake HTTP header 'X-Forwarded-For' (and similar)
-  if settings.TAMPER_SCRIPTS["xforwardedfor"]:
+  if settings.TAMPER_SCRIPTS["xforwardedfor"] and not safe:
     from src.tamper.misc import xforwardedfor
     xforwardedfor.tamper(request)
 
   # Carries the two halves the payload reads back through '$_SERVER' - drawn with it, so the names
   # in the payload and the headers on this request are the same pair.
-  if settings.TAMPER_SCRIPTS["phpserverheaders"]:
+  if settings.TAMPER_SCRIPTS["phpserverheaders"] and not safe:
     from src.tamper.eval.php import phpserverheaders
     phpserverheaders.apply_headers(request)
 

@@ -146,9 +146,9 @@ The value travels wherever the parameter does: the query string, the body, a hea
 the cookie - which is also where it is read from, for a target that hands it back that way.
 """
 def apply_token(request):
-  if not settings.CSRF_TOKEN or settings.FETCHING_CSRF_TOKEN or not _carries_token(request):
+  if not settings.CSRF_TOKEN or settings.in_side_request("csrf_token") or not _carries_token(request):
     return
-  settings.FETCHING_CSRF_TOKEN = True
+  settings.set_side_request("csrf_token", True)
   try:
     url = request.get_full_url()
     method = request.get_method()
@@ -208,6 +208,6 @@ def apply_token(request):
     menu.options.headers = adjust_header(menu.options.headers, token_name, token_value)
     settings.RAW_HTTP_HEADERS = adjust_header(settings.RAW_HTTP_HEADERS, token_name, token_value)
   finally:
-    settings.FETCHING_CSRF_TOKEN = False
+    settings.set_side_request("csrf_token", False)
 
 # eof

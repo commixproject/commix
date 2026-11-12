@@ -88,8 +88,9 @@ def note_request_sent():
   # A request the run makes around the measured one - the page a second-order result shows up on,
   # the visit that keeps a session alive, the fetch of an anti-CSRF token - is part of that
   # measurement rather than a second attempt at it. Counting one would read as a retry, and every
-  # timing taken with those options in play would be thrown away as untrustworthy.
-  if any((settings.FETCHING_SECOND_ORDER, settings.SENDING_SAFE_REQUEST, settings.FETCHING_CSRF_TOKEN)):
+  # timing taken with those options in play would be thrown away as untrustworthy. Asked of this
+  # thread alone, for the same reason the tally above is kept per thread.
+  if settings.in_side_request():
     return
   _thread_state.sent = getattr(_thread_state, "sent", 0) + 1
 

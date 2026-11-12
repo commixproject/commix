@@ -101,6 +101,21 @@ class PostSplitting(unittest.TestCase):
     split, _ = parameters.split_post_parameters("a=1")
     self.assertEqual(["a=1"], split)
 
+  def test_a_delimiter_carrying_a_backslash_splits_an_xml_body_as_it_stands(self):
+    # The split puts the delimiter between the tags, where a backslash would otherwise be read as
+    # an escape and "\1" as a group that was never asked for.
+    state = (settings.IS_XML, settings.POST_DATA_PARAM_DELIMITER, settings.XML_TAG_SEPARATORS,
+             menu.options.data, settings.USER_DEFINED_POST_DATA)
+    settings.IS_XML = True
+    settings.POST_DATA_PARAM_DELIMITER = "\\1"
+    menu.options.data = settings.USER_DEFINED_POST_DATA = "<a>1</a><b>2</b>"
+    try:
+      split, _ = parameters.split_post_parameters("<a>1</a><b>2</b>")
+      self.assertTrue(split)
+    finally:
+      (settings.IS_XML, settings.POST_DATA_PARAM_DELIMITER, settings.XML_TAG_SEPARATORS,
+       menu.options.data, settings.USER_DEFINED_POST_DATA) = state
+
 class NamedBoundary(unittest.TestCase):
   """
   What '--prefix' and '--suffix' do to the boundary the sweep was going to send.

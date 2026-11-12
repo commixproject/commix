@@ -500,7 +500,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "328"
+REVISION = "329"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -2599,21 +2599,40 @@ PROXY_LIST_CRED = None
 SAFE_REQUEST = None
 
 # The request '--second-req' was given: where the output of an injection shows up, rather than
-# where the injection is sent. True while that page is being fetched, so it fetches nothing itself.
+# where the injection is sent.
 SECOND_ORDER_REQUEST = None
-FETCHING_SECOND_ORDER = False
 
 # Every request this run has sent, counted for the options that act every so many of them.
 REQUEST_COUNTER = 0
 
-# True while the safe request is on its way, so that it does not count itself.
-SENDING_SAFE_REQUEST = False
-
-# The anti-CSRF token: what names it (an expression), what the user wrote, and True while the page
-# holding it is being fetched - a fetch that must not go looking for a token of its own.
+# The anti-CSRF token: what names it (an expression) and what the user wrote.
 CSRF_TOKEN = None
 CSRF_TOKEN_ORIGINAL = None
-FETCHING_CSRF_TOKEN = False
+
+"""
+The requests the run makes around the one it is measuring: the page a second-order result shows up
+on, the visit that keeps a session alive, the fetch of the page an anti-CSRF token is read from.
+Each is marked while it is on its way, so that it fetches nothing of its own kind, is left out of
+the count the pacing options act on, and is not taken for a second attempt at the request it was
+made around.
+
+Held per thread rather than for the run: each is asked for by a run-wide option, but the request
+it makes is made by one worker, and whatever another worker has in flight at that moment is a
+request of its own. Read off one flag shared by all of them, that request is taken for part of
+someone else's errand - left out of the tally its own retry check is read against, and left out of
+the pacing that '--safe-freq' and '--proxy-freq' go by.
+"""
+SIDE_REQUEST_KINDS = ("second_order", "safe_request", "csrf_token")
+SIDE_REQUESTS = _threading.local()
+
+# Whether this thread is in the middle of one of them - of the kind named, or of any kind at all.
+def in_side_request(kind=None):
+  names = (kind,) if kind else SIDE_REQUEST_KINDS
+  return any(bool(getattr(SIDE_REQUESTS, name, False)) for name in names)
+
+# Mark this thread as being in one of them, or out of it again.
+def set_side_request(kind, value):
+  setattr(SIDE_REQUESTS, kind, value)
 
 # Init Test
 INIT_TEST = ""

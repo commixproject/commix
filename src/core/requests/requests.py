@@ -855,7 +855,7 @@ page - answers the injected request with nothing at all. So that answer is set a
 named by '--second-url'/'--second-req' is fetched in its place, and read for the result instead.
 """
 def second_order_response(payload=None):
-  if settings.FETCHING_SECOND_ORDER:
+  if settings.in_side_request("second_order"):
     return None
   if not menu.options.second_url and not settings.SECOND_ORDER_REQUEST:
     return None
@@ -864,7 +864,7 @@ def second_order_response(payload=None):
   if payload and settings.WAF_CHECK_PAYLOAD in str(payload):
     return None
 
-  settings.FETCHING_SECOND_ORDER = True
+  settings.set_side_request("second_order", True)
   try:
     # The stored request may say where the payload goes, the way the target's own parameters do.
     def _with_payload(value):
@@ -888,7 +888,7 @@ def second_order_response(payload=None):
   except Exception:
     return None
   finally:
-    settings.FETCHING_SECOND_ORDER = False
+    settings.set_side_request("second_order", False)
 
 """
 Check if target host is vulnerable.

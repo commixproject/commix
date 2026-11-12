@@ -516,7 +516,10 @@ def split_post_parameters(parameter):
     settings.XML_TAG_SEPARATORS = re.findall(r">(\s*)<", settings.USER_DEFINED_POST_DATA or parameter)
     # Shield leaf elements before the ">"/"<" split below.
     parameter, _shielded = shield_xml_leaves(parameter)
-    parameter = re.sub(r">\s*<", ">" + settings.POST_DATA_PARAM_DELIMITER + "<", parameter)
+    # Handed over as a function rather than as a string: a replacement string reads a backslash in
+    # the delimiter as an escape of its own, and a value such as "\1" is answered with an error
+    # about a group that was never asked for.
+    parameter = re.sub(r">\s*<", lambda match: ">" + settings.POST_DATA_PARAM_DELIMITER + "<", parameter)
     kept = []
     parameters = re.findall(r'(.*)', parameter)
     parameters = [param for param in parameters if param]

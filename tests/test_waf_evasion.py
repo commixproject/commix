@@ -137,6 +137,57 @@ class TheHeadersAreSentAsASet(_AFreshRun):
     self.assertEqual(settings.HTTP_ACCEPT_BROWSER_VALUE, sent[settings.ACCEPT.lower()])
     self.assertEqual(settings.HTTP_ACCEPT_LANGUAGE_BROWSER_VALUE, sent[settings.ACCEPT_LANGUAGE.lower()])
 
+  def test_a_request_carrying_no_body_names_no_type_for_one(self):
+    self.assertNotIn(settings.CONTENT_TYPE.lower(), self._headers_of_a_request())
+
+  def test_a_request_carrying_one_says_what_it_is(self):
+    request = _urllib.request.Request("http://t/a.php", b"addr=1", method="POST")
+    headers.do_check(request)
+    sent = dict((name.lower(), value) for name, value in request.header_items())
+    self.assertEqual(settings.DEFAULT_HTTP_CONTENT_TYPE_VALUE, sent[settings.CONTENT_TYPE.lower()])
+
+class TheVisitThatKeepsTheSessionIsAnOrdinaryOne(_AFreshRun):
+  """
+  Sent for the session rather than to test anything, so what the evasion turned on is left off it -
+  a fresh spoofed client address on each of them is the surest way to lose the very session it was
+  sent to hold, and the target is not the one being evaded.
+  """
+  def setUp(self):
+    _AFreshRun.setUp(self)
+    self._script = settings.TAMPER_SCRIPTS["xforwardedfor"]
+    settings.TAMPER_SCRIPTS["xforwardedfor"] = True
+    menu.options.chunked = True
+    menu.options.data = None
+    menu.options.cookie = None
+    menu.options.live_cookies = None
+    menu.options.referer = None
+    menu.options.host = None
+
+  def tearDown(self):
+    settings.TAMPER_SCRIPTS["xforwardedfor"] = self._script
+    _AFreshRun.tearDown(self)
+
+  def _sent(self, **kwargs):
+    request = _urllib.request.Request("http://t/a.php", b"addr=1", method="POST")
+    headers.do_check(request, **kwargs)
+    return dict((name.lower(), value) for name, value in request.header_items())
+
+  def test_a_request_being_tested_still_carries_what_the_evasion_turned_on(self):
+    sent = self._sent()
+    self.assertIn("x-forwarded-for", sent)
+    self.assertEqual("chunked", sent[settings.TRANSFER_ENCODING.lower()])
+
+  def test_the_visit_that_keeps_the_session_carries_none_of_it(self):
+    sent = self._sent(safe=True)
+    self.assertNotIn("x-forwarded-for", sent)
+    self.assertNotIn(settings.TRANSFER_ENCODING.lower(), sent)
+
+  def test_it_still_carries_what_the_session_is_held_by(self):
+    menu.options.cookie = "PHPSESSID=abc"
+    sent = self._sent(safe=True)
+    self.assertEqual("PHPSESSID=abc", sent[settings.COOKIE.lower()])
+    self.assertIn(settings.USER_AGENT.lower(), sent)
+
 """
 The browser User-Agent values switch '--random-agent' draws from.
 """
