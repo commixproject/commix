@@ -1312,6 +1312,17 @@ def _perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http
   payload, suffix = parameters.suffixes(payload, suffix)
   
   payload = checks.tamper_outside_single_quotes(payload, lambda part: part.replace(settings.SINGLE_WHITESPACE, whitespace))
+  """
+  What the caller is handed back is the payload as it stands here, before the two rewrites below.
+
+  Those two are this request's business: the scripts rewrite it for the run they are loaded in, and
+  what they write belongs to that run - a variable name drawn at random this time is not the name
+  the next run draws. Handed back, it becomes the payload of record, which is then written into the
+  session and read out of it by a run that can no longer make sense of it: the stand-in in front of
+  it cannot be put back as the value it stood in for, because the stand-in is no longer there to
+  recognise. The encoding after them is the transport's business for the same reason.
+  """
+  payload_of_record = payload
   payload = checks.perform_payload_modification(payload)
   # A parameter the target carries encoded is written back the way it arrived, the whole value at
   # once rather than the injected part alone - which is what makes the value it reads a valid one.
@@ -1349,6 +1360,6 @@ def _perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http
   else:
     exec_time, vuln_parameter = init_injection(payload, http_request_method, url)
 
-  return exec_time, vuln_parameter, payload, prefix, suffix
+  return exec_time, vuln_parameter, payload_of_record, prefix, suffix
   
 # eof

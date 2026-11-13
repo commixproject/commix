@@ -19,6 +19,45 @@ from src.utils import settings
 from src.core.requests import requests, headers
 from src.thirdparty.six.moves import urllib as _urllib
 
+class WhatIsRecordedIsThePayloadNotTheRequest(unittest.TestCase):
+  """
+  The scripts rewrite a payload for the run they are loaded in, and what they write belongs to that
+  run - a name drawn at random this time is not the one the next run draws. Handed back, it becomes
+  the payload of record, written into the session and read out of it by a run that can no longer
+  make sense of it.
+  """
+  PAYLOAD = "AAA;echo TAG$((1+2))$(echo TAG)TAG;"
+
+  def setUp(self):
+    self._state = (list(settings.MULTI_ENCODED_PAYLOAD), settings.TARGET_OS, list(settings.WHITESPACES),
+                   settings.INJECT_TAG, requests.init_injection)
+    settings.TARGET_OS = settings.OS.UNIX
+    settings.WHITESPACES = [settings.SINGLE_WHITESPACE]
+    self.sent = []
+    requests.init_injection = lambda payload, method, url: (self.sent.append(payload), (0.0, "addr"))[1]
+
+  def tearDown(self):
+    (settings.MULTI_ENCODED_PAYLOAD, settings.TARGET_OS, settings.WHITESPACES,
+     settings.INJECT_TAG, requests.init_injection) = self._state
+
+  def _injected(self):
+    _, _, payload, _, _ = requests.perform_injection("", "", settings.SINGLE_WHITESPACE, self.PAYLOAD,
+                                                     "addr", settings.HTTPMETHOD.GET, "http://t/a.php?addr=1")
+    return payload
+
+  def test_with_no_script_in_use_it_is_what_went_out(self):
+    settings.MULTI_ENCODED_PAYLOAD = []
+    self.assertEqual(self.PAYLOAD, self._injected())
+    self.assertEqual([self.PAYLOAD], self.sent)
+
+  def test_a_script_rewrites_what_is_sent_and_not_what_is_recorded(self):
+    settings.MULTI_ENCODED_PAYLOAD = ["uninitializedvariable"]
+    recorded = self._injected()
+    self.assertEqual(self.PAYLOAD, recorded)
+    # The request itself still carries the rewrite, which is the whole point of the script.
+    self.assertNotEqual(self.PAYLOAD, self.sent[0])
+    self.assertIn("${", self.sent[0])
+
 class ResponseTimeSample(unittest.TestCase):
   """
   Which answers count as one, when the model that times them is being filled.
