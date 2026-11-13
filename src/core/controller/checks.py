@@ -3717,6 +3717,20 @@ def is_parameter_testable(name):
   return True
 
 """
+Why nothing was tested, which happens for two reasons that read nothing alike.
+
+One is a name given with '-p' that the request does not carry - what was asked for is not there.
+The other is every parameter it does carry having been set aside, by '--skip', '--param-exclude',
+'--randomize' or '--smart' - what was asked for is there, and was deliberately left alone. Told the
+first while looking at the parameter in their own URL, the user is sent after something that is not
+wrong; which option set it aside is already said, parameter by parameter, further up.
+"""
+def nothing_tested_message():
+  if settings.TESTABLE_PARAMETERS_LIST and not settings.TESTABLE_PARAMETERS:
+    return "All testable parameters you provided are not present within the given request data."
+  return "No parameter was left to test: every one the request carries was set aside."
+
+"""
 Identify and print non-listed/skipped parameters that were provided but not part of the request.
 """
 def testable_parameters(url, check_parameters):

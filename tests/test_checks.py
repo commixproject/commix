@@ -1148,6 +1148,34 @@ class ATamperedStandInIsStillWrittenOutAsTheValue(unittest.TestCase):
     settings.MULTI_ENCODED_PAYLOAD = []
     self.assertEqual("${AB}Q;echo TAG;", checks.payload_with_own_value("${AB}Q;echo TAG;"))
 
+class NothingTestedIsSaidAsTheReasonItWas(unittest.TestCase):
+  """
+  A name given with '-p' that the request does not carry is one thing; every parameter it does
+  carry having been set aside is another. Told the first while looking at the parameter in their
+  own URL, the user is sent after something that is not wrong.
+  """
+  def setUp(self):
+    self._state = (list(settings.TESTABLE_PARAMETERS_LIST), settings.TESTABLE_PARAMETERS)
+
+  def tearDown(self):
+    (settings.TESTABLE_PARAMETERS_LIST, settings.TESTABLE_PARAMETERS) = self._state
+
+  def test_a_name_the_request_does_not_carry_is_said_to_be_missing(self):
+    settings.TESTABLE_PARAMETERS_LIST = ["nosuchparam"]
+    settings.TESTABLE_PARAMETERS = None
+    self.assertIn("not present", checks.nothing_tested_message())
+
+  def test_a_name_it_does_carry_is_not(self):
+    # Named with '-p' and found, then set aside by one of the options that do that.
+    settings.TESTABLE_PARAMETERS_LIST = ["addr"]
+    settings.TESTABLE_PARAMETERS = True
+    self.assertIn("set aside", checks.nothing_tested_message())
+
+  def test_with_no_name_given_at_all_nothing_is_said_about_one(self):
+    settings.TESTABLE_PARAMETERS_LIST = []
+    settings.TESTABLE_PARAMETERS = None
+    self.assertIn("set aside", checks.nothing_tested_message())
+
 class AFileIsAskedForWholeWhereTheTechniqueCanAnswerWhole(unittest.TestCase):
   """
   Asked for as base64, a file arrives as it is on disk - nothing the page does to whitespace can

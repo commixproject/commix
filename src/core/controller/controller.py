@@ -1930,7 +1930,7 @@ def do_check(url, http_request_method, filename):
     # All injection techniques seems to be failed!
     if not settings.INJECTION_CHECKER and not settings.LOAD_SESSION:
       if settings.NOT_TESTABLE_PARAMETERS:
-        err_msg = "All testable parameters you provided are not present within the given request data."
+        err_msg = checks.nothing_tested_message()
       else:
         err_msg = "All tested parameters do not appear to be injectable."
         if settings.INJECTION_LEVEL < settings.HTTP_HEADER_INJECTION_LEVEL :
