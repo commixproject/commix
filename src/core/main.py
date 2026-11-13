@@ -264,6 +264,12 @@ def init_request(url, http_request_method):
     if menu.options.proxy and not menu.options.tor and not menu.options.ignore_proxy:
       proxy.apply_to_request(probe_request)
     response = opener.open(probe_request, timeout=settings.TIMEOUT)
+    # What an ordinary request is answered with, kept for the protection check further on - which
+    # reads an obvious attack's answer against this one rather than against its status code. Read
+    # through the same helper every other reader of a page goes through, so the body stays
+    # available to whatever reads this response next.
+    requests.capture_original_page(response)
+    settings.WAF_CHECK_BASELINE = settings.ORIGINAL_PAGE
     if response.geturl() != url:
       redirect_url = response.geturl()
 
@@ -330,6 +336,9 @@ def url_response(url, http_request_method):
   _conn_start = time.time()
   response = examine_request(conn_request, conn_url)
   if do_waf:
+    # A refusal served as a 200 never reaches the branch below, which is about a status code: it is
+    # told apart by how little the page resembles the one an ordinary request was answered with.
+    checks.detect_waf_in_page(response)
     # The probe being blocked is the detection doing its job, not the target being unreachable:
     # answer the protection and reconnect with the request that was asked for.
     if response is False and settings.WAF_ENABLED:

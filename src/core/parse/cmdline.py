@@ -902,7 +902,9 @@ injection.add_option("--maxlen",
 injection.add_option("--time-sec",
                 default=0,
                 action="store",
-                type="float",
+                # Written into the payload's own arithmetic, which a POSIX shell evaluates over
+                # integers alone - a fractional second there is a syntax error rather than a delay.
+                type="int",
                 dest="timesec",
                 help="Seconds to delay the OS response.")
 

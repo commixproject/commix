@@ -102,7 +102,7 @@ def save(parser, options, filename):
     directory = os.path.dirname(os.path.abspath(filename))
     if directory and not os.path.isdir(directory):
       os.makedirs(directory)
-    with open(filename, "w") as output_file:
+    with open(filename, "w", encoding=settings.DEFAULT_CODEC) as output_file:
       config.write(output_file)
   except (OSError, IOError) as err_msg:
     error_msg = "Unable to write the configuration file to '" + filename + "' (" + str(err_msg) + ")."

@@ -52,7 +52,7 @@ def _load(option, kind):
       raise SystemExit(settings.EXIT_FAILURE)
     namespace = {}
     try:
-      with open(path) as script_file:
+      with open(path, encoding=settings.DEFAULT_CODEC) as script_file:
         exec(compile(script_file.read(), path, "exec"), namespace)
     except Exception as err_msg:
       error_msg = "Unable to load the " + kind + " script '" + path + "' (" + str(err_msg) + ")."

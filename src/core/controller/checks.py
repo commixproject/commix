@@ -132,6 +132,41 @@ def detect_waf(err):
   return False
 
 """
+Whether what came back is the protection's own page rather than the application's.
+
+The probe above carries an obvious attack, so a target that filters at all answers it with
+something other than its own page. Where that answer is a status code, 'detect_waf' already has
+it; where the filter answers in-band - its own short refusal, served as a 200, with the
+application below never reached - nothing reading the code alone sees anything wrong, and the run
+goes on sending payloads that were refused before the sink was reached.
+
+Read as a ratio against what an ordinary request was answered with, rather than as a pattern:
+what a refusal says is written by whoever wrote the filter, and the one thing every one of them
+has in common is that it is not the page that was there before.
+"""
+def detect_waf_in_page(response):
+  if settings.WAF_ENABLED or menu.options.skip_waf or settings.HOST_INJECTION:
+    return False
+  if response is None or isinstance(response, bool) or not settings.WAF_CHECK_BASELINE:
+    return False
+  from src.core.requests import requests
+  requests.capture_original_page(response)
+  page = settings.ORIGINAL_PAGE
+  if not page or page == settings.WAF_CHECK_BASELINE:
+    return False
+  if difflib.SequenceMatcher(None, settings.WAF_CHECK_BASELINE, page).ratio() >= settings.WAF_CHECK_RATIO:
+    return False
+  settings.WAF_IDENTIFIED = identify_waf_in_text(page)
+  if settings.WAF_IDENTIFIED:
+    warn_msg = "'" + settings.WAF_IDENTIFIED + "' is protecting the target."
+  else:
+    warn_msg = "It seems some kind of WAF/IPS is protecting the target, answering in-band."
+  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  settings.WAF_ENABLED = True
+  persist_waf_finding()
+  return True
+
+"""
 Detection of WAF/IPS protection.
 """
 def check_waf(url, http_request_method):

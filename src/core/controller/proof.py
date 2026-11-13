@@ -318,7 +318,7 @@ def prove(filename, url):
                                 settings.END_LINE.LF + data)
   try:
     path = os.path.join(os.path.dirname(filename) or ".", "proof.txt")
-    with open(path, "w") as proof_file:
+    with open(path, "w", encoding=settings.DEFAULT_CODEC) as proof_file:
       proof_file.write(settings.strip_ansi_codes(header + ":" + settings.END_LINE.LF +
                        data + settings.END_LINE.LF))
     info_msg = "Proof of exploitation written to '" + path + "'."

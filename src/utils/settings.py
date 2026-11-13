@@ -500,7 +500,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "330"
+REVISION = "331"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -660,6 +660,18 @@ CMD_SUB_SUFFIX = ")"
 
 # Sent to be blocked, never to run: read-only and instant, in both shells, chained every way.
 WAF_CHECK_PAYLOAD = ";cat /etc/passwd|type C:\\Windows\\win.ini&&dir ../../||$(cat /etc/passwd)"
+"""
+How much of the ordinary page the answer to that payload has to still resemble before it is taken
+for an answer at all.
+
+A block does not have to arrive as a status code. A filter that answers in-band serves its own
+short refusal with a 200, and the application below is never reached - which anything reading the
+code alone takes for an ordinary answer, and goes on sending payloads that cannot work. What gives
+it away is how little that page resembles what the same target answers an ordinary request with.
+"""
+WAF_CHECK_RATIO = 0.5
+# What an ordinary request was answered with, kept from the first one of the run for that comparison.
+WAF_CHECK_BASELINE = ""
 WAF_ENABLED = False
 # The product name a blocked response was matched to, via 'WAF_SIGNATURES' - None until (if ever) found.
 WAF_IDENTIFIED = None
