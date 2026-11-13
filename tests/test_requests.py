@@ -101,3 +101,56 @@ class ResponseTimeSample(unittest.TestCase):
 
 if __name__ == "__main__":
   unittest.main()
+
+class AStatusIsReadOnEveryRequestNotJustTheFirst(unittest.TestCase):
+  """
+  What a status says about the target is true of whichever request it answered. Read only on the
+  run's opening request, a '414' went unexplained, a chunked body the target would not take was
+  never sent again without it, and every other error code passed in silence.
+  """
+  def setUp(self):
+    self._state = (settings.TOTAL_OF_REQUESTS, set(settings.WARNED_HTTP_ERROR_CODES),
+                   settings.print_data_to_stdout, settings.USER_DEFINED_POST_DATA)
+    self.said = []
+    settings.print_data_to_stdout = lambda text: self.said.append(str(text))
+    settings.WARNED_HTTP_ERROR_CODES = set()
+    # Well past the opening request, which is where every real payload is sent from.
+    settings.TOTAL_OF_REQUESTS = 42
+
+  def tearDown(self):
+    (settings.TOTAL_OF_REQUESTS, settings.WARNED_HTTP_ERROR_CODES,
+     settings.print_data_to_stdout, settings.USER_DEFINED_POST_DATA) = self._state
+
+  def _refused(self, code, reason):
+    return _urllib.error.HTTPError("http://target/x", code, reason, {}, None)
+
+  def test_a_request_line_the_target_will_not_take_is_explained(self):
+    requests.request_failed(self._refused(414, "Request-URI Too Long"))
+    said = " ".join(self.said)
+    self.assertIn("414", said)
+    self.assertIn("longer than it accepts", said)
+
+  def test_the_way_past_it_is_named(self):
+    settings.USER_DEFINED_POST_DATA = ""
+    requests.request_failed(self._refused(414, "Request-URI Too Long"))
+    self.assertIn("--data", " ".join(self.said))
+
+  def test_any_other_error_code_is_still_reported_as_interference(self):
+    requests.request_failed(self._refused(500, "Internal Server Error"))
+    self.assertIn("could interfere", " ".join(self.said))
+
+  def test_a_chunked_body_the_target_will_not_read_is_turned_off(self):
+    from src.core.parse import cmdline as menu
+    self._chunked = (menu.options.chunked, settings.CHUNKED_UNSUPPORTED)
+    try:
+      menu.options.chunked, settings.CHUNKED_UNSUPPORTED = True, False
+      self.assertTrue(requests.request_failed(self._refused(405, "Method Not Allowed")))
+      self.assertFalse(menu.options.chunked)
+      self.assertIn("chunked", " ".join(self.said))
+    finally:
+      menu.options.chunked, settings.CHUNKED_UNSUPPORTED = self._chunked
+
+  def test_it_is_said_once_rather_than_on_every_request_that_is_refused(self):
+    for _ in range(4):
+      requests.request_failed(self._refused(414, "Request-URI Too Long"))
+    self.assertEqual(1, len([_ for _ in self.said if "longer than it accepts" in _]))

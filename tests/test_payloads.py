@@ -1304,3 +1304,42 @@ class ResultsBasedReadsTheOutputAsItWasPrinted(unittest.TestCase):
   def test_a_target_without_the_tool_reads_it_the_plain_way(self):
     settings.RESULTS_BASED_EXACT_OUTPUT = False
     self.assertNotIn("awk", self.payload())
+
+class TheInterpreterIsHandedTheOutputNotAProgramMadeOfIt(unittest.TestCase):
+  """
+  The output used to be written into the program the interpreter was given to run, inside a quoted
+  string there - so a quote of the output's own closed that string early and the interpreter
+  answered with a syntax error instead of with the command's output. Silently: the run reported
+  nothing at all for a command that had worked.
+  """
+  def setUp(self):
+    self._state = (settings.TARGET_OS, settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX,
+                   list(settings.WHITESPACES))
+    settings.TARGET_OS = settings.OS.UNIX
+    settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = settings.NESTING_SUBSTITUTION
+    settings.WHITESPACES = [settings.SINGLE_WHITESPACE]
+
+  def tearDown(self):
+    (settings.TARGET_OS, settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX,
+     settings.WHITESPACES) = self._state
+
+  def _built(self):
+    from src.core.techniques.results_based import rb_payloads
+    from src.core.techniques.file_based import fb_payloads
+    return {
+      "rb_payloads": rb_payloads.cmd_execution_alter_interpreter(";", "MARKER", "echo Hello"),
+      "fb_payloads": fb_payloads.cmd_execution_alter_interpreter(";", "echo Hello", "out.txt"),
+    }
+
+  def test_the_output_arrives_as_an_argument(self):
+    for name, payload in self._built().items():
+      self.assertIn("sys.argv[1]", payload, name + " does not read the output as an argument")
+
+  def test_no_substitution_is_left_inside_a_string_the_interpreter_parses(self):
+    for name, payload in self._built().items():
+      self.assertNotIn("'" + settings.CMD_SUB_PREFIX, payload,
+                       name + " still writes the output into a quoted string of the program")
+
+  def test_the_command_is_still_run(self):
+    for name, payload in self._built().items():
+      self.assertIn(settings.CMD_SUB_PREFIX + "echo Hello" + settings.CMD_SUB_SUFFIX, payload, name)

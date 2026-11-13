@@ -1624,6 +1624,10 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
               html_data = ""
             else:
               html_data = checks.process_page_content(response, action="decode")
+              # The marker written here is what the file holds until a command overwrites it, so it
+              # is remembered as such - a command the target never runs leaves it in place, and the
+              # read that follows would otherwise hand it back as that command's own output.
+              injector.remember_output_file(response)
             shell = re.findall(r"" + TAG + "", str(html_data))
             if len(shell) == 0 :
               raise _urllib.error.HTTPError(url, int(settings.NOT_FOUND_ERROR), 'Error', {}, None)
@@ -1742,6 +1746,9 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
         time.sleep(timesec)
         verify_response = injector.fetch_output_response(url, OUTPUT_TEXTFILE, timesec, technique)
         verify_html_data = "" if verify_response is None or type(verify_response) is bool else checks.process_page_content(verify_response, action="decode")
+        # The markers written just now are the last thing in the file before a command is, so this
+        # is what the file still holds if the first command never reaches the target.
+        injector.remember_output_file(verify_response)
         # Tags must appear in order - rules out a stale/cached file.
         verified = re.search(r"" + r".*?".join(verify_tags) + r"", str(verify_html_data), re.DOTALL) is not None
       else:
@@ -1756,6 +1763,7 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
             time.sleep(timesec)
             verify_response = injector.fetch_output_response(url, OUTPUT_TEXTFILE, timesec, technique)
             verify_html_data = "" if verify_response is None or type(verify_response) is bool else checks.process_page_content(verify_response, action="decode")
+            injector.remember_output_file(verify_response)
             verify_shell = re.findall(r"" + verify_tag + "", str(verify_html_data))
             verified = bool(verify_shell) and verify_shell[0] == verify_tag
           else:

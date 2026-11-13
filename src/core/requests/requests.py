@@ -677,6 +677,33 @@ def request_failed(err_msg):
       if menu.options.auth_type and menu.options.auth_cred:
         raise SystemExit(settings.EXIT_FAILURE)
 
+  # What a status says about the target is true of whichever request it answered, so it is read
+  # here rather than inside the branch below - which is the first request's own diagnostics, and
+  # had these two inside it. Behind that gate a '414' went unexplained, a chunked body the target
+  # would not take was never sent again without it, and every other error code passed in silence,
+  # on every request but the one the run opens with.
+  elif checks.detect_waf(err_msg):
+    if not settings.NOT_FOUND_ERROR in str(err_msg).lower():
+      return False
+    return True
+
+  elif [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]:
+    status_code = [err_code for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]
+    code = status_code[0]
+    if not checks.ignored_http_error_code(code):
+      # What the code says about the target, before it is written off as interference.
+      handled = _answered_with_status(code, err_msg)
+      if handled is not None:
+        return handled
+    if not checks.ignored_http_error_code(code) and int(code) not in settings.WARNED_HTTP_ERROR_CODES:
+      warn_msg = "The web server responded with an HTTP error code '" + checks.http_error_code_label(code, err_msg)
+      warn_msg += "' which could interfere with the results of the tests."
+      settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+      settings.WARNED_HTTP_ERROR_CODES.add(int(code))
+    if not settings.NOT_FOUND_ERROR in str(err_msg).lower():
+      return False
+    return True
+
   elif settings.TOTAL_OF_REQUESTS == 1:
     if "IncompleteRead" in str(error_msg):
       error_msg = "There was an incomplete read error while retrieving data "
@@ -689,26 +716,6 @@ def request_failed(err_msg):
       error_msg += "status code received."
     elif "forcibly closed" in str(error_msg) or "Connection is already closed" in str(error_msg):
       error_msg = "Connection was forcibly closed by the target URL."
-    elif checks.detect_waf(err_msg):
-      if not settings.NOT_FOUND_ERROR in str(err_msg).lower():
-        return False
-      return True
-    elif [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]:
-      status_code = [err_code for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]
-      code = status_code[0]
-      if not checks.ignored_http_error_code(code):
-        # What the code says about the target, before it is written off as interference.
-        handled = _answered_with_status(code, err_msg)
-        if handled is not None:
-          return handled
-      if not checks.ignored_http_error_code(code) and int(code) not in settings.WARNED_HTTP_ERROR_CODES:
-        warn_msg = "The web server responded with an HTTP error code '" + checks.http_error_code_label(code, err_msg)
-        warn_msg += "' which could interfere with the results of the tests."
-        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-        settings.WARNED_HTTP_ERROR_CODES.add(int(code))
-      if not settings.NOT_FOUND_ERROR in str(err_msg).lower():
-        return False
-      return True
     elif stability.should_retry_connection_error(error_msg):
       return True
     else:

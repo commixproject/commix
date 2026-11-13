@@ -1595,6 +1595,72 @@ def fetch_output_response(url, OUTPUT_TEXTFILE, timesec, technique):
   return None
 
 """
+The output file's contents, read the way the command's own output is read - so that what the file
+held before a command can be told from what it holds after one.
+
+Only the line breaks it ends with come off. A substitution drops those and nothing else, which is
+what the techniques reading their answer off the page hand back, so this hands back the same.
+Stripped at both ends instead, a command whose output was indented, or padded, or was whitespace
+altogether came back without the part of it that said so: an output of a tab, three spaces, 'X' and
+seven more tabs arrived as 'X'.
+"""
+def output_file_content(response):
+  content = checks.process_page_content(response, action="encode")
+  content = content.rstrip(settings.END_LINE.CR + settings.END_LINE.LF)
+  # The bytes the file's own encoding could not read, back as the bytes the target wrote.
+  content = checks.decoded_byte_output(checks.restored_unreadable_bytes(content))
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    content = content.replace(settings.END_LINE.CR, "")
+  return content
+
+"""
+What the target says about the output file itself, which is how a read can tell that the write
+landed.
+
+An entity tag changes whenever the file does - its size and the moment it was last written are what
+it is made of - and a last-modified date says the same thing a second at a time. Both are the
+target's own account of the file, so neither depends on this machine's clock agreeing with the
+target's.
+"""
+def output_file_validator(response):
+  try:
+    served = response.info()
+  except Exception:
+    return None
+  validator = served.get("ETag") or served.get("Last-Modified")
+  if not validator:
+    return None
+  validator = validator.strip()
+  # A weak tag is the same tag, marked as one the target will not compare byte for byte itself.
+  return validator[2:] if validator.startswith("W/") else validator
+
+"""
+Whether what came back is this command's output rather than what the file held before it.
+
+A command the target never ran - a request it refused, a payload its shell would not parse - leaves
+the file exactly as it was, and reading it then answers with whatever wrote it last: the marker the
+detection phase put there, or the output of the command before this one. Handed back as this
+command's own, that is a wrong answer rather than a missing one, which is the worse of the two.
+
+Both the contents and the file's own validator have to be what they were for the write to be called
+missing. A command run twice writes the file again, so the validator moves even where the output it
+wrote is identical - and where the target serves no validator at all, nothing is withheld.
+"""
+def output_file_is_stale(content, validator, previous_content, previous_validator):
+  return (validator is not None and previous_validator is not None and
+          validator == previous_validator and content == previous_content)
+
+"""
+What the output file holds before any command has been run through it, remembered so that a command
+the target never runs cannot have it answered back as its own output.
+"""
+def remember_output_file(response):
+  if response is None or type(response) is bool:
+    return
+  settings.LAST_OUTPUT_FILE_CONTENT = output_file_content(response)
+  settings.LAST_OUTPUT_FILE_VALIDATOR = output_file_validator(response)
+
+"""
 Evaluate test results.
 """
 def injection_test_results(response, TAG, randvcalc, technique, payload=None):
@@ -1787,21 +1853,24 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
   else:
     #Find the directory.
     shell = ""
+    validator = None
+    previous_content = settings.LAST_OUTPUT_FILE_CONTENT
+    previous_validator = settings.LAST_OUTPUT_FILE_VALIDATOR
     for attempt in range(settings.MAX_OUTPUT_FILE_READS):
       response = fetch_output_response(url, OUTPUT_TEXTFILE, timesec, technique)
       if response is not None:
-        shell = checks.process_page_content(response, action="encode").rstrip().lstrip()
-        # The bytes the file's own encoding could not read, back as the bytes the target wrote.
-        shell = checks.decoded_byte_output(checks.restored_unreadable_bytes(shell))
-        if settings.TARGET_OS == settings.OS.WINDOWS:
-          shell = [newline.replace(settings.END_LINE.CR, "") for newline in shell]
-          shell = [empty for empty in shell if empty]
+        shell = output_file_content(response)
+        validator = output_file_validator(response)
       # What the file held before this command is what it still holds if the write has not landed.
-      if shell and shell != settings.LAST_OUTPUT_FILE_CONTENT:
+      if shell and not output_file_is_stale(shell, validator, previous_content, previous_validator):
         break
       if attempt + 1 < settings.MAX_OUTPUT_FILE_READS:
         time.sleep(settings.OUTPUT_FILE_READ_DELAY)
-    settings.LAST_OUTPUT_FILE_CONTENT = shell
+    if shell and output_file_is_stale(shell, validator, previous_content, previous_validator):
+      shell = ""
+    else:
+      settings.LAST_OUTPUT_FILE_CONTENT = shell
+      settings.LAST_OUTPUT_FILE_VALIDATOR = validator
 
   return shell
 # eof

@@ -500,7 +500,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "337"
+REVISION = "338"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -1947,6 +1947,10 @@ PIPE_SEPARATOR = "|"
 MAX_OUTPUT_FILE_READS = 3
 OUTPUT_FILE_READ_DELAY = 1
 LAST_OUTPUT_FILE_CONTENT = None
+# And what the target said about the file itself when that content was read - an entity tag or
+# a last-modified date, which is how a read tells the command's own output from what the file
+# held before it.
+LAST_OUTPUT_FILE_VALIDATOR = None
 # How many times an unusable URL is asked for again before the run gives up on being answered.
 MAX_INVALID_URL_ANSWERS = 3
 # Findings confirmed this run, for the end-of-run summary.

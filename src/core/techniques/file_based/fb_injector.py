@@ -38,6 +38,12 @@ def fetch_output_response(url, OUTPUT_TEXTFILE, timesec, technique):
   return injector.fetch_output_response(url, OUTPUT_TEXTFILE, timesec, technique)
 
 """
+What the output file holds before any command has been run through it.
+"""
+def remember_output_file(response):
+  return injector.remember_output_file(response)
+
+"""
 """
 def select_output_filename(technique, tmp_path, TAG, prompt=True):
   return injector.select_output_filename(technique, tmp_path, TAG, prompt=prompt)
