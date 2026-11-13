@@ -1147,6 +1147,47 @@ class ATamperedStandInIsStillWrittenOutAsTheValue(unittest.TestCase):
     settings.MULTI_ENCODED_PAYLOAD = []
     self.assertEqual("${AB}Q;echo TAG;", checks.payload_with_own_value("${AB}Q;echo TAG;"))
 
+class AFileIsAskedForWholeWhereTheTechniqueCanAnswerWhole(unittest.TestCase):
+  """
+  Asked for as base64, a file arrives as it is on disk - nothing the page does to whitespace can
+  reach it. Which technique is carrying the command is what decides whether that is worth paying
+  for, and it is the caller that knows which one: what is left in the run-wide name is whichever
+  was last announced while the parameter was being tested, long before this is asked.
+  """
+  CONTENT = "one\ntwo\n"
+
+  def setUp(self):
+    import base64
+    self._state = (settings.TARGET_OS, settings.CURRENT_TECHNIQUE, settings.DEFAULT_CODEC)
+    settings.TARGET_OS = settings.OS.UNIX
+    self.asked = []
+    encoded = base64.b64encode(self.CONTENT.encode()).decode()
+    self.execute_cmd = lambda cmd: (self.asked.append(cmd), (encoded, True))[1]
+
+  def tearDown(self):
+    (settings.TARGET_OS, settings.CURRENT_TECHNIQUE, settings.DEFAULT_CODEC) = self._state
+
+  def test_the_technique_the_caller_names_is_the_one_that_decides(self):
+    # The run-wide name says otherwise, which is exactly the case this exists for.
+    settings.CURRENT_TECHNIQUE = settings.INJECTION_TECHNIQUE.FILE_BASED
+    content, fresh = checks.file_read_encoded(self.execute_cmd, "/etc/passwd",
+                                              settings.INJECTION_TECHNIQUE.RESULTS_BASED)
+    self.assertEqual(self.CONTENT, content)
+    self.assertTrue(fresh)
+
+  def test_a_technique_that_reads_a_byte_at_a_time_is_not_asked_for_it(self):
+    settings.CURRENT_TECHNIQUE = settings.INJECTION_TECHNIQUE.RESULTS_BASED
+    content, fresh = checks.file_read_encoded(self.execute_cmd, "/etc/passwd",
+                                              settings.INJECTION_TECHNIQUE.TIME_BASED)
+    self.assertIsNone(content)
+    self.assertEqual([], self.asked)
+
+  def test_with_none_named_the_run_wide_one_still_answers(self):
+    settings.CURRENT_TECHNIQUE = settings.INJECTION_TECHNIQUE.RESULTS_BASED
+    self.assertEqual(self.CONTENT, checks.file_read_encoded(self.execute_cmd, "/etc/passwd")[0])
+    settings.CURRENT_TECHNIQUE = settings.INJECTION_TECHNIQUE.FILE_BASED
+    self.assertIsNone(checks.file_read_encoded(self.execute_cmd, "/etc/passwd")[0])
+
 class ASubstitutionWrittenAnotherWayIsWorthOneMoreAsk(unittest.TestCase):
   """
   Every substitution written here opens with '$', and so does the '${IFS}' a filtered whitespace is

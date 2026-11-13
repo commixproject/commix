@@ -6547,8 +6547,14 @@ them - or (None, False) where the target cannot produce it, leaving the plain re
 Only where the whole answer arrives at once. A technique that reads a byte at a time pays for every
 one of them, and base64 is a third longer than what it carries.
 """
-def file_read_encoded(execute_cmd, file_to_read):
-  if settings.CURRENT_TECHNIQUE not in (settings.INJECTION_TECHNIQUE.RESULTS_BASED, settings.INJECTION_TECHNIQUE.DYNAMIC_CODE):
+def file_read_encoded(execute_cmd, file_to_read, technique=None):
+  # The one carrying this command, where the caller knows it. What is left in 'CURRENT_TECHNIQUE'
+  # is whichever was last announced while the parameter was being tested, which says nothing about
+  # what is running now - a read asked for after detection is carried by whichever technique was
+  # confirmed, and reading the wrong name here refuses the encoded form to a technique that can
+  # produce it, leaving the file to arrive through the page with its whitespace folded away.
+  technique = technique if technique is not None else settings.CURRENT_TECHNIQUE
+  if technique not in (settings.INJECTION_TECHNIQUE.RESULTS_BASED, settings.INJECTION_TECHNIQUE.DYNAMIC_CODE):
     return None, False
   if settings.TARGET_OS == settings.OS.WINDOWS:
     cmd = settings.WIN_FILE_READ_B64 + file_to_read.replace("\\", "\\\\") + "'))\""

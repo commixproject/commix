@@ -89,7 +89,7 @@ def file_read(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, 
     # page does to a command's output - runs of whitespace folded into one, every newline among
     # them - leaves a file that cannot be put back together; the encoded form has none of those
     # characters in it, so the bytes arrive as they are on disk.
-    shell, fresh = checks.file_read_encoded(execute_cmd, file_to_read)
+    shell, fresh = checks.file_read_encoded(execute_cmd, file_to_read, technique)
     if shell is None:
       shell, fresh = execute_cmd(cmd)
   if settings.TIME_RELATED_ATTACK:
