@@ -1815,6 +1815,12 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
         shell = [backslash.replace(r"\/","/") for backslash in shell]
         # The output's own line breaks, back where they were.
         shell = [marked.replace(new_line, settings.END_LINE.LF) for marked in shell]
+        # And the ones the target was asked to mark before it answered, which is how a break
+        # survives a sink that hands back a single line of what it ran.
+        shell = [marked.replace(settings.RESULTS_BASED_LF_MARKER, settings.END_LINE.LF)
+                 for marked in shell]
+        shell = [marked.replace(settings.RESULTS_BASED_CR_MARKER, settings.END_LINE.CR)
+                 for marked in shell]
         # And the bytes the page's own encoding could not read, back as the bytes the target sent -
         # written out at the point the page was read rather than thrown away, so they are still here.
         shell = [checks.decoded_byte_output(checks.restored_unreadable_bytes(kept)) for kept in shell]

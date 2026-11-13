@@ -500,7 +500,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "338"
+REVISION = "339"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -690,6 +690,16 @@ IDENTIFIED_COMMAND_INJECTION = False
 # time. Turned off for the rest of this target once a reading comes back empty, which is how a
 # target without the tool that reading needs answers.
 RESULTS_BASED_EXACT_OUTPUT = True
+
+# What the target is asked to put in place of the line breaks its output carries, so that the output
+# arrives as the single line the markers are looked for on. A sink handing back only the last line
+# of what it ran - which is most of them, 'exec()' in PHP among them - answers with nothing at all
+# where a break of its own went out, so the breaks cannot travel as themselves. Marked instead and
+# put back once what is between the markers has been taken, the way the page's own breaks already
+# are. Made once for the run, out of the letters a shell, a page and its encoding all hand back
+# unchanged.
+RESULTS_BASED_LF_MARKER = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
+RESULTS_BASED_CR_MARKER = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
 
 # Basic heuristic checks for code injection: the probe that says code was evaluated, what its
 # answer looks like coming back, and the interpreter's own complaints that give the same away.
@@ -2378,6 +2388,7 @@ class END_LINE:
   CR = "\r"
   LF = "\n"
   CRLF = "\r\n"
+  ESCAPED_CR = "\\r"
   ESCAPED_LF = "\\n"
 
 # List of end lines

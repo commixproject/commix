@@ -100,21 +100,28 @@ def decision_alter_interpreter(separator, TAG, randv1, randv2):
   return payload
 
 """
-A command's output as a single line, with every byte it printed still in it.
+A command's output as a single line, with every byte it printed still in it - its line breaks among
+them, marked rather than thrown away.
 
 'echo' is handed the output through a substitution, and an unquoted one is split into words and
 rejoined with one space each - so runs of whitespace inside the output collapse and its ends are
 dropped. Quoted instead, that whitespace survives but so do the newlines, and a sink handing back
 only the last line of what it ran then answers with nothing at all. Both are avoided by asking
-'awk' for the output with its newlines replaced, the way the file-based technique asks 'tr' for it:
-the value goes in as an argument rather than through a pipe, so nothing is introduced that the
-payload is not proving, and the program is a single statement, so it needs no separator of its own
-either - 'gsub' is read for the condition of a choice whose answers are the same, since it hands
-back a count rather than the string it rewrote. Replaced with 'OFS', a literal space being the
-whitespace substitution's to take even inside awk's own quotes.
+'awk' for the output with its line breaks standing in a marker's place: the value goes in as an
+argument rather than through a pipe, so nothing is introduced that the payload is not proving, and
+the program is a single statement, so it needs no separator of its own either - the two 'gsub' are
+added for the condition of a choice whose answers are the same, since each hands back a count
+rather than the string it rewrote. The markers arrive as variables, a literal one being the
+whitespace substitution's to take even inside awk's own quotes, and 'OFS' holds the one for a
+newline because that is what it already held when a space was what a newline became.
+
+A break put back on this side rather than left out is the whole of what the output owes its own
+shape to: a list comes back a list, and the paragraph a target answered a list with is gone.
 """
 def single_line_output(cmd):
-  return (settings.CMD_SUB_PREFIX + "LC_ALL=C awk 'BEGIN{print(gsub(/" +
+  return (settings.CMD_SUB_PREFIX + "LC_ALL=C awk -v OFS=" + settings.RESULTS_BASED_LF_MARKER +
+          " -v r=" + settings.RESULTS_BASED_CR_MARKER + " 'BEGIN{print(gsub(/" +
+          settings.END_LINE.ESCAPED_CR + "/,r,ARGV[1])+gsub(/" +
           settings.END_LINE.ESCAPED_LF + "/,OFS,ARGV[1])?ARGV[1]:ARGV[1])}' \"" +
           settings.CMD_SUB_PREFIX + cmd + settings.CMD_SUB_SUFFIX + "\"" +
           settings.CMD_SUB_SUFFIX)
@@ -204,11 +211,23 @@ def cmd_execution_alter_interpreter(separator, TAG, cmd):
     # that string early and the interpreter answered with a syntax error rather than with the
     # command's output - silently, the run reporting nothing at all for a command that worked. The
     # way the tempfile-based technique already passes it, and no second substitution to nest.
+    # Its line breaks marked as the reading above marks them, and for the same reason: printed as
+    # themselves they are lines of their own, and a sink that hands back only the last of those
+    # answers without the marker the output is looked for after. Written as the characters they
+    # are, so that nothing of the payload is a backslash for a shell to read on the way.
+    #
+    # Written out as the bytes the target handed over rather than printed as text: the interpreter
+    # there encodes what it prints for the locale it was started in, and a target whose locale is
+    # the ASCII one answered a command whose output was not ASCII with an encoding error and
+    # nothing else - so an accented name, or any byte above 127, lost the whole output rather than
+    # itself. The way this technique's file-based counterpart already writes it.
+    marked = ("os.fsencode(sys.argv[1]).replace(bytes([13]),b'" + settings.RESULTS_BASED_CR_MARKER +
+              "').replace(bytes([10]),b'" + settings.RESULTS_BASED_LF_MARKER + "')")
     payload = (separator +
               settings.LINUX_PYTHON_INTERPRETER +
-              " -c \"import sys" + settings.END_LINE.CR +
-              "print('" + TAG + "'+'" + TAG + "'+sys.argv[1]+'" +
-              TAG + "'+'" + TAG + "')\" \"" + cmd_exec + "\""
+              " -c \"import os,sys" + settings.END_LINE.CR +
+              "sys.stdout.buffer.write(b'" + TAG + "'+b'" + TAG + "'+" + marked + "+b'" +
+              TAG + "'+b'" + TAG + "')\" \"" + cmd_exec + "\""
               )
 
     payload = checks.terminate_payload(payload, separator, keep_output=True)

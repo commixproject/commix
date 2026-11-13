@@ -304,10 +304,61 @@ class AwkExpressions(unittest.TestCase):
     """
     for name, program in self._programs().items():
       # Only awk's own program, since the ordinal carries a lone quote of printf's beside it.
-      programs = re.findall(r"awk '([^']*)'", program)
+      programs = re.findall(r"awk[^']*'([^']*)'", program)
       self.assertTrue(programs, name + " has no awk program to check")
       for part in programs:
         self.assertNotIn(" ", part, name + " holds a space inside its quotes")
+
+class TheOutputsOwnLineBreaksComeBackWithIt(unittest.TestCase):
+  """
+  A sink handing back only the last line of what it ran - which most of them do, PHP's 'exec()'
+  among them - answers with nothing at all where a break of the output's own went out. So the
+  breaks travel marked rather than as themselves, and are put back once what is between the markers
+  has been taken: the reading stays one line on the wire, and a list comes back a list.
+  """
+  def setUp(self):
+    self._os = settings.TARGET_OS
+    settings.TARGET_OS = settings.OS.UNIX
+
+  def tearDown(self):
+    settings.TARGET_OS = self._os
+
+  def test_the_markers_are_letters_a_shell_a_page_and_awk_all_hand_back_unchanged(self):
+    for marker in (settings.RESULTS_BASED_LF_MARKER, settings.RESULTS_BASED_CR_MARKER):
+      self.assertTrue(marker.isalpha() and marker.isupper(), repr(marker))
+
+  def test_a_break_is_not_told_apart_from_a_return(self):
+    self.assertNotEqual(settings.RESULTS_BASED_LF_MARKER, settings.RESULTS_BASED_CR_MARKER)
+
+  def test_the_single_line_reading_marks_a_break_rather_than_spacing_it(self):
+    from src.core.techniques.results_based import rb_payloads
+    program = rb_payloads.single_line_output("WORD")
+    self.assertIn(settings.RESULTS_BASED_LF_MARKER, program)
+    self.assertIn(settings.RESULTS_BASED_CR_MARKER, program)
+
+  def test_the_interpreter_marks_them_too_and_writes_the_bytes_it_was_handed(self):
+    from src.core.techniques.results_based import rb_payloads
+    payload = rb_payloads.cmd_execution_alter_interpreter(";", "TAG", "id")
+    self.assertIn(settings.RESULTS_BASED_LF_MARKER, payload)
+    self.assertIn(settings.RESULTS_BASED_CR_MARKER, payload)
+    # Printed as text instead, a target whose locale is the ASCII one answered an output that was
+    # not ASCII with an encoding error and nothing else.
+    self.assertIn("sys.stdout.buffer.write", payload)
+    self.assertNotIn("print(", payload)
+
+  def test_what_was_marked_is_a_break_again_by_the_time_it_is_read(self):
+    from src.core.controller import injector
+    body = ("TAGTAG" + "a" + settings.RESULTS_BASED_CR_MARKER + "b" +
+            settings.RESULTS_BASED_LF_MARKER + "c" + "TAGTAG")
+    class served(object):
+      def read(self, *args, **kwargs):
+        return body.encode(settings.DEFAULT_CODEC)
+      def info(self):
+        return {}
+      def getcode(self):
+        return 200
+    self.assertEqual(["a\rb\nc"], injector.injection_results(
+      served(), "TAG", "id", settings.INJECTION_TECHNIQUE.RESULTS_BASED, "url", None, 1))
 
 class ByteSemantics(unittest.TestCase):
   """
