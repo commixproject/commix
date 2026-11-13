@@ -887,10 +887,6 @@ def run():
         checks.list_tamper_scripts()
         raise SystemExit()
 
-      if settings.READLINE_ERROR :
-        checks.no_readline_module()
-        raise SystemExit()
-
       # Check if defined "--dependencies" option.
       if menu.options.dependencies:
         checks.list_dependencies()

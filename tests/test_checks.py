@@ -14,6 +14,7 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import io
+import re
 import threading
 import unittest
 
@@ -1147,6 +1148,38 @@ class ATamperedStandInIsStillWrittenOutAsTheValue(unittest.TestCase):
   def test_nothing_is_rewritten_where_no_script_is_applied(self):
     settings.MULTI_ENCODED_PAYLOAD = []
     self.assertEqual("${AB}Q;echo TAG;", checks.payload_with_own_value("${AB}Q;echo TAG;"))
+
+class EveryPlatformIsToldWhatToInstall(unittest.TestCase):
+  """
+  The sentence names something on each of them. Built a piece at a time around two platforms, it
+  stopped after "Download the" on every other one - which is where it is most likely to be read,
+  since the module ships with Python there and a missing one is the interpreter's own packaging.
+  """
+  def setUp(self):
+    self._state = (settings.IS_WINDOWS, settings.PLATFORM, settings.print_data_to_stdout)
+    self.said = []
+    settings.print_data_to_stdout = self.said.append
+
+  def tearDown(self):
+    (settings.IS_WINDOWS, settings.PLATFORM, settings.print_data_to_stdout) = self._state
+
+  def _said_on(self, is_windows, platform):
+    del self.said[:]
+    settings.IS_WINDOWS, settings.PLATFORM = is_windows, platform
+    checks.no_readline_module()
+    return re.sub(r"\x1b\[[0-9;]*m", "", "".join(self.said)).strip()
+
+  def test_each_one_is_named_something_to_install(self):
+    for is_windows, platform, named in ((True, "nt", "pyreadline"), (False, "mac", "gnureadline"),
+                                        (False, "posix", "readline")):
+      said = self._said_on(is_windows, platform)
+      self.assertIn(named, said, platform)
+
+  def test_the_sentence_is_finished_on_each_one(self):
+    for is_windows, platform in ((True, "nt"), (False, "mac"), (False, "posix")):
+      said = self._said_on(is_windows, platform)
+      self.assertTrue(said.endswith("."), platform)
+      self.assertNotIn("Download the.", said)
 
 class NothingTestedIsSaidAsTheReasonItWas(unittest.TestCase):
   """

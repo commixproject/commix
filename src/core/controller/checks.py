@@ -63,6 +63,9 @@ except ImportError:
   try:
     import pyreadline as readline
   except ImportError:
+    # Bound all the same: what reaches for it later then fails as a missing attribute, which the
+    # callers already catch, rather than as a name that was never defined at all.
+    readline = None
     settings.READLINE_ERROR = True
 
 """
@@ -1057,6 +1060,8 @@ def tab_autocompleter():
 Load commands from history.
 """
 def load_cmd_history():
+  if settings.READLINE_ERROR:
+    return
   try:
     cli_history = settings.CLI_HISTORY
     # An empty file holds no history to load, and holds no header for the platform's own history
@@ -1074,6 +1079,8 @@ def load_cmd_history():
 Save command history.
 """
 def save_cmd_history():
+  if settings.READLINE_ERROR:
+    return
   cli_history = settings.CLI_HISTORY
   try:
     # Written whether or not the file is already there: writing it is what creates it - though the
@@ -2442,14 +2449,18 @@ Information message if platform does not have
 GNU 'readline' module installed.
 """
 def no_readline_module():
-  err_msg =  "It seems your platform does "
-  err_msg += "not have GNU 'readline' module installed."
-  err_msg += " Download the"
+  warn_msg =  "It seems your platform does "
+  warn_msg += "not have GNU 'readline' module installed."
   if settings.IS_WINDOWS:
-    err_msg += " 'pyreadline' package (https://pypi.python.org/pypi/pyreadline) or the 'pyreadline3' package (https://pypi.python.org/pypi/pyreadline3) instead."
+    warn_msg += " Download the 'pyreadline' package (https://pypi.python.org/pypi/pyreadline) or the 'pyreadline3' package (https://pypi.python.org/pypi/pyreadline3) instead."
   elif settings.PLATFORM == "mac":
-    err_msg += " 'gnureadline' package (https://pypi.python.org/pypi/gnureadline)."
-  settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    warn_msg += " Download the 'gnureadline' package (https://pypi.python.org/pypi/gnureadline)."
+  else:
+    # Everywhere else it ships with Python itself, so a missing one is the interpreter's own
+    # packaging rather than something to go and fetch from an index.
+    warn_msg += " It normally comes with Python, so install the package your distribution keeps it in (e.g. 'python3-readline'), or the 'gnureadline' package (https://pypi.python.org/pypi/gnureadline)."
+  warn_msg += " Without it there is no tab completion and no command history."
+  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
 Check for incompatible OS (i.e. Unix).
