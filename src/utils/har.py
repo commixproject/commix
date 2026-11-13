@@ -18,6 +18,7 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import json
+import time
 import base64
 import datetime
 import threading
@@ -85,7 +86,7 @@ The request is read off the object that was sent rather than off the wire, so th
 client fills in for itself are put back here - they are the ones a replay needs and the only ones
 that would otherwise be missing.
 """
-def collect(request, code, status, response_headers, body, started, ended):
+def collect(request, code, status, response_headers, body, started, ended, raw_body=None):
   if not active():
     return
   try:
@@ -99,7 +100,9 @@ def collect(request, code, status, response_headers, body, started, ended):
     query = [{"name": name, "value": value}
              for name, value in _urllib.parse.parse_qsl(_urllib.parse.urlsplit(url).query, keep_blank_values=True)]
     entry = {
-      "startedDateTime": datetime.datetime.fromtimestamp(started).isoformat(),
+      # With the offset it was taken at: a bare local timestamp is read as whichever zone whatever
+      # opens the file happens to assume, which moves every entry in it by the difference.
+      "startedDateTime": datetime.datetime.fromtimestamp(started).isoformat() + time.strftime("%z"),
       "time": int(1000 * (ended - started)),
       "request": {
         "method": request.get_method(),
@@ -120,11 +123,19 @@ def collect(request, code, status, response_headers, body, started, ended):
         "content": _content(body, response_headers.get("Content-Type") if response_headers else ""),
         "redirectURL": "",
         "headersSize": -1,
-        "bodySize": len(body or b""),
+        # What came off the wire, where the page above is what it was read back as - the two differ
+        # by whatever the response was compressed with, and the difference is what the file calls
+        # the saving.
+        "bodySize": len(raw_body if raw_body is not None else (body or b"")),
       },
       "cache": {},
       "timings": {"send": -1, "wait": -1, "receive": -1},
     }
+    # Said rather than left to be worked out: a body read back longer than it arrived was
+    # compressed on the way, and the file has a field for how much that saved.
+    saved = entry["response"]["content"]["size"] - entry["response"]["bodySize"]
+    if saved > 0:
+      entry["response"]["content"]["compression"] = saved
     if data is not None:
       entry["request"]["postData"] = _content(data, request.get_header("Content-type", ""))
   except Exception:

@@ -558,7 +558,9 @@ def check_http_traffic(request):
       checks.blocked_ip(page)
       # Whatever shell or interpreter the page is reporting an error from.
       checks.parse_errors(page)
-      har.collect(request, code, getattr(response, "reason", ""), response.info(), _raw_body, started, time.time())
+      # The page as it was read back, the way the error path below records it - what a file like
+      # this is opened for is the answer, and the bytes it arrived compressed in are not it.
+      har.collect(request, code, getattr(response, "reason", ""), response.info(), page, started, time.time(), raw_body=_raw_body)
       stability.reset_connection_error_budget()
       return response
 
