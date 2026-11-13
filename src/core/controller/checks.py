@@ -6553,7 +6553,7 @@ def file_read_encoded(execute_cmd, file_to_read, technique=None):
   # what is running now - a read asked for after detection is carried by whichever technique was
   # confirmed, and reading the wrong name here refuses the encoded form to a technique that can
   # produce it, leaving the file to arrive through the page with its whitespace folded away.
-  technique = technique if technique is not None else settings.CURRENT_TECHNIQUE
+  technique = technique if technique is not None else settings.current_technique()
   if technique not in (settings.INJECTION_TECHNIQUE.RESULTS_BASED, settings.INJECTION_TECHNIQUE.DYNAMIC_CODE):
     return None, False
   if settings.TARGET_OS == settings.OS.WINDOWS:

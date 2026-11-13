@@ -500,7 +500,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "333"
+REVISION = "334"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -767,8 +767,28 @@ FILE_BASED_STATE = False
 TEMPFILE_BASED_STATE = False
 OOB_STATE = False
 
-# The technique currently being announced/tested.
+"""
+The technique being tested right now, asked about by whatever needs to know what is carrying a
+command - how a file is worth fetching, say, which is one answer for a technique that gets the
+whole of it at once and another for one that pays per byte.
+
+Held per thread, with the last one announced anywhere as the fallback: several workers share a run,
+and which technique one of them is on says nothing about what another is doing. Read off a single
+name, a worker asks its question about whichever technique some other worker happened to announce
+last - and a caller that knows which one it means should pass it rather than ask at all.
+"""
 CURRENT_TECHNIQUE = None
+_CURRENT_TECHNIQUE = _threading.local()
+
+# Mark this thread as testing the technique named, and leave it as the run's own last word on it.
+def set_technique(technique):
+  global CURRENT_TECHNIQUE
+  _CURRENT_TECHNIQUE.name = technique
+  CURRENT_TECHNIQUE = technique
+
+# What this thread is on, or the last one announced where this thread has announced nothing itself.
+def current_technique():
+  return getattr(_CURRENT_TECHNIQUE, "name", None) or CURRENT_TECHNIQUE
 TIME_RELATED_ATTACK = False
 TIME_RELATED_ATTACK_WARNING = False
 LAST_COMPLETED_TECHNIQUE = None

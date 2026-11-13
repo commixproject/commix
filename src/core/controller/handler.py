@@ -149,7 +149,7 @@ def _prioritize_confirmed_boundary(prefixes, suffixes, separators, whitespaces):
 Announce the technique about to be tested, re-checking tamper compatibility now that it and the target OS are known.
 """
 def _announce_technique(injection_type, technique):
-  settings.CURRENT_TECHNIQUE = technique
+  settings.set_technique(technique)
   checks.tamper_scripts(stored_tamper_scripts=True)
   announced = (settings.CHECKING_PARAMETER, checks.technique_label(injection_type, technique))
   already_announced = settings.LAST_ANNOUNCED_TECHNIQUE == announced

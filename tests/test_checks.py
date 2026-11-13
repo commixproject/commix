@@ -14,6 +14,7 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import io
+import threading
 import unittest
 
 from tests._testutils import stage
@@ -1187,6 +1188,37 @@ class AFileIsAskedForWholeWhereTheTechniqueCanAnswerWhole(unittest.TestCase):
     self.assertEqual(self.CONTENT, checks.file_read_encoded(self.execute_cmd, "/etc/passwd")[0])
     settings.CURRENT_TECHNIQUE = settings.INJECTION_TECHNIQUE.FILE_BASED
     self.assertIsNone(checks.file_read_encoded(self.execute_cmd, "/etc/passwd")[0])
+
+class WhatOneWorkerIsTestingIsNotWhatAnotherIs(unittest.TestCase):
+  """
+  The technique in hand is one worker's own. Several share a run, and the one a worker is on says
+  nothing about what another is doing - read off a single name, a worker asks its question about
+  whichever technique some other worker happened to announce last.
+  """
+  def setUp(self):
+    self._state = settings.CURRENT_TECHNIQUE
+    settings.set_technique(settings.INJECTION_TECHNIQUE.RESULTS_BASED)
+
+  def tearDown(self):
+    settings.set_technique(self._state)
+
+  def test_a_worker_announcing_its_own_does_not_move_another(self):
+    seen = {}
+    def worker():
+      settings.set_technique(settings.INJECTION_TECHNIQUE.TIME_BASED)
+      seen["worker"] = settings.current_technique()
+    thread = threading.Thread(target=worker)
+    thread.start()
+    thread.join()
+    self.assertEqual(settings.INJECTION_TECHNIQUE.TIME_BASED, seen["worker"])
+    self.assertEqual(settings.INJECTION_TECHNIQUE.RESULTS_BASED, settings.current_technique())
+
+  def test_a_worker_that_announced_nothing_reads_the_runs_last_word(self):
+    seen = {}
+    thread = threading.Thread(target=lambda: seen.__setitem__("worker", settings.current_technique()))
+    thread.start()
+    thread.join()
+    self.assertEqual(settings.INJECTION_TECHNIQUE.RESULTS_BASED, seen["worker"])
 
 class ASubstitutionWrittenAnotherWayIsWorthOneMoreAsk(unittest.TestCase):
   """
