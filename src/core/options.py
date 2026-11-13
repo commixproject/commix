@@ -403,7 +403,7 @@ def validate():
                                  ("--retries", menu.options.retries, 0),
                                  ("--crawl", menu.options.crawldepth, 0),
                                  ("--time-limit", menu.options.time_limit, 0),
-                                 ("--timeout", menu.options.timeout, 1),
+                                 ("--timeout", menu.options.timeout, 0),
                                  ("--maxlen", menu.options.maxlen, 1),
                                  ("--threads", menu.options.threads, 1),
                                  ("--failed-tries", menu.options.failed_tries, 1)):
@@ -413,6 +413,15 @@ def validate():
     err_msg += "not be negative." if minimum == 0 else "be " + str(minimum) + " or greater."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit(settings.EXIT_FAILURE)
+
+  # Raised rather than refused, for the same reason the values above are refused: a wait too short
+  # to tell a slow target from an unreachable one is a value that could never have worked, and what
+  # it costs is every later answer, read as silence.
+  if menu.options.timeout < settings.MIN_SAFE_TIMEOUT:
+    warn_msg = "The value of the '--timeout' option is too low to tell a slow target from one that "
+    warn_msg += "is not answering, so '" + str(settings.MIN_SAFE_TIMEOUT) + "' is used instead."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    settings.TIMEOUT = menu.options.timeout = settings.MIN_SAFE_TIMEOUT
 
   # Said now rather than where it is matched against: an oracle that cannot compile is one the run
   # would carry on without, reporting a target that never answered the question it was given.

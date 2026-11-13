@@ -83,6 +83,55 @@ class ADelimiterIsOneCharacter(_AValidatedRun):
     options.validate()
     self.assertEqual("\n", menu.options.cdel)
 
+class AWaitTooShortToBelieveIsRaised(_AValidatedRun):
+  """
+  Under it, a target that is merely slow cannot be told from one that is not answering, and every
+  technique reading that silence reports a parameter as not injectable for a reason that was never
+  the target's. Raised rather than refused: the run was asked to go faster, not to go wrong.
+  """
+  def setUp(self):
+    _AValidatedRun.setUp(self)
+    self._timeout = menu.options.timeout
+
+  def tearDown(self):
+    menu.options.timeout = self._timeout
+    _AValidatedRun.tearDown(self)
+
+  def test_a_wait_under_the_floor_is_raised_to_it_and_said_so(self):
+    menu.options.timeout = 1
+    options.validate()
+    self.assertEqual(settings.MIN_SAFE_TIMEOUT, menu.options.timeout)
+    self.assertIn("'--timeout'", "".join(self._printed))
+
+  def test_the_floor_is_carried_to_what_the_requests_are_made_with(self):
+    menu.options.timeout = 1
+    options.validate()
+    self.assertEqual(settings.MIN_SAFE_TIMEOUT, settings.TIMEOUT)
+
+  def test_a_wait_above_the_floor_is_left_as_it_was_given(self):
+    menu.options.timeout = 12
+    options.validate()
+    self.assertEqual(12, menu.options.timeout)
+    self.assertNotIn("'--timeout'", "".join(self._printed))
+
+  def test_a_wait_of_less_than_nothing_is_still_the_users_to_correct(self):
+    menu.options.timeout = -1
+    self.assertIn("'--timeout'", self.refused())
+
+class APaceCanBeAFractionOfASecond(unittest.TestCase):
+  """
+  Rounded down to whole seconds, a pace of less than one was a pace of none at all - and the only
+  way left to ask for a fraction was to ask for a random one through '--jitter', which is the
+  variation on a pace rather than the pace itself.
+  """
+  def test_the_pace_and_the_wait_are_both_read_as_fractions(self):
+    for option in ("--delay", "--timeout"):
+      self.assertEqual("float", menu.parser.get_option(option).type,
+                       option + " cannot be given a fraction")
+
+  def test_the_variation_on_a_pace_was_already_one(self):
+    self.assertEqual("float", menu.parser.get_option("--jitter").type)
+
 class ANumberThatCannotMeanWhatItSaysIsRefused(_AValidatedRun):
   """
   Left to run, a count of less than one reaches the loop it bounds and stops it before its first

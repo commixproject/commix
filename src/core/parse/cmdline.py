@@ -590,7 +590,7 @@ request.add_option("--timeout",
                 action="store",
                 dest="timeout",
                 default=settings.TIMEOUT,
-                type="int",
+                type="float",
                 help="Seconds to wait before timeout connection (Default: " + str(settings.TIMEOUT) + ").")
 
 request.add_option("--retries",
@@ -603,7 +603,7 @@ request.add_option("--retries",
 request.add_option("--delay",
                 default=0,
                 action="store",
-                type="int",
+                type="float",
                 dest="delay",
                 help="Seconds to delay between each HTTP request.")
 

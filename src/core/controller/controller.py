@@ -756,14 +756,29 @@ def check_parameter_in_http_header(check_parameter, place):
   return inject_http_headers
 
 """
+Whether what a parameter does to the page is worth the request it takes to find out.
+
+Where the answer decides something, and where it explains something. '--skip-static' is the first:
+it acts on the answer by leaving the parameter alone. The boolean-based technique is the second,
+and was once left out of this on the grounds that no technique here reads a page by comparing it -
+which is the one thing that technique does, telling its true from its false by how far two pages
+differ. A parameter that changes no page at all has no such difference to give, so the whole
+boundary matrix is spent on it and what gets reported is a target that is not injectable, for a
+reason the run had already measured and said nothing about.
+"""
+def dynamism_worth_asking():
+  return bool(menu.options.skip_static or
+              checks.technique_selected("b", eval_sink=bool(menu.options.eval_sink)))
+
+"""
 Whether changing the parameter changes the response at all.
 
-Asked only where the answer decides something, which is under '--skip-static' alone: no technique
-here reads a page by comparing it, so on every other run this would be a request per parameter
-spent on a remark.
+The baseline both readings are taken against is the target's own and was taken when it was first
+reached, so this costs the one request that puts something else in the parameter's place. Only
+'--skip-static' skips on the answer; everything else is told and carries on.
 """
 def check_parameter_dynamism(url, http_request_method, check_parameter):
-  if settings.LOAD_SESSION or not settings.TESTABLE_VALUE or not menu.options.skip_static:
+  if settings.LOAD_SESSION or not settings.TESTABLE_VALUE or not dynamism_worth_asking():
     return
 
   marker = settings.TESTABLE_VALUE + settings.INJECT_TAG

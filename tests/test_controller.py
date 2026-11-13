@@ -19,6 +19,42 @@ from src.utils import settings
 from src.core.controller import controller
 from src.core.parse import cmdline as menu
 
+class AStaticParameterIsWorthSayingSo(unittest.TestCase):
+  """
+  The boolean-based technique tells its true from its false by how far two pages differ, so a
+  parameter that changes no page at all has no answer to give it. Asked for that technique as well
+  as for '--skip-static', which was the only thing asking before - a run that spent the whole
+  boundary matrix on such a parameter reported a target as not injectable without ever saying the
+  one thing it had already measured.
+  """
+  def setUp(self):
+    self._state = (menu.options.skip_static, menu.options.tech, menu.options.eval_sink)
+    menu.options.eval_sink = False
+
+  def tearDown(self):
+    menu.options.skip_static, menu.options.tech, menu.options.eval_sink = self._state
+
+  def test_the_technique_that_compares_pages_asks(self):
+    menu.options.skip_static = False
+    menu.options.tech = "b"
+    self.assertTrue(controller.dynamism_worth_asking())
+
+  def test_a_run_that_names_no_technique_runs_that_one_too(self):
+    menu.options.skip_static = False
+    menu.options.tech = ""
+    self.assertTrue(controller.dynamism_worth_asking())
+
+  def test_nothing_reading_a_page_by_comparing_it_leaves_the_request_unspent(self):
+    menu.options.skip_static = False
+    for tech in ("r", "t", "f", "rtf"):
+      menu.options.tech = tech
+      self.assertFalse(controller.dynamism_worth_asking(), tech + " spent a request on a remark")
+
+  def test_the_switch_that_acts_on_the_answer_still_asks_on_its_own(self):
+    menu.options.skip_static = True
+    menu.options.tech = "r"
+    self.assertTrue(controller.dynamism_worth_asking())
+
 class TechniquesCarryingEitherSink(unittest.TestCase):
   """
   A technique that reaches both sinks is run against whichever one this run is testing: it is left

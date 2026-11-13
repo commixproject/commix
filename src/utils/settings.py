@@ -500,7 +500,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "339"
+REVISION = "340"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -2417,6 +2417,11 @@ MULTI_ENCODED_PAYLOAD = []
 
 # Default Timeout (Seconds to wait before timeout connection)
 TIMEOUT = 30
+
+# The shortest wait worth believing an answer from. Under it, a target that is merely slow is
+# indistinguishable from one that is not answering at all, and every technique reading that silence
+# reports a parameter as not injectable for a reason that was never the target's.
+MIN_SAFE_TIMEOUT = 3
 
 # Retries when the connection timeouts (Default: 3).
 MAX_RETRIES = 3

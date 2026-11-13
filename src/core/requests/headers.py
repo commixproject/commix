@@ -304,7 +304,10 @@ def apply_request_policy():
   count_request()
   # Delay in seconds between each HTTP request, plus whatever backing off the target has earned -
   # and, where '--jitter' was given, a different fraction of a second on top of every one of them.
-  time.sleep(int(settings.DELAY) + settings.ADAPTIVE_DELAY + (random.uniform(0, menu.options.jitter) if menu.options.jitter else 0))
+  # Waited for as it was given, a fraction of a second included - rounded down to whole seconds
+  # here, a pace of less than one was a pace of none at all, and the only way left to ask for a
+  # fraction was to ask for a random one through '--jitter'.
+  time.sleep(settings.DELAY + settings.ADAPTIVE_DELAY + (random.uniform(0, menu.options.jitter) if menu.options.jitter else 0))
 
 """
 Send a request the caller reads or times itself, rather than through the opener the rest of the run
