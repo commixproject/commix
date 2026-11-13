@@ -58,6 +58,69 @@ class SessionFixture(unittest.TestCase):
   def stored_placeholder(self):
     return session_handler.check_stored_testable_value(self.URL, "addr", "GET")
 
+class TheSessionKeepsOneRowPerThingItKnows(SessionFixture):
+  """
+  The value under test is stood in for by a placeholder made fresh every run, so the address a
+  point is filed under differs from one run to the next for the very same point. Grouped on the
+  whole of that address, the sweep that is meant to leave one row per point left every one of them,
+  and the file grew by a row for every run that found the same point again.
+  """
+  def _rows(self, suffix):
+    table = session_handler.table_name(self.URL) + suffix
+    with sqlite3.connect(settings.SESSION_FILE) as conn:
+      return conn.execute("SELECT COUNT(*) FROM \"" + table + "\";").fetchone()[0]
+
+  def _point(self, placeholder, payload):
+    table = session_handler.table_name(self.URL) + "_ip"
+    with sqlite3.connect(settings.SESSION_FILE) as conn:
+      conn.execute("CREATE TABLE IF NOT EXISTS \"" + table + "\" (id INTEGER PRIMARY KEY, url VARCHAR, "
+                   "technique VARCHAR, vuln_parameter VARCHAR, http_header VARCHAR, payload VARCHAR);")
+      conn.execute("INSERT INTO \"" + table + "\" (url, technique, vuln_parameter, http_header, payload) "
+                   "VALUES (?, ?, ?, ?, ?);",
+                   ("http://t/a.php?addr=" + placeholder + "INJECT_HERE",
+                    "results-based command injection technique", "addr", "", payload))
+      conn.commit()
+
+  def test_the_same_point_found_again_does_not_add_a_row(self):
+    for placeholder in ("YJY", "AHF", "EOH"):
+      self._point(placeholder, "payload-" + placeholder)
+    session_handler.clear(self.URL)
+    self.assertEqual(1, self._rows("_ip"))
+
+  def test_the_row_kept_is_the_one_a_resumed_run_would_have_used(self):
+    # Read back in order with the last of them kept, so the newest is the one that was in use - and
+    # the only one whose stored payload was built with the options this session was given.
+    for placeholder in ("YJY", "AHF", "EOH"):
+      self._point(placeholder, "payload-" + placeholder)
+    session_handler.clear(self.URL)
+    table = session_handler.table_name(self.URL) + "_ip"
+    with sqlite3.connect(settings.SESSION_FILE) as conn:
+      self.assertEqual("payload-EOH", conn.execute("SELECT payload FROM \"" + table + "\";").fetchone()[0])
+
+  def test_a_point_at_another_address_is_a_point_of_its_own(self):
+    self._point("YJY", "payload-one")
+    table = session_handler.table_name(self.URL) + "_ip"
+    with sqlite3.connect(settings.SESSION_FILE) as conn:
+      conn.execute("INSERT INTO \"" + table + "\" (url, technique, vuln_parameter, http_header, payload) "
+                   "VALUES (?, ?, ?, ?, ?);", ("http://t/b.php?addr=AHFINJECT_HERE",
+                   "results-based command injection technique", "addr", "", "payload-two"))
+      conn.commit()
+    session_handler.clear(self.URL)
+    self.assertEqual(2, self._rows("_ip"))
+
+  def test_a_command_asked_again_replaces_its_answer_rather_than_joining_it(self):
+    session_handler.store_cmd(self.URL, "id", "uid=33(www-data)", "addr")
+    session_handler.store_cmd(self.URL, "id", "uid=33(www-data)", "addr")
+    session_handler.store_cmd(self.URL, "id", "uid=0(root)", "addr")
+    self.assertEqual(1, self._rows("_ir"))
+    self.assertEqual("uid=0(root)", session_handler.export_stored_cmd(self.URL, "id", "addr"))
+
+  def test_another_command_is_an_answer_of_its_own(self):
+    session_handler.store_cmd(self.URL, "id", "uid=33(www-data)", "addr")
+    session_handler.store_cmd(self.URL, "whoami", "www-data", "addr")
+    self.assertEqual(2, self._rows("_ir"))
+    self.assertEqual("www-data", session_handler.export_stored_cmd(self.URL, "whoami", "addr"))
+
 class OnlyCredentialsThatAreAPairAreKept(SessionFixture):
   """
   What the store holds is a username and a password. A bearer token is neither half of one - it is

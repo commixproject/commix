@@ -301,6 +301,11 @@ part of, and the proxy rotation and safe visit that go by that count.
 """
 def apply_request_policy():
   settings.LAST_HTTP_ERROR = None
+  # What a redirect said is true of the request it answered and of no other. Set by the handler and
+  # never cleared, it outlived its own request: the code named in the question put to the user, and
+  # read by whatever asked later whether a redirect had happened at all, was whichever one the run
+  # had last been sent anywhere.
+  settings.REDIRECT_CODE = ""
   count_request()
   # Delay in seconds between each HTTP request, plus whatever backing off the target has earned -
   # and, where '--jitter' was given, a different fraction of a second on top of every one of them.

@@ -59,6 +59,15 @@ def split_url(url):
   return url.split("?")[0]
 
 """
+The address a stored row was written with, up to its query, as SQL says it.
+
+Which is how a resumed run matches a stored point: the value under test is stood in for by a
+placeholder made fresh every run, so the full address differs from one run to the next for the very
+same point.
+"""
+URL_UP_TO_QUERY = "CASE WHEN instr(url, '?') > 0 THEN substr(url, 1, instr(url, '?') - 1) ELSE url END"
+
+"""
 Escape SQL LIKE wildcard characters so they're matched literally.
 """
 def escape_like(value):
@@ -222,9 +231,18 @@ def flush():
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
-Remove all but the earliest injection point record for each unique URL and injection technique.
-This helps keep the session database clean by preserving only the first discovered injection point,
-which might be useful for historical or consistency purposes.
+Remove every injection point record but the one a resumed run would use, for each address,
+technique and place a point was found at.
+
+Grouped by the address up to its query rather than by the whole of it. The value under test is
+stood in for by a placeholder made fresh every run, so the whole of it differs from one run to the
+next for the same point: grouped on that, every row was a group of its own and this removed
+nothing, leaving the table a row longer after every run that found the same point again.
+
+The latest is kept rather than the earliest. A resumed run reads these rows in order and keeps the
+last of them, so that is the one it was already using - and it is the only one whose stored payload
+was built with the options this session was given, an older row carrying whatever the run that
+wrote it had been given instead.
 """
 def clear(url):
   try:
@@ -235,18 +253,19 @@ def clear(url):
       if conn.execute("SELECT name FROM sqlite_master WHERE name = ? AND type = 'table';", (table,)).fetchone() is None:
         return
 
-      query = "SELECT MIN(id) FROM \"" + table + "\" GROUP BY url, technique, vuln_parameter, http_header;"
+      query = ("SELECT MAX(id) FROM \"" + table + "\" GROUP BY " + URL_UP_TO_QUERY +
+               ", technique, vuln_parameter, http_header;")
       cursor = conn.execute(query)
 
       # Collect the ids to keep as strings
-      earliest_ids = [str(row[0]) for row in cursor.fetchall()]
+      latest_ids = [str(row[0]) for row in cursor.fetchall()]
 
       # If no records found, nothing more to do
-      if not earliest_ids:
+      if not latest_ids:
         return
 
       # Create a comma-separated string of ids to keep
-      ids_to_keep = ",".join(earliest_ids)
+      ids_to_keep = ",".join(latest_ids)
 
       # Delete all records that do NOT have an id in the earliest_ids list
       delete_query = "DELETE FROM \"" + table + "\" WHERE id NOT IN (" + ids_to_keep + ");"
@@ -786,8 +805,15 @@ def store_cmd(url, cmd, shell, vuln_parameter):
         # The address the output came back from, which the table was keyed without - named for the
         # host alone, one page's answers were handed back as another's.
         _ensure_columns(conn, table, (("url", "VARCHAR DEFAULT ''"),))
+        encoded_cmd = base64.b64encode(cmd.encode(settings.DEFAULT_CODEC)).decode()
+        # One row per command and place, the way the tables holding a single fact about the target
+        # already keep one. Inserted without this, a command asked again on a later run left its
+        # answer beside the one before it rather than in its place: the read takes the last row, so
+        # the answer was right and the table grew by a row for every repeat all the same.
+        conn.execute("DELETE FROM \"" + table + "\" WHERE cmd = ? AND vuln_parameter = ? AND url = ?;",
+                     (encoded_cmd, vuln_parameter, split_url(url)))
         conn.execute("INSERT INTO \"" + table + "\" (cmd, output, vuln_parameter, url) VALUES (?, ?, ?, ?)",
-                     (base64.b64encode(cmd.encode(settings.DEFAULT_CODEC)).decode(),
+                     (encoded_cmd,
                       base64.b64encode(shell.encode(settings.DEFAULT_CODEC)).decode(),
                       vuln_parameter, split_url(url)))
         conn.commit()

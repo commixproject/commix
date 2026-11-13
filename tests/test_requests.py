@@ -17,6 +17,7 @@ import unittest
 
 from src.utils import settings
 from src.core.requests import requests, headers
+from src.core.parse import cmdline as menu
 from src.thirdparty.six.moves import urllib as _urllib
 
 class WhatIsRecordedIsThePayloadNotTheRequest(unittest.TestCase):
@@ -154,3 +155,32 @@ class AStatusIsReadOnEveryRequestNotJustTheFirst(unittest.TestCase):
     for _ in range(4):
       requests.request_failed(self._refused(414, "Request-URI Too Long"))
     self.assertEqual(1, len([_ for _ in self.said if "longer than it accepts" in _]))
+
+class WhatARedirectSaidIsTrueOfItsOwnRequest(unittest.TestCase):
+  """
+  The code is set by the redirect handler as a request is answered. Never cleared, it outlived that
+  request: the one named in the question put to the user, and read by whatever asked later whether
+  a redirect had happened at all, was whichever the run had last been sent anywhere.
+  """
+  def setUp(self):
+    self._state = (settings.REDIRECT_CODE, settings.DELAY, settings.ADAPTIVE_DELAY,
+                   settings.REQUEST_COUNTER, menu.options.jitter, menu.options.proxy_freq,
+                   menu.options.safe_freq)
+    settings.DELAY = 0
+    settings.ADAPTIVE_DELAY = 0
+    menu.options.jitter = 0
+    menu.options.proxy_freq = None
+    menu.options.safe_freq = None
+
+  def tearDown(self):
+    (settings.REDIRECT_CODE, settings.DELAY, settings.ADAPTIVE_DELAY, settings.REQUEST_COUNTER,
+     menu.options.jitter, menu.options.proxy_freq, menu.options.safe_freq) = self._state
+
+  def test_a_request_does_not_start_carrying_the_one_before_it(self):
+    settings.REDIRECT_CODE = 301
+    headers.apply_request_policy()
+    self.assertFalse(settings.REDIRECT_CODE)
+
+  def test_a_request_that_was_never_redirected_says_so(self):
+    headers.apply_request_policy()
+    self.assertEqual("", settings.REDIRECT_CODE)
