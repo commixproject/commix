@@ -1842,19 +1842,52 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
 
   elif technique == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
     new_line = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
+    """
+    Every kind of line break stood in for, and each of them by a mark of its own.
+
+    A carriage return the command printed is a byte of its output like any other, and marked as the
+    same thing a newline is marked as, it came back as a newline: an output of 'a\rb' was answered
+    with 'a\nb'. The three marks share a prefix, so one pattern still matches whichever of them the
+    break a marker brought with it turned into - and the pair is taken first, so a Windows line
+    break is one mark rather than two.
+    """
+    marks = ((settings.END_LINE.CRLF, new_line + "B"), (settings.END_LINE.CR, new_line + "R"),
+             (settings.END_LINE.LF, new_line + "N"))
+    any_mark = new_line + "[BRN]"
+    # A break that ends a line, which is what the markers bring with them and what the output has
+    # dropped from its end everywhere else in this tool. A carriage return on its own ends nothing,
+    # so it stays: 'ab\r' is 'ab\r', the same way the techniques reading their answer off a
+    # substitution hand it back.
+    line_mark = new_line + "[BN]"
     # Grab execution results
     html_data = checks.process_page_content(response, action="decode")
-    # CRLF included, so a Windows target's line breaks are marked the same as a Unix one's.
-    html_data = re.sub(settings.END_LINE.CRLF + r"|[" + settings.END_LINE.CR + settings.END_LINE.LF + r"]", new_line, html_data)
-    shell = re.findall(r"" + TAG + new_line + TAG + "(.*)" + TAG + new_line + TAG + "", html_data)
-    try:
-      if len(re.split(TAG  + "(.*)" + TAG, shell[0])) != 0:
-        shell = re.findall(r"" + new_line + "(.*)" + new_line + "", \
-                           re.split(TAG  + "(.*)" + TAG, \
-                           re.split(TAG  + "(.*)" + TAG, shell[0])[0])[0])
-      shell = shell[0].replace(new_line, settings.END_LINE.LF).rstrip().lstrip()
-    except IndexError:
-      pass
+    for sequence, mark in marks:
+      html_data = html_data.replace(sequence, mark)
+    """
+    What the two pairs of markers enclose, and only that.
+
+    The payload prints its markers with 'echo', which ends each of them with a line break, so what
+    sits between the pairs is one of those breaks followed by the command's own output. Read
+    instead as the text between two breaks, the output had to end with a break of its own for there
+    to be a second one to match: a command printing anything else - 'printf', 'echo -n', a program
+    that simply does not end on one - was answered with nothing at all, and reported as a command
+    that returned no output rather than as one whose output went unread. An output of several lines
+    that ended without a break lost its last line the same way.
+
+    So the break the marker brought is taken off by itself, the ones the output ends with go the
+    way a substitution drops them, and every other one stays where the command put it. Nothing is
+    taken off the ends beyond that: trimmed there as well, a command whose output was indented, or
+    padded, or was whitespace altogether came back without the part of it that said so.
+    """
+    shell = re.findall(r"" + TAG + any_mark + TAG + "(.*?)" + TAG + any_mark + TAG + "", html_data)
+    if not shell:
+      shell = ""
+    else:
+      found = re.sub("^(?:" + line_mark + ")", "", shell[0], count=1)
+      found = re.sub("(?:" + line_mark + ")+$", "", found)
+      for sequence, mark in marks:
+        found = found.replace(mark, sequence)
+      shell = found
 
   else:
     #Find the directory.

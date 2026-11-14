@@ -283,7 +283,6 @@ class AwkExpressions(unittest.TestCase):
     return {
       "length": tb_payloads._length_arg_expr("WORD"),
       "ordinal": tb_payloads._ordinal_arg_expr("WORD", 3),
-      "flatten": tfb_payloads.flattened_trimmed_text("FILE"),
       "single line": rb_payloads.single_line_output("WORD"),
     }
 
@@ -308,6 +307,125 @@ class AwkExpressions(unittest.TestCase):
       self.assertTrue(programs, name + " has no awk program to check")
       for part in programs:
         self.assertNotIn(" ", part, name + " holds a space inside its quotes")
+
+class TheCreatedFileIsReadAsTheCommandWroteIt(unittest.TestCase):
+  """
+  The bytes are read off this file one ordinal at a time, and an ordinal is the same number whether
+  the byte is a newline or a letter - which the delay-based technique's reading of the same kind
+  already relies on. Joined into one line before it was read, an output of several lines came back
+  a paragraph, and one trailing whitespace character was taken off every output to drop the space
+  that joining left where the last newline had been.
+  """
+  def _read(self):
+    from src.core.techniques.tempfile_based import tfb_payloads
+    return tfb_payloads.file_text("/tmp/o.txt")
+
+  def test_the_file_is_read_whole_rather_than_joined_into_a_line(self):
+    read = self._read()
+    self.assertNotIn("tr ", read)
+    self.assertNotIn("awk", read)
+    self.assertTrue(read.endswith("/tmp/o.txt"), read)
+
+  def test_the_read_needs_no_pipe_and_no_separator_of_its_own(self):
+    read = self._read()
+    self.assertNotIn("|", read)
+    for operator in ("&&", "||", "&", ";"):
+      self.assertNotIn(operator, read, "the read carries " + repr(operator))
+
+  def test_nothing_is_taken_off_what_the_command_printed(self):
+    from src.core.techniques.tempfile_based import tfb_payloads
+    # A substitution has already dropped the newlines the output ended with by this point, so a
+    # trailing character removed here is one the command printed.
+    self.assertNotIn("%[[:space:]]", tfb_payloads.output_text())
+    self.assertIn(settings.RANDOM_VAR_GENERATOR, tfb_payloads.output_text())
+
+class AnEvaluatedCommandsOutputIsReadAsItWasPrinted(unittest.TestCase):
+  """
+  The payload prints its markers with 'echo', so each of them ends with a line break and what sits
+  between the two pairs is one of those breaks followed by the output. Read as the text between two
+  breaks instead, an output that did not end with one of its own was answered with nothing at all.
+  """
+  TAG = "QQQQQQ"
+
+  def _page(self, output):
+    # Exactly what 'print(`echo TAG`.`echo TAG`.`cmd`.`echo TAG`.`echo TAG`)' leaves on the page.
+    marker = self.TAG + "\n" + self.TAG + "\n"
+    return "Hello, " + marker + output + marker + "!"
+
+  def _read(self, output):
+    from src.core.controller import injector
+    page = self._page(output)
+    class served(object):
+      def read(self, *args, **kwargs):
+        return page.encode(settings.DEFAULT_CODEC)
+      def info(self):
+        return {}
+      def getcode(self):
+        return 200
+    return injector.injection_results(served(), self.TAG, "cmd",
+                                      settings.INJECTION_TECHNIQUE.DYNAMIC_CODE, "url", None, 1)
+
+  def test_an_output_that_ends_with_a_break_is_answered(self):
+    self.assertEqual("AB", self._read("AB\n"))
+
+  def test_an_output_that_ends_without_one_is_answered_too(self):
+    # 'printf', 'echo -n', or any program that does not end on a break - reported as a command that
+    # returned no output, for want of a second break to match.
+    self.assertEqual("AB", self._read("AB"))
+
+  def test_the_whitespace_the_output_begins_and_ends_with_is_kept(self):
+    self.assertEqual("\t AB \t", self._read("\t AB \t\n"))
+    self.assertEqual("\t AB \t", self._read("\t AB \t"))
+
+  def test_an_output_that_is_only_whitespace_is_not_read_as_an_empty_one(self):
+    self.assertEqual("   ", self._read("   "))
+
+  def test_the_line_breaks_inside_it_stay_where_they_are(self):
+    self.assertEqual("a\nb", self._read("a\nb\n"))
+
+  def test_a_last_line_with_no_break_after_it_is_still_a_line(self):
+    self.assertEqual("a\nb", self._read("a\nb"))
+
+  def test_the_breaks_it_ends_with_come_off_the_way_a_substitution_drops_them(self):
+    self.assertEqual("a\nb", self._read("a\nb\n\n\n"))
+
+  def test_a_carriage_return_is_not_read_as_a_newline(self):
+    # A byte the command printed, marked as the same thing a newline is marked as: 'a\rb' came
+    # back as 'a\nb'.
+    self.assertEqual("a\rb", self._read("a\rb\n"))
+    self.assertEqual("a\rb", self._read("a\rb"))
+
+  def test_a_windows_line_break_is_one_break_rather_than_two(self):
+    self.assertEqual("a\r\nb", self._read("a\r\nb\n"))
+
+  def test_a_carriage_return_at_the_end_ends_no_line_so_it_stays(self):
+    self.assertEqual("ab\r", self._read("ab\r"))
+
+  def test_a_page_whose_own_breaks_are_windows_ones_is_still_read(self):
+    from src.core.controller import injector
+    marker = self.TAG + "\r\n" + self.TAG + "\r\n"
+    page = "Hello, " + marker + "A\tB" + marker + "!"
+    class served(object):
+      def read(self, *args, **kwargs):
+        return page.encode(settings.DEFAULT_CODEC)
+      def info(self):
+        return {}
+      def getcode(self):
+        return 200
+    self.assertEqual("A\tB", injector.injection_results(served(), self.TAG, "cmd",
+                     settings.INJECTION_TECHNIQUE.DYNAMIC_CODE, "url", None, 1))
+
+  def test_a_page_the_markers_are_not_on_answers_nothing(self):
+    from src.core.controller import injector
+    class served(object):
+      def read(self, *args, **kwargs):
+        return b"Hello, commix!"
+      def info(self):
+        return {}
+      def getcode(self):
+        return 200
+    self.assertEqual("", injector.injection_results(served(), self.TAG, "cmd",
+                     settings.INJECTION_TECHNIQUE.DYNAMIC_CODE, "url", None, 1))
 
 class TheOutputsOwnLineBreaksComeBackWithIt(unittest.TestCase):
   """
@@ -1211,40 +1329,37 @@ class ArithmeticIsOpenedOnce(unittest.TestCase):
 
 class BytesAreReadByByte(unittest.TestCase):
   """
-  A byte read off a file is read by byte position, not by character. 'cut -c' counts characters,
-  and in a UTF-8 locale it errors outright on a byte that is not valid UTF-8 - returning nothing
-  for every position at or after the first non-ASCII byte, which is exactly the output worth
-  reading. 'cut -b' counts bytes, and reads it in any locale.
+  A byte read off the created file is read by byte position, not by character, and not by line.
+
+  'cut -b' counted bytes but answered once per line of the file, so on an output of more than one
+  it gave another line's byte and nothing at all for a line shorter than the position asked for -
+  which is why the file used to be joined into one line before any of it was read. Indexed by awk
+  instead, with the locale pinned to the byte one, a newline is a position like any other and a
+  byte that is not valid UTF-8 is still the byte that was written.
   """
-  def _tfb_readers(self):
-    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    path = os.path.join(root, "src", "core", "techniques", "tempfile_based", "tfb_payloads.py")
-    with open(path) as handle:
-      return [line for line in handle if "cut -" in line and "OUTPUT_TEXTFILE" in line]
+  def _reader(self):
+    from src.core.techniques.tempfile_based import tfb_payloads
+    settings.TARGET_OS = settings.OS.UNIX
+    return tfb_payloads.oracle_get_char(";", "/tmp/o.txt", 6, 65)
 
-  def test_the_file_is_indexed_by_byte(self):
-    readers = self._tfb_readers()
-    self.assertTrue(readers, "no byte reader found to check")
-    for line in readers:
-      self.assertIn("cut -b", line, "a file byte is read with 'cut -c': " + line.strip()[:70])
-      self.assertNotIn("cut -c", line)
+  def test_the_file_is_indexed_by_byte_and_not_by_line(self):
+    reader = self._reader()
+    self.assertIn("substr(ARGV[1],6,1)", reader)
+    self.assertIn(settings.BYTE_LOCALE, reader)
+    for per_line in ("cut -b", "cut -c"):
+      self.assertNotIn(per_line, reader, "a file byte is read a line at a time: " + per_line)
 
-  @unittest.skipUnless(os.path.exists("/usr/bin/cut") or os.path.exists("/bin/cut"), "needs cut")
-  def test_cut_b_reads_a_high_byte_a_utf8_locale_rejects(self):
-    import subprocess, tempfile
-    with tempfile.NamedTemporaryFile(delete=False) as handle:
-      handle.write(b"x\xc3y")
-      name = handle.name
-    try:
-      environment = {"LC_ALL": "en_US.UTF-8", "PATH": os.environ.get("PATH", "/bin:/usr/bin")}
-      for position, expected in ((1, "120"), (2, "195"), (3, "121")):
-        got = subprocess.run("cut -b%d %s | LC_ALL=C od -An -tu1" % (position, name),
-                             shell=True, env=environment, stdout=subprocess.PIPE,
-                             stderr=subprocess.DEVNULL).stdout.decode().split()
-        # The byte at the position, bar the newline 'cut' puts after it.
-        self.assertEqual(expected, got[0] if got else "none", "byte at position " + str(position))
-    finally:
-      os.unlink(name)
+  @unittest.skipUnless(os.path.exists("/usr/bin/awk") or os.path.exists("/bin/awk"), "needs awk")
+  def test_the_reading_answers_a_high_byte_a_utf8_locale_rejects(self):
+    import subprocess
+    environment = {"LC_ALL": "en_US.UTF-8", "PATH": os.environ.get("PATH", "/bin:/usr/bin")}
+    for position, expected in ((1, "120"), (2, "195"), (3, "121")):
+      command = ("LC_ALL=C awk 'BEGIN{print((substr(ARGV[1]," + str(position) +
+                 ",1))(\"X\"))}' \"$(printf 'x\\303y')\" | LC_ALL=C od -An -tu1")
+      got = subprocess.run(command, shell=True, env=environment, stdout=subprocess.PIPE,
+                           stderr=subprocess.DEVNULL).stdout.decode().split()
+      # The byte at the position, before the letter concatenated onto it to keep a newline readable.
+      self.assertEqual(expected, got[0] if got else "none", "byte at position " + str(position))
 
 # eof
 

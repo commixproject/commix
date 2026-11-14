@@ -94,8 +94,8 @@ def print_statement(separator, commands, chain=None):
   """
   terminator = TERMINATOR if separator else ""
   if separator == "":
-    return "print(" + ".".join("`" + command + "`" for command in commands) + ")" + terminator
-  return "print(`" + (chain or separator).join(commands) + "`)" + terminator
+    return "print(" + ".".join(run(command) for command in commands) + ")" + terminator
+  return "print(" + run((chain or separator).join(commands)) + ")" + terminator
 
 """
 The expressions every payload is built out of, spelled the way this language spells them.
@@ -110,9 +110,24 @@ again rather than by touching a payload.
 def execution_prefix(function):
   return "${" + function + "("
 
-# Run a command and yield its output.
+# A string literal holding the given text. A single-quoted PHP string is read almost verbatim -
+# no variable in one is interpolated, and no escape but these two is recognised - so a '$' or a
+# backtick in the command is the character it is rather than something the interpreter acts on.
+def _literal(text):
+  return "'" + text.replace("\\", "\\\\").replace("'", "\\'") + "'"
+
+"""
+Run a command and yield its output.
+
+Handed over as a literal rather than written into the string the backtick operator reads. Written
+in, that string interpolated what it found: a command carrying a '$' lost the name behind it to a
+variable that was never set - 'printf a$c' ran as 'printf a' and the run reported the shorter
+answer as the command's own - and one carrying a backtick closed the string early, so nothing ran
+at all. The operator is this function under another name, so a target that refuses one refuses both
+and nothing is given up by writing it out.
+"""
 def run(cmd):
-  return "`" + cmd + "`"
+  return "shell_exec(" + _literal(cmd) + ")"
 
 # Read a file and yield its contents.
 def read_file(path):

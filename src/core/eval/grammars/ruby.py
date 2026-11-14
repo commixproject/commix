@@ -105,8 +105,13 @@ again rather than by touching a payload.
 
 # Run a command and yield its output, through the backtick operator - which reads a command the
 # same way a double-quoted string reads its own text, so nothing here needs a separate literal form.
+# A string literal holding the given text. A single-quoted Ruby string interpolates nothing and
+# recognises no escape but these two, so a '#{' or a backtick in the command stays what it is.
+def _literal(text):
+  return "'" + text.replace("\\", "\\\\").replace("'", "\\'") + "'"
+
 def run(cmd):
-  return "`" + cmd + "`"
+  return "IO.popen(" + _literal(cmd) + ").read"
 
 # Read a file and yield its contents.
 def read_file(path):

@@ -124,6 +124,19 @@ the newlines it ends with, so a byte that is itself a newline would otherwise co
 The parentheses stand in for the space awk's own concatenation would need, which the whitespace
 substitution would eat inside the quoted program.
 """
+def _ordinal_arg_byte(word, num_of_chars):
+  """
+  The byte itself, for a reading that opens the arithmetic around it rather than joining one
+  already open - the tempfile-based technique asks for its own bytes this way.
+
+  >>> "|" in _ordinal_arg_byte("WORD", 3)
+  False
+  >>> "substr(ARGV[1],3,1)" in _ordinal_arg_byte("WORD", 3)
+  True
+  """
+  return (settings.CMD_SUB_PREFIX + "LC_ALL=C awk 'BEGIN{print((substr(ARGV[1]," + str(num_of_chars) +
+          ",1))(\"X\"))}' \"" + word + "\"" + settings.CMD_SUB_SUFFIX)
+
 def _ordinal_arg_expr(word, num_of_chars):
   """
   >>> "|" in _ordinal_arg_expr("WORD", 3)
@@ -131,9 +144,7 @@ def _ordinal_arg_expr(word, num_of_chars):
   >>> "substr(ARGV[1],3,1)" in _ordinal_arg_expr("WORD", 3)
   True
   """
-  byte = (settings.CMD_SUB_PREFIX + "LC_ALL=C awk 'BEGIN{print((substr(ARGV[1]," + str(num_of_chars) +
-          ",1))(\"X\"))}' \"" + word + "\"" + settings.CMD_SUB_SUFFIX)
-  return checks.byte_ordinal_term(byte)
+  return checks.byte_ordinal_term(_ordinal_arg_byte(word, num_of_chars))
 
 """
 The same condition written as arithmetic, or nothing where it is not one 'test' comparison of

