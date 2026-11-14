@@ -500,7 +500,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "342"
+REVISION = "343"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -2496,6 +2496,13 @@ NARROWING_MAX_SET_SIZE = 64
 
 # Number of most-frequent characters probed directly before bisecting.
 FREQUENCY_PROBE_TOP_K = 3
+
+# How often a byte has to repeat before the set already seen is worth halving instead of the pool.
+# Asking about that set and being wrong costs the questions it took plus the pool's own halving, so
+# it only pays where the output really does say the same things over again - an output of mostly
+# distinct bytes answered more slowly for being asked the clever way.
+NARROWING_MIN_REPEAT_RATIO = 2
+
 
 # Prevent auto-shrink from undoing a delay increase after validation.
 ADJUST_TIME_DELAY_DISABLED = False

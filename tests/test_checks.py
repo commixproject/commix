@@ -23,6 +23,41 @@ from src.utils import settings
 from src.core.controller import checks
 from src.core.parse import cmdline as menu
 
+class WhatTheOutputHasAlreadyTurnedOutToBeMadeOf(unittest.TestCase):
+  """
+  A byte bisected out of the whole pool every time pays no attention to the ones already read, so
+  the last character of an output costs what the first one did. Halving the set seen so far instead
+  is a question or two rather than seven - but it is paid for at every position and collected only
+  where a byte repeats, so an output of mostly distinct bytes is answered more slowly for being
+  asked the clever way, and is left alone.
+  """
+  def _seen(self, text):
+    seen = checks.new_observed_characters()
+    for char in text:
+      checks.record_observed_character(seen, ord(char))
+    return seen
+
+  def test_nothing_is_generalised_from_too_few_bytes(self):
+    self.assertIsNone(checks.narrowed_characters(self._seen("ab")))
+
+  def test_an_output_whose_bytes_repeat_is_worth_halving(self):
+    narrowed = checks.narrowed_characters(self._seen("aaaabbbb"))
+    self.assertEqual([ord("a"), ord("b")], narrowed)
+
+  def test_an_output_of_mostly_distinct_bytes_is_left_to_the_pool(self):
+    # '/usr/local/bin' - eleven distinct bytes in fourteen, which the halving below cannot beat.
+    self.assertIsNone(checks.narrowed_characters(self._seen("/usr/local/bin")))
+
+  def test_a_set_wider_than_the_pool_is_worth_nothing(self):
+    wide = "".join(chr(code) for code in range(32, 32 + settings.NARROWING_MAX_SET_SIZE + 1))
+    self.assertIsNone(checks.narrowed_characters(self._seen(wide * settings.NARROWING_MIN_REPEAT_RATIO)))
+
+  def test_a_position_that_resolved_to_nothing_is_not_a_byte(self):
+    seen = self._seen("aaaabbbb")
+    before = checks.narrowed_characters(seen)
+    checks.record_observed_character(seen, None)
+    self.assertEqual(before, checks.narrowed_characters(seen))
+
 class CurrentBoundary(unittest.TestCase):
   """
   What a rewrite reads back about the boundary the parameter at hand was proved on.

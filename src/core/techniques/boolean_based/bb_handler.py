@@ -149,11 +149,30 @@ handful of characters sits in a far shorter range than a printable one, and ever
 range is a request not sent. The same pool the time-related techniques read, so an answer given
 once holds whichever of them ends up asking.
 """
-def _byte_at(channel, cmd, position, payloads=None):
+def _byte_at(channel, cmd, position, payloads=None, seen=None):
   payloads = payloads or checks.boolean_based_payloads()
   question = lambda candidate: payloads.get_char(channel.separator, cmd, position, candidate, operator="-le")
+  exact = lambda candidate: payloads.get_char(channel.separator, cmd, position, candidate, operator="-eq")
   char_pool = sorted(set(checks.generate_char_pool(position)))
   low, high = char_pool[0], char_pool[-1]
+
+  """
+  What the output has already turned out to be made of, asked about before the pool is halved at
+  all - the delay-based technique reads its own bytes this way, and this one used to pay the full
+  halving for every position however many times the same byte had already come back.
+
+  The set itself is halved, which is a question or two where the pool would have been seven, and the
+  answer is the equality question's own - so a guess that was wrong costs those questions and
+  nothing else: the halving below still runs, exactly as it did before. Which is also why it is
+  asked only of an output whose bytes actually repeat: paid for at every position and collected at
+  few, it is slower than the halving it was meant to save.
+  """
+  if seen is not None:
+    narrowed = checks.narrowed_characters(seen)
+    if narrowed:
+      index = _bisect(channel, lambda position_in_set: question(narrowed[position_in_set]), 0, len(narrowed) - 1)
+      if index is not None and _ask(channel, exact(narrowed[index])):
+        return narrowed[index]
   # A pool with nothing missing between its ends is its own range, so it is halved directly rather
   # than by index. The answer is still asked for by name: what the halving cannot tell apart is a
   # byte inside the pool from one above it, and that is true of a pool with no gaps as much as any.
@@ -277,8 +296,13 @@ def retrieve(channel, cmd, length=None, payloads=None):
       else:
         settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_info_msg(base + ": " + _display()))
 
+  # One memory for the whole output, so a byte read at one position makes the next one cheaper.
+  seen = checks.new_observed_characters()
+
   def _resolve(position):
-    resolved[position] = _byte_at(channel, cmd, position, payloads=payloads)
+    ascii_char = _byte_at(channel, cmd, position, payloads=payloads, seen=seen)
+    resolved[position] = ascii_char
+    checks.record_observed_character(seen, ascii_char)
     _note()
 
   if workers == 1:

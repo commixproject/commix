@@ -111,6 +111,11 @@ def _literal(text):
   return "'" + text.replace("\\", "\\\\").replace("'", "\\'") + "'"
 
 def run(cmd):
+  # As in the PHP grammar beside it, and for the same reason: a script rewriting this payload is
+  # written around the operator below, so where one is in effect the command goes in that way.
+  from src.utils import settings
+  if any(settings.TAMPER_SCRIPTS.values()):
+    return "`" + cmd + "`"
   return "IO.popen(" + _literal(cmd) + ").read"
 
 # Read a file and yield its contents.

@@ -272,6 +272,13 @@ class TestDnsOobIntegration(unittest.TestCase):
     def setUp(self):
         settings.TARGET_OS = settings.OS.UNIX
         settings.INCOMPLETE_OUTPUT = False
+        # As in 'test_oob_dns': the eval wrapper's shape is the no-tamper one, and a tamper module
+        # imported earlier in the run would otherwise choose it for us.
+        self._tampers = dict(settings.TAMPER_SCRIPTS)
+        for name in settings.TAMPER_SCRIPTS:
+            settings.TAMPER_SCRIPTS[name] = False
+        self._grammar = settings.EVAL_GRAMMAR
+        settings.set_eval_grammar("php")
         self._stub = DnsStub()
         self._stub.start()
         self._tmpdir = tempfile.mkdtemp(prefix="commix_oob_test_")
@@ -281,6 +288,8 @@ class TestDnsOobIntegration(unittest.TestCase):
         self._stub.stop()
         shutil.rmtree(self._tmpdir, ignore_errors=True)
         settings.TARGET_OS = settings.OS.UNIX
+        settings.TAMPER_SCRIPTS.update(self._tampers)
+        settings.EVAL_GRAMMAR = self._grammar
 
     def _run(self, cmd, timeout=12):
         env = dict(os.environ)

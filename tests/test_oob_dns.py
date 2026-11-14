@@ -559,9 +559,21 @@ class TestOobEval(unittest.TestCase):
     def setUp(self):
         settings.TARGET_OS = settings.OS.UNIX
         settings.OOB_EVAL = False
+        # The shape asserted below is the one built where nothing is rewriting the payload. Each
+        # tamper module flips its own flag as it is imported, so a test that imported one earlier
+        # in the run would otherwise decide what this one is handed.
+        self._tampers = dict(settings.TAMPER_SCRIPTS)
+        for name in settings.TAMPER_SCRIPTS:
+            settings.TAMPER_SCRIPTS[name] = False
+        # And the language too: the shape below is PHP's, and a test that named another grammar
+        # earlier in the run leaves that one in place for whatever runs next.
+        self._grammar = settings.EVAL_GRAMMAR
+        settings.set_eval_grammar("php")
 
     def tearDown(self):
         settings.OOB_EVAL = False
+        settings.TAMPER_SCRIPTS.update(self._tampers)
+        settings.EVAL_GRAMMAR = self._grammar
 
     # --- exfiltrate_eval structure -----------------------------------------
 

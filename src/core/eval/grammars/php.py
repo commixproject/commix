@@ -127,6 +127,15 @@ at all. The operator is this function under another name, so a target that refus
 and nothing is given up by writing it out.
 """
 def run(cmd):
+  # Asked for only where the payload still reaches the target written the way it was built. Every
+  # script rewriting a payload of this grammar's is written around the operator below - the one
+  # answering a sink that rejects a quote of either kind could not carry this call's own quotes at
+  # all - so where any is in effect the command goes in the way it always did, read by the
+  # interpreter on its way to the shell. A '$' or a backtick of its own is lost there, which is the
+  # cost of reaching a sink that would otherwise refuse the payload outright.
+  from src.utils import settings
+  if any(settings.TAMPER_SCRIPTS.values()):
+    return "`" + cmd + "`"
   return "shell_exec(" + _literal(cmd) + ")"
 
 # Read a file and yield its contents.

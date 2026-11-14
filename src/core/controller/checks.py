@@ -25,6 +25,7 @@ import shlex
 import socket
 import random
 import string
+import threading
 import base64
 import importlib
 import gzip
@@ -5485,6 +5486,49 @@ def check_similarities(all_params):
 
   all_params = [str(x) for x in all_params if x is not None]
   return all_params
+
+"""
+What this run has already seen the output made of.
+
+A command's output is not a random string. The same bytes come back again and again - the slashes
+of a path, the digits of an id, the letters of a name - and a byte bisected out of the whole pool
+every time pays no attention to any of that: the last character of an output costs what the first
+one did. Kept here, the next byte is asked about against the ones before it, and the pool is only
+fallen back on where they have nothing to say.
+
+Held per extraction rather than for the run, so it is handed to whatever is reading rather than
+kept in 'settings' - two outputs read one after another are not made of the same bytes.
+"""
+def new_observed_characters():
+  return {"frequency": {}, "count": 0, "lock": threading.Lock()}
+
+"""
+One more byte of the output, now that it is known.
+"""
+def record_observed_character(seen, ordinal):
+  if ordinal is None:
+    return
+  with seen["lock"]:
+    seen["frequency"][ordinal] = seen["frequency"].get(ordinal, 0) + 1
+    seen["count"] = seen["count"] + 1
+
+"""
+The bytes seen so far, where halving them says more than halving the pool - which it does once
+enough of them have answered to be worth generalising from, while the set is still the smaller of
+the two, and while the output is repeating itself enough for the guess to be worth its cost.
+
+Nothing read from here is believed on its own: every technique asking confirms what it finds with
+an equality question of its own, so a guess that was wrong costs that question and no correctness.
+
+The lock is for '--threads', which has several positions being read at once.
+"""
+def narrowed_characters(seen):
+  with seen["lock"]:
+    if (seen["count"] < settings.NARROWING_MIN_OBSERVED
+        or len(seen["frequency"]) > settings.NARROWING_MAX_SET_SIZE
+        or seen["count"] < len(seen["frequency"]) * settings.NARROWING_MIN_REPEAT_RATIO):
+      return None
+    return sorted(seen["frequency"])
 
 """
 Generate a character pool for time‑related command injection techniques
