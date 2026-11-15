@@ -29,6 +29,33 @@ from src.utils import settings
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CMDLINE = os.path.join(ROOT, "src", "core", "parse", "cmdline.py")
 
+class ACommandACmdExeCannotBeHandedSaysSo(unittest.TestCase):
+  """
+  The command is written into a 'for /f' clause, and a double quote of its own closes that clause
+  rather than reaching the shell - so nothing runs. Measured against a cmd.exe: doubling the quote,
+  escaping it with a caret and swapping the clause for the backquoted form each failed to carry it.
+  An answer that was never going to arrive is worth telling apart from a command that printed
+  nothing.
+  """
+  def setUp(self):
+    self._os = settings.TARGET_OS
+
+  def tearDown(self):
+    settings.TARGET_OS = self._os
+
+  def test_a_windows_target_is_told_why_the_command_did_not_run(self):
+    settings.TARGET_OS = settings.OS.WINDOWS
+    said = common.invalid_cmd_output('echo a"b')
+    self.assertIn("cannot be carried to a cmd.exe", said)
+
+  def test_a_command_without_one_is_left_unexplained(self):
+    settings.TARGET_OS = settings.OS.WINDOWS
+    self.assertNotIn("cannot be carried", common.invalid_cmd_output("echo ab"))
+
+  def test_nothing_is_said_about_a_shell_that_carries_it_perfectly_well(self):
+    settings.TARGET_OS = settings.OS.UNIX
+    self.assertNotIn("cannot be carried", common.invalid_cmd_output('echo a"b'))
+
 class SanitisedReports(unittest.TestCase):
   """
   An unhandled exception offers to open a GitHub issue, and what it carries is read by strangers.

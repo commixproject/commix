@@ -1828,8 +1828,19 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
         pass
       if settings.TARGET_OS == settings.OS.WINDOWS:
         if menu.options.interpreter:
-          shell = [right_space.rstrip() for right_space in shell]
-          shell = [left_space.lstrip() for left_space in shell]
+          """
+          The one space this payload's own 'write-host' puts either side of the output, and only
+          that - it is handed the markers and the command as separate arguments, and joins them
+          with a single space each.
+
+          Stripped of whitespace instead, a command whose output was indented, or padded, or was
+          whitespace altogether came back without the part of it that said so: an output of a tab,
+          three spaces, 'X' and seven more tabs arrived as 'X', the same way the file-based
+          technique's own reading used to lose it.
+          """
+          padding = settings.SINGLE_WHITESPACE
+          shell = [padded[1:-1] if padded[:1] == padding and padded[-1:] == padding else padded
+                   for padded in shell]
           if "<<<<" in shell[0]:
             false_result = True
         else:

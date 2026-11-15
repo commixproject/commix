@@ -695,7 +695,11 @@ def request_failed(err_msg):
       handled = _answered_with_status(code, err_msg)
       if handled is not None:
         return handled
-    if not checks.ignored_http_error_code(code) and int(code) not in settings.WARNED_HTTP_ERROR_CODES:
+    # Not where the request went looking for the code it got: the read that checks whether the
+    # output file is still served answers "deleted" with a '404', and calling that interference
+    # warned the operator about the one thing that had gone right.
+    if (not checks.ignored_http_error_code(code) and not settings.in_side_request("file_check")
+        and int(code) not in settings.WARNED_HTTP_ERROR_CODES):
       warn_msg = "The web server responded with an HTTP error code '" + checks.http_error_code_label(code, err_msg)
       warn_msg += "' which could interfere with the results of the tests."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))

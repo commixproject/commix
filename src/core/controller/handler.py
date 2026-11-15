@@ -249,6 +249,10 @@ def delete_previous_shell(separator, TAG, prefix, suffix, whitespace, http_reque
       warn_msg += "does not appear to have been deleted. Remove it by hand."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       return
+    if settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "The file ('" + OUTPUT_TEXTFILE + "') is no longer served by the target, so the "
+      debug_msg += "delete took."
+      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
     session_handler.mark_file_deleted(url, technique, vuln_parameter, http_request_method)
     checks.forget_leftover_file(OUTPUT_TEXTFILE)
 

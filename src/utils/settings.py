@@ -500,7 +500,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "343"
+REVISION = "344"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -1073,6 +1073,10 @@ SUFFIXES_LVL3 = SUFFIXES_LVL2 + [" #"]
 
 # A quote closes only its own kind.
 QUOTES = ("'", "\"")
+
+# The one of them a cmd.exe target cannot be handed: it closes the 'for /f' clause the command is
+# written into rather than reaching the shell.
+DOUBLE_QUOTE = QUOTES[1]
 
 # Boundary lists already put in the order a shape of value asks for, kept rather than sorted again.
 BOUNDARY_ORDER_CACHE = {}
@@ -2684,7 +2688,7 @@ request of its own. Read off one flag shared by all of them, that request is tak
 someone else's errand - left out of the tally its own retry check is read against, and left out of
 the pacing that '--safe-freq' and '--proxy-freq' go by.
 """
-SIDE_REQUEST_KINDS = ("second_order", "safe_request", "csrf_token")
+SIDE_REQUEST_KINDS = ("second_order", "safe_request", "csrf_token", "file_check")
 SIDE_REQUESTS = _threading.local()
 
 # Whether this thread is in the middle of one of them - of the kind named, or of any kind at all.

@@ -7270,6 +7270,12 @@ def output_file_still_served():
   if not settings.DEFINED_WEBROOT:
     return False
   from src.core.requests import requests
+  """
+  Asked as a request of its own, because what it is looking for is the answer every other request
+  is warned about: a file that has been deleted is not found, and a '404' here is the delete having
+  taken rather than the target interfering with anything.
+  """
+  settings.set_side_request("file_check", True)
   try:
     request = _urllib.request.Request(settings.DEFINED_WEBROOT)
     headers.do_check(request)
@@ -7277,6 +7283,8 @@ def output_file_still_served():
     return bool(response) and not isinstance(response, bool)
   except Exception:
     return False
+  finally:
+    settings.set_side_request("file_check", False)
 
 """
 Name the file this technique leaves in the target's document root, and the URL it answers on - it is

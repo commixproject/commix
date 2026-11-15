@@ -22,6 +22,7 @@ import unittest
 
 from tests._testutils import SEPARATORS, separators_in, stage as stage_exploitation
 from src.utils import settings
+from src.core.parse import cmdline as menu
 
 TECHNIQUES = ("results_based.rb_payloads", "time_based.tb_payloads", "file_based.fb_payloads",
               "tempfile_based.tfb_payloads", "boolean_based.bb_payloads")
@@ -338,6 +339,50 @@ class TheCreatedFileIsReadAsTheCommandWroteIt(unittest.TestCase):
     # trailing character removed here is one the command printed.
     self.assertNotIn("%[[:space:]]", tfb_payloads.output_text())
     self.assertIn(settings.RANDOM_VAR_GENERATOR, tfb_payloads.output_text())
+
+class AWindowsInterpretersOutputKeepsItsOwnEdges(unittest.TestCase):
+  """
+  The payload hands 'write-host' the markers and the command as separate arguments, and it joins
+  them with a single space each - so one space either side of the output is the payload's own and
+  everything else is the command's. Stripped of whitespace instead, an output that was indented, or
+  padded, or was whitespace altogether came back without the part of it that said so.
+  """
+  TAG = "WWWWWW"
+
+  def setUp(self):
+    self._state = (settings.TARGET_OS, menu.options.interpreter)
+    settings.TARGET_OS = settings.OS.WINDOWS
+    menu.options.interpreter = "python"
+
+  def tearDown(self):
+    settings.TARGET_OS, menu.options.interpreter = self._state
+
+  def _read(self, output):
+    from src.core.controller import injector
+    # What 'write-host TAGTAG $(cmd /c ...) TAGTAG' leaves on the page.
+    page = "junk" + self.TAG + self.TAG + " " + output + " " + self.TAG + self.TAG + "junk"
+    class served(object):
+      def read(self, *args, **kwargs):
+        return page.encode(settings.DEFAULT_CODEC)
+      def info(self):
+        return {}
+      def getcode(self):
+        return 200
+    found = injector.injection_results(served(), self.TAG, "cmd",
+                                       settings.INJECTION_TECHNIQUE.RESULTS_BASED, "url", None, 1)
+    return "".join(str(part) for part in found)
+
+  def test_an_ordinary_output_loses_the_padding_and_nothing_else(self):
+    self.assertEqual("X", self._read("X"))
+
+  def test_the_whitespace_the_output_begins_and_ends_with_is_kept(self):
+    self.assertEqual("\t   \t\t\tX\t\t\t\t\t\t\t", self._read("\t   \t\t\tX\t\t\t\t\t\t\t"))
+
+  def test_an_output_that_is_only_whitespace_is_not_read_as_an_empty_one(self):
+    self.assertEqual("   ", self._read("   "))
+
+  def test_an_output_padded_with_spaces_keeps_them(self):
+    self.assertEqual(" X ", self._read(" X "))
 
 class AnEvaluatedCommandsOutputIsReadAsItWasPrinted(unittest.TestCase):
   """

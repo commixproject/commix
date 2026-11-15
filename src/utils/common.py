@@ -33,6 +33,19 @@ Invalid cmd output
 """
 def invalid_cmd_output(cmd):
   err_msg = "Execution of the '" + cmd + "' command did not return any output."
+  """
+  And why, where the command itself is the reason.
+
+  A cmd.exe target is read through a 'for /f' loop, whose own clause is where the command is
+  written - and a double quote of the command's closes that clause rather than reaching the shell,
+  so nothing runs and nothing comes back. Doubling it, escaping it with a caret and swapping the
+  clause for the backquoted form were each tried against a cmd.exe and none of them carries it, so
+  what is left is to say so: an answer that was never going to arrive is worth telling apart from a
+  command that genuinely printed nothing.
+  """
+  if settings.TARGET_OS == settings.OS.WINDOWS and settings.DOUBLE_QUOTE in cmd:
+    err_msg += " A '" + settings.DOUBLE_QUOTE + "' in a command cannot be carried to a cmd.exe "
+    err_msg += "target, which is why this one did not run. Write it without one."
   return err_msg
 
 """

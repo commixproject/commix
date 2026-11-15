@@ -184,3 +184,42 @@ class WhatARedirectSaidIsTrueOfItsOwnRequest(unittest.TestCase):
   def test_a_request_that_was_never_redirected_says_so(self):
     headers.apply_request_policy()
     self.assertEqual("", settings.REDIRECT_CODE)
+
+
+class ACodeTheRequestWentLookingForIsNotInterference(unittest.TestCase):
+  """
+  The read that checks whether the output file is still served answers "deleted" with a '404', so
+  warning about it told the operator that the one thing which had gone right might be interfering
+  with the tests.
+  """
+  def setUp(self):
+    self._state = (settings.TOTAL_OF_REQUESTS, set(settings.WARNED_HTTP_ERROR_CODES))
+    # Past the first request, which is where this warning used to be confined.
+    settings.TOTAL_OF_REQUESTS = 42
+    settings.WARNED_HTTP_ERROR_CODES = set()
+    self.said = []
+    self._print = settings.print_data_to_stdout
+    settings.print_data_to_stdout = lambda text: self.said.append(str(text))
+
+  def tearDown(self):
+    settings.print_data_to_stdout = self._print
+    settings.TOTAL_OF_REQUESTS, settings.WARNED_HTTP_ERROR_CODES = self._state
+    settings.set_side_request("file_check", False)
+
+  def _not_found(self):
+    return _urllib.error.HTTPError("http://t/o.txt", 404, "Not Found", {}, None)
+
+  def test_a_404_on_an_ordinary_request_is_still_worth_saying(self):
+    requests.request_failed(self._not_found())
+    self.assertTrue([_ for _ in self.said if "could interfere" in _])
+
+  def test_the_file_check_is_not_warned_about_for_finding_what_it_asked(self):
+    settings.set_side_request("file_check", True)
+    requests.request_failed(self._not_found())
+    self.assertFalse([_ for _ in self.said if "could interfere" in _])
+
+  def test_the_check_puts_the_marker_back_when_it_is_done(self):
+    from src.core.controller import checks
+    settings.DEFINED_WEBROOT = ""
+    checks.output_file_still_served()
+    self.assertFalse(settings.in_side_request("file_check"))
