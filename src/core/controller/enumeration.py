@@ -101,17 +101,10 @@ def check_current_user_privs(separator, maxlen, TAG, cmd, prefix, suffix, whites
     cmd = settings.IS_ROOT
     if checks.using_backticks():
       cmd = checks.remove_command_substitution(cmd)
-  """
-  Undo the padding the Windows interpreter payload writes around its output, and only that.
-
-  Nothing else pads, and taking a character off either end regardless turned a user id of '0' into
-  an empty string - root, reported as having no elevated privileges.
-  """
-  def trim_marker(shell):
-    if shell.startswith(settings.SINGLE_WHITESPACE) and shell.endswith(settings.SINGLE_WHITESPACE):
-      return shell.strip()
-    return shell
-  execute_cmd = execution.make_execute_cmd(injector, separator, maxlen, TAG, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, interpreter, filename, url_time_response, technique, OUTPUT_TEXTFILE, postprocess=trim_marker)
+  # The padding the Windows interpreter payload writes is taken off where that payload's own shape
+  # is known, which is the reading itself - undone a second time here, the one space it leaves was
+  # a space of the command's own, and an answer of ' X ' arrived as 'X'.
+  execute_cmd = execution.make_execute_cmd(injector, separator, maxlen, TAG, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, interpreter, filename, url_time_response, technique, OUTPUT_TEXTFILE)
   shell, fresh = execute_cmd(cmd)
   checks.print_current_user_privs(shell, filename, settings.TIME_RELATED_ATTACK and fresh)
 

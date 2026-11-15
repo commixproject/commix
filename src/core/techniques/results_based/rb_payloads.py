@@ -141,7 +141,7 @@ def cmd_execution(separator, TAG, cmd):
     else:
       payload = (chain +
                 "for /f \"tokens=* eol=\" %i in ('cmd /c \"" +
-                cmd +
+                checks.caret_escaped(cmd) +
                 "\"') do @" + settings.CMD_NUL + " set /p=" + TAG + TAG + "%i" + TAG + TAG
                 )
   else:

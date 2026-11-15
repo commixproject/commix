@@ -500,7 +500,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "344"
+REVISION = "345"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -1298,6 +1298,9 @@ FILE_READ_B64 = "base64 <"
 WIN_FILE_READ_B64 = "powershell.exe -c \"[Convert]::ToBase64String([IO.File]::ReadAllBytes('"
 FILE_WRITE_OPERATOR = " >"
 FILE_APPEND_OPERATOR = " >>"
+# What cmd.exe reads as its own escape character, and drops.
+WIN_ESCAPE = "^"
+
 WIN_FILE_WRITE_OPERATOR = "powershell.exe Set-Content "
 WIN_FILE_READ = "powershell.exe get-Content "
 

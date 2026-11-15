@@ -22,6 +22,7 @@ import unittest
 
 from tests._testutils import SEPARATORS, separators_in, stage as stage_exploitation
 from src.utils import settings
+from src.core.controller import checks
 from src.core.parse import cmdline as menu
 
 TECHNIQUES = ("results_based.rb_payloads", "time_based.tb_payloads", "file_based.fb_payloads",
@@ -339,6 +340,67 @@ class TheCreatedFileIsReadAsTheCommandWroteIt(unittest.TestCase):
     # trailing character removed here is one the command printed.
     self.assertNotIn("%[[:space:]]", tfb_payloads.output_text())
     self.assertIn(settings.RANDOM_VAR_GENERATOR, tfb_payloads.output_text())
+
+class ACaretReachesACmdExeAsTheCharacterItIs(unittest.TestCase):
+  """
+  cmd.exe takes a '^' for its own escape and drops it, so a command carrying one ran without it and
+  the shorter answer was reported as the command's own - 'echo a^b' came back as 'ab'. Measured
+  against a cmd.exe: one doubling is exactly what a single pass of its unescaping takes off.
+  """
+  def setUp(self):
+    self._tampers = dict(settings.TAMPER_SCRIPTS)
+    for name in settings.TAMPER_SCRIPTS:
+      settings.TAMPER_SCRIPTS[name] = False
+    self._os = settings.TARGET_OS
+    settings.TARGET_OS = settings.OS.WINDOWS
+
+  def tearDown(self):
+    settings.TAMPER_SCRIPTS.update(self._tampers)
+    settings.TARGET_OS = self._os
+
+  def test_a_caret_is_doubled(self):
+    self.assertEqual("echo a^^b", checks.caret_escaped("echo a^b"))
+
+  def test_every_caret_is(self):
+    self.assertEqual("a^^b^^c", checks.caret_escaped("a^b^c"))
+
+  def test_a_command_carrying_none_is_untouched(self):
+    self.assertEqual("echo ab", checks.caret_escaped("echo ab"))
+
+  def test_the_payload_carries_the_doubled_form(self):
+    from src.core.techniques.results_based import rb_payloads
+    self.assertIn("echo a^^b", rb_payloads.cmd_execution("&", "TAG", "echo a^b"))
+
+  def test_the_tempfile_payload_quotes_the_command_and_doubles_it(self):
+    """
+    Unquoted, no number of carets brought one back - one, two, three and four each arrived as none
+    against a cmd.exe, while the quoted form carries a doubled one as the character it was.
+    """
+    from src.core.techniques.tempfile_based import tfb_payloads
+    built = tfb_payloads.cmd_execution_alter_interpreter("&", "echo a^b", 6, "OUT.txt", 5, "GET")
+    self.assertIn("'cmd /c \"echo a^^b\"'", built)
+
+  def test_a_script_spelling_the_payload_in_carets_is_left_to_do_it(self):
+    # That one collapses a double back to a single, which would undo this and leave the command
+    # shorter than it was written.
+    settings.TAMPER_SCRIPTS["caret"] = True
+    self.assertEqual("echo a^b", checks.caret_escaped("echo a^b"))
+
+class ThePaddingIsTakenOffOnceAndOnlyOnce(unittest.TestCase):
+  """
+  The space the Windows interpreter payload writes either side of its output is removed where that
+  payload's own shape is known, which is the reading itself. The privilege check used to undo it a
+  second time, and the space it took the second time was the command's own: an answer of ' X ' came
+  back as 'X', and only a user id having no padding of its own kept it from being noticed.
+  """
+  def test_the_privilege_check_does_not_trim_the_answer_again(self):
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    with open(os.path.join(root, "src", "core", "controller", "enumeration.py")) as handle:
+      source = handle.read()
+    start = source.index("def check_current_user_privs(")
+    body = source[start:source.index("\ndef ", start)]
+    for trimming in (".strip()", ".rstrip()", ".lstrip()"):
+      self.assertNotIn(trimming, body, "the answer is trimmed again by " + trimming)
 
 class AWindowsInterpretersOutputKeepsItsOwnEdges(unittest.TestCase):
   """

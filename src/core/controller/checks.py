@@ -5533,6 +5533,24 @@ def narrowed_characters(seen):
 """
 Generate a character pool for time‑related command injection techniques
 """
+"""
+A command written into a cmd.exe payload, with the one character that shell reads as its own left
+as the command's.
+
+cmd.exe takes a '^' for its own escape and drops it, so a command carrying one ran without it and
+what came back was reported as the command's own answer: 'echo a^b' arrived as 'ab', which is a
+wrong answer rather than a missing one. Doubled, it reaches the command as the character it was -
+measured against a cmd.exe, one doubling is exactly what a single pass of its unescaping takes off,
+and a command carrying none is untouched.
+
+Not done where a script is rewriting the payload: the one that spells a payload in carets collapses
+a double back to a single, which would undo this and leave the command shorter than it was written.
+"""
+def caret_escaped(cmd):
+  if any(settings.TAMPER_SCRIPTS.values()):
+    return cmd
+  return cmd.replace(settings.WIN_ESCAPE, settings.WIN_ESCAPE * 2)
+
 def generate_char_pool(num_of_chars):
   if menu.options.charset:
     return [ord(c) for c in menu.options.charset]
