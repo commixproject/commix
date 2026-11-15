@@ -55,15 +55,23 @@ def _rewrite_php_span(span):
   span = _EMPTY_STRING.sub("?NULL:exit()", span)
   return span
 
+# The operator and everything it holds, an escaped backtick of the command's own staying inside
+# the command rather than reading as the one that closes it.
+BACKTICK_SPAN = r"`((?:[^`\\]|\\.)*)`"
+
 def tamper(payload):
   if settings.EVAL_GRAMMAR.NAME != "php":
     return payload
-  # Backticks alternate PHP-level code with the shell command it runs - odd positions are the
-  # commands themselves, left exactly as every other tamper script already left them.
-  parts = payload.split("`")
+  # The operator alternates PHP-level code with the shell command it runs - odd positions are the
+  # commands themselves, left exactly as every other tamper script already left them. Split on the
+  # operator rather than on every backtick, so one of the command's own, written behind a backslash
+  # for the interpreter that reads the operator's string, does not open a span of PHP that is not
+  # there - everything after it was then rewritten as the wrong one of the two.
+  parts = re.split(BACKTICK_SPAN, payload)
   for index in range(0, len(parts), 2):
     parts[index] = _rewrite_php_span(parts[index])
-  payload = "`".join(parts)
+  payload = "".join(part if index % 2 == 0 else "`" + part + "`"
+                    for index, part in enumerate(parts))
   # The grammar's own statement terminator, said only once and only at the very end - a closing
   # PHP tag ends the statement it follows exactly as that character would, and reopening it is
   # only needed where something is meant to run after it, which nothing here ever is.

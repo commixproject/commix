@@ -130,21 +130,52 @@ the first of them ends the literal and the rest is read as code that does not pa
 def _literal(text):
   return "\"" + text.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
 
-# Run a command and yield its output.
+"""
+Run a command and yield its output, read as the bytes the command wrote.
+
+Read as text, the handle this language's shortest reader hands back translates every kind of line
+break into the one this platform writes: a command printing 'AB\r\n' was answered with 'AB\n', a
+carriage return of the output's own came back as a newline, and a length read off it was one short.
+Nothing else in this grammar translates anything, and neither does the shell the other techniques
+read their answer off, so the output is read as the bytes it is and decoded once, here.
+
+'-1' rather than the name the module gives that value, which would need the module imported a
+second time to say; and the pipe is read rather than the exit status checked, so a command the
+target refuses is answered with the nothing it printed, the way every other grammar here answers
+one.
+"""
 def run(cmd):
-  return "__import__(\"os\").popen(" + _literal(cmd) + ").read()"
+  return ("__import__(\"subprocess\").Popen(" + _literal(cmd) +
+          ",shell=True,stdout=-1).communicate()[0].decode()")
 
-# Read a file and yield its contents.
+# Read a file and yield its contents, as the bytes it holds - opened as text, a carriage return in
+# the file comes back as a newline, the same way a command's own output would.
 def read_file(path):
-  return "open(" + _literal(path) + ").read()"
+  return "open(" + _literal(path) + ",\"rb\").read().decode()"
 
-# Drop trailing whitespace, so a length agrees with what a shell's own substitution would report.
+"""
+Drop the newlines an output ends with, so a length agrees with what a shell's own substitution
+would report.
+
+Whitespace of every kind taken off instead, an output ending in a space or a tab was reported
+shorter than it is and came back without the part of it that said so: a command printing 'AB  '
+was answered with 'AB', while the techniques reading their answer off a substitution handed back
+all four characters. A substitution drops newlines and stops at the first byte that is not one -
+a carriage return, among them - so that is what comes off here.
+"""
 def trim(expr):
-  return "(" + expr + ").rstrip()"
+  return "(" + expr + ").rstrip(chr(10))"
 
-# How many bytes an expression is.
+"""
+How many bytes an expression is.
+
+Counted off the bytes rather than off what this language calls its characters: a command printing
+three Greek letters is six bytes and was reported as three, so the search asked about half of them
+and the other half came back as nothing at all. Every other grammar here counts bytes, and the
+ordinals the techniques read are byte ordinals, so the two have to agree on what a position is.
+"""
 def length(expr):
-  return "len(" + expr + ")"
+  return "len((" + expr + ").encode(\"utf-8\"))"
 
 """
 The ordinal of an expression's Nth byte, counting from zero.
@@ -153,7 +184,8 @@ Sliced rather than indexed, and given something to fall back on: an index past t
 where another language answers zero, and the search asks about bytes that may not be there.
 """
 def ordinal(expr, index):
-  return "ord((" + expr + ")[" + str(index) + ":" + str(index + 1) + "] or chr(0))"
+  return ("ord((" + expr + ").encode(\"utf-8\")[" + str(index) + ":" + str(index + 1) +
+          "] or b\"\\0\")")
 
 # An expression's value read as a number, for a command whose output is one.
 def to_number(expr):

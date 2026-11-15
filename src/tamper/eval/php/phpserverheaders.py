@@ -59,7 +59,9 @@ has to have reached the page by itself before then.
 EXECUTION_FUNCTION = "system"
 
 # The backtick operator, which is how a payload of this grammar runs a command.
-BACKTICK_COMMAND = r"`([^`]*)`"
+# The operator and everything it holds, an escaped backtick of the command's own staying inside
+# the command rather than reading as the one that closes it.
+BACKTICK_COMMAND = r"`((?:[^`\\]|\\.)*)`"
 
 # How many characters a generated header name carries.
 NAME_LENGTH = 6
@@ -112,13 +114,25 @@ string read out of one header, the command a string read out of another, and nei
 parameter the request is testing. The two are drawn together and travel on the same request, so a
 filter reading either half sees a name of no meaning and a header of no meaning.
 """
+"""
+The command as it was written, out of the operator it was read out of.
+
+The operator reads its own string before the shell is handed it, so the command sits in there
+written for that reading. The call this script writes carries the command as a quoted literal
+instead, which nothing reads on the way - so what the operator was written for comes back off.
+"""
+def _raw_command(text):
+  return settings.EVAL_GRAMMAR.backtick_command(text)
+
 def tamper(payload):
   commands = []
   function_header = _header_name()
   taken = set([function_header.lower()])
 
   def _through_headers(match):
-    command = match.group(1)
+    # The header carries the command to the shell with nothing reading it on the way, so what
+    # the operator was written for comes off here.
+    command = _raw_command(match.group(1))
     if not _sendable(command):
       return match.group(0)
     while True:

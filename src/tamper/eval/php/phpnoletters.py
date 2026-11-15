@@ -99,6 +99,11 @@ def _matching_paren(text, open_index):
   depth, in_backtick, i = 0, False, open_index
   while i < len(text):
     char = text[i]
+    # A backslash shields whatever follows it, so a backtick of the command's own does not read as
+    # the one that ends the command.
+    if char == "' + B*2 + '" and in_backtick:
+      i += 2
+      continue
     if char == "`":
       in_backtick = not in_backtick
     elif not in_backtick:
@@ -163,9 +168,20 @@ value the oracle can compare exactly the way it compares everything else it is a
 """
 _HALT_REPLACEMENT = "9256"
 
-# Hide every letter left inside a backtick-run shell command, the punctuation around it untouched.
+# The operator and everything it holds, an escaped backtick of the command's own staying inside
+# the command rather than reading as the one that closes it.
+BACKTICK_SPAN = r"`((?:[^`\\]|\\.)*)`"
+
+"""
+Hide every letter left inside a backtick-run shell command, the punctuation around it untouched.
+
+The command is read back as it was written before its letters are hidden and written for the
+operator again afterwards: what is written here is octal escapes, which the operator's own
+string would otherwise read for itself and hand the shell the letters they were hiding.
+"""
 def _hide_backtick(match):
-  return "`" + _hide_letters(match.group(1)) + "`"
+  command = _hide_letters(settings.EVAL_GRAMMAR.backtick_command(match.group(1)))
+  return "`" + settings.EVAL_GRAMMAR.backticked(command) + "`"
 
 def tamper(payload):
   # Run for what they do or read for what they answer, every one is hidden the same way.
@@ -173,6 +189,6 @@ def tamper(payload):
     payload = _hide_value_calls(payload, name)
   payload = payload.replace("exit()", _HALT_REPLACEMENT)
   payload = _hide_print(payload)
-  return re.sub(r"`([^`]*)`", _hide_backtick, payload)
+  return re.sub(BACKTICK_SPAN, _hide_backtick, payload)
 
 # eof

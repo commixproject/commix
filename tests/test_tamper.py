@@ -525,6 +525,93 @@ class NashornParsesWhatItIsSent(unittest.TestCase):
     tampered = self._tamper(grammar.halt("1==2"))
     self.assertIn("function(){throw new Error()}", tampered)
 
+class TheOperatorHandsOnTheCommandItWasGiven(unittest.TestCase):
+  """
+  Where a tamper script is in effect, the PHP and Ruby grammars run a command through the backtick
+  operator, because every script rewriting such a payload is written around it. The operator reads
+  its own string before the shell is handed anything, and what it reads it spends: 'printf \\141'
+  reached the shell as 'printf a', a backtick of the command's own closed the operator early, and a
+  '$' opened a variable that was never set. Each is written for that reading, and the scripts that
+  take the command back out of the operator read it off again.
+  """
+  COMMAND = "printf '\\141\\045' $HOME `id`"
+
+  def setUp(self):
+    self.grammar = settings.EVAL_GRAMMAR
+    self.scripts = dict(settings.TAMPER_SCRIPTS)
+    settings.TAMPER_SCRIPTS["phpconcat"] = True
+
+  def tearDown(self):
+    settings.EVAL_GRAMMAR = self.grammar
+    settings.TAMPER_SCRIPTS.clear()
+    settings.TAMPER_SCRIPTS.update(self.scripts)
+
+  def _grammar(self, language):
+    settings.EVAL_GRAMMAR = importlib.import_module("src.core.eval.grammars." + language)
+    return settings.EVAL_GRAMMAR
+
+  def test_what_the_operator_reads_is_written_for_it(self):
+    for language, interpolation in (("php", "$"), ("ruby", "#")):
+      grammar = self._grammar(language)
+      written = grammar.run(self.COMMAND)
+      self.assertTrue(written.startswith("`") and written.endswith("`"), language)
+      inside = written[1:-1]
+      self.assertNotIn("\\141", inside.replace("\\\\141", ""), language + " left an escape unwritten")
+      self.assertNotIn("`", inside.replace("\\`", ""), language + " left a backtick unwritten")
+      self.assertEqual(self.COMMAND, grammar.backtick_command(inside),
+                       language + " does not read back what it wrote")
+      self.assertNotIn(interpolation, inside.replace("\\" + interpolation, ""),
+                       language + " left its own interpolation unwritten")
+
+  def test_a_script_taking_the_command_out_gets_it_as_it_was_written(self):
+    grammar = self._grammar("php")
+    payload = grammar.print_statement("", [self.COMMAND])
+    for name, module in (("phpconcat", "src.tamper.eval.php.phpconcat"),
+                         ("phphexname", "src.tamper.eval.php.phphexname")):
+      tampered = importlib.import_module(module).tamper(payload)
+      # The call carries the command as a single-quoted literal, where only the quote and the
+      # backslash are spoken for - so what the operator was written for is off it again.
+      self.assertIn("printf \\'\\\\141\\\\045\\' $HOME `id`", tampered,
+                    name + " did not hand on the command as it was written")
+
+class AReplacementStringCarriesWhatItWasGiven(unittest.TestCase):
+  """
+  A sink evaluated by preg_replace()'s "e" modifier fills in the backreferences its replacement is
+  read as naming before it evaluates anything, and a pattern that captured nothing fills them in
+  with nothing: a command written "printf '\\141\\142\\143'" reached the sink as "printf '123'",
+  each backslash and the digit behind it spent on a group that was never there. What arrives has to
+  be what was written, so the payload is written the way that reading puts it back.
+  """
+  # What is left of a replacement string once the backreferences in it have been filled in, with
+  # nothing captured to fill them with - which is what the sink evaluates.
+  READ_AS = r"\\\\|\\\$|\\\d{1,2}|\$\{?\d{1,2}\}?"
+
+  def _as_the_sink_reads_it(self, replacement):
+    def filled(match):
+      return {"\\\\": "\\", "\\$": "$"}.get(match.group(0), "")
+    return re.sub(self.READ_AS, filled, replacement)
+
+  def _tamper(self, payload):
+    from src.tamper.eval.php import phpregreplace
+    return phpregreplace.tamper(payload)
+
+  def test_a_payload_arrives_as_it_was_written(self):
+    written = ["printf '\\141\\142\\143'",
+               "shell_exec('printf \\'a\\\\b\\'')",
+               "print(`echo $((5+7))`)",
+               "`cat /tmp/x.txt`"]
+    for payload in written:
+      self.assertEqual(payload, self._as_the_sink_reads_it(self._tamper(payload)),
+                       "did not arrive as written: " + payload)
+
+  def test_a_dollar_sign_that_stands_before_a_digit_arrives_as_one(self):
+    self.assertEqual("echo $1", self._as_the_sink_reads_it(self._tamper("echo $1")))
+    self.assertEqual("echo ${12}", self._as_the_sink_reads_it(self._tamper("echo ${12}")))
+
+  def test_a_payload_with_nothing_to_carry_is_left_as_it_is(self):
+    for payload in ("print(`echo ABCDEF`)", "id", "echo $((1+2))"):
+      self.assertEqual(payload, self._tamper(payload))
+
 class ListedDescriptions(unittest.TestCase):
   """
   Whatever '--list-tampers' prints for a script has to be the whole sentence the script opens with,

@@ -1598,15 +1598,18 @@ def fetch_output_response(url, OUTPUT_TEXTFILE, timesec, technique):
 The output file's contents, read the way the command's own output is read - so that what the file
 held before a command can be told from what it holds after one.
 
-Only the line breaks it ends with come off. A substitution drops those and nothing else, which is
-what the techniques reading their answer off the page hand back, so this hands back the same.
-Stripped at both ends instead, a command whose output was indented, or padded, or was whitespace
-altogether came back without the part of it that said so: an output of a tab, three spaces, 'X' and
-seven more tabs arrived as 'X'.
+Only the newlines it ends with come off. A substitution drops those and stops at the first byte
+that is not one, which is what the techniques reading their answer off the page hand back, so this
+hands back the same. Stripped at both ends instead, a command whose output was indented, or padded,
+or was whitespace altogether came back without the part of it that said so: an output of a tab,
+three spaces, 'X' and seven more tabs arrived as 'X'. A carriage return taken off with them is the
+same mistake one byte smaller - an output ending 'a\r\nb\r\n' came back as 'a\r\nb', where a
+substitution hands back the carriage return that break left behind. A Windows target's own are
+dropped below, where they are the target's and not the command's.
 """
 def output_file_content(response):
   content = checks.process_page_content(response, action="encode")
-  content = content.rstrip(settings.END_LINE.CR + settings.END_LINE.LF)
+  content = content.rstrip(settings.END_LINE.LF)
   # The bytes the file's own encoding could not read, back as the bytes the target wrote.
   content = checks.decoded_byte_output(checks.restored_unreadable_bytes(content))
   if settings.TARGET_OS == settings.OS.WINDOWS:
@@ -1674,7 +1677,7 @@ def injection_test_results(response, TAG, randvcalc, technique, payload=None):
     except ImportError:  # Python 2
       unescape = _html_parser.HTMLParser().unescape
     # Check the execution results
-    html_data = checks.process_page_content(response, action="decode")
+    html_data = checks.process_page_content(response, action="decode", guard=TAG)
     html_data = html_data.replace(settings.END_LINE.LF,settings.SINGLE_WHITESPACE)
     # cleanup string / unescape html to string
     html_data = _urllib.parse.unquote(html_data)
@@ -1687,7 +1690,7 @@ def injection_test_results(response, TAG, randvcalc, technique, payload=None):
     if len(shell) > 1:
       shell = shell[0]
   else:
-    html_data = checks.process_page_content(response, action="decode")
+    html_data = checks.process_page_content(response, action="decode", guard=TAG)
     # A Windows target ends its lines with CRLF, so every line break counts as the one whitespace
     # the markers are looked up with.
     html_data = re.sub(r"[" + settings.END_LINE.CR + settings.END_LINE.LF + r"]+", settings.SINGLE_WHITESPACE, html_data)
@@ -1790,7 +1793,7 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
     false_result = False
     try:
       # Grab execution results
-      html_data = checks.process_page_content(response, action="decode")
+      html_data = checks.process_page_content(response, action="decode", guard=TAG)
       """
       Every line break stood in for, rather than thrown away.
 
@@ -1871,7 +1874,7 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
     # substitution hand it back.
     line_mark = new_line + "[BN]"
     # Grab execution results
-    html_data = checks.process_page_content(response, action="decode")
+    html_data = checks.process_page_content(response, action="decode", guard=TAG)
     for sequence, mark in marks:
       html_data = html_data.replace(sequence, mark)
     """
@@ -1895,7 +1898,18 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
       shell = ""
     else:
       found = re.sub("^(?:" + line_mark + ")", "", shell[0], count=1)
-      found = re.sub("(?:" + line_mark + ")+$", "", found)
+      """
+      The newlines an output ends with dropped, and only those.
+
+      A Windows line break is marked as one mark rather than two, so a trailing one taken off whole
+      took its carriage return with it: an output of 'a\r\nb\r\n' came back as 'a\r\nb', where a
+      substitution would have dropped the newline alone and handed back 'a\r\nb\r'. Dropping stops
+      at the first byte that is not a newline, which is what the carriage return left behind is -
+      so the pair's own mark is rewritten as the one standing for that byte, and nothing after it
+      is taken off.
+      """
+      found = re.sub("(?:" + new_line + "N)+$", "", found)
+      found = re.sub("(?:" + new_line + "B)$", new_line + "R", found)
       for sequence, mark in marks:
         found = found.replace(mark, sequence)
       shell = found

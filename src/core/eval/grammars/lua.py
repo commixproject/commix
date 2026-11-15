@@ -103,14 +103,22 @@ def read_file(path):
   return "io.open(" + _literal(path) + "):read(\"*a\")"
 
 """
-Drop trailing whitespace, so a length agrees with what a shell's own substitution would report.
+Drop the newlines an output ends with, so a length agrees with what a shell's own substitution
+would report.
+
+Whitespace of every kind taken off instead, an output ending in a space or a tab was reported
+shorter than it is and came back without the part of it that said so: a command printing 'AB  '
+was answered with 'AB', while the techniques reading their answer off a substitution handed back
+all four characters. A substitution drops newlines and stops at the first byte that is not one -
+a carriage return, among them - so that is what comes off here, written as the decimal escape for
+it rather than as the byte, which the payload carries no better than the shell around it does.
 
 Parenthesised around the whole call: 'gsub' answers the string and how many times it matched, and
 the second of those would otherwise still be there wherever this sits as the last of several
 arguments passed to something else - 'string.len', not least.
 """
 def trim(expr):
-  return "((" + expr + "):gsub(\"%s+$\", \"\"))"
+  return "((" + expr + "):gsub(\"\\10+$\", \"\"))"
 
 # How many bytes an expression is.
 def length(expr):
@@ -124,7 +132,12 @@ anywhere else in this grammar - answering nothing, not a byte that happens to sh
 the index runs past the end.
 """
 def ordinal(expr, index):
-  return "(" + expr + "):byte(" + str(index + 1) + ") or 0"
+  # Parenthesised around the whole of it: 'or' binds looser than every comparison this grammar
+  # writes around an ordinal, so the fallback would otherwise take the comparison for its own right
+  # side - a byte that is there answers the 'or' before the comparison is ever reached, every
+  # comparison came back true, and the search for the byte converged on the top of its pool
+  # whatever the byte was.
+  return "((" + expr + "):byte(" + str(index + 1) + ") or 0)"
 
 # An expression's value read as a number, for a command whose output is one.
 def to_number(expr):

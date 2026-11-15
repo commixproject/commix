@@ -73,7 +73,19 @@ def _quoted_command(command):
 
 # What the backtick operator is underneath, so naming it runs the command the backticks ran.
 BACKTICK_FUNCTION = "shell_exec"
-BACKTICK_COMMAND = r"`([^`]*)`"
+# The operator and everything it holds, an escaped backtick of the command's own staying inside
+# the command rather than reading as the one that closes it.
+BACKTICK_COMMAND = r"`((?:[^`\\]|\\.)*)`"
+
+"""
+The command as it was written, out of the operator it was read out of.
+
+The operator reads its own string before the shell is handed it, so the command sits in there
+written for that reading. The call this script writes carries the command as a quoted literal
+instead, which nothing reads on the way - so what the operator was written for comes back off.
+"""
+def _raw_command(text):
+  return settings.EVAL_GRAMMAR.backtick_command(text)
 
 # Run the command through a function named in pieces, wherever the payload runs one.
 def tamper(payload):
@@ -86,7 +98,8 @@ def tamper(payload):
   # The boundary a payload most often arrives on names no function at all - it runs the command in
   # backticks, which is this function wearing punctuation, and reads the same way once named.
   return re.sub(BACKTICK_COMMAND,
-                lambda x: CALL_BY_NAME + _concat_name(BACKTICK_FUNCTION) + "," + _quoted_command(x.group(1)) + ")",
+                lambda x: (CALL_BY_NAME + _concat_name(BACKTICK_FUNCTION) + "," +
+                           _quoted_command(_raw_command(x.group(1))) + ")"),
                 payload)
 
 # eof

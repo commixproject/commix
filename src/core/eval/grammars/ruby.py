@@ -13,6 +13,8 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import re
+
 NAME = "ruby"
 
 # The same name as it is written out to the user, where the switch's own spelling would read wrong.
@@ -110,25 +112,72 @@ again rather than by touching a payload.
 def _literal(text):
   return "'" + text.replace("\\", "\\\\").replace("'", "\\'") + "'"
 
+"""
+What the backtick operator reads out of the command it holds, and what each of those is written as
+so the shell is handed the character instead.
+
+As in the PHP grammar beside it, with this language's own interpolation in the place of the other's
+variable: '#{...}' is read here, and a '#' is only the start of one before a brace - escaped all the
+same, since the escape hands back the character either way and nothing has to work out which '#'
+this is.
+"""
+BACKTICK_READS = ("\\", "`", "#")
+
+# The command inside the operator, as the one holding it has to be written.
+def backticked(cmd):
+  for character in BACKTICK_READS:
+    cmd = cmd.replace(character, "\\" + character)
+  return cmd
+
+# The command as it was written, out of the operator above.
+def backtick_command(text):
+  return re.sub(r"\\([\\`#])", r"\1", text)
+
+# The operator and everything it holds, an escaped backtick of the command's own staying inside it.
+BACKTICK_SPAN = r"`((?:[^`\\]|\\.)*)`"
+
 def run(cmd):
   # As in the PHP grammar beside it, and for the same reason: a script rewriting this payload is
-  # written around the operator below, so where one is in effect the command goes in that way.
+  # written around the operator below, so where one is in effect the command goes in that way -
+  # written for what the interpreter reads out of it on the way through.
   from src.utils import settings
   if any(settings.TAMPER_SCRIPTS.values()):
-    return "`" + cmd + "`"
+    return "`" + backticked(cmd) + "`"
   return "IO.popen(" + _literal(cmd) + ").read"
 
 # Read a file and yield its contents.
 def read_file(path):
   return run("cat " + path)
 
-# Drop trailing whitespace, so a length agrees with what a shell's own substitution would report.
-def trim(expr):
-  return "(" + expr + ").rstrip"
+"""
+Drop the newlines an output ends with, so a length agrees with what a shell's own substitution
+would report.
 
-# How many bytes an expression is.
+Whitespace of every kind taken off instead, an output ending in a space or a tab was reported
+shorter than it is and came back without the part of it that said so: a command printing 'AB  '
+was answered with 'AB', while the techniques reading their answer off a substitution handed back
+all four characters. A substitution drops newlines and stops at the first byte that is not one -
+a carriage return, among them - so that is what comes off here.
+"""
+def trim(expr):
+  # Read as bytes before the pattern is put to it. What this language's own reader hands back is
+  # tagged with the encoding the process was started in, US-ASCII on a target that names none, and a
+  # pattern over a string carrying a byte that encoding cannot read raises rather than matching: an
+  # output of three Greek letters took the whole payload down with it and came back as nothing at
+  # all, where the same output read one byte at a time came back whole. Every byte sequence is a
+  # valid one in ASCII-8BIT, which is what the length and the ordinals beside this already count.
+  return "(" + expr + ").force_encoding(\"ASCII-8BIT\").sub(/\\n+\\z/, \"\")"
+
+"""
+How many bytes an expression is.
+
+Counted off the bytes rather than off what this language calls its characters: a command printing
+three Greek letters is six bytes and was reported as three, so the search asked about half of them
+and the other half came back as nothing at all. Every other grammar here counts bytes, and the
+ordinals the techniques read are byte ordinals, so the two have to agree on what a position is.
+"""
 def length(expr):
-  return "(" + expr + ").length"
+  return "(" + expr + ").bytesize"
 
 """
 The ordinal of an expression's Nth byte, counting from zero.
@@ -138,7 +187,7 @@ empty string instead - itself a valid one-character result at the boundary, and 
 from "out of range" the way 'nil' is.
 """
 def ordinal(expr, index):
-  return "((" + expr + ")[" + str(index) + "] || \"\\0\").ord"
+  return "((" + expr + ").getbyte(" + str(index) + ") || 0)"
 
 # An expression's value read as a number, for a command whose output is one - 'nil.to_i' and
 # '"".to_i' both answer 0, so nothing further has to guard against either.

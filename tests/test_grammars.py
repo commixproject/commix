@@ -155,6 +155,87 @@ class GrammarPayloads(unittest.TestCase):
       self.skipTest("none of the evaluated languages are installed on this host")
     self.assertEqual([], offenders)
 
+class WhatAGrammarReadsBackOffAnOutput(unittest.TestCase):
+  """
+  A length and an ordinal are what the blind techniques have instead of the output itself, so what
+  they read has to be the same thing the techniques reading a substitution hand back. A trim that
+  took every kind of whitespace reported an output ending in a space shorter than it is, and an
+  ordinal written without brackets of its own was read as one side of the comparison wrapped around
+  it rather than as the byte - every comparison came back true, and the search for a byte converged
+  on the top of its pool whatever the byte was.
+
+  Asked of the interpreter rather than of a spelling written out here: each of these is a question
+  about how the language reads what the grammar writes, which only the language can answer. One
+  that is not installed on this host is passed over rather than failed.
+  """
+  PRINTERS = {
+    "python": ["python3", "-c", "print(%s)"],
+    "ruby": ["ruby", "-e", "print(%s)"],
+    "perl": ["perl", "-e", "print(%s)"],
+    "lua": ["lua", "-e", "print(%s)"],
+    "php": ["php", "-r", "echo(%s);"],
+    "javascript": ["node", "-e", "console.log(%s)"],
+  }
+  TRUE = ("1", "true", "True")
+  FALSE = ("", "0", "false", "False")
+
+  def _answer(self, name, expression):
+    argv = list(self.PRINTERS[name])
+    argv[-1] = argv[-1].replace("%s", expression)
+    done = subprocess.run(argv, capture_output=True, text=True, timeout=60)
+    self.assertEqual(0, done.returncode,
+                     name + " could not read '" + expression[:90] + "': " + (done.stderr or "").strip()[:160])
+    return done.stdout.strip()
+
+  def _installed(self):
+    for name, grammar in sorted(grammars().items()):
+      argv = self.PRINTERS.get(name)
+      if argv and shutil.which(argv[0]):
+        yield name, grammar
+
+  def test_the_length_counts_the_whitespace_an_output_ends_with(self):
+    reached = []
+    for name, grammar in self._installed():
+      reached.append(name)
+      # 'AB' and two spaces, then two newlines: a substitution drops the newlines and keeps the
+      # spaces, which is four characters.
+      written = grammar.length(grammar.trim(grammar.run("printf 'AB  \\n\\n'")))
+      self.assertEqual("4", self._answer(name, written), name + " counted it differently")
+    if not reached:
+      self.skipTest("none of the evaluated languages are installed on this host")
+
+  def test_a_carriage_return_an_output_ends_with_is_counted_too(self):
+    for name, grammar in self._installed():
+      # A substitution stops at the first byte that is not a newline, and a carriage return is one
+      # of those: 'AB' and a CRLF is three characters, not two.
+      written = grammar.length(grammar.trim(grammar.run("printf 'AB\\r\\n'")))
+      self.assertEqual("3", self._answer(name, written), name + " counted it differently")
+
+  def test_a_length_and_an_ordinal_are_read_off_the_bytes(self):
+    for name, grammar in self._installed():
+      # Three Greek letters: six bytes, three of whatever a language calls a character. Counted the
+      # second way, the search asks about half the output and the rest comes back as nothing.
+      written = grammar.run("printf '\\316\\261\\316\\262\\316\\263'")
+      self.assertEqual("6", self._answer(name, grammar.length(grammar.trim(written))),
+                       name + " did not count the bytes")
+      self.assertEqual("177", self._answer(name, grammar.ordinal(grammar.trim(written), 1)),
+                       name + " did not read the second byte")
+      self.assertEqual("0", self._answer(name, grammar.ordinal(grammar.trim(written), 99)),
+                       name + " answered something for a byte that is not there")
+
+  def test_an_ordinal_is_the_byte_and_not_the_comparison_around_it(self):
+    for name, grammar in self._installed():
+      byte = grammar.ordinal(grammar.trim(grammar.run("printf 'A'")), 0)
+      self.assertEqual("65", self._answer(name, byte), name + " read the byte differently")
+      # The comparison the blind techniques write around it - answered by the byte, not by a
+      # fallback that took the comparison for its own right-hand side.
+      above = byte + grammar.COMPARISON["-ge"] + "200"
+      self.assertIn(self._answer(name, above), self.FALSE,
+                    name + " read 'A' as standing at or above 200")
+      below = byte + grammar.COMPARISON["-ge"] + "60"
+      self.assertIn(self._answer(name, below), self.TRUE,
+                    name + " read 'A' as standing below 60")
+
 if __name__ == "__main__":
   unittest.main()
 

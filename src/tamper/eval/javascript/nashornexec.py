@@ -17,19 +17,17 @@ from src.utils import settings
 from src.core.controller import checks
 
 """
-About: Rewrites the grammar's require() calls into a Java-interop shim, and its arrow function and
-       trimEnd() into ECMAScript-5 equivalents, for a sink evaluating JavaScript through Java's
-       Nashorn engine rather than Node.
+About: Rewrites the grammar's require() calls into a Java-interop shim, and its arrow function
+       into an ECMAScript-5 equivalent, for a sink evaluating JavaScript through Java's Nashorn
+       engine rather than Node.
 Notes: This tamper script works against target(s) evaluating JavaScript (i.e. option '--eval=javascript').
        'require("child_process")' and 'require("fs")' resolve to nothing, since neither module
        exists outside Node; Nashorn exposes the whole Java classpath as plain globals by default
        though, with no filter configured unless the embedding application added one itself, so a
        shim standing in for the module reaches a real shell through java.lang.ProcessBuilder in
        execSync's place, and a real file through java.nio.file.Files in readFileSync's place.
-       Separately, two things the grammar writes are newer than the language Nashorn implements:
-       every answer it reads back is trimmed with 'trimEnd()', added in 2019, where the call is
-       simply not defined - and the one place it stops a page throws out of an arrow function,
-       which is ES6, and which Nashorn does not parse at all.
+       Separately, the one place the grammar stops a page throws out of an arrow function, which
+       is ES6, and which Nashorn does not parse at all.
 Reference: https://www.exploit-db.com/exploits/33028 (same shape against JRuby's own sandbox: a
            blocked native call reached instead through the host language's interop)
 """
@@ -67,9 +65,6 @@ def tamper(payload):
   # Every require() the grammar writes opens on the same bracket regardless of the module named,
   # the way the shim itself only decides which module it is once it is actually called.
   payload = payload.replace('require(', _SHIM)
-  # The one ES2019 method the grammar relies on, rewritten to what trimming trailing whitespace
-  # looked like before that version - a regex substitution every ECMAScript release has had.
-  payload = payload.replace('.trimEnd()', '.replace(/\\s+$/,"")')
   # The one arrow function it writes, as the function expression that says the same thing before
   # ES6 - left as it is, the payload does not parse at all here, and a parse error answers every
   # boundary with the very same page, which a technique reading one answer against another is

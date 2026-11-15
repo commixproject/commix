@@ -1507,3 +1507,34 @@ class TheOracleReadsTheWholeAnswer(unittest.TestCase):
   def test_a_pattern_that_does_not_compile_answers_nothing(self):
     menu.options.regexp = "([unclosed"
     self.assertIsNone(checks.boolean_oracle("body", headers=self.headers()))
+
+class APerCentSignACommandPrintedComesBack(unittest.TestCase):
+  """
+  A page is read as a browser reads one, per-cent escapes included - and a command's output is not
+  a page. An output ending in '%' and a marker beginning with two hex digits were read together as
+  the one byte they spell, which left no marker to find and answered the command with nothing: the
+  same output came back whole or not at all depending on which six letters the marker happened to
+  be given, which is what made it look like a target that answers sometimes.
+  """
+  def _response(self, charset="utf-8"):
+    served = type("Served", (object,), {})()
+    served.info = lambda: {"Content-Encoding": "", "Content-Type": "text/html; charset=" + charset}
+    return served
+
+  def test_an_escape_that_would_reach_into_the_marker_is_left_alone(self):
+    self.assertEqual(b"a%b%%cEFLMFW", checks.percent_decoded(b"a%b%%cEFLMFW", "EFLMFW"))
+    self.assertEqual(b"out%EFLMFW", checks.percent_decoded(b"out%EFLMFW", "EFLMFW"))
+
+  def test_the_same_page_is_answered_the_same_way_whichever_marker_was_drawn(self):
+    for marker in ("EFLMFW", "UZIPIE", "ABCDEF", "QQQQQQ"):
+      page = ("a%b%%c" + marker).encode(settings.DEFAULT_CODEC)
+      self.assertEqual(page, checks.percent_decoded(page, marker), "marker " + marker)
+
+  def test_an_escape_the_marker_is_nowhere_near_is_still_read(self):
+    self.assertEqual(b"a b", checks.percent_decoded(b"a%20b", "EFLMFW"))
+    self.assertEqual(b"a b", checks.percent_decoded(b"a%20b"))
+
+  def test_the_whole_page_is_read_where_no_marker_was_named(self):
+    body = b"<html>a%b%%cEFLMFW</html>"
+    self.assertEqual("a%b%%cEFLMFW", checks.decode_page_body(body, self._response(), guard="EFLMFW")
+                     .replace("<html>", "").replace("</html>", ""))

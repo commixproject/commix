@@ -111,9 +111,18 @@ def run(cmd):
 def read_file(path):
   return run("cat " + path)
 
-# Drop trailing whitespace, so a length agrees with what a shell's own substitution would report.
+"""
+Drop the newlines an output ends with, so a length agrees with what a shell's own substitution
+would report.
+
+Whitespace of every kind taken off instead, an output ending in a space or a tab was reported
+shorter than it is and came back without the part of it that said so: a command printing 'AB  '
+was answered with 'AB', while the techniques reading their answer off a substitution handed back
+all four characters. A substitution drops newlines and stops at the first byte that is not one -
+a carriage return, among them - so that is what comes off here.
+"""
 def trim(expr):
-  return "((" + expr + ")=~s/\\s+\\z//r)"
+  return "((" + expr + ")=~s/\\n+\\z//r)"
 
 # How many bytes an expression is.
 def length(expr):

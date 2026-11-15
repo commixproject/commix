@@ -773,8 +773,18 @@ def do_boolean_based_process(url, timesec, filename, http_request_method, inject
       answering through it. Where it does not parse, the interpreter prints its complaint instead,
       and the false question draws another carrying different digits of this run's own - read as two
       answers, that one error confirms a boundary nothing ever ran through.
+
+      Asked only of a payload that went in behind the parameter's own value. Standing in place of
+      it, the value is not there to be rendered and the page is not meant to read like the one it
+      returns: a sink replacing the whole of what it was given answered the true question with the
+      empty string the payload evaluates to, which is a page of its own rather than that one - and
+      the technique was refused on every boundary, including the ones that worked, while naming the
+      string by hand found it at once. What a broken payload leaves is still caught below, where
+      two answers that are one interpreter complaint carrying different digits are read as the one
+      error they are.
       """
-      if not settings.BOOLEAN_PRINTED_STATE and checks.comparable_page(page_true or "") != checks.comparable_page(checks.comparison_baseline(url, http_request_method)):
+      if not settings.BOOLEAN_PRINTED_STATE and not settings.REPLACE_VALUE and \
+         checks.comparable_page(page_true or "") != checks.comparable_page(checks.comparison_baseline(url, http_request_method)):
         return None
       """
       What the page moves on its own, measured again where the run can actually see it.
@@ -1627,7 +1637,7 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
             if type(response) is bool:
               html_data = ""
             else:
-              html_data = checks.process_page_content(response, action="decode")
+              html_data = checks.process_page_content(response, action="decode", guard=TAG)
               # The marker written here is what the file holds until a command overwrites it, so it
               # is remembered as such - a command the target never runs leaves it in place, and the
               # read that follows would otherwise hand it back as that command's own output.
@@ -1749,7 +1759,7 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
         requests.perform_injection(prefix, suffix, whitespace, verify_payload, "", http_request_method, url)
         time.sleep(timesec)
         verify_response = injector.fetch_output_response(url, OUTPUT_TEXTFILE, timesec, technique)
-        verify_html_data = "" if verify_response is None or type(verify_response) is bool else checks.process_page_content(verify_response, action="decode")
+        verify_html_data = "" if verify_response is None or type(verify_response) is bool else checks.process_page_content(verify_response, action="decode", guard=verify_tags[0])
         # The markers written just now are the last thing in the file before a command is, so this
         # is what the file still holds if the first command never reaches the target.
         injector.remember_output_file(verify_response)
@@ -1766,7 +1776,7 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
             requests.perform_injection(prefix, suffix, whitespace, verify_payload, "", http_request_method, url)
             time.sleep(timesec)
             verify_response = injector.fetch_output_response(url, OUTPUT_TEXTFILE, timesec, technique)
-            verify_html_data = "" if verify_response is None or type(verify_response) is bool else checks.process_page_content(verify_response, action="decode")
+            verify_html_data = "" if verify_response is None or type(verify_response) is bool else checks.process_page_content(verify_response, action="decode", guard=verify_tag)
             injector.remember_output_file(verify_response)
             verify_shell = re.findall(r"" + verify_tag + "", str(verify_html_data))
             verified = bool(verify_shell) and verify_shell[0] == verify_tag

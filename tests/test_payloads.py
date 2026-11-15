@@ -502,6 +502,15 @@ class AnEvaluatedCommandsOutputIsReadAsItWasPrinted(unittest.TestCase):
     self.assertEqual("a\rb", self._read("a\rb\n"))
     self.assertEqual("a\rb", self._read("a\rb"))
 
+  def test_a_windows_break_at_the_end_leaves_its_carriage_return_behind(self):
+    # A substitution drops the newlines an output ends with and stops at the first byte that is not
+    # one. Marked as the single break a CRLF is, a trailing one was taken off whole instead and the
+    # carriage return went with it: 'a\r\nb\r\n' came back as 'a\r\nb'.
+    self.assertEqual("a\r\nb\r", self._read("a\r\nb\r\n"))
+    self.assertEqual("a\r\n\r", self._read("a\r\n\r\n"))
+    self.assertEqual("a\r", self._read("a\r\n\n\n"))
+    self.assertEqual("a\n\r", self._read("a\n\r\n"))
+
   def test_a_windows_line_break_is_one_break_rather_than_two(self):
     self.assertEqual("a\r\nb", self._read("a\r\nb\n"))
 

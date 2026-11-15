@@ -500,7 +500,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "345"
+REVISION = "346"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -2124,6 +2124,7 @@ TAMPER_SCRIPTS = {
                   "sleep2ping": False,
                   "phphexname": False,
                   "phpconcat": False,
+                  "phpregreplace": False,
                   "phpnoletters": False,
                   "pyhexname": False,
                   "xforwardedfor": False,

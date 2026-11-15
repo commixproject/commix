@@ -13,6 +13,8 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import re
+
 NAME = "php"
 
 # The same name as it is written out to the user, where the switch's own spelling would read wrong.
@@ -126,25 +128,65 @@ answer as the command's own - and one carrying a backtick closed the string earl
 at all. The operator is this function under another name, so a target that refuses one refuses both
 and nothing is given up by writing it out.
 """
+"""
+What the backtick operator reads out of the command it holds, and what each of those is written as
+so the shell is handed the character instead.
+
+The operator's own string is read the way a double-quoted one is: an octal escape becomes the byte
+it names, a '$' opens a variable, and a backtick ends the operator altogether. Written as they
+stand, a command carrying any of the three arrives as something else - 'printf \141' reached the
+shell as 'printf a', the escape spent before the shell was ever asked - so each is written behind a
+backslash, which is the one spelling this reading hands back unchanged.
+"""
+BACKTICK_READS = ("\\", "`", "$")
+
+# The command inside the operator, as the one holding it has to be written.
+def backticked(cmd):
+  for character in BACKTICK_READS:
+    cmd = cmd.replace(character, "\\" + character)
+  return cmd
+
+"""
+The command as it was written, out of the operator above.
+
+What a script rewriting that operator into a call of its own has to hand the call: the call carries
+its argument as a quoted literal, which is read by nothing on the way and needs none of this.
+"""
+def backtick_command(text):
+  return re.sub(r"\\([\\`$])", r"\1", text)
+
+# The operator and everything it holds, an escaped backtick of the command's own staying inside it
+# rather than being read as the one that closes it.
+BACKTICK_SPAN = r"`((?:[^`\\]|\\.)*)`"
+
 def run(cmd):
   # Asked for only where the payload still reaches the target written the way it was built. Every
   # script rewriting a payload of this grammar's is written around the operator below - the one
   # answering a sink that rejects a quote of either kind could not carry this call's own quotes at
   # all - so where any is in effect the command goes in the way it always did, read by the
-  # interpreter on its way to the shell. A '$' or a backtick of its own is lost there, which is the
-  # cost of reaching a sink that would otherwise refuse the payload outright.
+  # interpreter on its way to the shell. What that reading would take is written for it instead,
+  # so the command still arrives as the one that was built.
   from src.utils import settings
   if any(settings.TAMPER_SCRIPTS.values()):
-    return "`" + cmd + "`"
+    return "`" + backticked(cmd) + "`"
   return "shell_exec(" + _literal(cmd) + ")"
 
 # Read a file and yield its contents.
 def read_file(path):
   return run("cat " + path)
 
-# Drop trailing whitespace, so a length agrees with what a shell's own substitution would report.
+"""
+Drop the newlines an output ends with, so a length agrees with what a shell's own substitution
+would report.
+
+Whitespace of every kind taken off instead, an output ending in a space or a tab was reported
+shorter than it is and came back without the part of it that said so: a command printing 'AB  '
+was answered with 'AB', while the techniques reading their answer off a substitution handed back
+all four characters. A substitution drops newlines and stops at the first byte that is not one -
+a carriage return, among them - so that is what comes off here.
+"""
 def trim(expr):
-  return "rtrim(" + expr + ")"
+  return "rtrim(" + expr + ", chr(10))"
 
 # How many bytes an expression is.
 def length(expr):

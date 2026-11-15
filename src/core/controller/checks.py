@@ -1538,7 +1538,27 @@ def comparison_baseline(url, http_request_method):
     settings.STAND_IN_PAGE = requests.page_without_payload(url, http_request_method) or settings.ORIGINAL_PAGE or ""
   return settings.STAND_IN_PAGE
 
-def decode_page_body(body, response=None, percent_decode=True, entity_decode=True):
+"""
+Per-cent escapes read as the characters they stand for, except where one runs into a marker.
+
+What a command printed is bytes, not a page: a per-cent sign in its output is one it printed, and
+the two characters behind it belong to whatever came next - the marker a technique closes the
+output with, where the output ends on one. Read together, those three became a single byte, the
+marker was no longer whole and the output came back as nothing at all: an output ending in '%'
+and a marker beginning 'EF' lost both, while the same output and a marker beginning 'UZ' came
+back as it was. An escape is left as it stands wherever reading it would reach into the marker,
+and every other one is read the way a page carrying encoded text needs it read.
+"""
+def percent_decoded(body, guard=None):
+  if isinstance(guard, str):
+    guard = guard.encode(settings.DEFAULT_CODEC)
+  def decoded(match):
+    if guard and any(body.startswith(guard, match.start() + offset) for offset in (1, 2)):
+      return match.group(0)
+    return codecs.decode(match.group(1), "hex")
+  return re.sub(b"(?i)%([0-9a-f]{2})", decoded, body)
+
+def decode_page_body(body, response=None, percent_decode=True, entity_decode=True, guard=None):
   """
   A page already read from its response, as text: decompressed if it was compressed, and read in
   the encoding it declares.
@@ -1587,7 +1607,7 @@ def decode_page_body(body, response=None, percent_decode=True, entity_decode=Tru
       body = re.sub(b"(?i)&#x([0-9a-f]{1,2});", lambda _: codecs.decode(_.group(1) if len(_.group(1)) == 2 else b"0" + _.group(1), "hex"), body)
       body = re.sub(b"&#(\\d{1,3});", lambda _: bytes(bytearray([int(_.group(1))])) if int(_.group(1)) < 256 else _.group(0), body)
     if percent_decode and b"%" in body:
-      body = re.sub(b"(?i)%([0-9a-f]{2})", lambda _: codecs.decode(_.group(1), "hex"), body)
+      body = percent_decoded(body, guard)
     if entity_decode:
       body = re.sub(b"&([^;]+);", lambda _: bytes(bytearray([settings.HTML_ENTITIES[_.group(1).decode("ascii", errors="replace")]])) if settings.HTML_ENTITIES.get(_.group(1).decode("ascii", errors="replace"), 256) < 256 else _.group(0), body)
     page_encoding = page_encoding or heuristic_charset(body)
@@ -1726,7 +1746,7 @@ def page_text_percent(page):
     return 100.0
   return 100.0 * len(filtered_page_content(page)) / len(page)
 
-def process_page_content(response, action):
+def process_page_content(response, action, guard=None):
   try:
     page = response.read()
   except _http_client.IncompleteRead as err_msg:
@@ -1742,7 +1762,7 @@ def process_page_content(response, action):
   # Read as text the one way every page is read: decompressed, in the charset the page and its
   # header agree on, with what a browser would resolve already resolved.
   if action != "encode":
-    return decode_page_body(page, response, percent_decode=not settings.CRAWLING)
+    return decode_page_body(page, response, percent_decode=not settings.CRAWLING, guard=guard)
 
   page = decompress_page(page, content_encoding)
 

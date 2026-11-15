@@ -1,4 +1,5 @@
 ## Version 4.2 (TBA)
+* Added: New tamper script `phpregreplace.py`, carrying a payload through the replacement string of a PHP sink evaluated by `preg_replace()`'s "e" modifier.
 * Fixed: The switch `--null-connection`, which reads no page body, was left to run alongside an option that reads one (`--string`, `--not-string`, `--regexp`, `--text-only`, `--titles`), leaving every boolean answer the same.
 * Added: New switch `--titles`, comparing pages by their title alone - for a target whose page moves by itself everywhere except the line naming what it rendered.
 * Fixed: Payload generation for certain separator and tamper script combinations, which could produce a payload the shell cannot run.

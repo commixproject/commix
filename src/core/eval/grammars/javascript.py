@@ -117,21 +117,44 @@ def run(cmd):
 def read_file(path):
   return "require(\"fs\").readFileSync(" + _literal(path) + ").toString()"
 
-# Drop trailing whitespace, so a length agrees with what a shell's own substitution would report -
-# both ends rather than the one, the way another language's grammar does it here, would disagree
-# with that substitution on any output that opens with whitespace of its own.
-def trim(expr):
-  return "(" + expr + ").trimEnd()"
+"""
+Drop the newlines an output ends with, so a length agrees with what a shell's own substitution
+would report.
 
-# How many bytes an expression is.
+Whitespace of every kind taken off instead, an output ending in a space or a tab was reported
+shorter than it is and came back without the part of it that said so: a command printing 'AB  '
+was answered with 'AB', while the techniques reading their answer off a substitution handed back
+all four characters. A substitution drops newlines and stops at the first byte that is not one -
+a carriage return, among them - so that is what comes off here.
+"""
+def trim(expr):
+  return "(" + expr + ").replace(/\\n+$/, \"\")"
+
+"""
+How many bytes an expression is.
+
+Counted off the bytes rather than off what this language calls its characters: a command printing
+three Greek letters is six bytes and was reported as three, so the search asked about half of them
+and the other half came back as nothing at all. Every other grammar here counts bytes, and the
+ordinals the techniques read are byte ordinals, so the two have to agree on what a position is.
+
+Read through the one pair of calls every build of this language has had: 'encodeURIComponent' writes
+each byte as its own escape and 'unescape' reads those back one per character, which is a string
+whose length and whose character codes are the bytes. A 'Buffer' would say the same thing in fewer
+calls and is not there at all outside Node, which one of the sinks this grammar answers is not.
+"""
 def length(expr):
-  return "(" + expr + ").length"
+  return "unescape(encodeURIComponent(" + expr + ")).length"
 
 # The ordinal of an expression's Nth byte, counting from zero. 'charCodeAt' answers 'NaN' past the
 # end, which the search would read as a comparison that is never true - answering zero instead
 # says plainly that nothing is there, the way every other language's grammar here does too.
 def ordinal(expr, index):
-  return "(" + expr + ").charCodeAt(" + str(index) + ")||0"
+  # Parenthesised around the whole of it: '||' binds looser than every comparison this grammar
+  # writes around an ordinal, so the fallback would otherwise take the comparison for its own right
+  # side rather than standing in for a byte that is not there. Read off the bytes, as the length
+  # beside it is.
+  return "(unescape(encodeURIComponent(" + expr + ")).charCodeAt(" + str(index) + ")||0)"
 
 # An expression's value read as a number, for a command whose output is one.
 def to_number(expr):
