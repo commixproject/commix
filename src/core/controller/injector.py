@@ -1803,7 +1803,18 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
       what is between the markers has been taken, the way the evaluation sink below already does it.
       """
       new_line = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
-      html_data = re.sub(settings.END_LINE.CRLF + r"|[" + settings.END_LINE.CR + settings.END_LINE.LF + r"]", new_line, html_data)
+      """
+      Each kind of break by a mark of its own, the pair taken first.
+
+      Marked as one thing and put back as a newline, a carriage return the command printed came
+      back as one: an output of 'a\rb' was answered with 'a\nb'. The three marks share a prefix,
+      so one of them is still as easy to find as the single mark was, and a Windows line break is
+      one mark rather than two - which is what keeps it a pair when it is put back.
+      """
+      page_marks = ((settings.END_LINE.CRLF, new_line + "B"), (settings.END_LINE.CR, new_line + "R"),
+                    (settings.END_LINE.LF, new_line + "N"))
+      for sequence, mark in page_marks:
+        html_data = html_data.replace(sequence, mark)
       # cleanup string / unescape html to string
       html_data = _urllib.parse.unquote(html_data)
       html_data = unescape(html_data)
@@ -1816,8 +1827,9 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
         # Clear junks
         shell = [tags.replace(TAG + TAG , settings.SINGLE_WHITESPACE) for tags in shell]
         shell = [backslash.replace(r"\/","/") for backslash in shell]
-        # The output's own line breaks, back where they were.
-        shell = [marked.replace(new_line, settings.END_LINE.LF) for marked in shell]
+        # The output's own line breaks, back where they were and as what they were.
+        for sequence, mark in page_marks:
+          shell = [marked.replace(mark, sequence) for marked in shell]
         # And the ones the target was asked to mark before it answered, which is how a break
         # survives a sink that hands back a single line of what it ran.
         shell = [marked.replace(settings.RESULTS_BASED_LF_MARKER, settings.END_LINE.LF)

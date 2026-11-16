@@ -101,26 +101,54 @@ def make_simple_execute_cmd(injector, separator, maxlen, TAG, prefix, suffix, wh
         shell = ""
       return postprocess_time(shell)
     else:
-      def send():
+      def send(command=None):
+        command = cmd if command is None else command
         if technique == settings.INJECTION_TECHNIQUE.FILE_BASED and not results_based_injector:
-          response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, technique)
+          response = injector.injection(separator, TAG, command, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, technique)
         else:
-          response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, interpreter, filename, technique)
+          response = injector.injection(separator, TAG, command, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, interpreter, filename, technique)
           if settings.URL_RELOAD:
             response = requests.url_reload(url, timesec)
-        shell = injector.injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, timesec)
-        return "".join(str(p) for p in shell)
-      shell = send()
-      # The reading that hands the output back whole asks a tool of the target, and a target
-      # without it answers nothing where the plainer reading would have answered something. Asked
-      # again the once, with the rest of this target kept to the plainer form; an output that is
-      # genuinely empty pays that one request to establish that it is.
-      if not shell and settings.RESULTS_BASED_EXACT_OUTPUT \
-         and technique == settings.INJECTION_TECHNIQUE.RESULTS_BASED:
-        settings.RESULTS_BASED_EXACT_OUTPUT = False
-        shell = send()
-      return shell
+        return injector.injection_results(response, TAG, command, technique, url, OUTPUT_TEXTFILE, timesec)
+      return read_command_output(send, technique, cmd)
   return execute_cmd
+
+"""
+What a results-based answer says, as text - or None where the markers never came back at all.
+
+Only that technique reads its answer from between markers, and only it can tell an output that
+was empty from a payload that was never answered: the markers come back around nothing in the
+first case and not at all in the second. Every other answer is text already.
+"""
+def _answer_text(found, technique):
+  if technique == settings.INJECTION_TECHNIQUE.RESULTS_BASED and isinstance(found, list) and not found:
+    return None
+  return "".join(str(part) for part in found) if found else ""
+
+"""
+Read one command's output through the confirmed injection point, the command run once.
+
+How the output is read is settled before the first command the user asked for, not after it: told
+over an output already read, the only way to read it again is to run the command again. The one
+request sent twice is a more complex payload that was not answered at all - no markers came back,
+so it never ran, and sending the plain one instead runs the command for the first time, not the
+second. The rest of the target is then kept to the plain reading, and the user is told why.
+"""
+def read_command_output(send, technique, cmd):
+  def check(command):
+    applied = settings.USER_APPLIED_CMD
+    try:
+      return _answer_text(send(command), technique) or ""
+    finally:
+      settings.USER_APPLIED_CMD = applied
+  checks.decide_exact_output(technique, check)
+  shell = _answer_text(send(cmd), technique)
+  if shell is None and settings.RESULTS_BASED_EXACT_OUTPUT:
+    settings.RESULTS_BASED_EXACT_OUTPUT = False
+    warn_msg = "The more complex payload went unanswered, so command output is read the plain way."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+    shell = _answer_text(send(cmd), technique)
+  return shell or ""
 
 """
 Build an execute_cmd(cmd) -> (output, fresh) callback around the injector model, with session caching - the shared logic behind every enumeration.py check.

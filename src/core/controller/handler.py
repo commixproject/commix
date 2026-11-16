@@ -387,13 +387,15 @@ def pseudo_terminal_shell(injector, separator, maxlen, TAG, cmd, prefix, suffix,
           # Export injection result
           checks.time_related_export_injection_results(cmd, separator, shell, check_exec_time)
         else:
-          if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
-            response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, technique)
-          else:
-            response = injector.injection(separator, TAG, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, interpreter, filename, technique)
-          # Command execution results.
-          shell = injector.injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, timesec)
-          shell = "".join(str(p) for p in shell)
+          # Through the same reading every other command takes, so the form settled before the first
+          # one holds in the shell as well, and each command is run once.
+          def send(command):
+            if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
+              response = injector.injection(separator, TAG, command, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, technique)
+            else:
+              response = injector.injection(separator, TAG, command, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, interpreter, filename, technique)
+            return injector.injection_results(response, TAG, command, technique, url, OUTPUT_TEXTFILE, timesec)
+          shell = execution.read_command_output(send, technique, cmd)
       # Update logs with executed cmds and execution results.
       logs.executed_command(filename, cmd, shell)
       # Storing a known-incomplete result would serve it back as if it were the real output.

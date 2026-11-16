@@ -860,6 +860,9 @@ def quit(filename, url, hard_exit):
   if not exploit:
     settings.PENDING_POST_DETECTION_ACTIONS = []
     settings.PENDING_OS_SHELL_ENTRY = None
+  else:
+    # From here on the commands are the ones the user asked for.
+    settings.EXPLOITATION_STARTED = True
   for action_fn in list(settings.PENDING_POST_DETECTION_ACTIONS):
     action_fn()
   settings.PENDING_POST_DETECTION_ACTIONS = []
@@ -8358,5 +8361,60 @@ def in_scope(url):
     debug_msg = "Skipping out of scope target '" + url + "'."
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
   return False
+
+"""
+Whether there is an exact reading of the output to ask for on this target at all.
+
+Only the classic payload against a Unix-like shell has one: a Windows target is read through
+'for /f', which hands the output back line by line whatever is asked, and the payload built for an
+alternative interpreter marks its own line breaks and has no plainer form to be told apart from. A
+substitution that cannot hold another one cannot hold the 'awk' call either, and a tamper script
+has the exact reading taken out of the payload altogether - the quoting it asks for is a level
+deeper than the scripts take apart.
+
+Asked of the same conditions the payload is built under, so that a question is never put to the
+user where answering yes would send the very payload that was sent already.
+"""
+def exact_output_exists():
+  return (settings.TARGET_OS != settings.OS.WINDOWS and not menu.options.interpreter
+          and substitution_nests() and not any(settings.TAMPER_SCRIPTS.values()))
+
+"""
+Settle, before the first command the user asked for, how this target's command output is read - once,
+so that every command after it runs a single time, in the one form.
+
+The plain reading hands the output back as the shell's own word splitting leaves it: every run of
+whitespace a single space, and the line breaks gone with them. The exact reading hands it back as
+it was printed, at the cost of a payload several times the length spelling out 'awk', 'LC_ALL',
+'BEGIN', 'gsub' and 'ARGV' - every one a word a filter in front of the target can be watching for.
+So it is the user's to ask for, and asked before anything runs: told over an output already read,
+the only way to read that output exactly is to run the command again, and a command with an effect
+of its own - an append, a deletion - would have it twice.
+
+The target is asked first whether it has 'awk' at all, by name and without running it. Where it
+does not, there is no exact reading to offer and nothing is asked. Under '--batch' the answer is the
+plain reading, so neither the question nor the check that would come before it is sent - unless
+'--answers' names this question with a yes, which is the user asking for it in advance.
+"""
+def decide_exact_output(technique, read):
+  if (technique != settings.INJECTION_TECHNIQUE.RESULTS_BASED or settings.EXACT_OUTPUT_CHOICE is not None
+      or not settings.EXPLOITATION_STARTED or not exact_output_exists()):
+    return
+  settings.EXACT_OUTPUT_CHOICE = False
+  message = "Do you want to preserve whitespace in command output? (more complex payloads) [y/N] "
+  # Under '--batch' only an answer given by name for this question is reason to send anything.
+  if menu.options.batch and str(common.predefined_answer(message) or "").lower() != "y":
+    return
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Checking whether the target has 'awk', which reading command output exactly needs."
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+  if not (read(settings.AWK_PRESENCE_CHECK) or "").strip():
+    if settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "The target has no 'awk', so command output is read the plain way."
+      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+    return
+  answer = common.read_input(message, default="N", check_batch=True)
+  settings.EXACT_OUTPUT_CHOICE = str(answer).lower() == "y"
+  settings.RESULTS_BASED_EXACT_OUTPUT = settings.EXACT_OUTPUT_CHOICE
 
 # eof

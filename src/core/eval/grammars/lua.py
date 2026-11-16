@@ -91,7 +91,8 @@ The expressions every payload is built out of, spelled the way this language spe
 # nothing in one is ever read back as a variable or another expression - so only a literal
 # backslash and the quote closing this one need escaping, nothing an embedded '$' or '@' needs.
 def _literal(text):
-  return "\"" + text.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
+  text = text.replace("\\", "\\\\").replace("\"", "\\\"")
+  return "\"" + text.replace("\r", "\\r").replace("\n", "\\n") + "\""
 
 # Run a command and yield its output, through the one handle this language reads a command's
 # stdout from.

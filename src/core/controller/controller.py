@@ -272,6 +272,10 @@ def probe_skip_testable_value_early(url, http_request_method, check_parameter, p
   else:
     url = url.replace(marker, placeholder + settings.INJECT_TAG)
   settings.TESTABLE_VALUE = placeholder
+  if settings.VERBOSITY_LEVEL != 0:
+    debug_msg = "Checking whether the parameter's own value is required to reach the sink, by sending "
+    debug_msg += "the same payload with '" + placeholder + "' in place of '" + original_value + "'."
+    settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
   answered = False
   try:
     response, _ = heuristic_request(url, http_request_method, check_parameter, payload, whitespace, place)

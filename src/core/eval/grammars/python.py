@@ -128,7 +128,8 @@ Whatever is quoted here can itself contain a quote - an interpreter one-liner pa
 the first of them ends the literal and the rest is read as code that does not parse.
 """
 def _literal(text):
-  return "\"" + text.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
+  text = text.replace("\\", "\\\\").replace("\"", "\\\"")
+  return "\"" + text.replace("\r", "\\r").replace("\n", "\\n") + "\""
 
 """
 Run a command and yield its output, read as the bytes the command wrote.

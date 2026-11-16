@@ -155,60 +155,160 @@ class TechniquesCarryingEitherSink(unittest.TestCase):
 if __name__ == "__main__":
   unittest.main()
 
-class AReadingThatNeedsAToolFallsBackWhenItIsNotThere(unittest.TestCase):
+class EachCommandRunsOnceInTheFormSettledBeforeIt(unittest.TestCase):
   """
-  The exact reading of a command's output asks 'awk' of the target. A target without it answers
-  nothing, where the reading that asks for none would have answered something - so an empty answer
-  is asked again the once, and the rest of that target is read the plainer way.
+  How a results-based answer is read - plainly, or exactly as printed through a more complex
+  payload - is settled before the first command the user asked for, and every command then runs a
+  single time. Settled after an output was read, the only way to read that output exactly is to run
+  the command again, and a command with an effect of its own would have it twice. The target is
+  asked first whether it has 'awk', by name: where it does not, there is nothing to ask the user.
   """
   def setUp(self):
     from src.core.controller import execution
-    self.execution = execution
-    self._exact = settings.RESULTS_BASED_EXACT_OUTPUT
-    self._time = settings.TIME_RELATED_ATTACK
-    self._reload = settings.URL_RELOAD
-    settings.RESULTS_BASED_EXACT_OUTPUT = True
+    from src.utils import common
+    self.execution, self.common = execution, common
+    self._kept = (settings.RESULTS_BASED_EXACT_OUTPUT, settings.EXACT_OUTPUT_CHOICE,
+                  settings.EXPLOITATION_STARTED, settings.TIME_RELATED_ATTACK, settings.URL_RELOAD,
+                  common.read_input, settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX,
+                  dict(settings.TAMPER_SCRIPTS), settings.TARGET_OS, menu.options.interpreter,
+                  menu.options.batch)
+    settings.RESULTS_BASED_EXACT_OUTPUT = False
+    settings.EXACT_OUTPUT_CHOICE = None
+    settings.EXPLOITATION_STARTED = True
     settings.TIME_RELATED_ATTACK = False
     settings.URL_RELOAD = False
-    self.sent = []
+    settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = "$(", ")"
+    for name in settings.TAMPER_SCRIPTS:
+      settings.TAMPER_SCRIPTS[name] = False
+    settings.TARGET_OS = settings.OS.UNIX
+    menu.options.interpreter = None
+    menu.options.batch = False
+    self.asked, self.sent, self.commands = [], [], []
 
   def tearDown(self):
-    settings.RESULTS_BASED_EXACT_OUTPUT = self._exact
-    settings.TIME_RELATED_ATTACK = self._time
-    settings.URL_RELOAD = self._reload
+    (settings.RESULTS_BASED_EXACT_OUTPUT, settings.EXACT_OUTPUT_CHOICE,
+     settings.EXPLOITATION_STARTED, settings.TIME_RELATED_ATTACK, settings.URL_RELOAD,
+     self.common.read_input, settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX,
+     scripts, settings.TARGET_OS, menu.options.interpreter, menu.options.batch) = self._kept
+    settings.TAMPER_SCRIPTS.clear()
+    settings.TAMPER_SCRIPTS.update(scripts)
 
-  def injector(self, answers):
-    sent, said = self.sent, list(answers)
+  def _answers(self, answer):
+    asked = self.asked
+    def read_input(message, default=None, check_batch=True):
+      asked.append(message)
+      return answer
+    self.common.read_input = read_input
+
+  def fire(self, answers, cmd="id"):
+    # What the target answers, in the order it is asked - each a list of what the markers enclosed,
+    # an empty one being markers that never came back.
+    sent, said, commands = self.sent, list(answers), self.commands
     class Injector(object):
       @staticmethod
       def injection(*args, **kwargs):
         sent.append(settings.RESULTS_BASED_EXACT_OUTPUT)
+        commands.append(args[2])
         return "response"
       @staticmethod
       def injection_results(*args, **kwargs):
         return said.pop(0)
-    return Injector
-
-  def fire(self, answers):
     run = self.execution.make_simple_execute_cmd(
-      self.injector(answers), ";", 10, "TAG", "", "", " ", 5, "GET", "http://t/", "p", None, "f",
+      Injector, ";", 10, "TAG", "", "", " ", 5, "GET", "http://t/", "p", None, "f",
       0, settings.INJECTION_TECHNIQUE.RESULTS_BASED, "")
-    return run("id")
+    return run(cmd)
 
-  def test_an_empty_answer_is_asked_again_without_the_tool(self):
-    self.assertEqual("plain", self.fire(["", "plain"]))
-    self.assertEqual([True, False], self.sent)
+  def test_a_yes_reads_the_first_command_exactly_and_runs_it_once(self):
+    self._answers("y")
+    self.assertEqual("a  b", self.fire([["/usr/bin/awk"], ["a  b"]], cmd="ls"))
+    self.assertEqual([settings.AWK_PRESENCE_CHECK, "ls"], self.commands)
+    self.assertEqual([False, True], self.sent)
+    self.assertEqual(1, len(self.asked))
+
+  def test_a_no_reads_it_plainly_and_runs_it_once(self):
+    self._answers("n")
+    self.assertEqual("a b", self.fire([["/usr/bin/awk"], ["a b"]], cmd="ls"))
+    self.assertEqual([settings.AWK_PRESENCE_CHECK, "ls"], self.commands)
+    self.assertEqual([False, False], self.sent)
+
+  def test_a_target_without_awk_is_not_asked_about_it(self):
+    self._answers("y")
+    self.assertEqual("a b", self.fire([[""], ["a b"]], cmd="ls"))
+    self.assertEqual([], self.asked)
+    self.assertEqual([settings.AWK_PRESENCE_CHECK, "ls"], self.commands)
     self.assertFalse(settings.RESULTS_BASED_EXACT_OUTPUT)
 
-  def test_an_answer_that_came_back_is_not_asked_twice(self):
-    self.assertEqual("exact  output", self.fire(["exact  output"]))
-    self.assertEqual([True], self.sent)
+  def test_batch_sends_neither_the_check_nor_the_question(self):
+    self._answers("y")
+    menu.options.batch = True
+    self.assertEqual("a b", self.fire([["a b"]], cmd="ls"))
+    self.assertEqual(["ls"], self.commands)
+    self.assertEqual([], self.asked)
+
+  def test_batch_with_a_yes_given_by_name_checks_and_reads_exactly(self):
+    self._answers("y")
+    menu.options.batch = True
+    kept, settings.ANSWERS = settings.ANSWERS, "preserve whitespace=y"
+    try:
+      self.assertEqual("a  b", self.fire([["/usr/bin/awk"], ["a  b"]], cmd="ls"))
+    finally:
+      settings.ANSWERS = kept
+    self.assertEqual([settings.AWK_PRESENCE_CHECK, "ls"], self.commands)
+    self.assertEqual([False, True], self.sent)
+
+  def test_batch_with_a_no_given_by_name_sends_nothing_extra(self):
+    menu.options.batch = True
+    kept, settings.ANSWERS = settings.ANSWERS, "preserve whitespace=n"
+    try:
+      self.fire([["a b"]], cmd="ls")
+    finally:
+      settings.ANSWERS = kept
+    self.assertEqual(["ls"], self.commands)
+
+  def test_the_form_is_settled_once_for_the_target(self):
+    self._answers("y")
+    self.fire([["/usr/bin/awk"], ["x"]], cmd="ls")
+    self.commands[:] = []
+    self.fire([["y"]], cmd="id")
+    self.assertEqual(["id"], self.commands)
+    self.assertEqual(1, len(self.asked))
+
+  def test_nothing_is_asked_before_the_commands_the_user_asked_for(self):
+    # A web root, a shell type - the run's own commands during detection are read plainly.
+    self._answers("y")
+    settings.EXPLOITATION_STARTED = False
+    self.assertEqual("/var/www", self.fire([["/var/www"]], cmd="pwd"))
+    self.assertEqual(["pwd"], self.commands)
+    self.assertIsNone(settings.EXACT_OUTPUT_CHOICE)
+
+  def test_nothing_is_asked_where_a_yes_would_change_nothing(self):
+    self._answers("y")
+    settings.TARGET_OS = settings.OS.WINDOWS
+    self.fire([["a b"]])
+    settings.TARGET_OS = settings.OS.UNIX
+    menu.options.interpreter = "python"
+    self.fire([["a b"]])
+    menu.options.interpreter = None
+    settings.TAMPER_SCRIPTS["space2ifs"] = True
+    self.fire([["a b"]])
+    self.assertEqual([], self.asked)
+    self.assertEqual(["id", "id", "id"], self.commands)
+
+  def test_an_empty_output_is_not_a_reason_to_run_the_command_again(self):
+    # The markers came back around nothing: the command ran and printed nothing.
+    settings.RESULTS_BASED_EXACT_OUTPUT = True
+    settings.EXACT_OUTPUT_CHOICE = True
+    self.assertEqual("", self.fire([[""]], cmd="touch f"))
+    self.assertEqual(["touch f"], self.commands)
     self.assertTrue(settings.RESULTS_BASED_EXACT_OUTPUT)
 
-  def test_a_target_already_read_the_plain_way_asks_once(self):
-    settings.RESULTS_BASED_EXACT_OUTPUT = False
-    self.assertEqual("", self.fire([""]))
-    self.assertEqual([False], self.sent)
+  def test_an_unanswered_complex_payload_is_sent_once_more_the_plain_way(self):
+    # No markers at all: the payload never ran, so the plain one runs the command the first time.
+    settings.RESULTS_BASED_EXACT_OUTPUT = True
+    settings.EXACT_OUTPUT_CHOICE = True
+    self.assertEqual("a b", self.fire([[], ["a b"]], cmd="ls"))
+    self.assertEqual([True, False], self.sent)
+    self.assertFalse(settings.RESULTS_BASED_EXACT_OUTPUT)
 
 class WhatStoodInForOneParametersValueIsNotCarriedToTheNext(unittest.TestCase):
   """

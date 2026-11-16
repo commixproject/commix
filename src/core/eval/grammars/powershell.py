@@ -106,11 +106,39 @@ differs - so the techniques ask through the names below, and a language is added
 again rather than by touching a payload.
 """
 
-# A single-quoted string literal holding the given text - the one quote it needs escaped by
-# doubling, and nothing else: unlike a double-quoted string here, it reads no backslash or '$' as
-# anything other than itself, which is exactly what a foreign shell's own command line is full of.
+"""
+A string literal holding the given text.
+
+Single-quoted, the one quote it needs escaped by doubling and nothing else: unlike a double-quoted
+string here, it reads no backslash or '$' as anything other than itself, which is exactly what a
+foreign shell's own command line is full of.
+
+A line break is the one character such a string cannot be written with. It is allowed inside one -
+the string simply runs on to the next line - but the payload is then a payload with a line break in
+it, and an injection point that is a header carries that as the end of the header rather than as
+part of the value. This language has no escape for it inside single quotes either, so the break is
+spliced in as the character it is and the quoted runs on each side are joined back onto it. Every
+other grammar here writes the same break as an escape of its own; this is that, spelled the way
+this one spells it.
+"""
+BREAKS = ("\r", "\n")
+
 def _literal(text):
-  return "'" + text.replace("'", "''") + "'"
+  quoted = lambda run: "'" + run.replace("'", "''") + "'"
+  pieces, run = [], ""
+  for character in text:
+    if character in BREAKS:
+      if run:
+        pieces.append(quoted(run))
+        run = ""
+      pieces.append("[char]" + str(ord(character)))
+    else:
+      run = run + character
+  if run or not pieces:
+    pieces.append(quoted(run))
+  if len(pieces) == 1:
+    return pieces[0]
+  return "(" + "+".join(pieces) + ")"
 
 """
 Run a command and yield its output.
@@ -124,7 +152,28 @@ def run(cmd):
   from src.utils import settings
   if settings.TARGET_OS == settings.OS.WINDOWS:
     return "((cmd /c " + _literal(cmd) + " 2>&1) | Out-String)"
-  return "((/bin/sh -c " + _literal(cmd) + " 2>&1) | Out-String)"
+  return _read_through_a_pipe(cmd)
+
+"""
+Start the shell and read its output off the pipe, rather than letting this language collect it.
+
+What a native command writes is collected here as lines: the terminator of each is taken off, and
+'Out-String' then puts the platform's own back between them - which is not what the command wrote.
+A carriage return of the output's own went with it, a CRLF came back as a newline, and a length read
+off either was one byte short per line: 'AB\r\n' was answered with 'AB'. Read off the pipe instead,
+nothing is split and nothing is put back, so the bytes are the ones the command printed.
+
+The command goes in on the pipe as well, not as an argument: an argument list is read for quotes and
+backslashes of its own before the shell is ever reached, and is spelled differently again by the
+build of this language a Windows target carries. Written to the shell's own input there is nothing
+in between to read it, so the command arrives as it was built. 'exec 2>&1' first, which is what the
+redirection this used to carry said: the shell's own error output goes the same way as the rest.
+"""
+def _read_through_a_pipe(cmd):
+  return ("$($i=New-Object Diagnostics.ProcessStartInfo;$i.FileName='/bin/sh';"
+          "$i.RedirectStandardInput=$true;$i.RedirectStandardOutput=$true;$i.UseShellExecute=$false;"
+          "$p=[Diagnostics.Process]::Start($i);$p.StandardInput.Write('exec 2>&1;'+" + _literal(cmd) +
+          ");$p.StandardInput.Close();$p.StandardOutput.ReadToEnd())")
 
 # Read a file and yield its contents.
 def read_file(path):
@@ -143,19 +192,31 @@ a carriage return, among them - so that is what comes off here.
 def trim(expr):
   return "(" + expr + ").TrimEnd([char]10)"
 
-# How many bytes an expression is.
+# What this language counts a string in, so the byte of a given position can be asked for.
+UTF8 = "[System.Text.Encoding]::UTF8"
+
+"""
+How many bytes an expression is.
+
+Counted off the bytes rather than off what this language calls the string's length, which is its
+characters: a command printing three Greek letters is six bytes and was reported as three, so the
+search asked about half of them and the other half came back as nothing at all. The ordinals the
+techniques read are byte ordinals, so the two have to agree on what a position is.
+"""
 def length(expr):
-  return "(" + expr + ").Length"
+  return UTF8 + ".GetByteCount(" + expr + ")"
 
 """
 The ordinal of an expression's Nth byte, counting from zero.
 
-Indexing a string past its end answers '$null' here rather than raising, and '[int]$null' is 0 - the
-same "nothing there" answer every other language's grammar gives for the same case, reached for free
-rather than built.
+Read off the same bytes the length beside it counts. Indexing past the end answers '$null' here
+rather than raising, and '[int]$null' is 0 - the same "nothing there" answer every other language's
+grammar gives for the same case, reached for free rather than built. The cast binds tighter than
+every comparison this grammar writes around an ordinal, so the whole of it needs no brackets of its
+own the way a fallback written with an operator would.
 """
 def ordinal(expr, index):
-  return "[int](" + expr + ")[" + str(index) + "]"
+  return "[int]" + UTF8 + ".GetBytes(" + expr + ")[" + str(index) + "]"
 
 # An expression's value read as a number, for a command whose output is one - '[int]""' is 0 for the
 # same reason the line above needs nothing extra either.

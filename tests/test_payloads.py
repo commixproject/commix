@@ -594,6 +594,41 @@ class TheOutputsOwnLineBreaksComeBackWithIt(unittest.TestCase):
     self.assertEqual(["a\rb\nc"], injector.injection_results(
       served(), "TAG", "id", settings.INJECTION_TECHNIQUE.RESULTS_BASED, "url", None, 1))
 
+class AResultsBasedAnswerKeepsEachKindOfBreak(unittest.TestCase):
+  """
+  The page a results-based answer is read off puts every break of the output on a line of its own,
+  and the markers are looked for on one line - so the breaks are marked and put back afterwards.
+  Marked as one thing and put back as a newline, a carriage return the command printed came back as
+  a newline: 'a\rb' was answered with 'a\nb', and a Windows line break with two of them.
+  """
+  TAG = "QQQQQQ"
+
+  def _read(self, printed):
+    from src.core.controller import injector
+    body = "<b>" + self.TAG + self.TAG + printed + self.TAG + self.TAG + "</b>"
+    class served(object):
+      def read(self, *args, **kwargs):
+        return body.encode(settings.DEFAULT_CODEC)
+      def info(self):
+        return {}
+      def getcode(self):
+        return 200
+    found = injector.injection_results(served(), self.TAG, "cmd",
+                                       settings.INJECTION_TECHNIQUE.RESULTS_BASED, "url", None, 1)
+    return found[0] if found else found
+
+  def test_a_newline_comes_back_as_one(self):
+    self.assertEqual("a\nb", self._read("a\nb"))
+
+  def test_a_carriage_return_does_not_come_back_as_a_newline(self):
+    self.assertEqual("a\rb", self._read("a\rb"))
+
+  def test_a_windows_break_comes_back_as_the_pair_it_was(self):
+    self.assertEqual("a\r\nb\r\n", self._read("a\r\nb\r\n"))
+
+  def test_the_three_kinds_in_one_answer_each_stay_what_they_were(self):
+    self.assertEqual("a\nb\rc\r\nd", self._read("a\nb\rc\r\nd"))
+
 class ByteSemantics(unittest.TestCase):
   """
   An ordinal is read off a raw byte, and a shell in a UTF-8 locale will not decode one on its own -

@@ -107,7 +107,8 @@ again rather than by touching a payload.
 
 # A string literal holding the given text.
 def _literal(text):
-  return "\"" + text.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
+  text = text.replace("\\", "\\\\").replace("\"", "\\\"")
+  return "\"" + text.replace("\r", "\\r").replace("\n", "\\n") + "\""
 
 # Run a command and yield its output. 'execSync' answers with a Buffer, not the string itself.
 def run(cmd):

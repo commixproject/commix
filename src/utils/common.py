@@ -99,6 +99,23 @@ def safe_input(message):
 """
 Reads input from terminal
 """
+"""
+The answer '--answers' gives for a question, or None where it gives none.
+
+Read on its own as well as from inside a prompt, so that something about to be asked under
+'--batch' can tell an answer given by name from the default that would otherwise stand in for one.
+"""
+def predefined_answer(message):
+  if settings.ANSWERS and any(_ in settings.ANSWERS for _ in ",="):
+    for item in settings.ANSWERS.split(','):
+      # Split once: an answer is free to hold "=" of its own, a URL with a query string most of
+      # all, and splitting on every one of them handed back the answer cut at the first.
+      question = item.split('=', 1)[0].strip()
+      answer = item.split('=', 1)[1] if '=' in item else None
+      if answer and question.lower() in message.lower():
+        return answer
+  return None
+
 def read_input(message, default=None, check_batch=True):
   # Close the spinner line before prompting unless the message is empty.
   if message:
@@ -125,16 +142,10 @@ def read_input(message, default=None, check_batch=True):
     # Nothing in there names a question, so a run given that is answered the way a run given none
     # is - read as a prompt of its own, it left '--batch' unconsulted and every question waiting on
     # somebody to type, which under automation is a run that ends on the first one.
-    if settings.ANSWERS and any(_ in settings.ANSWERS for _ in ",="):
-      for item in settings.ANSWERS.split(','):
-        # Split once: an answer is free to hold "=" of its own, a URL with a query string most
-        # of all, and splitting on every one of them handed back the answer cut at the first.
-        question = item.split('=', 1)[0].strip()
-        answer = item.split('=', 1)[1] if '=' in item else None
-        if answer and question.lower() in message.lower():
-          value = answer
-          settings.print_data_to_stdout(settings.print_message(message + str(value)))
-          return value
+    given = predefined_answer(message)
+    if given is not None:
+      settings.print_data_to_stdout(settings.print_message(message + str(given)))
+      return given
     if value:
       if settings.VERBOSITY_LEVEL != 0:
         debug_msg = "Used the given answer."

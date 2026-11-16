@@ -101,6 +101,7 @@ go through this, so only run() and read_file() need it.
 """
 def _literal(text):
   text = text.replace("\\", "\\\\").replace("\"", "\\\"").replace("$", "\\$").replace("@", "\\@")
+  text = text.replace("\r", "\\r").replace("\n", "\\n")
   return "\"" + text + "\""
 
 # Run a command and yield its output, through the backtick operator.

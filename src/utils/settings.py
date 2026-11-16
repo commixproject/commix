@@ -500,7 +500,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "346"
+REVISION = "347"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -686,10 +686,32 @@ ALTER_INTERPRETER_BASIC_COMMAND_INJECTION_PAYLOADS = []
 BASIC_COMMAND_INJECTION_RESULT = ""
 IDENTIFIED_COMMAND_INJECTION = False
 
-# Whether the results-based technique still asks the target to hand its output back a line at a
-# time. Turned off for the rest of this target once a reading comes back empty, which is how a
-# target without the tool that reading needs answers.
-RESULTS_BASED_EXACT_OUTPUT = True
+"""
+Whether the results-based technique asks the target to hand its output back exactly as the command
+printed it, rather than as the shell's own word-splitting leaves it.
+
+Off until the user says otherwise. The exact reading asks 'awk' of the target and spells out
+'LC_ALL', 'BEGIN', 'gsub' and 'ARGV' to do it, in a payload three times the length of the plain
+one - every one of those a word a filter can be watching for, and a payload that never runs where
+one is. The plain reading carries 'echo' and a substitution and nothing else, so that is what goes
+out unless the user asks, before the first command, for the exact one.
+
+Turned off again for the rest of this target where the exact reading is not answered at all, which
+is how a filter refusing it answers.
+"""
+RESULTS_BASED_EXACT_OUTPUT = False
+
+# The answer to that question, kept for the rest of the target: asked once, before the first command
+# the user asked for, rather than once per command.
+EXACT_OUTPUT_CHOICE = None
+
+# Set once detection is over and the commands the user asked for begin - the moment the question
+# above is put, rather than during the commands this run sends of its own (a web root, a shell type).
+EXPLOITATION_STARTED = False
+
+# Whether the target has 'awk', asked by name and without running it - there is no exact reading to
+# offer where it does not, so the question is not put at all.
+AWK_PRESENCE_CHECK = "command -v awk"
 
 # What the target is asked to put in place of the line breaks its output carries, so that the output
 # arrives as the single line the markers are looked for on. A sink handing back only the last line
