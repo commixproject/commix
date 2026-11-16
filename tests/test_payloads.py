@@ -1601,13 +1601,13 @@ class ResultsBasedReadsTheOutputAsItWasPrinted(unittest.TestCase):
     # A script that writes the payload out differently puts its own characters inside the markers
     # too, and those are stripped only where the shell still reads them.
     payload = self.payload()
-    self.assertIn('%s' + settings.CMD_SUB_PREFIX + 'echo TAG' + settings.CMD_SUB_SUFFIX + 'TAG', payload)
+    self.assertIn('%s' + settings.CMD_SUB_PREFIX + 'printf TAG' + settings.CMD_SUB_SUFFIX + 'TAG', payload)
     self.assertIn('"' + settings.CMD_SUB_PREFIX + 'LC_ALL=C awk', payload)
 
   def test_a_substitution_that_cannot_nest_reads_it_the_plain_way(self):
     settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = "`", "`"
     payload = self.payload()
-    self.assertIn("echo TAG", payload)
+    self.assertIn(checks.print_marker("TAG"), payload)
     self.assertNotIn("awk", payload)
 
   def test_a_script_rewriting_the_payload_reads_it_the_plain_way(self):
@@ -1615,7 +1615,7 @@ class ResultsBasedReadsTheOutputAsItWasPrinted(unittest.TestCase):
     # is in effect the output goes in as it always did - a collapsed answer, not no answer.
     settings.TAMPER_SCRIPTS["space2ifs"] = True
     payload = self.payload()
-    self.assertIn("echo TAG", payload)
+    self.assertIn(checks.print_marker("TAG"), payload)
     self.assertNotIn("awk", payload)
 
   def test_a_target_without_the_tool_reads_it_the_plain_way(self):
@@ -1660,3 +1660,130 @@ class TheInterpreterIsHandedTheOutputNotAProgramMadeOfIt(unittest.TestCase):
   def test_the_command_is_still_run(self):
     for name, payload in self._built().items():
       self.assertIn(settings.CMD_SUB_PREFIX + "echo Hello" + settings.CMD_SUB_SUFFIX, payload, name)
+
+class EachPayloadPrintsWithOneCommand(unittest.TestCase):
+  """
+  A payload prints with 'printf' or with 'echo', never both: a filter refusing either name would
+  otherwise refuse the payload over a word the other half did not need. 'printf' is the default,
+  since it prints its arguments as they are; the tamper script trading it for 'echo' turns every
+  payload to 'echo' at once. Every POSIX builder is built here under every separator, both ways.
+  """
+  MODULES = ("results_based.rb_payloads", "time_based.tb_payloads", "boolean_based.bb_payloads",
+             "file_based.fb_payloads", "tempfile_based.tfb_payloads")
+  ARGS = {"separator": ";", "TAG": "TAG", "cmd": "id", "OUTPUT_TEXTFILE": "/tmp/X.txt", "timesec": 2,
+          "http_request_method": "GET", "output_length": 3, "j": 3, "num_of_chars": 1,
+          "ascii_char": 65, "tag_length": 3, "randvcalc": 5, "holds": True, "candidate_length": 3}
+
+  def setUp(self):
+    self._kept = (settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX, settings.TARGET_OS,
+                  settings.PRINT_WITH_ECHO, settings.RESULTS_BASED_EXACT_OUTPUT)
+    settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = "$(", ")"
+    settings.TARGET_OS = settings.OS.UNIX
+
+  def tearDown(self):
+    (settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX, settings.TARGET_OS,
+     settings.PRINT_WITH_ECHO, settings.RESULTS_BASED_EXACT_OUTPUT) = self._kept
+
+  def _payloads(self):
+    for name in self.MODULES:
+      module = importlib.import_module("src.core.techniques." + name)
+      for function_name, function in inspect.getmembers(module, inspect.isfunction):
+        if function.__module__ != module.__name__ or function_name.startswith("_"):
+          continue
+        # The alternative interpreter's payloads hand the output to Python, not to a printing command.
+        if "alter_interpreter" in function_name:
+          continue
+        for separator in (";", "&", "&&", "|", "||", "\n"):
+          values = dict(self.ARGS, separator=separator)
+          try:
+            payload = function(*[values.get(p, 1) for p in inspect.signature(function).parameters])
+          except Exception:
+            continue
+          if isinstance(payload, str) and payload:
+            yield name + "." + function_name + " " + repr(separator), payload
+
+  def _mixed(self):
+    return [where for where, payload in self._payloads()
+            if re.search(r"\becho\b", payload) and re.search(r"\bprintf\b", payload)]
+
+  def test_no_payload_mixes_the_two_by_default(self):
+    for exact in (False, True):
+      settings.RESULTS_BASED_EXACT_OUTPUT = exact
+      settings.PRINT_WITH_ECHO = False
+      self.assertEqual([], self._mixed())
+
+  def test_no_payload_mixes_the_two_where_echo_is_asked_for(self):
+    settings.PRINT_WITH_ECHO = True
+    self.assertEqual([], self._mixed())
+
+  def test_the_payloads_that_print_say_printf_by_default_and_echo_when_asked(self):
+    from src.core.techniques.results_based import rb_payloads
+    settings.RESULTS_BASED_EXACT_OUTPUT = False
+    settings.PRINT_WITH_ECHO = False
+    self.assertNotIn("echo", rb_payloads.cmd_execution(";", "TAG", "id"))
+    settings.PRINT_WITH_ECHO = True
+    self.assertNotIn("printf", rb_payloads.cmd_execution(";", "TAG", "id"))
+
+  def test_the_script_trading_printf_for_echo_says_so_before_anything_is_built(self):
+    from src.tamper.obfuscation.posix import printf2echo
+    settings.PRINT_WITH_ECHO = False
+    printf2echo.declare()
+    self.assertTrue(settings.PRINT_WITH_ECHO)
+
+class AnOutputIsPrintedAsItWasPrinted(unittest.TestCase):
+  """
+  'echo' reads the backslashes of what it prints as escapes on some shells and a leading '-n' as an
+  option on all of them, so an output carrying either came back changed: 'C:\\temp\\new' as a tab and
+  a line break, and '\\c' cut the closing markers off. Each payload is run here through the local
+  shell, so it is the shell's reading of what was built that is checked, not its spelling.
+  """
+  TAG = "QQQQQQ"
+  PRINTED = ("C:\\temp\\new", "a\\cb", "a\\\\b", "\\0141", "-n x", "-E")
+
+  def setUp(self):
+    self._kept = (settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX, settings.TARGET_OS,
+                  settings.RESULTS_BASED_EXACT_OUTPUT, settings.PRINT_WITH_ECHO)
+    settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = "$(", ")"
+    settings.TARGET_OS = settings.OS.UNIX
+    settings.RESULTS_BASED_EXACT_OUTPUT = False
+    settings.PRINT_WITH_ECHO = False
+
+  def tearDown(self):
+    (settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX, settings.TARGET_OS,
+     settings.RESULTS_BASED_EXACT_OUTPUT, settings.PRINT_WITH_ECHO) = self._kept
+
+  def _command(self, text):
+    # Written out a byte at a time, so the command itself carries nothing for a shell to read.
+    return "printf '" + "".join("\\%03o" % byte for byte in text.encode("utf-8")) + "'"
+
+  def test_the_plain_reading_prints_the_output_as_it_was_printed(self):
+    from src.core.techniques.results_based import rb_payloads
+    for text in self.PRINTED:
+      payload = rb_payloads.cmd_execution(";", self.TAG, self._command(text))
+      done = subprocess.run(["sh", "-c", "true" + payload], capture_output=True)
+      found = re.findall((self.TAG * 2 + "(.*)" + self.TAG * 2).encode(), done.stdout, re.S)
+      self.assertEqual([text.encode()], found, "the plain reading changed " + repr(text))
+
+  def test_the_plain_reading_still_joins_the_words_with_one_space(self):
+    from src.core.techniques.results_based import rb_payloads
+    payload = rb_payloads.cmd_execution(";", self.TAG, self._command("a  b\n c\n"))
+    done = subprocess.run(["sh", "-c", "true" + payload], capture_output=True)
+    self.assertIn((self.TAG * 2 + "a b c" + self.TAG * 2).encode(), done.stdout)
+
+  def test_the_tempfile_reading_stores_the_output_as_it_was_printed(self):
+    from src.core.techniques.tempfile_based import tfb_payloads
+    import tempfile
+    with tempfile.TemporaryDirectory() as work:
+      stored = os.path.join(work, "out.txt")
+      for text in self.PRINTED:
+        subprocess.run(["sh", "-c", "true" + tfb_payloads.oracle_write(";", self._command(text), stored)],
+                       capture_output=True)
+        with open(stored, "rb") as handle:
+          self.assertEqual(text.encode(), handle.read(), "the tempfile reading changed " + repr(text))
+
+  def test_echo_where_asked_for_still_reads_a_plain_output(self):
+    from src.core.techniques.results_based import rb_payloads
+    settings.PRINT_WITH_ECHO = True
+    payload = rb_payloads.cmd_execution(";", self.TAG, self._command("uid=33 gid=33"))
+    done = subprocess.run(["sh", "-c", "true" + payload], capture_output=True)
+    self.assertIn((self.TAG * 2 + "uid=33 gid=33" + self.TAG * 2).encode(), done.stdout)

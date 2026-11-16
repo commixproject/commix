@@ -500,7 +500,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "347"
+REVISION = "348"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -537,6 +537,8 @@ LEGAL_DISCLAIMER_MSG = "Attacking targets without prior mutual consent is illega
 RANDOM_STRING_GENERATOR = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(10))
 # Random variable name (E-Z only).
 RANDOM_VAR_GENERATOR = ''.join(random.choice(string.ascii_uppercase[4:]) for _ in range(3))
+# Random "printf" format for a printed word and the one space it is written with.
+RANDOM_PRINTF_FORMAT = random.choice((r"%s\\040", r"%s\\40", r"\\040%s", r"\\40%s"))
 
 # Path to text resources folder
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'data'))
@@ -708,6 +710,10 @@ EXACT_OUTPUT_CHOICE = None
 # Set once detection is over and the commands the user asked for begin - the moment the question
 # above is put, rather than during the commands this run sends of its own (a web root, a shell type).
 EXPLOITATION_STARTED = False
+
+# Whether payloads that print a command's output print it with 'echo' rather than 'printf'. Set by
+# the tamper script that trades one for the other, for a target that refuses 'printf' by name.
+PRINT_WITH_ECHO = False
 
 # Whether the target has 'awk', asked by name and without running it - there is no exact reading to
 # offer where it does not, so the question is not put at all.
@@ -900,6 +906,8 @@ STABILITY_CHECK_DELAY = 0.5
 
 # Below this similarity ratio, two page fetches count as "dynamic".
 STABILITY_SIMILARITY_THRESHOLD = 0.98
+# Largest pair of pages still read character by character, rather than by their length alone.
+MAX_COMPARISON_LENGTH = 10 * 1024 * 1024
 
 # The two pages a question with a known answer came back with, kept so that every later answer is
 # read against them rather than against a threshold - what a condition changes can be two characters

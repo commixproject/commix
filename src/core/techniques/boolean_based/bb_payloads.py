@@ -63,7 +63,7 @@ that marker or it does not. Which of the two is in use is settled per target, by
 def _decide(separator, expression, arithmetic=None):
   if not settings.BOOLEAN_PRINTED_STATE:
     return _test(expression)
-  printing = "echo " + settings.BOOLEAN_MARKER
+  printing = checks.print_marker(settings.BOOLEAN_MARKER)
   # What follows '&&' runs only where what precedes it succeeded, which is the whole conditional.
   if separator == "&&":
     return _test(expression) + separator + printing
@@ -83,7 +83,7 @@ is a count some builds refuse outright.
 """
 def _printed_through_pipe(arithmetic):
   marker = settings.BOOLEAN_MARKER
-  return ("printf '%s' " + marker + settings.PIPE_SEPARATOR + "tail -c +$(( (" + arithmetic +
+  return (checks.print_value(marker) + settings.PIPE_SEPARATOR + "tail -c +$(( (" + arithmetic +
           ") ? 1 : " + str(len(marker) + 1) + " ))")
 
 """
@@ -94,10 +94,10 @@ right reads it - what the other separators keep in one is read here as it is nee
 counted rather than read as a character, so a build whose 'printf' signs it answers the same.
 """
 def _piped_length(word):
-  return "$(printf '%s' \"" + word + "\"" + settings.PIPE_SEPARATOR + "wc -c)"
+  return "$(" + checks.print_value("\"" + word + "\"") + settings.PIPE_SEPARATOR + "wc -c)"
 
 def _piped_ordinal(word, num_of_chars):
-  return ("$(printf '%s' \"" + word + "\"" + settings.PIPE_SEPARATOR + "tail -c +" + str(num_of_chars) +
+  return ("$(" + checks.print_value("\"" + word + "\"") + settings.PIPE_SEPARATOR + "tail -c +" + str(num_of_chars) +
           settings.PIPE_SEPARATOR + "head -c 1" + settings.PIPE_SEPARATOR + "od -A n -t u1)")
 
 """
@@ -154,7 +154,7 @@ def decision(separator, TAG, output_length, holds=True):
       "powershell.exe -InputFormat none write " +
       checks.windows_output_bytes(checks.windows_output_text("echo " + TAG)) + ".length",
       "EQU", expected)
-  word = tb_payloads._output_word("echo " + TAG)
+  word = tb_payloads._output_word(checks.print_marker(TAG))
   var = settings.RANDOM_VAR_GENERATOR
   if separator == settings.PIPE_SEPARATOR:
     measured = _piped_length(word)

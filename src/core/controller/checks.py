@@ -158,7 +158,7 @@ def detect_waf_in_page(response):
   page = settings.ORIGINAL_PAGE
   if not page or page == settings.WAF_CHECK_BASELINE:
     return False
-  if difflib.SequenceMatcher(None, settings.WAF_CHECK_BASELINE, page).ratio() >= settings.WAF_CHECK_RATIO:
+  if page_ratio(settings.WAF_CHECK_BASELINE, page) >= settings.WAF_CHECK_RATIO:
     return False
   settings.WAF_IDENTIFIED = identify_waf_in_text(page)
   if settings.WAF_IDENTIFIED:
@@ -1730,6 +1730,31 @@ is what a yes and a no can still be told apart by.
 def page_title(page):
   match = re.search(r"(?i)<title\b[^>]*>(?P<result>[^<]*)</title>", page or "")
   return (match.group("result") or "").strip() if match else ""
+
+"""
+How alike two pages are, from 0 to 1.
+
+Counted over the characters the two have in common rather than the order they arrive in, because
+the ordered reading leaves out every character making up more than one percent of the page: a body
+ending in a long run of few distinct characters - base64, hexadecimal, decimals - has every one of
+them left out that way, and two such pages a single byte apart read as half alike. A pair too large
+to read character by character at all is answered by their lengths, which is the one reading that
+costs nothing.
+"""
+def page_ratio(first, second):
+  if first is None or second is None:
+    return 0.0
+  if first == second:
+    return 1.0
+  if not first or not second:
+    return 0.0
+  if max(len(first), len(second)) > settings.MAX_COMPARISON_LENGTH:
+    ratio = 1.0 * len(first) / len(second)
+    return ratio if ratio <= 1 else 1.0 / ratio
+  try:
+    return difflib.SequenceMatcher(None, first, second).quick_ratio()
+  except (MemoryError, TypeError, ValueError):
+    return 0.0
 
 """
 The page as it is worth comparing: without the regions that move by themselves, and - where
@@ -5203,8 +5228,8 @@ def boolean_oracle(page, code=None, page_length=None, headers=None):
   if settings.BOOLEAN_TRUE_PAGE is None or settings.BOOLEAN_FALSE_PAGE is None or page is None:
     return None
   current = comparable_page(page)
-  to_true = difflib.SequenceMatcher(None, settings.BOOLEAN_TRUE_PAGE, current).ratio()
-  to_false = difflib.SequenceMatcher(None, settings.BOOLEAN_FALSE_PAGE, current).ratio()
+  to_true = page_ratio(settings.BOOLEAN_TRUE_PAGE, current)
+  to_false = page_ratio(settings.BOOLEAN_FALSE_PAGE, current)
   if to_true == to_false:
     return None
   return to_true > to_false
@@ -8361,6 +8386,31 @@ def in_scope(url):
     debug_msg = "Skipping out of scope target '" + url + "'."
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
   return False
+
+"""
+The command a payload prints a command's output with.
+
+'printf' prints its arguments as they are, where 'echo' reads backslashes as escapes on some shells
+and a leading '-n' as an option on all of them. Each payload uses only one of the two, and the
+tamper script that trades 'printf' for 'echo' sets PRINT_WITH_ECHO for these to write 'echo'.
+"""
+# Several words, one space to each - the joining 'echo' does, in a format picked once per run.
+def print_words(words):
+  if settings.PRINT_WITH_ECHO:
+    return "echo " + words
+  return "printf " + settings.RANDOM_PRINTF_FORMAT + " " + words
+
+# One argument, printed as it is - with no line break behind it in either form, so both write the same.
+def print_value(value):
+  if settings.PRINT_WITH_ECHO:
+    return "echo -n " + value
+  return "printf %s " + value
+
+# A marker, a word of letters only.
+def print_marker(word):
+  if settings.PRINT_WITH_ECHO:
+    return "echo " + word
+  return "printf " + word
 
 """
 Whether there is an exact reading of the output to ask for on this target at all.

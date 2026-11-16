@@ -19,7 +19,6 @@ import time
 import calendar
 import email.utils
 import threading
-import difflib
 import statistics
 from socket import error as SocketError
 from src.core.parse import cmdline as menu
@@ -113,7 +112,7 @@ def is_url_content_stable(url, response=None, fetch_time=None, http_request_meth
       second_response.close()
 
     if first_response_content != second_response_content:
-      ratio = difflib.SequenceMatcher(None, first_response_content, second_response_content).ratio()
+      ratio = checks.page_ratio(first_response_content, second_response_content)
       if settings.VERBOSITY_LEVEL != 0:
         debug_msg = "Content similarity ratio between the two samples: " + str(round(ratio, 4))
         debug_msg += " (threshold: " + str(settings.STABILITY_SIMILARITY_THRESHOLD) + ")."
@@ -146,8 +145,8 @@ def is_url_content_stable(url, response=None, fetch_time=None, http_request_meth
     """
     checks.find_dynamic_content(settings.ORIGINAL_PAGE, second_page)
     settings.ORIGINAL_PAGE_COMPARABLE = checks.comparable_page(settings.ORIGINAL_PAGE)
-    settings.PAGE_NOISE_RATIO = difflib.SequenceMatcher(None, settings.ORIGINAL_PAGE_COMPARABLE,
-                                                        checks.comparable_page(second_page)).ratio()
+    settings.PAGE_NOISE_RATIO = checks.page_ratio(settings.ORIGINAL_PAGE_COMPARABLE,
+                                                  checks.comparable_page(second_page))
 
     """
     '--skip-static' reads this ratio as how similar an unchanged response can be expected to look -
@@ -165,8 +164,8 @@ def is_url_content_stable(url, response=None, fetch_time=None, http_request_meth
           third_page = checks.decode_page_body(third_response.read(), third_response)
         finally:
           third_response.close()
-        third_ratio = difflib.SequenceMatcher(None, settings.ORIGINAL_PAGE_COMPARABLE,
-                                              checks.comparable_page(third_page)).ratio()
+        third_ratio = checks.page_ratio(settings.ORIGINAL_PAGE_COMPARABLE,
+                                        checks.comparable_page(third_page))
         settings.PAGE_NOISE_RATIO = max(settings.PAGE_NOISE_RATIO, third_ratio)
       except Exception:
         # The two-sample ratio above still stands; a third, better-calibrated reading is a bonus.

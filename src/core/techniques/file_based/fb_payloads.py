@@ -43,7 +43,7 @@ def decision(separator, TAG, OUTPUT_TEXTFILE):
               )
   else:
     payload = (separator +
-              "echo " + TAG + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE
+              checks.print_marker(TAG) + settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE
               )
 
     payload = checks.terminate_payload(payload, separator)
@@ -57,7 +57,7 @@ def decision_combined(separator, tags, OUTPUT_TEXTFILE):
   writes = []
   for index, tag in enumerate(tags):
     operator = settings.FILE_WRITE_OPERATOR if index == 0 else settings.FILE_APPEND_OPERATOR
-    writes.append("echo " + tag + operator + settings.WEB_ROOT + OUTPUT_TEXTFILE)
+    writes.append(checks.print_marker(tag) + operator + settings.WEB_ROOT + OUTPUT_TEXTFILE)
   payload = separator + separator.join(writes)
   payload = checks.terminate_payload(payload, separator)
   return payload

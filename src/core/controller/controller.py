@@ -18,7 +18,6 @@ import os
 import time
 import random
 import string
-import difflib
 from src.core.parse import cmdline as menu
 from src.utils import logs
 from src.utils import settings
@@ -69,7 +68,7 @@ def basic_payload_generator():
     # '--skip-calc' covers the detection phase, and the heuristic is part of it - so what the target
     # has to print back between the markers is a marker it had to run a command to produce.
     expected = marker3
-    settings.BASIC_STRING = "echo " + marker3
+    settings.BASIC_STRING = checks.print_marker(marker3)
     windows_proof = "echo " + marker3
     alter_interpreter_basic_string = " -c \"print('" + marker3 + "')\""
   else:
@@ -78,9 +77,9 @@ def basic_payload_generator():
     windows_proof = "set /a " + settings.BASIC_STRING
     alter_interpreter_basic_string = " -c \"print(int(" + calc_string + "))\""
 
-  settings.BASIC_COMMAND_INJECTION_PAYLOADS = [";echo " + marker1 + settings.CMD_SUB_PREFIX + settings.BASIC_STRING + settings.CMD_SUB_SUFFIX + marker2 +
-                                              "&echo " + marker1 + settings.CMD_SUB_PREFIX + settings.BASIC_STRING + settings.CMD_SUB_SUFFIX + marker2 +
-                                              "|echo " + marker1 + settings.CMD_SUB_PREFIX + settings.BASIC_STRING + settings.CMD_SUB_SUFFIX + marker2,
+  # The same proof behind each separator, printed through the one command checks.print_words() names.
+  posix_proof = checks.print_words(marker1 + settings.CMD_SUB_PREFIX + settings.BASIC_STRING + settings.CMD_SUB_SUFFIX + marker2)
+  settings.BASIC_COMMAND_INJECTION_PAYLOADS = [";" + posix_proof + "&" + posix_proof + "|" + posix_proof,
                                               "|echo " + marker1 + "&" + windows_proof + "&echo " + marker2 +
                                               "&echo " + marker1 + "&" + windows_proof + "&echo " + marker2
                                               ]
@@ -856,13 +855,13 @@ def check_parameter_dynamism(url, http_request_method, check_parameter):
     repeat_body = _body(settings.TESTABLE_VALUE)
     if real_body is None or repeat_body is None:
       return
-    noise = difflib.SequenceMatcher(None, real_body, repeat_body).ratio()
+    noise = checks.page_ratio(real_body, repeat_body)
 
   placeholder_body = _body(placeholder)
   if placeholder_body is None:
     return
 
-  changed = difflib.SequenceMatcher(None, real_body, placeholder_body).ratio()
+  changed = checks.page_ratio(real_body, placeholder_body)
   if changed >= max(noise, settings.STABILITY_SIMILARITY_THRESHOLD):
     warn_msg = param_label + " does not appear to be dynamic."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))

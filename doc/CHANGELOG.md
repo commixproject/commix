@@ -1,4 +1,6 @@
 ## Version 4.2 (TBA)
+* Revised: Tamper script `printf2echo.py` now switches every payload, both detection and exploitation, from `printf` to `echo`, for a target that refuses `printf` by name.
+* Fixed: Command output carrying a backslash (e.g. "C:\temp\new") or starting with "-n", which came back altered because payloads printed it with "echo".
 * Added: New tamper script `phpregreplace.py`, carrying a payload through the replacement string of a PHP sink evaluated by `preg_replace()`'s "e" modifier.
 * Fixed: The switch `--null-connection`, which reads no page body, was left to run alongside an option that reads one (`--string`, `--not-string`, `--regexp`, `--text-only`, `--titles`), leaving every boolean answer the same.
 * Added: New switch `--titles`, comparing pages by their title alone - for a target whose page moves by itself everywhere except the line naming what it rendered.
