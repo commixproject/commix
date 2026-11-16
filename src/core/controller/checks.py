@@ -8395,8 +8395,10 @@ and a leading '-n' as an option on all of them. Each payload uses only one of th
 tamper script that trades 'printf' for 'echo' sets PRINT_WITH_ECHO for these to write 'echo'.
 """
 # Several words, one space to each - the joining 'echo' does, in a format picked once per run.
-def print_words(words):
-  if settings.PRINT_WITH_ECHO:
+# 'with_echo' names the printing for this one call, where the caller is writing both deliberately
+# rather than printing the way the run prints; left out, the run's own choice stands.
+def print_words(words, with_echo=None):
+  if settings.PRINT_WITH_ECHO if with_echo is None else with_echo:
     return "echo " + words
   return "printf " + settings.RANDOM_PRINTF_FORMAT + " " + words
 
@@ -8411,6 +8413,22 @@ def print_marker(word):
   if settings.PRINT_WITH_ECHO:
     return "echo " + word
   return "printf " + word
+
+"""
+Note which of the two printings the heuristic test came back with, where it came back with one of
+them only.
+
+Both went out in the one request, so an answer carrying one and not the other is the target's own
+word on which it still lets through - suggestive rather than settled, since each went behind its
+own separator and a separator the target does not take answers the same as a name it refuses. Read
+as what is worth trying next, which is what the pass that reaches for the tamper script asks.
+"""
+def note_printer_that_answered(page):
+  patterns = settings.BASIC_COMMAND_INJECTION_RESULTS
+  if not patterns or not page:
+    return
+  answered = [name for name in ("echo", "printf") if patterns.get(name) and re.search(patterns[name], page)]
+  settings.PRINTER_ANSWERED = answered[0] if len(answered) == 1 else None
 
 """
 Whether there is an exact reading of the output to ask for on this target at all.

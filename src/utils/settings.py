@@ -500,7 +500,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "348"
+REVISION = "349"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -537,8 +537,11 @@ LEGAL_DISCLAIMER_MSG = "Attacking targets without prior mutual consent is illega
 RANDOM_STRING_GENERATOR = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(10))
 # Random variable name (E-Z only).
 RANDOM_VAR_GENERATOR = ''.join(random.choice(string.ascii_uppercase[4:]) for _ in range(3))
-# Random "printf" format for a printed word and the one space it is written with.
-RANDOM_PRINTF_FORMAT = random.choice((r"%s\\040", r"%s\\40", r"\\040%s", r"\\40%s"))
+# Random "printf" format for a printed word and the one space it is written with - the conversion,
+# the octal escape and the side the space falls on are each spelled more than one way, so a filter
+# refusing the format has no one string of it to go by.
+RANDOM_PRINTF_FORMAT = random.choice((r"%s\\040", r"%s\\40", r"\\040%s", r"\\40%s",
+                                      r"%-s\\040", r"%-s\\40", r"\\040%-s", r"\\40%-s"))
 
 # Path to text resources folder
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'data'))
@@ -686,6 +689,10 @@ BASIC_STRING = ""
 BASIC_COMMAND_INJECTION_PAYLOADS = []
 ALTER_INTERPRETER_BASIC_COMMAND_INJECTION_PAYLOADS = []
 BASIC_COMMAND_INJECTION_RESULT = ""
+# The same, split by the name each repetition printed with, so the one that answered is known.
+BASIC_COMMAND_INJECTION_RESULTS = {}
+# What the target still printed with, where only one of the two names came back.
+PRINTER_ANSWERED = None
 IDENTIFIED_COMMAND_INJECTION = False
 
 """
@@ -1031,6 +1038,8 @@ WHITESPACE_RETRY_CHOICE = None
 TEMP_FOLDER_CHOICE = None
 # The same consent, asked about a filter built around '-' rather than around whitespace.
 DASHLESS_RETRY_CHOICE = None
+# And again for one built around the name and the format every payload prints with.
+PRINTER_RETRY_CHOICE = None
 # And the same again for one built around '$', which is what every command substitution this writes
 # is opened with - and what the whitespace pass above reaches for first, in '${IFS}'.
 BACKTICK_RETRY_CHOICE = None
@@ -3223,7 +3232,7 @@ RUN_WIDE_STATE = frozenset((
   # an obstacle, and an answer given once covers every target the same way, since what is being
   # answered is whether that pass is worth its cost at all.
   "ADJUST_TIME_DELAY_CHOICE", "BACKTICK_RETRY_CHOICE", "DASHLESS_RETRY_CHOICE",
-  "FILE_BASED_NARROWING_CHOICE",
+  "FILE_BASED_NARROWING_CHOICE", "PRINTER_RETRY_CHOICE",
   "IGNORE_IDENTIFIED_TARGET_OS", "IGNORE_NOT_FOUND", "NOT_FOUND_PROMPTED", "UNSTABLE_PROMPTED",
   "RECOGNISE_OS", "REPLACE_VALUE_RETRY_CHOICE", "THREADED_TIME_RETRIEVAL_CHOICE",
   "USE_BIN_SUBDIR_CHOICE", "WAF_EVASION_CONSENT", "WHITESPACE_RETRY_CHOICE",
