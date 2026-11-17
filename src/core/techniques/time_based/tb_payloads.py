@@ -73,9 +73,13 @@ command on the end of the pipe the payload is already proving - no second statem
 def _ordinal_expr(word, num_of_chars):
   # '+' rather than a bare '+', which arrives as a space - and 'tail -c N' counts from the end.
   # Held in '$( )' whichever substitution is in use, as the count beside it is: the word inside is
-  # itself a substitution, and a backtick cannot hold another without escaping it.
-  return ("$(printf '%s' \"" + word + "\" | tail -c +" + str(num_of_chars) +
-          " | head -c 1 | od -A n -t u1)")
+  # itself a substitution, and a backtick cannot hold another without escaping it. Printed through
+  # the same command everything else in the payload is printed through: spelled out here instead,
+  # it went on saying 'printf' while a run that had settled on 'echo' said that everywhere else,
+  # and a payload carrying both names answers for both to whichever filter refuses either.
+  return ("$(" + checks.print_value("\"" + word + "\"") + settings.PIPE_SEPARATOR +
+          "tail -c +" + str(num_of_chars) + settings.PIPE_SEPARATOR + "head -c 1" +
+          settings.PIPE_SEPARATOR + "od -A n -t u1)")
 
 """
 The interpreter reads the output as an argument of its own rather than off a pipe. It is still data

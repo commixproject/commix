@@ -52,13 +52,18 @@ def decision(separator, TAG, OUTPUT_TEXTFILE):
 
 """
 Combined multi-tag decision payload for false-positive verification (Unix only).
+
+Written out by one command rather than one per marker. Several of them would be chained on the
+separator that proved the injection, and two of those do not run what they join in turn: "&" puts
+what precedes it in the background and "|" starts both sides at once, which leaves the write that
+truncates the file racing the one that appends to it. The read that follows asks for the markers in
+the order they went in, so a race there is read as a target answering every payload the same way -
+a real finding thrown out as a false positive. One write cannot come out in the wrong order, and
+the markers run together are still read apart, each being looked for in its turn.
 """
 def decision_combined(separator, tags, OUTPUT_TEXTFILE):
-  writes = []
-  for index, tag in enumerate(tags):
-    operator = settings.FILE_WRITE_OPERATOR if index == 0 else settings.FILE_APPEND_OPERATOR
-    writes.append(checks.print_marker(tag) + operator + settings.WEB_ROOT + OUTPUT_TEXTFILE)
-  payload = separator + separator.join(writes)
+  payload = (separator + checks.print_marker("".join(tags)) +
+            settings.FILE_WRITE_OPERATOR + settings.WEB_ROOT + OUTPUT_TEXTFILE)
   payload = checks.terminate_payload(payload, separator)
   return payload
 

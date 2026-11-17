@@ -96,9 +96,11 @@ counted rather than read as a character, so a build whose 'printf' signs it answ
 def _piped_length(word):
   return "$(" + checks.print_value("\"" + word + "\"") + settings.PIPE_SEPARATOR + "wc -c)"
 
+# The reading the time-based technique already takes, asked for there rather than written out
+# again here: the two spellings of it drifted apart once, one of them keeping a 'printf' the run
+# had stopped using.
 def _piped_ordinal(word, num_of_chars):
-  return ("$(" + checks.print_value("\"" + word + "\"") + settings.PIPE_SEPARATOR + "tail -c +" + str(num_of_chars) +
-          settings.PIPE_SEPARATOR + "head -c 1" + settings.PIPE_SEPARATOR + "od -A n -t u1)")
+  return tb_payloads._ordinal_expr(word, num_of_chars)
 
 """
 The command's output held in a variable, and cut down to the byte being asked about.

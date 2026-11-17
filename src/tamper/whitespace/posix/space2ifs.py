@@ -20,7 +20,10 @@ from src.core.controller import checks
 About: Replaces space character (' ') with the internal field separator ($IFS) in a given payload.
 The internal field separator refers to a variable which defines the character
 or characters used to separate a pattern into tokens for some operations.
-Notes: This tamper script works against target(s) with a POSIX shell.
+Notes: This tamper script works against target(s) with a POSIX shell. '${IFS}' is a separator only
+       once the shell has expanded it and split what it expanded, so where that is not what happens
+       - beside a keyword, after a command's own assignments, or inside a quoted literal - the
+       request writes a tab in its place, or leaves the whitespace as it was.
 """
 
 __tamper__ = "space2ifs"

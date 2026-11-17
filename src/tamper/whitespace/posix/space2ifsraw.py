@@ -23,8 +23,10 @@ Notes: This tamper script works against target(s) with a POSIX shell, for a filt
        character this kind of filter takes away. '$9' is an empty positional parameter in an
        ordinary run, so it contributes nothing beyond ending the '$IFS' expansion cleanly: without
        it, '$IFS' run straight into a following letter, digit or underscore would be read as a
-       longer, different (and empty) variable name instead. Safe wherever it lands, since nothing
-       about what follows the space changes how it is used.
+       longer, different (and empty) variable name instead. It is a separator only once the shell
+       has expanded it and split what it expanded, so where that is not what happens - beside a
+       keyword, after a command's own assignments, in front of a digit, or inside a quoted literal
+       - the request writes a tab in its place, or leaves the whitespace as it was.
 References: [1] https://www.yeswehack.com/dojo/dojo-ctf-challenge-winners
 """
 

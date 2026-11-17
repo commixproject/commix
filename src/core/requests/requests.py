@@ -1317,11 +1317,26 @@ def injected_delay_allowance():
 
 # Send the payload wherever the injection point is, and time the answer.
 def _perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url):
+  # What the caller still holds, which is what a finding is reported under - the three rewrites
+  # below are this request's own, so the payload of record is no longer the string it was handed.
+  payload_as_given = payload
   # Fix prefixes / suffixes
   payload, prefix = parameters.prefixes(payload, prefix)
   payload, suffix = parameters.suffixes(payload, suffix)
-  
-  payload = checks.tamper_outside_single_quotes(payload, lambda part: part.replace(settings.SINGLE_WHITESPACE, whitespace))
+
+  # Where the payload itself begins and ends in what is about to be sent, told to the rewrites
+  # below while the two ends are still known separately from it. The payload is unchanged by the
+  # gluing, so it is found in there exactly as it was handed over.
+  body = payload.find(payload_as_given)
+  settings.PAYLOAD_EDGES = ((payload[:body], payload[body + len(payload_as_given):])
+                            if body != -1 else ("", ""))
+  # A substitute the shell reads as text cannot go inside a quoted literal, where it would be that
+  # text rather than the gap it stands for; one the target decodes first arrives there as the space
+  # itself and is written in as before. Nothing is rewritten at all where neither applies.
+  if whitespace != settings.SINGLE_WHITESPACE:
+    rewrite = (checks.tamper_outside_single_quotes if whitespace in settings.DECODED_WHITESPACES
+               else checks.tamper_outside_quoted_text)
+    payload = rewrite(payload, lambda part: checks.tamper_blanks(part, whitespace))
   """
   What the caller is handed back is the payload as it stands here, before the two rewrites below.
 
@@ -1334,6 +1349,11 @@ def _perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http
   """
   payload_of_record = payload
   payload = checks.perform_payload_modification(payload)
+  # Noted before the transport's own encoding goes on, which is the form a finding is reported in.
+  # Under both the payload of record and the string the caller still holds: a prefix, a suffix or a
+  # whitespace substitute leaves the two different, and a finding is reported under the latter.
+  checks.note_payload_as_sent(payload_of_record, payload)
+  checks.note_payload_as_sent(payload_as_given, payload)
   # A parameter the target carries encoded is written back the way it arrived, the whole value at
   # once rather than the injected part alone - which is what makes the value it reads a valid one.
   payload = checks.apply_value_encoding(payload)

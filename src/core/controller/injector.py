@@ -1223,9 +1223,19 @@ def results_based_injection(separator, TAG, cmd, prefix, suffix, whitespace, htt
         if settings.COMMENT in cmd:  
           shown_cmd = cmd.split(settings.COMMENT)[0].strip()
       # The trace of what is actually being run, which for an internal command is the only word of
-      # it - but a command the user asked for on the command line has just been named already.
+      # it - but a command the user asked for on the command line has just been named already. The
+      # technique is named with the first of them because it need not be the one the command is
+      # being run for: a file-based technique is set up by asking the target where to write, and
+      # that question goes out through the results-based one where this target answered it, which
+      # is the whole of why that one alone is called usable. Said once and not again: what it
+      # explains holds for every internal command after it, and repeating it says nothing new.
       if shown_cmd != menu.options.os_cmd:
-        debug_msg = "Executing the '" + shown_cmd + "' command."
+        debug_msg = "Executing the '" + shown_cmd + "' command"
+        if not settings.TECHNIQUE_NAMED_IN_TRACE:
+          settings.TECHNIQUE_NAMED_IN_TRACE = True
+          usable = "usable " if technique == settings.INJECTION_TECHNIQUE.RESULTS_BASED else ""
+          debug_msg += " through the " + usable + technique
+        debug_msg += "."
         settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
     response, vuln_parameter, payload, prefix, suffix = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
     return response

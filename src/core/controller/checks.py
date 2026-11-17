@@ -1105,7 +1105,31 @@ def save_cmd_history():
 """
 Testing technique (title)
 """
+def dashless_gap_note(technique):
+  """
+  What a run working a filtered '-' out of its payloads still cannot spell without one.
+
+  'dashlesstest' reads 'test's comparisons, a word's length and a byte's ordinal without one, which
+  between them are every '-' the results-, boolean-, time- and file-based techniques write. The
+  tempfile-based one turns a whole file into the decimals of its bytes, and what performs that is
+  asked for it through its options - spelled with the one character this target takes away, and
+  with no other spelling of their own. Said here because a target that strips it answers such a
+  payload exactly as it answers a parameter that was never injectable.
+  """
+  if technique != settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
+    return
+  if settings.DASHLESS_TAMPER not in settings.MULTI_ENCODED_PAYLOAD:
+    return
+  warn_msg = "The '" + settings.DASHLESS_TAMPER + ".py' tamper script reaches every '-' this "
+  warn_msg += "technique's comparisons are written with, but not the ones its byte reading needs, "
+  warn_msg += "which are options and have no other spelling. A target that strips a '-' answers "
+  warn_msg += "this technique as it answers a parameter that is not injectable."
+  settings.print_once(warn_msg)
+
 def testing_technique_title(injection_type, technique):
+  # Said before the title, so what follows it is read knowing what this technique can still be
+  # refused for - and once, which 'print_once' settles rather than the title's own repeats.
+  dashless_gap_note(technique)
   # A new technique's title - the completion label below is free to print again for it.
   settings.LAST_COMPLETED_TECHNIQUE = None
   settings.LAST_DOT_BUCKET = -1
@@ -2177,7 +2201,8 @@ def finding_summary_lines(technique, injection_type, payload, title=None):
            settings.SUB_CONTENT_SIGN_TYPE + "Type: " + injection_type[0].upper() + injection_type[1:]]
   if title:
     lines.append(settings.SUB_CONTENT_SIGN_TYPE + "Boundary: " + title)
-  lines.append(settings.SUB_CONTENT_SIGN_TYPE + "Payload: " + payload)
+  # Shown the way every other payload in the run is shown, so the two never read as two payloads.
+  lines.append(settings.SUB_CONTENT_SIGN_TYPE + "Payload: " + settings.rendered_payload(payload))
   return lines
 
 """
@@ -2260,6 +2285,34 @@ def payload_with_own_value(payload):
     settings.RAW_PAYLOAD = raw_payload
   return payload
 
+"""
+The payload as it went out, rather than as the technique built it.
+
+A script that rewrites the payload's own text does so on the way to the target, so what the
+technique still holds afterwards is the form from before it - and a finding reported in that form
+names a payload the target refused. 'dashlesstest' is the plain case: the request carried
+'[ ${#V} = 6 ]' and the summary printed the '-eq' that target rejects.
+
+Looked up rather than worked out again. Running the scripts a second time over the same payload
+answers for the ones that rewrite it the same way every time and invents a payload for the rest -
+'uninitializedvariable' puts its empty variable in at positions it draws at random, so a second
+pass writes something that was never sent, which is the very thing this is here to stop.
+
+The latest rewrite of a payload is the one kept, since that is the request the finding was printed
+behind. A script drawing afresh on every request writes the same payload out differently each time
+it goes - 'space2randomblank' picks among its blanks per occurrence - so for those the form shown
+is one of the requests that were really made rather than the single one that proved it.
+"""
+def note_payload_as_sent(payload_of_record, sent):
+  if payload_of_record == sent:
+    return
+  if len(settings.PAYLOADS_AS_SENT) > settings.MAX_PAYLOADS_AS_SENT:
+    settings.PAYLOADS_AS_SENT.clear()
+  settings.PAYLOADS_AS_SENT[payload_of_record] = sent
+
+def payload_as_sent(payload):
+  return settings.PAYLOADS_AS_SENT.get(payload, payload)
+
 def _injection_points_summary(header_msg, rows, decode_payload=False):
   settings.print_data_to_stdout(header_msg)
   prev_parameter = None
@@ -2271,12 +2324,14 @@ def _injection_points_summary(header_msg, rows, decode_payload=False):
     if current_parameter != prev_parameter:
       settings.print_data_to_stdout(finding_parameter_line(vuln_parameter, http_request_method))
       prev_parameter = current_parameter
-    # A row read back from a stored session holds the payload as it was sent, so the value goes in
-    # here. One confirmed this run had that settled as it was recorded, while the parameter it was
-    # found on was still the one being tested - by the time this prints, another parameter's own
-    # value is what is on record, and a second rewrite here would read the wrong one back.
+    # A row read back from a stored session holds the payload as the technique built it. Where this
+    # run sent it, that is what is shown; where it was another run's, nothing here knows what the
+    # scripts made of it then, and the payload stands as recorded rather than being guessed at. One
+    # confirmed this run had the value settled as it was recorded, while the parameter it was found
+    # on was still the one being tested - by the time this prints, another parameter's own value is
+    # what is on record, and a second rewrite here would read the wrong one back.
     if decode_payload:
-      payload = payload_with_own_value(str(url_decode(payload)))
+      payload = payload_with_own_value(payload_as_sent(str(url_decode(payload))))
     for line in finding_summary_lines(technique, injection_type, payload):
       settings.print_data_to_stdout(line)
   """
@@ -4191,6 +4246,96 @@ def tamper_outside_single_quotes(payload, transform):
   parts = re.split(r"('[^']*')", payload)
   return "".join(part if part.startswith("'") else transform(part) for part in parts)
 
+# A quoted span, and inside a double-quoted one what is still code rather than part of the literal.
+TAMPER_QUOTED_SPAN = r"""('[^']*'|"[^"]*")"""
+TAMPER_QUOTED_CODE = re.compile(r"\$\((?P<substitution>[^()]*)\)|`(?P<backticks>[^`]*)`")
+
+"""
+Apply "transform" to everything but the text a quote makes a literal of.
+
+'tamper_outside_single_quotes' leaves a double-quoted span to be rewritten, which is right for a
+substitute the shell reads back as the character it replaced. A whitespace one is not among those:
+'${IFS}' written between two words is the gap between them, while the same thing written between
+two words of a double-quoted literal is three characters of that literal - so a request line built
+as "GET /x HTTP/1.0" arrives as something no server is going to answer. The literal is left to
+itself here, and only the substitutions inside it are walked, each being a payload of its own.
+
+Only the payload's own quotes are read that way. A boundary's quote answers one the application
+opened, so the span it appears to open runs the other way round - what is inside it is the shell's
+code and what is outside is the application's string - and pairing it with one of the payload's own
+would read both backwards. The two ends are held aside first, by what 'PAYLOAD_EDGES' was last told
+they are, and rewritten on their own.
+"""
+def tamper_outside_quoted_text(payload, transform):
+  # cmd.exe gives a single quote no meaning of its own, for the reason given just above.
+  if settings.TARGET_OS == settings.OS.WINDOWS:
+    return transform(payload)
+  opening, closing = settings.PAYLOAD_EDGES
+  # Held aside only while they are still there to recognise: a script that has already rewritten
+  # one of the two ends has made the payload something this cannot take apart, and the walk below
+  # is what the whole of it gets.
+  if (opening or closing) and payload.startswith(opening) and payload.endswith(closing) and \
+     len(payload) > len(opening) + len(closing):
+    return transform(opening) + \
+           tamper_outside_quoted_text(payload[len(opening):len(payload) - len(closing)], transform) + \
+           transform(closing)
+  parts = re.split(TAMPER_QUOTED_SPAN, payload)
+  # Alternating: what the split was made on lands on the odd positions, the text between on the even.
+  for index, part in enumerate(parts):
+    if index % 2 == 0:
+      parts[index] = transform(part)
+    elif part.startswith("\""):
+      parts[index] = TAMPER_QUOTED_CODE.sub(lambda match: _tamper_quoted_code(match, transform), part)
+  return "".join(parts)
+
+# One substitution out of a double-quoted literal, walked by the same rules as the payload around
+# it - a quote of its own inside it is a quote like any other, and is held to itself the same way.
+def _tamper_quoted_code(match, transform):
+  if match.group("substitution") is not None:
+    return "$(" + tamper_outside_quoted_text(match.group("substitution"), transform) + ")"
+  return "`" + tamper_outside_quoted_text(match.group("backticks"), transform) + "`"
+
+# A whitespace substitute that is only a separator once the shell has expanded it ('${IFS}',
+# '$IFS$9'), as against one that is a separator character in its own right (a tab, a '%20').
+TAMPER_EXPANDED_BLANK = "$"
+# What stands in for one of those where it would not be read as the gap it is written for. A tab is
+# settled as that gap at the point a keyword is, before anything expands, and is still not the
+# space whichever filter the substitute is there for took away.
+TAMPER_PARSED_BLANK = "\t"
+# A command's own assignments, which such a substitute cannot be written after: the words of an
+# assignment are the one place a shell does no field splitting, so what expands to a separator
+# there is read as more of the value rather than as the end of it. A substitution opens a word of
+# its own, so a value reaching into one is not this - what follows it is split as usual.
+TAMPER_ASSIGNMENTS = re.compile(r"(?:\A|[;&|`\n(])(?:\s*[A-Za-z_]\w*=[^\s;&|`\n()]*)+\Z")
+
+def tamper_blank_allowed(blank, part, start, end):
+  """
+  Whether a whitespace substitute written where this one is would be read as the gap it stands for.
+
+  A separator character of its own always is. An expansion is one only where the shell splits what
+  it expanded, and there are three places it does not: beside a keyword, which is settled off the
+  word as written and so is no keyword at all once something expands next to it; after a command's
+  own assignments, whose words are not split; and, for '$IFS$9', in front of a digit, which the
+  shell reads together with the '$9' as one longer - and equally empty - parameter.
+  """
+  if not blank.startswith(TAMPER_EXPANDED_BLANK):
+    return True
+  before = re.search(r"(\w+)\Z", part[:start])
+  after = re.match(r"\A(\w+)", part[end:])
+  if (before and before.group(1) in settings.SHELL_KEYWORDS) or \
+     (after and after.group(1) in settings.SHELL_KEYWORDS):
+    return False
+  if TAMPER_ASSIGNMENTS.search(part[:start]):
+    return False
+  return not (blank.endswith("$9") and after and after.group(1)[:1].isdigit())
+
+# Every space in one span of shell code written as the substitute, bar where that one would not be
+# read as the gap it stands for and a tab is written instead.
+def tamper_blanks(part, blank):
+  return re.sub(re.escape(settings.SINGLE_WHITESPACE),
+                lambda match: blank if tamper_blank_allowed(blank, part, match.start(), match.end())
+                              else TAMPER_PARSED_BLANK, part)
+
 """
 Interleave obf_char before each tamper-modification-letter match (Unix-only) - the shared logic behind backslashes/dollaratsigns/singlequotes.
 """
@@ -4243,8 +4388,13 @@ def tamper_rewrite_user_command(payload, tamper_name):
   source = payload if settings.USER_APPLIED_CMD in payload else settings.RAW_PAYLOAD
   if settings.USER_APPLIED_CMD in source:
     payload = source.replace(settings.USER_APPLIED_CMD, command)
-    if len(settings.WHITESPACES) != 0:
-      payload = payload.replace(settings.SINGLE_WHITESPACE, settings.WHITESPACES[0])
+    # The substitute goes back on what the command was written into, and on the same terms the
+    # request itself puts it on: a quoted literal is the string the payload meant to send, not a
+    # place where one word ends and the next begins.
+    if len(settings.WHITESPACES) != 0 and settings.WHITESPACES[0] != settings.SINGLE_WHITESPACE:
+      rewrite = (tamper_outside_single_quotes if settings.WHITESPACES[0] in settings.DECODED_WHITESPACES
+                 else tamper_outside_quoted_text)
+      payload = rewrite(payload, lambda part: tamper_blanks(part, settings.WHITESPACES[0]))
   return payload
 
 def tamper_word_kept(word, preceding=""):
@@ -4577,6 +4727,13 @@ def tamper_scripts(stored_tamper_scripts):
       settings.TAMPER_WARNING_SHOWN = True
       warn_msg += "is not a good idea (may cause false positive / negative results)."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
+  # What the payloads print with follows the script that trades the two names rather than being
+  # remembered from when it was taken up. A script is dropped again where the target turns out not
+  # to meet what it asks of it, and the ones commix reached for itself are given back between one
+  # parameter and the next - and either way what was remembered went on printing with 'echo' for
+  # payloads nothing was asking it of, on a run whose scripts no longer said so.
+  settings.PRINT_WITH_ECHO = settings.PRINTF_TO_ECHO_TAMPER in settings.MULTI_ENCODED_PAYLOAD
 
 """
 Enable a tamper script by name, skipping duplicates.
@@ -7325,6 +7482,8 @@ def announce_vulnerable_finding(filename, injection_type, technique, the_type, h
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
   announce_leftover_file(technique)
   decoded_payload = str(url_decode(payload)) if decode_payload else payload
+  # Reported as the request proved it, which is after every script that rewrites a payload's text.
+  decoded_payload = payload_as_sent(decoded_payload)
   if not settings.LOAD_SESSION:
     settings.CONFIRMED_INJECTION_POINTS.append((technique, injection_type, vuln_parameter, payload_with_own_value(decoded_payload), display_method, settings.TOTAL_OF_REQUESTS, title))
 

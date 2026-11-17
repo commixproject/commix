@@ -238,13 +238,22 @@ def print_payload(payload):
   at '-v 2' is for. The only things changed are the characters a terminal does not draw, which
   would otherwise split the line or leave two different payloads looking like the same one.
   """
+  # A payload is shown exactly as long as it is, a trailing space included.
+  return _format_msg(PAYLOAD_SIGN, rendered_payload(payload), strip=False)
+
+"""
+The characters a terminal does not draw, written out so they can be read.
+
+Every payload that is shown goes through here, wherever it is shown from - a payload written one
+way where it is sent and another where it is reported reads as two payloads, and a tab printed raw
+into a summary is a tab a reader cannot see is there.
+"""
+def rendered_payload(payload):
   for sequence, shown in ((END_LINE.CRLF, ESCAPED_CRLF), (END_LINE.CR, ESCAPED_CR),
                           (END_LINE.LF, END_LINE.ESCAPED_LF)):
     payload = payload.replace(sequence, shown)
-  payload = re.sub(r"[\x00-\x1f\x7f]", lambda match: ESCAPED_CONTROLS.get(match.group(0),
-                   "\\x%02x" % ord(match.group(0))), payload)
-  # A payload is shown exactly as long as it is, a trailing space included.
-  return _format_msg(PAYLOAD_SIGN, payload, strip=False)
+  return re.sub(r"[\x00-\x1f\x7f]", lambda match: ESCAPED_CONTROLS.get(match.group(0),
+                "\\x%02x" % ord(match.group(0))), payload)
 
 # Print HTTP traffic (verbose mode)
 def print_traffic(traffic):
@@ -500,7 +509,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "349"
+REVISION = "350"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -535,13 +544,34 @@ LEGAL_DISCLAIMER_MSG = "Attacking targets without prior mutual consent is illega
 
 # Random string generator
 RANDOM_STRING_GENERATOR = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(10))
-# Random variable name (E-Z only).
-RANDOM_VAR_GENERATOR = ''.join(random.choice(string.ascii_uppercase[4:]) for _ in range(3))
-# Random "printf" format for a printed word and the one space it is written with - the conversion,
-# the octal escape and the side the space falls on are each spelled more than one way, so a filter
-# refusing the format has no one string of it to go by.
-RANDOM_PRINTF_FORMAT = random.choice((r"%s\\040", r"%s\\40", r"\\040%s", r"\\40%s",
-                                      r"%-s\\040", r"%-s\\40", r"\\040%-s", r"\\40%-s"))
+# Names the shell has a meaning of its own for, which a variable of ours must not be drawn as.
+# Assigning to one takes that meaning away for the rest of the payload: 'IFS' decides where one
+# word ends and the next begins, and is what a whitespace substitute is written out of, so a
+# payload that named itself after it separates nothing and reads its own marker back as the gap.
+# Spelled in letters only, since the draw below has nothing else to spell them with.
+SHELL_OWNED_NAMES = frozenset((
+                  "IFS", "ENV", "PWD", "OLDPWD", "PATH", "HOME", "SHELL", "TERM", "USER",
+                  "LOGNAME", "MAIL", "MAILPATH", "MAILCHECK", "CDPATH", "UID", "EUID", "GID",
+                  "PPID", "SHLVL", "RANDOM", "SECONDS", "LINENO", "REPLY", "OPTARG", "OPTIND",
+                  "LANG", "TMPDIR", "TZ", "COLUMNS", "LINES", "HISTFILE", "HISTSIZE", "BASH",
+                  "FUNCNAME", "GROUPS", "DIRSTACK", "PIPESTATUS", "HOSTNAME", "HOSTTYPE",
+                  "OSTYPE", "MACHTYPE", "EDITOR", "VISUAL", "PAGER"
+))
+
+# Random variable name (E-Z only), of a length that leaves the draw room to be a name of its own.
+def random_var_name(length=4, alphabet=string.ascii_uppercase[4:]):
+  while True:
+    name = ''.join(random.choice(alphabet) for _ in range(length))
+    if name not in SHELL_OWNED_NAMES:
+      return name
+
+RANDOM_VAR_GENERATOR = random_var_name()
+# Random "printf" format for a printed word and the one space it is written with - the octal escape
+# and the side the space falls on are each spelled two ways, so a filter refusing the format has no
+# one string of it to go by. All four are dash-free: the conversion written "%-s" reads the same to
+# "printf", but a target filtering a bare "-" refuses every payload carrying it, and a filter on
+# "-" is a thing targets do where one on "%s" alone is not.
+RANDOM_PRINTF_FORMAT = random.choice((r"%s\\040", r"%s\\40", r"\\040%s", r"\\40%s"))
 
 # Path to text resources folder
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'data'))
@@ -1150,9 +1180,30 @@ EVAL_SUFFIXES_LVL3 = EVAL_GRAMMAR.SUFFIXES_LVL3
 
 # Raw payload (without tampering)
 RAW_PAYLOAD = ""
+# What each payload of record was rewritten into on its way out, kept so a finding is
+# reported as the request that proved it rather than as a fresh rewrite of the same payload -
+# a script drawing a name or a position at random does not draw the same one twice.
+PAYLOADS_AS_SENT = {}
+# How many it keeps before starting over - a run sends far more payloads than it reports on,
+# and only the handful that proved something is ever looked up again.
+MAX_PAYLOADS_AS_SENT = 2000
+# What a payload is glued between to reach the sink: the parameter's own value and the boundary's
+# prefix in front of it, the boundary's suffix behind. A quote in there closes one the application
+# itself opened and is answered by one the payload does not hold, so what sits between the two is
+# the application's quoting rather than the payload's own - the opposite of a quoted literal.
+PAYLOAD_EDGES = ("", "")
+# Whether the trace has already said which technique an internal command is going out through.
+# What that says is that such a command need not use the technique it is being run for, which is
+# worth saying where it is first seen and is noise on every one after it.
+TECHNIQUE_NAMED_IN_TRACE = False
 
 # Single whitespace
 SINGLE_WHITESPACE = " "
+# The whitespace substitutes the target turns back into the one space they stood for before its
+# shell ever reads them. Those are as good inside a quoted literal as outside it, having become
+# that same one character by then - which is what none of the others ('${IFS}', a tab, a vertical
+# tab, or any of these written more than once) does.
+DECODED_WHITESPACES = ("%20", "+")
 
 # The default whitespace, as a space - encoded with the rest of the payload at the end.
 WHITESPACES = [SINGLE_WHITESPACE]
@@ -1336,7 +1387,6 @@ FILE_READ = "cat "
 FILE_READ_B64 = "base64 <"
 WIN_FILE_READ_B64 = "powershell.exe -c \"[Convert]::ToBase64String([IO.File]::ReadAllBytes('"
 FILE_WRITE_OPERATOR = " >"
-FILE_APPEND_OPERATOR = " >>"
 # What cmd.exe reads as its own escape character, and drops.
 WIN_ESCAPE = "^"
 
@@ -2246,6 +2296,11 @@ BROWSER_LIKE_HEADERS = False
 # though a bare name carries no path to glob) leaves nothing after it that still reads as one of
 # its recognised command names, so it is left to fold away whatever space is still there to find.
 COMMAND_REWRITERS = ("cmd2wildcard", "cmd2var", "cmd2redir")
+# The one script that trades the two printing commands for each other, named here so that what
+# follows its being in use does not spell it out a second time and drift from it.
+PRINTF_TO_ECHO_TAMPER = "printf2echo"
+# The one script that works a filtered '-' out of the payloads, named here for the same reason.
+DASHLESS_TAMPER = "dashlesstest"
 
 # Scripts asking more of the target's shell than POSIX gives, and what each one asks for. A run
 # carrying one of these and finding nothing may have found nothing because the shell is a plain one.
@@ -2314,21 +2369,15 @@ INCOMPATIBLE_TAMPER_SCRIPTS = [
 
 # Words that must survive per-character obfuscation - shell keywords stop being keywords once
 # obfuscated, and user-supplied commands can still use them.
+# What a POSIX shell settles before it takes any quoting off and before it expands anything: a
+# keyword is read off the word exactly as it was written, so one spelled any other way - or run
+# into a whitespace substitute that is only a separator once expanded - reaches the target as a
+# plain word, and the payload loses the branch or the loop it was built around.
+SHELL_KEYWORDS = ("if", "then", "elif", "else", "fi", "for", "while", "until", "do", "done", "case", "esac", "in")
+
 IGNORE_TAMPER_TRANSFORMATION = [
                   "IFS",
-                  "if",
-                  "then",
-                  "elif",
-                  "else",
-                  "fi",
-                  "for",
-                  "while",
-                  "until",
-                  "do",
-                  "done",
-                  "case",
-                  "esac",
-                  "in",
+] + list(SHELL_KEYWORDS) + [
                   "cmd",
                   "%0d",
                   "PATH%%u*",

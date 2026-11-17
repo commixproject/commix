@@ -23,18 +23,17 @@ About: Replaces every occurrence of the payload's own whitespace with one drawn 
        small set of equivalents, rather than the one substitute every other space2* script settles
        on for the whole payload.
 Notes: This tamper script works against target(s) with a POSIX shell.
-       'if'/'then'/'fi' and friends are recognised before '${IFS}' expands, so 'if${IFS}' is never
-       read back as the keyword - a tab goes next to those instead. '$IFS$9' merges with a digit
-       right after it into one (empty) parameter, so it is skipped there too. Picked once per call
-       rather than once per occurrence, since a choice that breaks here would otherwise pass
-       boolean-based verification's first check and fail its second, or the other way round.
+       Where one of the two expansions would not be read as the gap it stands for - beside a
+       keyword, after a command's own assignments, or, for '$IFS$9', in front of a digit - the tab
+       goes in instead, 'tamper_blank_allowed' being what settles which. A whitespace inside a
+       double-quoted literal is left alone altogether: there it is a character of the string rather
+       than the gap between two words, and none of these equivalents is that same one character.
 """
 
 __tamper__ = "space2randomblank"
 __priority__ = settings.PRIORITY.LOWER
 
-_BLANKS = ("\t", "${IFS}", "$IFS$9")
-_KEYWORDS = ("if", "then", "elif", "else", "fi", "for", "while", "until", "do", "done", "case", "esac", "in")
+_BLANKS = (checks.TAMPER_PARSED_BLANK, "${IFS}", "$IFS$9")
 
 # Why this script cannot be applied to the target at hand, or nothing where it can.
 def dependencies():
@@ -43,16 +42,11 @@ def dependencies():
 if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
-# Rules out whichever choices would misparse here, and picks randomly among what is left.
+# Rules out whichever choices would misparse here, and picks randomly among what is left. Where
+# that is none of them the tab goes in, which 'tamper_blank_allowed' never rules out.
 def _blank_for(part, start, end):
-  before = re.search(r"(\w+)\Z", part[:start])
-  after = re.match(r"\A(\w+)", part[end:])
-  choices = _BLANKS
-  if (before and before.group(1) in _KEYWORDS) or (after and after.group(1) in _KEYWORDS):
-    choices = ("\t",)
-  elif after and after.group(1)[:1].isdigit():
-    choices = tuple(blank for blank in choices if blank != "$IFS$9")
-  return random.choice(choices)
+  choices = tuple(blank for blank in _BLANKS if checks.tamper_blank_allowed(blank, part, start, end))
+  return random.choice(choices or (checks.TAMPER_PARSED_BLANK,))
 
 # Every occurrence of the current separator, each replaced with its own independent pick - so a
 # signature over one consistent telltale substitute never sees the same one twice in a row.
@@ -68,6 +62,6 @@ def tamper(payload):
   pattern = re.escape(current)
   def _replace(part):
     return re.sub(pattern, lambda match: _blank_for(part, match.start(), match.end()), part)
-  return checks.tamper_outside_single_quotes(payload, _replace)
+  return checks.tamper_outside_quoted_text(payload, _replace)
 
 # eof
