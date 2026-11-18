@@ -24,9 +24,12 @@ About: Runs 'test's numeric comparisons ('-eq'/'-ne'/'-le'/'-ge'/'-lt'/'-gt') wi
 Notes: This tamper script works against target(s) with a POSIX shell. Equality is read as '='/'!=', which agrees with '-eq'/'-ne' exactly for the plain, unpadded decimal integers commix always compares this way - it would not for a value written with a leading zero. Ordering has no dash-free spelling of its own in 'test', so it is read instead from 'expr's own comparison, whose "<="/">="/"<"/">" need no '-' either - quoted, since unquoted they are shell redirections.
        What this reaches is every '-' the results-, boolean-, time- and file-based techniques
        write: the comparisons above, a word's length, a byte's ordinal, and the marker a result is
-       read by. The tempfile-based technique's byte reading is not among them - it turns a whole
-       file into the decimals of its bytes through options, which are spelled with the character
-       this script is there to avoid - and a run reaching that technique is told so.
+       read by. The out-of-band technique follows it too, with the curl and interpreter transports
+       and the name lookup chain written without one, and the clients that cannot be (wget,
+       openssl) left out of the sweep rather than sent to be refused. Not among them are the
+       tempfile-based technique's byte reading and the out-of-band name lookups' hex encoding -
+       each turns output into the decimals or hex of its bytes through options, spelled with the
+       character this script is there to avoid - and a run reaching either is told so.
 References: [1] https://github.com/digininja/DVWA/blob/master/vulnerabilities/exec/source/high.php
 """
 
