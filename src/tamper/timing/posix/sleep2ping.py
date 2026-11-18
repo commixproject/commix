@@ -63,15 +63,17 @@ def _ping_wait(count, whitespace):
 def _sleep_to_ping(payload):
   """Every 'sleep' in the payload restated as the wait between ping packets."""
   whitespace = checks.current_whitespace()
-  token = "sleep" + whitespace
+  # Matched however the gap is spelled where this reads it, and written with the run's own.
+  token = re.compile("sleep" + checks.tamper_blank_pattern())
   out, index = [], 0
   while True:
-    at = payload.find(token, index)
-    if at == -1:
+    found = token.search(payload, index)
+    if not found:
       out.append(payload[index:])
       return "".join(out)
+    at = found.start()
     out.append(payload[index:at])
-    rest = payload[at + len(token):]
+    rest = payload[found.end():]
     consumed = 0
     if rest.startswith("$(("):
       end = _arithmetic_end(rest)
@@ -84,11 +86,12 @@ def _sleep_to_ping(payload):
       if seconds:
         count, consumed = str(int(seconds.group(0)) + 1), seconds.end()
     if not consumed:
-      out.append(token)
-      index = at + len(token)
+      # Put back exactly what was matched, the gap included - it is this payload's, not this run's.
+      out.append(found.group(0))
+      index = found.end()
       continue
     out.append(_ping_wait(count, whitespace))
-    index = at + len(token) + consumed
+    index = found.end() + consumed
 
 # Wait out the packets where the payload waited out the seconds.
 def tamper(payload):

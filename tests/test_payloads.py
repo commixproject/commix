@@ -253,6 +253,43 @@ class OutOfBandTransports(unittest.TestCase):
     for transport in windows_only | unix_only:
       self.assertTrue(oob_payloads.transport_identifies_os(transport))
 
+class AnInterpreterKeptFromItsOption(unittest.TestCase):
+  """
+  An alternative interpreter is handed its program by '-c', which is the one thing a run keeping a
+  '-' out of its payloads cannot write. Feeding the program on standard input needs a pipe, so it is
+  written where a pipe is what the target was shown to accept and nowhere else - a payload reaching
+  for a second separator would be asking for a character nothing proved.
+  """
+  def setUp(self):
+    self._state = (list(settings.MULTI_ENCODED_PAYLOAD), settings.PRINT_WITH_ECHO)
+
+  def tearDown(self):
+    settings.MULTI_ENCODED_PAYLOAD, settings.PRINT_WITH_ECHO = self._state
+
+  def _built(self, separator, scripts=(settings.DASHLESS_TAMPER,)):
+    from src.core.techniques.time_based import tb_payloads
+    stage_exploitation(separator)
+    settings.MULTI_ENCODED_PAYLOAD = list(scripts)
+    settings.EXPLOITATION_PHASE = True
+    return tb_payloads._py_length_expr("id"), tb_payloads._py_ordinal_expr("id", 2)
+
+  def test_a_proven_pipe_carries_the_program_without_the_option(self):
+    for printer in (False, True):
+      settings.PRINT_WITH_ECHO = printer
+      for built in self._built("|"):
+        self.assertNotIn("-", built, "with echo" if printer else "with printf")
+        self.assertNotIn("sys.argv[1]", built)
+        self.assertIn(settings.RANDOM_VAR_GENERATOR + "=", built)
+
+  def test_a_separator_that_is_not_a_pipe_keeps_the_option(self):
+    for built in self._built(";"):
+      self.assertIn(" -c ", built)
+      self.assertIn("sys.argv[1]", built)
+
+  def test_a_run_not_keeping_a_dash_out_is_left_as_it_was(self):
+    for built in self._built("|", scripts=()):
+      self.assertIn(" -c ", built)
+
 class EvalStatementTerminators(unittest.TestCase):
   """
   Where a payload that carries no separator is allowed to end a statement.

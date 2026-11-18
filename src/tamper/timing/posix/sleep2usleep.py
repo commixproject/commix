@@ -38,11 +38,13 @@ def tamper(payload):
   # The rewrite itself, the delay restated in microseconds.
   def sleep_to_usleep(payload):
     whitespace = checks.current_whitespace()
+    # Matched however the gap is spelled where this reads it, and written with the run's own.
+    gap = checks.tamper_blank_pattern()
     # Arithmetic-gated delay ("sleep $((5*(cond)))") - scale its leading factor to microseconds.
-    payload = re.sub(r"sleep" + re.escape(whitespace) + r"\$\(\((\d+)\*",
+    payload = re.sub(r"sleep" + gap + r"\$\(\((\d+)\*",
                      lambda x: "usleep" + whitespace + "$((" + x.group(1) + "000000*", payload)
     # A plain delay, taken from the match itself rather than split back out of it.
-    for match in re.finditer(r"sleep" + re.escape(whitespace) + r"([1-9]\d+|[0-9])", payload):
+    for match in re.finditer(r"sleep" + gap + r"([1-9]\d+|[0-9])", payload):
       seconds = match.group(1)
       # Seconds become microseconds, except a zero, which has nothing to scale.
       delay = seconds + "0" * 6 if seconds != "0" else seconds

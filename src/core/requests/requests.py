@@ -1330,25 +1330,36 @@ def _perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http
   body = payload.find(payload_as_given)
   settings.PAYLOAD_EDGES = ((payload[:body], payload[body + len(payload_as_given):])
                             if body != -1 else ("", ""))
-  # A substitute the shell reads as text cannot go inside a quoted literal, where it would be that
-  # text rather than the gap it stands for; one the target decodes first arrives there as the space
-  # itself and is written in as before. Nothing is rewritten at all where neither applies.
+  """
+  What the caller is handed back is the payload as it stands here, before the three rewrites below.
+
+  Those three are this request's business: the scripts rewrite it for the run they are loaded in,
+  and what they write belongs to that run - a variable name drawn at random this time is not the
+  name the next run draws. Handed back, it becomes the payload of record, which is then written into
+  the session and read out of it by a run that can no longer make sense of it: the stand-in in front
+  of it cannot be put back as the value it stood in for, because the stand-in is no longer there to
+  recognise. The whitespace this run settled on is written beside the boundary rather than into the
+  record, and the encoding after them is the transport's business for the same reason.
+  """
+  payload_of_record = payload
+  payload = checks.perform_payload_modification(payload)
+  """
+  The gap, written last.
+
+  A script is handed the payload with its spaces still in it, and what a script writes is written
+  with spaces too - so the substitute goes in once, over everything that is going to be sent, rather
+  than before the scripts and over only what the builders wrote. Put in first, a shape spelled with
+  a space matched nothing a script looked for, and what a script wrote afterwards kept the one
+  character the substitute is there to avoid.
+
+  A substitute the shell reads as text cannot go inside a quoted literal, where it would be that
+  text rather than the gap it stands for; one the target decodes first arrives there as the space
+  itself and is written in as before. Nothing is rewritten at all where neither applies.
+  """
   if whitespace != settings.SINGLE_WHITESPACE:
     rewrite = (checks.tamper_outside_single_quotes if whitespace in settings.DECODED_WHITESPACES
                else checks.tamper_outside_quoted_text)
     payload = rewrite(payload, lambda part: checks.tamper_blanks(part, whitespace))
-  """
-  What the caller is handed back is the payload as it stands here, before the two rewrites below.
-
-  Those two are this request's business: the scripts rewrite it for the run they are loaded in, and
-  what they write belongs to that run - a variable name drawn at random this time is not the name
-  the next run draws. Handed back, it becomes the payload of record, which is then written into the
-  session and read out of it by a run that can no longer make sense of it: the stand-in in front of
-  it cannot be put back as the value it stood in for, because the stand-in is no longer there to
-  recognise. The encoding after them is the transport's business for the same reason.
-  """
-  payload_of_record = payload
-  payload = checks.perform_payload_modification(payload)
   # Noted before the transport's own encoding goes on, which is the form a finding is reported in.
   # Under both the payload of record and the string the caller still holds: a prefix, a suffix or a
   # whitespace substitute leaves the two different, and a finding is reported under the latter.

@@ -1116,9 +1116,22 @@ def dashless_gap_note(technique):
   with no other spelling of their own. Said here because a target that strips it answers such a
   payload exactly as it answers a parameter that was never injectable.
   """
-  if technique != settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
-    return
   if settings.DASHLESS_TAMPER not in settings.MULTI_ENCODED_PAYLOAD:
+    return
+  """
+  The same thing again, where the program is handed to an interpreter rather than to a shell.
+
+  An alternative interpreter is given its statements through an option, and a payload that reaches
+  for one carries that option whichever technique wrote it - so the script's own rewrites land on a
+  payload the target was never going to run. The out-of-band transports feed theirs on standard
+  input for exactly this reason; nothing here can, the program and the output word being handed over
+  together, so it is said rather than left to read as a parameter that never answered.
+  """
+  if menu.options.interpreter and current_separator() not in ("|", "||"):
+    warn_msg = "The '" + settings.DASHLESS_TAMPER + ".py' tamper script does not reach the '-' that "
+    warn_msg += "'--interpreter' hands its program by, so a target that strips it answers these payloads as not injectable."
+    settings.print_once(warn_msg)
+  if technique != settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED:
     return
   warn_msg = "The '" + settings.DASHLESS_TAMPER + ".py' tamper script reaches every '-' this "
   warn_msg += "technique's comparisons are written with, but not the ones its byte reading needs, "
@@ -4003,6 +4016,23 @@ def current_whitespace():
   return settings.WHITESPACES[0] if len(settings.WHITESPACES) != 0 else settings.SINGLE_WHITESPACE
 
 # The separator the parameter at hand was proved on, for a rewrite choosing between forms by it.
+"""
+Where the command the run was asked to execute sits in the payload it is being looked for in.
+
+Looked for the way it is written there rather than the way it was typed: a gap inside it may be
+spelled by whatever this run spells one with by the time a script is handed the payload, and a
+script that asks for the literal text finds nothing - which once sent it back to the payload the run
+started with, throwing away the work of every script before it.
+"""
+def command_in(payload):
+  if not settings.USER_APPLIED_CMD:
+    return None
+  return re.search(blank_tolerant(settings.USER_APPLIED_CMD), payload)
+
+# Whether the run reads a filtered '-' out of its payloads, which is what the dashless script is for.
+def dashless():
+  return settings.DASHLESS_TAMPER in settings.MULTI_ENCODED_PAYLOAD and settings.TARGET_OS != settings.OS.WINDOWS
+
 def current_separator():
   boundary = settings.CONFIRMED_BOUNDARY.get(settings.CHECKING_PARAMETER)
   return boundary[2] if boundary else None
@@ -4337,6 +4367,25 @@ def tamper_blanks(part, blank):
                               else TAMPER_PARSED_BLANK, part)
 
 """
+What a gap is spelled with in the payload a tamper script is handed, as a pattern.
+
+The substitute is written in before any script runs, so a shape spelled with a space finds none of
+what it was built to find: the script goes on being reported as applied while rewriting nothing at
+all. Two spellings come back from that substitution rather than one - the run's own, and the tab it
+falls back on where an expansion would not be read as the gap it stands for - and a plain space is
+kept among them for what a script has already written itself.
+"""
+def tamper_blank_pattern():
+  blank = current_whitespace()
+  if blank == settings.SINGLE_WHITESPACE:
+    return r"[ \t]"
+  return "(?:" + re.escape(blank) + "|" + re.escape(TAMPER_PARSED_BLANK) + r"| )"
+
+# A shape written out with spaces, as a pattern that finds it however this run spells a gap.
+def blank_tolerant(shape):
+  return re.escape(shape).replace(re.escape(settings.SINGLE_WHITESPACE), tamper_blank_pattern())
+
+"""
 Interleave obf_char before each tamper-modification-letter match (Unix-only) - the shared logic behind backslashes/dollaratsigns/singlequotes.
 """
 def interleave_char_tamper(payload, obf_char):
@@ -4385,9 +4434,13 @@ def tamper_rewrite_user_command(payload, tamper_name):
     command = importlib.import_module(tamper_module_path(name)).rewrite_command(command)
   if command == settings.USER_APPLIED_CMD:
     return payload
-  source = payload if settings.USER_APPLIED_CMD in payload else settings.RAW_PAYLOAD
-  if settings.USER_APPLIED_CMD in source:
-    payload = source.replace(settings.USER_APPLIED_CMD, command)
+  # Read out of the payload as it stands, never out of the one the run started with: the scripts
+  # work in order, and a script that has already hidden this command is one whose work reaching back
+  # past it would throw away. Where the command is no longer there to find, there is nothing here to
+  # do - which is the answer, not a reason to start again from the original.
+  found = command_in(payload)
+  if found:
+    payload = re.sub(blank_tolerant(settings.USER_APPLIED_CMD), lambda match: command, payload)
     # The substitute goes back on what the command was written into, and on the same terms the
     # request itself puts it on: a quoted literal is the string the payload meant to send, not a
     # place where one word ends and the next begins.
@@ -5144,7 +5197,37 @@ def perform_payload_modification(payload):
     module = importlib.import_module(tamper_module_path(script))
     payload = _apply_tamper(script, module, payload)
 
+  dashless_leftover_note(payload)
   return payload
+
+"""
+What the dashless script could not reach, named once a run.
+
+It rewrites what a payload's own comparisons and readings are written with, and nothing else. A '-'
+belonging to something else goes out as it stands: an option 'ping' has no other way of taking, the
+arithmetic inside an 'awk' program, the ':-' of a defaulted expansion, the command the run was asked
+to execute. Checked against what was actually built rather than against a list of which scripts
+conflict, so a combination nobody thought of is caught by the same reading - and a target that
+strips the character answers such a payload exactly as it answers a parameter that was never
+injectable, which is worth telling apart from a finding that would not confirm.
+"""
+def dashless_leftover_note(payload):
+  if (settings.DASHLESS_LEFTOVER_NOTICE_GIVEN or settings.TARGET_OS == settings.OS.WINDOWS
+      or settings.DASHLESS_TAMPER not in settings.MULTI_ENCODED_PAYLOAD):
+    return
+  # The injected part alone: a '-' in the value the parameter already carried is the target's own.
+  opening, closing = settings.PAYLOAD_EDGES if settings.PAYLOAD_EDGES else ("", "")
+  body = payload[len(opening):len(payload) - len(closing)] if opening or closing else payload
+  carries = re.search(r"\S*-\S*", body)
+  if not carries:
+    return
+  settings.DASHLESS_LEFTOVER_NOTICE_GIVEN = True
+  # Said where the switch that explains it has not already been named.
+  if menu.options.interpreter:
+    return
+  warn_msg = "The '" + settings.DASHLESS_TAMPER + ".py' tamper script does not reach the '-' in '"
+  warn_msg += carries.group(0)[:40] + "', so a target that strips it answers this payload as not injectable."
+  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
 Settle what a tamper script's own mutation to 'WHITESPACES' would be, before anything built off

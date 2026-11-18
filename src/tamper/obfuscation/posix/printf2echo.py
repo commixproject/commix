@@ -13,6 +13,8 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import re
+
 from src.utils import settings
 from src.core.controller import checks
 
@@ -60,18 +62,24 @@ def tamper(payload):
     return payload
   space = checks.current_whitespace()
   prefix, suffix = checks.byte_ordinal_bounds()
+  # Those two are spelled with spaces, and a payload reaching a script is not: whatever stands for a
+  # gap this run went in before anything here was asked to find it.
+  opening, closing = re.compile(checks.blank_tolerant(prefix)), re.compile(checks.blank_tolerant(suffix))
   # The reading is taken whole - from the text written around it rather than by looking for a
   # closing bracket, which the byte's own expression carries plenty of.
-  while prefix in payload:
-    opened = payload.index(prefix)
-    closed = payload.find(suffix, opened + len(prefix))
-    if closed < 0:
+  while True:
+    found = opening.search(payload)
+    if not found:
       break
-    byte = payload[opened + len(prefix):closed]
+    ends = closing.search(payload, found.end())
+    if not ends:
+      break
+    opened, closed = found.start(), ends.start()
+    byte = payload[found.end():closed]
     counted = (settings.CMD_SUB_PREFIX + "echo" + space + "-n" + space + "\"" + byte + "\"" + space +
                "|" + space + "od" + space + "-An" + space + "-tuC" + space + "|" + space + "xargs" +
                settings.CMD_SUB_SUFFIX)
-    payload = payload[:opened] + counted + payload[closed + len(suffix):]
+    payload = payload[:opened] + counted + payload[ends.end():]
   return payload
 
 # eof

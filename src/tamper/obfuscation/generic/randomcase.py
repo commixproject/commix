@@ -14,6 +14,8 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 from random import choice
+import re
+
 from src.utils import settings
 from src.core.controller import checks
 
@@ -60,10 +62,15 @@ def tamper(payload):
   # the name is varied, an argument being the command's own to read however it reads it.
   if settings.TARGET_OS == settings.OS.WINDOWS:
     if settings.EXPLOITATION_PHASE and settings.USER_APPLIED_CMD:
-      source = payload if settings.USER_APPLIED_CMD in payload else settings.RAW_PAYLOAD
-      if settings.USER_APPLIED_CMD in source:
+      # Read out of the payload as it stands, never out of the one the run started with: the scripts
+      # work in order, and a script that has already hidden this command is one whose work reaching back
+      # past it would throw away. Where the command is no longer there to find, there is nothing here to
+      # do - which is the answer, not a reason to start again from the original.
+      source = payload
+      if checks.command_in(source):
         name, separator, arguments = settings.USER_APPLIED_CMD.partition(settings.SINGLE_WHITESPACE)
-        payload = source.replace(settings.USER_APPLIED_CMD, _mixed_case(name) + separator + arguments)
+        written = _mixed_case(name) + separator + arguments
+        payload = re.sub(checks.blank_tolerant(settings.USER_APPLIED_CMD), lambda match: written, source)
         if len(settings.WHITESPACES) != 0:
           payload = payload.replace(settings.SINGLE_WHITESPACE, settings.WHITESPACES[0])
     return payload
@@ -72,8 +79,12 @@ def tamper(payload):
   # verification litmus built after a finding confirms (and so after exploitation phase starts)
   # has no command of its own to case-randomize at all.
   if settings.EXPLOITATION_PHASE and settings.USER_APPLIED_CMD:
-    source = payload if settings.USER_APPLIED_CMD in payload else settings.RAW_PAYLOAD
-    if settings.USER_APPLIED_CMD in source:
+    # Read out of the payload as it stands, never out of the one the run started with: the scripts
+    # work in order, and a script that has already hidden this command is one whose work reaching back
+    # past it would throw away. Where the command is no longer there to find, there is nothing here to
+    # do - which is the answer, not a reason to start again from the original.
+    source = payload
+    if checks.command_in(source):
       # Only the name, since the fold would lower an argument's own letters along with it - and the
       # command was asked for with the letters it was asked for.
       name, separator, arguments = settings.USER_APPLIED_CMD.partition(settings.SINGLE_WHITESPACE)
@@ -103,7 +114,8 @@ def tamper(payload):
         random_case_cmd = settings.CMD_SUB_PREFIX + folded + settings.CMD_SUB_SUFFIX
       # Applied to the payload as handed over, not to the untouched original: the scripts run in
       # order, and reaching back past the ones before would throw their work away.
-      payload = source.replace(settings.USER_APPLIED_CMD, random_case_cmd + separator + arguments)
+      written = random_case_cmd + separator + arguments
+      payload = re.sub(checks.blank_tolerant(settings.USER_APPLIED_CMD), lambda match: written, source)
       if len(settings.WHITESPACES) != 0:
         payload = payload.replace(settings.SINGLE_WHITESPACE, settings.WHITESPACES[0])
   return payload

@@ -315,6 +315,26 @@ class Printf2Echo(unittest.TestCase):
       self.assertNotIn("printf '%d'", tampered)
       self.assertIn("od -An -tuC", tampered)
 
+  def test_it_finds_the_reading_however_the_run_spells_a_gap(self):
+    """
+    The substitute is written in before any script runs, so a reading looked for with spaces in it
+    is not the reading there is to find - and a script that looks for one rewrites nothing while
+    going on being reported as applied.
+    """
+    from src.core.controller import checks
+    kept = list(settings.WHITESPACES)
+    try:
+      for blank in ("\t", "${IFS}", "$IFS$9"):
+        stage("|", whitespace=blank)
+        settings.EXPLOITATION_PHASE = True
+        plain = "|[ 126 -gt " + checks.byte_ordinal("${" + settings.RANDOM_VAR_GENERATOR + "}") + " ]"
+        written = checks.tamper_outside_quoted_text(plain, lambda part: checks.tamper_blanks(part, blank))
+        tampered = self._script().tamper(written)
+        self.assertNotEqual(written, tampered, "rewrote nothing under " + repr(blank))
+        self.assertNotIn("printf '%d'", tampered, "under " + repr(blank))
+    finally:
+      settings.WHITESPACES = kept
+
   def test_it_is_not_written_where_a_pipe_is_not_what_is_proving(self):
     for separator in (";", "&", "&&", settings.END_LINE.LF):
       for name, payload in self._payloads(separator):
@@ -683,6 +703,197 @@ class DashlessReadingsOfAnAwkwardOutput(unittest.TestCase):
                     dashlesstest.tamper(tb_payloads._ordinal_expr(word, 2))):
       self.assertIn(settings.BYTE_LOCALE + " expr", written)
       self.assertNotIn("-", written)
+
+class AWhitespaceSubstituteDoesNotDisarmAScript(unittest.TestCase):
+  """
+  The substitute is written in before any script runs - the request puts it there, and by then every
+  space outside a quoted literal is gone - so a script that looks for a space finds none of what it
+  was built to find, and goes on being reported as applied while rewriting nothing at all.
+
+  Asked of every script that rewrites anything here: what it does to a payload written with a space
+  it must still do to that same payload written the way the run spells a gap. The whitespace scripts
+  themselves are left out, having no space of their own left to find once another one has run.
+  """
+  BLANKS = ("\t", "${IFS}", "$IFS$9")
+
+  def setUp(self):
+    # Every one of these is left as it was found: a substitute whitespace or a printer carried into
+    # the next test is a payload built the way nothing else here expects.
+    self._state = (list(settings.WHITESPACES), settings.PRINT_WITH_ECHO,
+                   list(settings.MULTI_ENCODED_PAYLOAD), settings.EXPLOITATION_PHASE)
+
+  def tearDown(self):
+    settings.WHITESPACES, settings.PRINT_WITH_ECHO, settings.MULTI_ENCODED_PAYLOAD, settings.EXPLOITATION_PHASE = self._state
+
+  def _substituted(self, payload, blank):
+    from src.core.controller import checks
+    rewrite = (checks.tamper_outside_single_quotes if blank in settings.DECODED_WHITESPACES
+               else checks.tamper_outside_quoted_text)
+    return rewrite(payload, lambda part: checks.tamper_blanks(part, blank))
+
+  def _built(self, separator):
+    from src.core.techniques.boolean_based import bb_payloads
+    from src.core.techniques.time_based import tb_payloads
+    if separator == "|":
+      return bb_payloads.get_char("|", "id", 2, 100)
+    return tb_payloads.get_length(separator, "id", 5, 5, "GET")
+
+  def test_a_script_reads_the_payload_whichever_way_round_the_two_rewrites_went(self):
+    """
+    The substitute is written last, so what a script is handed carries spaces - and a script that
+    only knew how to read a substitute would find nothing in it. Asked both ways round, since a
+    script is also handed what another script wrote, and that may carry either.
+    """
+    stale = []
+    for name, module in sorted(tamper_modules().items()):
+      if not hasattr(module, "tamper") or os.sep + "whitespace" + os.sep in module.__file__:
+        continue
+      for separator in (";", "|"):
+        for blank in self.BLANKS:
+          stage(separator, whitespace=blank)
+          settings.MULTI_ENCODED_PAYLOAD = [name]
+          settings.EXPLOITATION_PHASE = True
+          try:
+            payload = self._built(separator)
+            if not payload or module.tamper(payload) == payload:
+              continue
+          except Exception:
+            continue
+          # The same payload once the gap has been written in, which is what another script may hand on.
+          swapped = self._substituted(self._built(separator), blank)
+          try:
+            if module.tamper(swapped) == swapped:
+              stale.append(name + " under " + repr(blank) + " (" + repr(separator) + ")")
+          except Exception as exc:
+            stale.append(name + " raised " + type(exc).__name__ + " under " + repr(blank))
+    self.assertEqual([], stale, "reads one spelling of a gap and not the other: " + ", ".join(stale))
+
+  def test_what_a_script_rewrites_with_a_space_it_rewrites_with_a_substitute(self):
+    disarmed = []
+    for name, module in sorted(tamper_modules().items()):
+      if not hasattr(module, "tamper") or os.sep + "whitespace" + os.sep in module.__file__:
+        continue
+      for separator in (";", "|"):
+        stage(separator)
+        settings.MULTI_ENCODED_PAYLOAD = [name]
+        settings.EXPLOITATION_PHASE = True
+        try:
+          payload = self._built(separator)
+          if not payload or module.tamper(payload) == payload:
+            continue
+        except Exception:
+          continue
+        for blank in self.BLANKS:
+          stage(separator, whitespace=blank)
+          settings.MULTI_ENCODED_PAYLOAD = [name]
+          settings.EXPLOITATION_PHASE = True
+          # Built again under this staging: a script reads the command the run was asked for out of
+          # the payload, and a payload built under one staging does not hold the other's command.
+          swapped = self._substituted(self._built(separator), blank)
+          try:
+            if module.tamper(swapped) == swapped:
+              disarmed.append(name + " under " + repr(blank) + " (" + repr(separator) + ")")
+          except Exception as exc:
+            disarmed.append(name + " raised " + type(exc).__name__ + " under " + repr(blank))
+    self.assertEqual([], disarmed, "rewrites nothing once the gap is a substitute: " + ", ".join(disarmed))
+
+  def test_the_dashless_script_leaves_no_dash_whatever_the_gap_is_written_with(self):
+    from src.tamper.obfuscation.posix import dashlesstest
+    for blank in (settings.SINGLE_WHITESPACE,) + self.BLANKS:
+      for separator in (";", "|"):
+        for printer in (False, True):
+          stage(separator, whitespace=blank)
+          settings.MULTI_ENCODED_PAYLOAD = [settings.DASHLESS_TAMPER]
+          settings.EXPLOITATION_PHASE = True
+          settings.PRINT_WITH_ECHO = printer
+          payload = self._built(separator)
+          if not payload:
+            continue
+          given = payload if blank == settings.SINGLE_WHITESPACE else self._substituted(payload, blank)
+          written = dashlesstest.tamper(given)
+          self.assertNotIn("-", written,
+                           "a '-' left under " + repr(blank) + " " + repr(separator) +
+                           (" with echo" if printer else " with printf"))
+
+class TheDashlessScriptReadsBeforeWhatRewritesWhatItReads(unittest.TestCase):
+  """
+  What it matches is the shape a payload builder wrote - a comparison, a count, a byte taken down a
+  pipe. A script that breaks those up, a quote or a backslash or a letter at a time, leaves nothing
+  to recognise, and this one then rewrites none of it while still being reported as applied. It is
+  ordered ahead of them for that reason, so the only '-' a pairing can leave is one the other script
+  writes itself and has no other spelling for.
+  """
+  # 'ping' has no other way of being told how many packets to send, 'awk' counts down with one, and
+  # a defaulted expansion is written with one.
+  WRITES_ITS_OWN = ("sleep2ping", "rev", "cmd2wildcard")
+
+  def setUp(self):
+    self._state = (list(settings.MULTI_ENCODED_PAYLOAD), settings.EXPLOITATION_PHASE)
+
+  def tearDown(self):
+    settings.MULTI_ENCODED_PAYLOAD, settings.EXPLOITATION_PHASE = self._state
+
+  def test_a_pairing_leaves_a_dash_only_where_the_other_script_wrote_one(self):
+    from src.core.techniques.time_based import tb_payloads
+    modules = {name: module for name, module in tamper_modules().items()
+               if hasattr(module, "tamper") and name != "xforwardedfor"
+               and os.sep + "windows" + os.sep not in module.__file__
+               and os.sep + "eval" + os.sep not in module.__file__}
+    priority = {name: getattr(module, "__priority__", settings.PRIORITY.NORMAL)
+                for name, module in modules.items()}
+    left = []
+    for separator in (";", "|"):
+      for other in sorted(modules):
+        if other == settings.DASHLESS_TAMPER or other in self.WRITES_ITS_OWN:
+          continue
+        pair = sorted((settings.DASHLESS_TAMPER, other), key=lambda name: -priority[name])
+        stage(separator)
+        settings.MULTI_ENCODED_PAYLOAD = list(pair)
+        settings.EXPLOITATION_PHASE = True
+        for name in pair:
+          if hasattr(modules[name], "declare"):
+            try: modules[name].declare()
+            except Exception: pass
+        payload = tb_payloads.get_length(separator, "id", 5, 5, "GET")
+        if not payload:
+          continue
+        try:
+          for name in pair:
+            payload = modules[name].tamper(payload)
+        except Exception:
+          continue
+        if "-" in payload:
+          left.append(other + " on " + repr(separator))
+    self.assertEqual([], left, "a '-' left in the payload beside: " + ", ".join(left))
+
+class AScriptDoesNotReachBackPastTheOnesBeforeIt(unittest.TestCase):
+  """
+  The scripts run in order, each handed what the one before it wrote. One that cannot find the
+  command in what it was handed - because the script before it hid the command, which is what that
+  one was loaded to do - has nothing of its own to do, and going back to the payload the run started
+  with would throw that work away and send a payload carrying only half of what was asked for.
+  """
+  def setUp(self):
+    self._state = (list(settings.MULTI_ENCODED_PAYLOAD), settings.EXPLOITATION_PHASE,
+                   settings.RAW_PAYLOAD, settings.USER_APPLIED_CMD)
+
+  def tearDown(self):
+    (settings.MULTI_ENCODED_PAYLOAD, settings.EXPLOITATION_PHASE,
+     settings.RAW_PAYLOAD, settings.USER_APPLIED_CMD) = self._state
+
+  def test_a_hidden_command_is_still_hidden_after_the_next_script(self):
+    from src.core.techniques.time_based import tb_payloads
+    modules = tamper_modules()
+    stage(";", command="id")
+    settings.MULTI_ENCODED_PAYLOAD = ["cmd2wildcard", "randomcase"]
+    settings.EXPLOITATION_PHASE = True
+    payload = tb_payloads.get_length(";", "id", 5, 5, "GET")
+    settings.RAW_PAYLOAD = payload
+    hidden = modules["cmd2wildcard"].tamper(payload)
+    # What that script writes in place of the command, which is the thing that must survive.
+    self.assertIn(":-", hidden, "the script under test rewrote nothing to begin with")
+    self.assertIn(":-", modules["randomcase"].tamper(hidden),
+                  "the rewrite before it was thrown away")
 
 class ListedDescriptions(unittest.TestCase):
   """

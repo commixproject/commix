@@ -93,7 +93,26 @@ same bytes the pipe did - and the same ones the ordinal below indexes.
 def _py_source(statements):
   return "\"" + settings.END_LINE.CR.join(statements) + "\""
 
+"""
+The same call with the interpreter handed its program on standard input, where '-c' would be a '-'.
+
+Written only where a pipe is what the target was shown to accept: feeding a program needs one, and a
+payload reaching for a second separator would be asking for a character nothing proved. The output
+word goes in through the environment, an argument being where the program itself would otherwise be,
+and the program reads it back from there. Printed the way the run prints, bar the '-n' of an 'echo'
+that prints a value: the line break it leaves behind is one the interpreter reads past.
+"""
+def _py_stdin_call(cmd, statements):
+  var = settings.RANDOM_VAR_GENERATOR
+  read_back = tuple(statement.replace("sys.argv[1]", "os.environ['" + var + "']") for statement in statements)
+  printing = "echo" + settings.SINGLE_WHITESPACE if settings.PRINT_WITH_ECHO else checks.print_value("")
+  return (settings.CMD_SUB_PREFIX + printing + _py_source(read_back) + settings.PIPE_SEPARATOR +
+          var + "=\"" + _output_word(cmd) + "\"" + settings.SINGLE_WHITESPACE +
+          settings.LINUX_PYTHON_INTERPRETER + settings.CMD_SUB_SUFFIX)
+
 def _py_call(cmd, statements):
+  if checks.dashless() and checks.current_separator() in ("|", "||"):
+    return _py_stdin_call(cmd, statements)
   return (settings.CMD_SUB_PREFIX + settings.LINUX_PYTHON_INTERPRETER + " -c " +
           _py_source(statements) + " \"" + _output_word(cmd) + "\"" + settings.CMD_SUB_SUFFIX)
 

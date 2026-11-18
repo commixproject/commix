@@ -58,6 +58,88 @@ class WhatTheOutputHasAlreadyTurnedOutToBeMadeOf(unittest.TestCase):
     checks.record_observed_character(seen, None)
     self.assertEqual(before, checks.narrowed_characters(seen))
 
+class WhatTheDashlessScriptCouldNotReachIsNamed(unittest.TestCase):
+  """
+  The script rewrites what a payload's own comparisons and readings are written with, and nothing
+  else - so a '-' belonging to another script's spelling, or to the command the run was asked to
+  execute, goes out as it stands. Read off what was actually built rather than off a list of which
+  scripts conflict, so a combination nobody thought of is caught by the same reading.
+  """
+  def setUp(self):
+    self._state = (list(settings.MULTI_ENCODED_PAYLOAD), settings.PAYLOAD_EDGES,
+                   settings.DASHLESS_LEFTOVER_NOTICE_GIVEN, settings.print_data_to_stdout,
+                   menu.options.interpreter, settings.TARGET_OS)
+    self._said = []
+    settings.print_data_to_stdout = lambda message, *args, **kwargs: self._said.append(message)
+    menu.options.interpreter = None
+
+  def tearDown(self):
+    (settings.MULTI_ENCODED_PAYLOAD, settings.PAYLOAD_EDGES, settings.DASHLESS_LEFTOVER_NOTICE_GIVEN,
+     settings.print_data_to_stdout, menu.options.interpreter, settings.TARGET_OS) = self._state
+
+  def _ask(self, payload, scripts=(settings.DASHLESS_TAMPER,), edges=("", "")):
+    settings.TARGET_OS = settings.OS.UNIX
+    settings.MULTI_ENCODED_PAYLOAD = list(scripts)
+    settings.PAYLOAD_EDGES = edges
+    settings.DASHLESS_LEFTOVER_NOTICE_GIVEN = False
+    self._said[:] = []
+    checks.dashless_leftover_note(payload)
+    return self._said
+
+  def test_a_dash_another_script_wrote_is_named(self):
+    said = self._ask(";ping -c 1 x;")
+    self.assertTrue(said)
+    self.assertIn("-c", said[0])
+
+  def test_a_payload_carrying_none_is_left_quiet(self):
+    self.assertEqual([], self._ask(";[ 1 = 1 ];"))
+
+  def test_the_value_the_parameter_already_carried_is_not_the_payload_s(self):
+    self.assertEqual([], self._ask("a-b;[ 1 = 1 ];tail", edges=("a-b", "tail")))
+
+  def test_nothing_is_said_where_the_script_is_not_in_use(self):
+    self.assertEqual([], self._ask(";ping -c 1 x;", scripts=()))
+
+  def test_it_is_said_once_a_run(self):
+    self.assertTrue(self._ask(";ping -c 1 x;"))
+    self._said[:] = []
+    checks.dashless_leftover_note(";ping -c 1 x;")
+    self.assertEqual([], self._said)
+
+class AnInterpreterIsHandedItsProgramByAnOption(unittest.TestCase):
+  """
+  The dashless script reaches every '-' a payload's own comparisons are written with, and not the
+  one an alternative interpreter takes its program by - there being no other spelling of it. Said
+  out loud, since a target that strips the character answers such a payload exactly as it answers a
+  parameter that was never injectable.
+  """
+  def setUp(self):
+    self._state = (list(settings.MULTI_ENCODED_PAYLOAD), menu.options.interpreter, settings.print_once)
+    self._said = []
+    settings.print_once = lambda message, *args, **kwargs: self._said.append(message)
+
+  def tearDown(self):
+    settings.MULTI_ENCODED_PAYLOAD, menu.options.interpreter, settings.print_once = self._state
+
+  def _ask(self, interpreter, scripts):
+    stage(";")
+    self._said[:] = []
+    settings.MULTI_ENCODED_PAYLOAD = list(scripts)
+    menu.options.interpreter = interpreter
+    checks.dashless_gap_note(settings.INJECTION_TECHNIQUE.TIME_BASED)
+    return self._said
+
+  def test_the_two_together_are_told_what_cannot_be_written(self):
+    said = self._ask("python", [settings.DASHLESS_TAMPER])
+    self.assertTrue(said)
+    self.assertIn("--interpreter", said[0])
+
+  def test_the_script_without_an_interpreter_is_left_unsaid(self):
+    self.assertEqual([], self._ask(None, [settings.DASHLESS_TAMPER]))
+
+  def test_an_interpreter_without_the_script_is_left_unsaid(self):
+    self.assertEqual([], self._ask("python", []))
+
 class CurrentBoundary(unittest.TestCase):
   """
   What a rewrite reads back about the boundary the parameter at hand was proved on.

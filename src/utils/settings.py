@@ -509,7 +509,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "352"
+REVISION = "353"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -2301,6 +2301,8 @@ COMMAND_REWRITERS = ("cmd2wildcard", "cmd2var", "cmd2redir")
 PRINTF_TO_ECHO_TAMPER = "printf2echo"
 # The one script that works a filtered '-' out of the payloads, named here for the same reason.
 DASHLESS_TAMPER = "dashlesstest"
+# Said once a run, where what that script cannot reach is still going out.
+DASHLESS_LEFTOVER_NOTICE_GIVEN = False
 
 # Scripts asking more of the target's shell than POSIX gives, and what each one asks for. A run
 # carrying one of these and finding nothing may have found nothing because the shell is a plain one.
@@ -2327,6 +2329,9 @@ INCOMPATIBLE_TAMPER_SCRIPTS = [
                   ("ansiquote", "dollaratsigns"),
                   ("ansiquote", "dollarstars"),
                   ("ansiquote", "singlequotes"),
+                  # The same, and measured: together these two hand the shell '""x69""x64' where the
+                  # command was, which is no command at all.
+                  ("ansiquote", "doublequotes"),
                   ("ansiquote", "uninitializedvariable"),
                   # Two encodings of the same words, over the same characters.
                   ("ansiquote", "ansiquoteoctal"),

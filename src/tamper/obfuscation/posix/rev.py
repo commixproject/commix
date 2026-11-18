@@ -13,6 +13,8 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import re
+
 from src.utils import settings
 from src.core.controller import checks
 
@@ -49,8 +51,12 @@ def tamper(payload):
   # verification litmus built after a finding confirms (and so after exploitation phase starts)
   # has no command of its own to reverse at all.
   if settings.EXPLOITATION_PHASE and settings.USER_APPLIED_CMD:
-    source = payload if settings.USER_APPLIED_CMD in payload else settings.RAW_PAYLOAD
-    if settings.USER_APPLIED_CMD in source:
+    # Read out of the payload as it stands, never out of the one the run started with: the scripts
+    # work in order, and a script that has already hidden this command is one whose work reaching back
+    # past it would throw away. Where the command is no longer there to find, there is nothing here to
+    # do - which is the answer, not a reason to start again from the original.
+    source = payload
+    if checks.command_in(source):
       # 'rev' reads its input through a pipe and awk reads its own program through a ';' or a
       # newline, so the form handed over is the one whose operator is the separator under test.
       # Reading a command back from its end needs an operator either way: awk puts a ';' or a
@@ -69,7 +75,7 @@ def tamper(payload):
         rev_cmd = settings.CMD_SUB_PREFIX + reversed_cmd + settings.CMD_SUB_SUFFIX
       # Applied to the payload as handed over, not to the untouched original: the scripts run in
       # order, and reaching back past the ones before would throw their work away.
-      payload = source.replace(settings.USER_APPLIED_CMD, rev_cmd)
+      payload = re.sub(checks.blank_tolerant(settings.USER_APPLIED_CMD), lambda match: rev_cmd, source)
       if len(settings.WHITESPACES) != 0:
         payload = payload.replace(settings.SINGLE_WHITESPACE, settings.WHITESPACES[0])
   return payload

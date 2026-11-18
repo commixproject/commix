@@ -59,9 +59,8 @@ def invalid_cmd_output(cmd):
   boundary = settings.CONFIRMED_BOUNDARY.get(settings.CHECKING_PARAMETER)
   if (settings.TARGET_OS != settings.OS.WINDOWS and boundary and boundary[2] == settings.PIPE_SEPARATOR
       and settings.DASHLESS_TAMPER in settings.MULTI_ENCODED_PAYLOAD):
-    err_msg += " An output longer than one argument can hold is refused by the reading the '"
-    err_msg += settings.DASHLESS_TAMPER + ".py' tamper script writes for a pipe, rather than "
-    err_msg += "measured, and arrives here as none at all."
+    err_msg += " An output longer than one argument can hold is refused by the reading '"
+    err_msg += settings.DASHLESS_TAMPER + ".py' writes for a pipe, so it arrives as none at all."
   return err_msg
 
 """

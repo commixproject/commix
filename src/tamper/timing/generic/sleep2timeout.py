@@ -39,14 +39,19 @@ def tamper(payload):
   # The rewrite itself, keeping the delay the payload asked for.
   def sleep_to_timeout_ping(payload):
     whitespace = checks.current_whitespace()
+    # Matched however the gap is spelled where this reads it, and written with the run's own.
+    gap = checks.tamper_blank_pattern()
     if settings.TARGET_OS != settings.OS.WINDOWS:
-      payload = re.sub(r"sleep" + re.escape(whitespace) + r"(\$\(\(\d+\*\([^()]*\)\)\))",
+      payload = re.sub(r"sleep" + gap + r"(\$\(\(\d+\*\([^()]*\)\)\))",
                        lambda x: "timeout" + whitespace + x.group(1) + ".01" + whitespace + "ping" + whitespace + "localhost", payload)
-      for match in re.finditer(r"sleep" + re.escape(whitespace) + r"([1-9]\d+|[0-9])", payload):
-        payload = payload.replace(match.group(0), match.group(0).replace("sleep", "timeout") + " ping localhost".replace(settings.SINGLE_WHITESPACE, whitespace))
-        payload = payload.replace("timeout" + whitespace + "0" + whitespace + "ping" + whitespace + "localhost", "timeout" + whitespace + "0")
+      for match in re.finditer(r"sleep" + gap + r"([1-9]\d+|[0-9])", payload):
+        # A delay of none has nothing to wait for, so nothing is given to wait on either.
+        written = ("timeout" + whitespace + "0" if match.group(1) == "0" else
+                   "timeout" + whitespace + match.group(1) + whitespace + "ping" + whitespace + "localhost")
+        payload = payload.replace(match.group(0), written)
     else:
-      payload = payload.replace("powershell.exe" + whitespace + "-InputFormat" + whitespace + "none" + whitespace + "Start-Sleep" + whitespace + "-s", "timeout")
+      payload = re.sub(r"powershell\.exe" + gap + r"-InputFormat" + gap + r"none" + gap + r"Start-Sleep" + gap + r"-s",
+                       "timeout", payload)
     return payload
   if not settings.TIME_RELATED_ATTACK:
     return payload
