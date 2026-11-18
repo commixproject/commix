@@ -56,6 +56,40 @@ class ACommandACmdExeCannotBeHandedSaysSo(unittest.TestCase):
     settings.TARGET_OS = settings.OS.UNIX
     self.assertNotIn("cannot be carried", common.invalid_cmd_output('echo a"b'))
 
+class AnOutputTooLongForOneArgumentSaysSo(unittest.TestCase):
+  """
+  A pipe keeps nothing a variable could hold, so the reading written for one without a '-' hands the
+  whole output to a command as a single argument - and what one argument can hold is capped by the
+  target's own kernel. Past that the reading is refused rather than measured, and what arrives here
+  is a command that printed nothing. Said, because the ceiling is the script's and not the output's.
+  """
+  def setUp(self):
+    self._state = (settings.TARGET_OS, list(settings.MULTI_ENCODED_PAYLOAD),
+                   dict(settings.CONFIRMED_BOUNDARY), settings.CHECKING_PARAMETER)
+    settings.TARGET_OS = settings.OS.UNIX
+    settings.CHECKING_PARAMETER = "P"
+
+  def tearDown(self):
+    settings.TARGET_OS, settings.MULTI_ENCODED_PAYLOAD, settings.CONFIRMED_BOUNDARY, settings.CHECKING_PARAMETER = self._state
+
+  def _boundary(self, separator):
+    settings.CONFIRMED_BOUNDARY = {"P": ("", "", separator, settings.SINGLE_WHITESPACE)}
+
+  def test_a_pipe_read_without_a_dash_is_told_what_the_ceiling_is(self):
+    settings.MULTI_ENCODED_PAYLOAD = [settings.DASHLESS_TAMPER]
+    self._boundary(settings.PIPE_SEPARATOR)
+    self.assertIn("longer than one argument can hold", common.invalid_cmd_output("ls"))
+
+  def test_a_separator_that_holds_the_output_in_a_variable_is_left_unexplained(self):
+    settings.MULTI_ENCODED_PAYLOAD = [settings.DASHLESS_TAMPER]
+    self._boundary(";")
+    self.assertNotIn("longer than one argument", common.invalid_cmd_output("ls"))
+
+  def test_a_pipe_whose_reading_was_never_rewritten_is_left_unexplained(self):
+    settings.MULTI_ENCODED_PAYLOAD = []
+    self._boundary(settings.PIPE_SEPARATOR)
+    self.assertNotIn("longer than one argument", common.invalid_cmd_output("ls"))
+
 class SanitisedReports(unittest.TestCase):
   """
   An unhandled exception offers to open a GitHub issue, and what it carries is read by strangers.

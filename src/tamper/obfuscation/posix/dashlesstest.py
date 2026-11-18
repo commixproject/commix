@@ -43,6 +43,12 @@ def dependencies():
 if not settings.TAMPER_SCRIPTS[__tamper__]:
   settings.TAMPER_SCRIPTS[__tamper__] = True
 
+# Written in front of an output 'expr' is handed, so that an output which is one of its own words
+# cannot be read as one. Both readings that write it ask for the byte locale beside it: what they
+# count and index is bytes, and a build that knows the target's own locale reads a character there
+# instead - two bytes of an accented one answering as a single step.
+_OPERAND_GUARD = "A"
+
 # The ordering operators, spelled the way 'expr' reads them rather than 'test'.
 _ORDER_OPERATORS = {"-le": "<=", "-ge": ">=", "-lt": "<", "-gt": ">"}
 
@@ -93,14 +99,28 @@ def _skipped(count):
 The byte count the comparisons are made against, spelled without the '-' of 'wc -c'.
 
 Written down a pipe because the separator being proved is one, and nothing set on its left side
-survives to be read with '${#...}' on the right. 'expr STRING : REGEX' answers with how far the
-match ran, which needs neither a pipe nor a dash, and agrees with 'wc -c' on what this counts -
-a marker of ASCII letters, where a character and a byte are the same thing.
+survives to be read with '${#...}' on the right. 'wc' without its option counts the same bytes in
+the last of the numbers it prints, and 'expr STRING : REGEX' answers with how far a match ran, which
+needs neither a pipe nor a dash of its own.
+
+What is measured here is a command's own output, which a run is free to find anything in - and an
+output that is one of 'expr's own words, a '|' or a '(' or 'match' or 'length', is read as that word
+rather than as the text being measured: refused outright by one build of it, answered with a wrong
+number by another. A letter in front of it can be neither, and the one it adds to the count is taken
+off the way the byte ordinal takes off its own span, by adding the rest of a round number and
+keeping the remainder - a '-' being the one thing that cannot be written here.
 """
 _LENGTH = re.compile(r"\$\(" + _PRINTERS + r'"(?P<word>[^"]*)"' + _PIPE + r"wc -c\)")
+# What the guarded count is carried round by. A thousand million bytes is past any output a run
+# reads a byte at a time, and the sum of the two stays inside what a shell counts with.
+_LENGTH_SPAN = 1000000000
 
 def _rewrite_length(payload):
-  return _LENGTH.sub(lambda m: '$(expr "' + m.group("word") + '" : \'.*\')', payload)
+  def _rewritten(match):
+    counted = ('$(' + settings.BYTE_LOCALE + ' expr "' + _OPERAND_GUARD + match.group("word") +
+               '" : \'.*\')')
+    return ("$(expr \\( " + counted + " + " + str(_LENGTH_SPAN - 1) + " \\) % " + str(_LENGTH_SPAN) + ")")
+  return _LENGTH.sub(_rewritten, payload)
 
 """
 The byte read down the pipe, without the '-' of 'tail -c +N', 'head -c 1' and 'od -A n -t u1'.
@@ -111,6 +131,16 @@ than an arithmetic one, because this stands where the caller may already have an
 expansion open, and one holding another is not parsed alike everywhere. The span is added on and
 taken off again for the same reason 'byte_ordinal' does it - a build whose 'printf' signs the byte
 answers with a negative, and the same sum lands either answer back in range.
+
+What is taken is the byte and everything behind it, rather than the byte on its own: a substitution
+hands back no trailing line break, so a byte that is one came back as nothing at all and was read as
+an ordinal of zero - which a command's output holds one of per line. The output's own last byte is
+never a line break for the same reason, so what the match ends on is always a byte that survives,
+and 'printf' reads the ordinal of the first one either way.
+
+A letter is written in front of the output for the same reason the count beside this one is taken
+off a line of 'wc': an output that is one of 'expr's own words is read as that word rather than as
+the text being indexed. The byte is counted one further in to go with it.
 """
 _ORDINAL = re.compile(r"\$\(" + _PRINTERS + r'"(?P<word>[^"]*)"' + _PIPE + r"tail -c \+(?P<at>\d+)" +
                       _PIPE + r"head -c 1" + _PIPE + r"od -A n -t u1\)")
@@ -118,7 +148,8 @@ _ORDINAL = re.compile(r"\$\(" + _PRINTERS + r'"(?P<word>[^"]*)"' + _PIPE + r"tai
 def _rewrite_piped_ordinal(payload):
   span = str(settings.HIGHEST_BYTE + 1)
   def _rewritten(match):
-    character = '$(expr "' + match.group("word") + '" : "' + _skipped(int(match.group("at")) - 1) + r'\(.\)")'
+    character = ('$(' + settings.BYTE_LOCALE + ' expr "' + _OPERAND_GUARD + match.group("word") +
+                 '" : "' + _skipped(int(match.group("at"))) + r'\(.*\)")')
     return ("$(expr \\( $(" + settings.BYTE_LOCALE + " printf '%d' \"'" + character +
             "\") + " + span + " \\) % " + span + ")")
   return _ORDINAL.sub(_rewritten, payload)

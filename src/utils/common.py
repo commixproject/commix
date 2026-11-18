@@ -46,6 +46,22 @@ def invalid_cmd_output(cmd):
   if settings.TARGET_OS == settings.OS.WINDOWS and settings.DOUBLE_QUOTE in cmd:
     err_msg += " A '" + settings.DOUBLE_QUOTE + "' in a command cannot be carried to a cmd.exe "
     err_msg += "target, which is why this one did not run. Write it without one."
+  """
+  And why, where the reading is the reason.
+
+  A pipe keeps nothing a variable could hold, so the reading written for one without a '-' hands
+  the whole output to 'expr' as a single argument. What one argument can hold is capped by the
+  target's own kernel - a little over 128 KB where that is Linux, nearer a megabyte elsewhere - and
+  an output past it is refused rather than measured, which arrives here as a command that printed
+  nothing. The reading this stands in for pipes the output instead and is bounded by none of that,
+  so the ceiling is this script's and worth telling apart from an empty answer.
+  """
+  boundary = settings.CONFIRMED_BOUNDARY.get(settings.CHECKING_PARAMETER)
+  if (settings.TARGET_OS != settings.OS.WINDOWS and boundary and boundary[2] == settings.PIPE_SEPARATOR
+      and settings.DASHLESS_TAMPER in settings.MULTI_ENCODED_PAYLOAD):
+    err_msg += " An output longer than one argument can hold is refused by the reading the '"
+    err_msg += settings.DASHLESS_TAMPER + ".py' tamper script writes for a pipe, rather than "
+    err_msg += "measured, and arrives here as none at all."
   return err_msg
 
 """

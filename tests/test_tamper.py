@@ -15,6 +15,7 @@ For more see the file 'readme/COPYING' for copying permission.
 
 import os
 import re
+import subprocess
 import inspect
 import importlib
 import unittest
@@ -611,6 +612,77 @@ class AReplacementStringCarriesWhatItWasGiven(unittest.TestCase):
   def test_a_payload_with_nothing_to_carry_is_left_as_it_is(self):
     for payload in ("print(`echo ABCDEF`)", "id", "echo $((1+2))"):
       self.assertEqual(payload, self._tamper(payload))
+
+class DashlessByteReading(unittest.TestCase):
+  """
+  The reading 'dashlesstest' writes in place of 'tail -c'/'head -c'/'od' hands back the byte those
+  three would have, a line break among them: a command's output carries one of those per line, and a
+  reading that loses them answers with a wrong ordinal on every one of them.
+  """
+  # Two lines with an empty one between them, so a line break is asked for twice over - once where
+  # another follows it, which is where a reading that takes the byte alone has nothing left to read.
+  OUTPUT = "a\n\nb"
+
+  def _shell(self, expression):
+    done = subprocess.run(["/bin/sh", "-c", "printf %s " + expression], capture_output=True, text=True)
+    return done.stdout.strip()
+
+  @unittest.skipUnless(os.path.exists("/bin/sh"), "no POSIX shell to read the payload back with")
+  def test_every_byte_reads_as_the_one_the_pipe_would_have_handed_back(self):
+    stage("|")
+    from src.core.techniques.time_based import tb_payloads
+    from src.tamper.obfuscation.posix import dashlesstest
+    word = "$(printf 'a\\n\\nb')"
+    for at in range(1, len(self.OUTPUT) + 1):
+      piped = tb_payloads._ordinal_expr(word, at)
+      self.assertIn("od -A n -t u1", piped)
+      expected = self._shell(piped)
+      written = self._shell(dashlesstest.tamper(piped))
+      self.assertEqual(str(ord(self.OUTPUT[at - 1])), written.strip(),
+                       "byte " + str(at) + " of " + repr(self.OUTPUT) + " read as " + repr(written))
+      self.assertEqual(expected.strip(), written.strip(), "byte " + str(at))
+
+class DashlessReadingsOfAnAwkwardOutput(unittest.TestCase):
+  """
+  What the script measures and indexes is a command's own output, which a run is free to find
+  anything in. An output that is one of 'expr's own words is read as that word rather than as the
+  text being measured - refused by one build of it, answered with a wrong number by another - and a
+  byte of a character written in two is a step of its own only where the byte locale is asked for.
+  """
+  # Each of 'expr's shapes: an operator, a parenthesis, and the words only some builds know.
+  AWKWARD = ("|", "(", "match", "length", "index", "alpha\n\nbeta", "x")
+
+  def _shell(self, script):
+    done = subprocess.run(["/bin/sh", "-c", script], capture_output=True, text=True)
+    return done.stdout.strip()
+
+  def _printed(self, text):
+    return "printf '" + "".join("\\%03o" % byte for byte in text.encode("utf-8")) + "'"
+
+  @unittest.skipUnless(os.path.exists("/bin/sh"), "no POSIX shell to read the payload back with")
+  def test_the_count_and_the_bytes_come_back_whatever_the_output_says(self):
+    stage("|")
+    from src.core.techniques.boolean_based import bb_payloads
+    from src.core.techniques.time_based import tb_payloads
+    from src.tamper.obfuscation.posix import dashlesstest
+    for text in self.AWKWARD:
+      word = "$(" + self._printed(text) + ")"
+      counted = self._shell("printf %s " + dashlesstest.tamper(bb_payloads._piped_length(word)))
+      self.assertEqual(str(len(text.encode("utf-8"))), counted, "length of " + repr(text))
+      for at in range(1, len(text.encode("utf-8")) + 1):
+        read = self._shell("printf %s " + dashlesstest.tamper(tb_payloads._ordinal_expr(word, at)))
+        self.assertEqual(str(text.encode("utf-8")[at - 1]), read, "byte " + str(at) + " of " + repr(text))
+
+  def test_both_readings_ask_for_the_locale_that_makes_a_character_a_byte(self):
+    stage("|")
+    from src.core.techniques.boolean_based import bb_payloads
+    from src.core.techniques.time_based import tb_payloads
+    from src.tamper.obfuscation.posix import dashlesstest
+    word = "$(id)"
+    for written in (dashlesstest.tamper(bb_payloads._piped_length(word)),
+                    dashlesstest.tamper(tb_payloads._ordinal_expr(word, 2))):
+      self.assertIn(settings.BYTE_LOCALE + " expr", written)
+      self.assertNotIn("-", written)
 
 class ListedDescriptions(unittest.TestCase):
   """
