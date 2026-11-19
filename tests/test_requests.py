@@ -100,6 +100,44 @@ class ResponseTimeSample(unittest.TestCase):
     self.refuse_with(500)
     self.assertIsNone(requests.quick_response_time_sample("http://127.0.0.1/x.php?a=1", "GET"))
 
+class AnHttpProxyFollowsARedirect(unittest.TestCase):
+  """
+  An HTTP proxy is named on each request, so the request a redirect builds went straight to the
+  host it named, past the proxy the run was told to use.
+  """
+  def setUp(self):
+    self._state = (menu.options.proxy, menu.options.ignore_proxy, menu.options.tor,
+                   menu.options.tor_type, menu.options.proxy_cred, settings.PROXY_SCHEME,
+                   settings.FOLLOW_REDIRECT)
+    menu.options.proxy = "127.0.0.1:18093"
+    menu.options.ignore_proxy = False
+    menu.options.tor = False
+    menu.options.proxy_cred = None
+    settings.PROXY_SCHEME = "http"
+    settings.FOLLOW_REDIRECT = True
+
+  def tearDown(self):
+    (menu.options.proxy, menu.options.ignore_proxy, menu.options.tor, menu.options.tor_type,
+     menu.options.proxy_cred, settings.PROXY_SCHEME, settings.FOLLOW_REDIRECT) = self._state
+
+  def _redirected(self, target="http://other.example/next"):
+    from src.core.requests import redirection
+    original = redirection.Request("http://first.example/a", method="GET")
+    handler = redirection.RedirectHandler()
+    return handler.redirect_request(original, None, 302, "Found", {}, target)
+
+  def test_the_request_a_redirect_makes_goes_through_the_proxy(self):
+    self.assertEqual("127.0.0.1:18093", self._redirected().host)
+
+  def test_a_run_told_to_ignore_the_proxy_is_not_sent_through_it(self):
+    menu.options.ignore_proxy = True
+    self.assertEqual("other.example", self._redirected().host)
+
+  def test_a_tor_run_leaves_it_to_the_opener_s_own_handler(self):
+    menu.options.tor = True
+    menu.options.tor_type = settings.PROXY_TYPE.HTTP
+    self.assertEqual("other.example", self._redirected().host)
+
 if __name__ == "__main__":
   unittest.main()
 

@@ -509,7 +509,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "356"
+REVISION = "357"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -988,6 +988,9 @@ BOOLEAN_FALSE_LENGTH = None
 # since the "skip the body, pay a fresh connection instead" trade only wins past a minimum size.
 NULL_CONNECTION_WORTHWHILE = None
 NULL_CONNECTION_MIN_LENGTH = 32768
+
+# Each confirmed finding's own calibration, keyed (url, parameter, technique, separator) - put back before it is read.
+ORACLE_STATES = {}
 
 # One-time "reflected value(s) found" notice already shown this run.
 REFLECTIVE_VALUE_FOUND = False
@@ -3315,7 +3318,7 @@ Options a target's own testing can change - a stored session replaces them, a te
 directory - and which the next target is entitled to see as the user left them.
 """
 RESTORED_OPTIONS = ("cookie", "data", "tamper", "os", "web_root", "tmp_path", "timesec",
-                    "auth_cred", "auth_type", "level", "tech")
+                    "auth_cred", "auth_type", "level", "tech", "host", "referer")
 
 _TARGET_STATE_BASELINE = {}
 _OPTIONS_BASELINE = {}

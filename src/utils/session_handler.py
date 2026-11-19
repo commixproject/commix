@@ -428,7 +428,8 @@ def applied_techniques(url, http_request_method):
         for session in cursor:
           technique_info = session[0]
           letter = technique_letter(technique_info)
-          if letter:
+          # Only a letter '--technique' takes narrows the run; code injection and out-of-band are reached through their own switches.
+          if letter and letter in settings.AVAILABLE_TECHNIQUES:
             techniques.append(letter)
         techniques = list(set(techniques))
         techniques = "".join(str(x) for x in techniques)

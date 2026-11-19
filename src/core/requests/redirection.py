@@ -16,7 +16,15 @@ For more see the file 'readme/COPYING' for copying permission.
 from src.utils import settings
 from src.utils import common
 from src.core.controller import checks
+from src.core.parse import cmdline as menu
 from src.thirdparty.six.moves import urllib as _urllib
+
+# An HTTP proxy is named on each request, so the one a redirect makes has to name it again.
+def _proxied(request):
+  if menu.options.proxy and not menu.options.ignore_proxy and not (menu.options.tor and menu.options.tor_type == settings.PROXY_TYPE.HTTP):
+    from src.core.requests import proxy
+    proxy.apply_to_request(request, request.type)
+  return request
 
 class Request(_urllib.request.Request):
   # A request that keeps the method it was made with, whatever a redirect asks for.
@@ -53,12 +61,12 @@ class RedirectHandler(_urllib.request.HTTPRedirectHandler, object):
             del carried[header]
       # Preserve the original method, not HEAD - except on 303, which asks for GET by definition.
       if code == 303 and request.get_method() != "HEAD":
-        return Request(target, data=None, headers=carried, method="GET")
-      return Request(target,
-                     data=request.data,
-                     headers=carried,
-                     method=request.get_method()
-                     )
+        return _proxied(Request(target, data=None, headers=carried, method="GET"))
+      return _proxied(Request(target,
+                              data=request.data,
+                              headers=carried,
+                              method=request.get_method()
+                              ))
     else:
       err_msg = str(_urllib.error.HTTPError(request.get_full_url(), code, msg, headers, fp)).replace(": "," (")
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg + ")."))

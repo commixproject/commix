@@ -13,6 +13,7 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import copy
 import io
 import re
 import threading
@@ -1723,3 +1724,103 @@ class APerCentSignACommandPrintedComesBack(unittest.TestCase):
     body = b"<html>a%b%%cEFLMFW</html>"
     self.assertEqual("a%b%%cEFLMFW", checks.decode_page_body(body, self._response(), guard="EFLMFW")
                      .replace("<html>", "").replace("</html>", ""))
+
+class AFindingKeepsItsOwnOracle(unittest.TestCase):
+  """
+  The calibration lives in settings, so a later parameter's calibration - or a failed one, which
+  clears it on the way in - overwrote the pages a deferred extraction was about to read through.
+  """
+  _NAMES = ("BOOLEAN_TRUE_PAGE", "BOOLEAN_FALSE_PAGE", "BOOLEAN_TRUE_RAW", "BOOLEAN_FALSE_RAW",
+            "BOOLEAN_TRUE_LENGTH", "BOOLEAN_FALSE_LENGTH", "BOOLEAN_TRUE_CODE", "BOOLEAN_FALSE_CODE",
+            "BOOLEAN_PRINTED_STATE", "DYNAMIC_MARKINGS", "ORACLE_STATES")
+
+  def setUp(self):
+    saved = dict((name, getattr(settings, name)) for name in self._NAMES)
+    for name, value in saved.items():
+      self.addCleanup(setattr, settings, name, value)
+    settings.ORACLE_STATES = {}
+
+  def test_a_later_calibration_does_not_take_the_oracle_with_it(self):
+    first, second = ("a", "u", "B", "t"), ("a", "u", "B", "t")
+    self.assertTrue(checks.calibrate_boolean_oracle("<p>Host is up</p>" * 20, "<p>Host is down</p>" * 20))
+    settings.BOOLEAN_PRINTED_STATE = True
+    checks.remember_oracle(first)
+    # A second parameter whose two pages read alike wipes the calibration on its way through.
+    self.assertFalse(checks.calibrate_boolean_oracle("same", "same"))
+    settings.BOOLEAN_PRINTED_STATE = False
+    self.assertIsNone(settings.BOOLEAN_TRUE_PAGE)
+    checks.restore_oracle(second)
+    self.assertIsNotNone(settings.BOOLEAN_TRUE_PAGE)
+    self.assertIsNotNone(settings.BOOLEAN_FALSE_PAGE)
+    self.assertTrue(settings.BOOLEAN_PRINTED_STATE)
+    self.assertTrue(checks.boolean_oracle("<p>Host is up</p>" * 20))
+
+  def test_a_finding_never_remembered_leaves_the_oracle_as_it_is(self):
+    self.assertTrue(checks.calibrate_boolean_oracle("<p>Host is up</p>" * 20, "<p>Host is down</p>" * 20))
+    page = settings.BOOLEAN_TRUE_PAGE
+    checks.restore_oracle(("nothing", "stored", "here", ";"))
+    self.assertEqual(page, settings.BOOLEAN_TRUE_PAGE)
+
+  def test_two_findings_are_kept_apart(self):
+    self.assertTrue(checks.calibrate_boolean_oracle("<p>Host is up</p>" * 20, "<p>Host is down</p>" * 20))
+    checks.remember_oracle(("u", "a", "B", ";"))
+    self.assertTrue(checks.calibrate_boolean_oracle("<p>Reachable</p>" * 20, "<p>Unreachable</p>" * 20))
+    checks.remember_oracle(("u", "b", "B", ";"))
+    checks.restore_oracle(("u", "a", "B", ";"))
+    self.assertIn("Host is up", settings.BOOLEAN_TRUE_PAGE)
+    checks.restore_oracle(("u", "b", "B", ";"))
+    self.assertIn("Reachable", settings.BOOLEAN_TRUE_PAGE)
+
+class ADiscardedFindingTakesItsDeferredWorkWithIt(unittest.TestCase):
+  """
+  A finding the final re-ask takes back was still holding its enumeration, proof and shell entry,
+  and so went on being exploited and reported as proved after the run had said it was not injectable.
+  """
+  _NAMES = ("CONFIRMED_INJECTION_POINTS", "PENDING_POST_DETECTION_ACTIONS", "PROOF_EXECUTORS",
+            "PENDING_OS_SHELL_ENTRY", "INJECTION_CHECKER", "IDENTIFIED_COMMAND_INJECTION", "BOOLEAN_BASED_STATE",
+            "CHECKING_PARAMETER", "CONFIRMED_BOUNDARY", "LOAD_SESSION", "TIME_RELATED_ATTACK",
+            "SKIP_SUBST", "AUTO_TAMPER", "MULTI_ENCODED_PAYLOAD")
+
+  def setUp(self):
+    # Copied, since the retries a discard goes through append to the lists in place.
+    saved = dict((name, copy.copy(getattr(settings, name))) for name in self._NAMES)
+    for name, value in saved.items():
+      self.addCleanup(setattr, settings, name, value)
+    # Not under test here: it rebuilds the tamper chain from settings the other tests share.
+    original = checks.tamper_scripts
+    checks.tamper_scripts = lambda *args, **kwargs: None
+    self.addCleanup(setattr, checks, "tamper_scripts", original)
+    settings.LOAD_SESSION = None
+    settings.CHECKING_PARAMETER = "P"
+    settings.CONFIRMED_BOUNDARY = {"P": ("", "", ";", settings.SINGLE_WHITESPACE)}
+
+  def _discard(self, earlier_action, earlier_proof, earlier_entry):
+    from src.core.controller import injector
+    settings.CONFIRMED_INJECTION_POINTS = [(settings.INJECTION_TECHNIQUE.BOOLEAN_BASED,)]
+    settings.PENDING_POST_DETECTION_ACTIONS = [earlier_action]
+    settings.PROOF_EXECUTORS = [earlier_proof]
+    settings.PENDING_OS_SHELL_ENTRY = earlier_entry
+    pending = (1, 1, earlier_entry)
+    # Registered by the finding about to be taken back.
+    settings.PENDING_POST_DETECTION_ACTIONS.append("discarded action")
+    settings.PROOF_EXECUTORS.append("discarded proof")
+    settings.PENDING_OS_SHELL_ENTRY = "discarded entry"
+    settings.INJECTION_CHECKER = True
+    original = injector.false_positive_check
+    injector.false_positive_check = lambda *args, **kwargs: (None, "")
+    try:
+      checks.final_false_positive_check("http://t/", "GET", "P", 0, 0, pending)
+    finally:
+      injector.false_positive_check = original
+
+  def test_what_it_registered_is_taken_back_and_what_came_before_is_kept(self):
+    self._discard("earlier action", "earlier proof", "earlier entry")
+    self.assertEqual(["earlier action"], settings.PENDING_POST_DETECTION_ACTIONS)
+    self.assertEqual(["earlier proof"], settings.PROOF_EXECUTORS)
+    self.assertEqual("earlier entry", settings.PENDING_OS_SHELL_ENTRY)
+
+  def test_nothing_confirmed_is_left_standing_as_a_checker(self):
+    self._discard("earlier action", "earlier proof", None)
+    self.assertEqual([], settings.CONFIRMED_INJECTION_POINTS)
+    self.assertFalse(settings.INJECTION_CHECKER)
+    self.assertIsNone(settings.PENDING_OS_SHELL_ENTRY)

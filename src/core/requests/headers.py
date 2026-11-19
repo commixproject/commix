@@ -452,7 +452,8 @@ def check_http_traffic(request):
   if menu.options.ignore_proxy:
     opener = _urllib.request.build_opener(_urllib.request.ProxyHandler({}), connection_handler(context=settings.unverified_context()), redirection.RedirectHandler(), *extra_handlers)
   elif menu.options.tor and menu.options.tor_type == settings.PROXY_TYPE.HTTP:
-    opener = _urllib.request.build_opener(_urllib.request.ProxyHandler({settings.SCHEME: menu.options.proxy}), connection_handler(context=settings.unverified_context()), redirection.RedirectHandler(), *extra_handlers)
+    # Both schemes, since a redirect may leave the target's own for the other.
+    opener = _urllib.request.build_opener(_urllib.request.ProxyHandler({"http": menu.options.proxy, "https": menu.options.proxy}), connection_handler(context=settings.unverified_context()), redirection.RedirectHandler(), *extra_handlers)
   else:
     proxy.apply_to_request(request)
     opener = _urllib.request.build_opener(connection_handler(context=settings.unverified_context()), redirection.RedirectHandler(), *extra_handlers)

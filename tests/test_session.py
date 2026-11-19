@@ -283,5 +283,33 @@ class APrefixOfTheUsersOwnOutranksTheStandIn(SessionFixture):
     session_handler.reapply_testable_value(self.url, "addr", "GET", "ZZZ")
     self.assertEqual([], self.said)
 
+class AResumeNarrowsOnlyToTheTechniquesTheOptionTakes(SessionFixture):
+  """
+  A stored finding narrows the techniques a later run tests. One that code injection or the
+  out-of-band channel made carries a letter '--technique' does not take, and narrowing to it left
+  nothing to test at all - every other technique reported as not selected.
+  """
+  def store(self, technique):
+    session_handler.import_injection_points(
+      self.URL, technique, settings.INJECTION_TYPE.RESULTS_BASED_CI,
+      "", ";", True, "addr", "", "", "TAG", False, "127.0.0.1;echo TAG;", "GET", 0, 0, 0, 0, "1")
+
+  def test_a_finding_of_the_option_s_own_letters_narrows_the_run(self):
+    self.store(settings.INJECTION_TECHNIQUE.RESULTS_BASED)
+    self.assertEqual("r", session_handler.applied_techniques(self.URL, "GET"))
+
+  def test_a_code_injection_finding_alone_leaves_every_technique_selected(self):
+    self.store(settings.INJECTION_TECHNIQUE.DYNAMIC_CODE)
+    self.assertEqual("", session_handler.applied_techniques(self.URL, "GET"))
+
+  def test_an_out_of_band_finding_alone_leaves_every_technique_selected(self):
+    self.store(settings.INJECTION_TECHNIQUE.OOB)
+    self.assertEqual("", session_handler.applied_techniques(self.URL, "GET"))
+
+  def test_the_letters_the_option_takes_survive_beside_one_it_does_not(self):
+    self.store(settings.INJECTION_TECHNIQUE.OOB)
+    self.store(settings.INJECTION_TECHNIQUE.TIME_BASED)
+    self.assertEqual("t", session_handler.applied_techniques(self.URL, "GET"))
+
 if __name__ == "__main__":
   unittest.main()

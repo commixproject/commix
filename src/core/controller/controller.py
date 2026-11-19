@@ -1328,8 +1328,9 @@ def injection_process(url, check_parameter, http_request_method, filename, times
       """
       def _run_and_verify():
         mark = len(settings.CONFIRMED_INJECTION_POINTS)
+        pending = (len(settings.PENDING_POST_DETECTION_ACTIONS), len(settings.PROOF_EXECUTORS), settings.PENDING_OS_SHELL_ENTRY)
         ended = _run_techniques()
-        checks.final_false_positive_check(url, http_request_method, check_parameter, timesec, mark)
+        checks.final_false_positive_check(url, http_request_method, check_parameter, timesec, mark, pending)
         return ended
 
       # An escalation already handled during the heuristic test, ahead of this first pass, would

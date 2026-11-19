@@ -380,6 +380,7 @@ def init_injection(url):
   settings.CONFIRMED_INJECTION_POINTS = []
   settings.ASKED_KEEP_TESTING = False
   settings.PENDING_POST_DETECTION_ACTIONS = []
+  settings.ORACLE_STATES = {}
   settings.OS_CMD_DONE = False
   settings.PENDING_OS_SHELL_ENTRY = None
   settings.LOGS_NOTIFICATION_SHOWN = False

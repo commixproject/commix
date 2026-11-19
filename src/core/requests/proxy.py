@@ -127,10 +127,10 @@ def configure():
 """
 Name the proxy on one request, where it is an HTTP proxy - a SOCKS one is already carried beneath it.
 """
-def apply_to_request(request):
+def apply_to_request(request, scheme=None):
   if not menu.options.proxy or is_socks():
     return
-  request.set_proxy(menu.options.proxy, settings.SCHEME)
+  request.set_proxy(menu.options.proxy, scheme or settings.SCHEME)
   header = authorization_header()
   if header:
     request.add_unredirected_header("Proxy-Authorization", header)

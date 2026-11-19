@@ -249,3 +249,43 @@ class NothingIsKeptThatNothingReads(unittest.TestCase):
   def test_the_write_only_names_are_gone(self):
     for name in ("FOUND_EXEC_TIME", "FOUND_DIFF", "IDENTIFIED_SERVER_OS", "WAF_DETECTION_PHASE"):
       self.assertFalse(hasattr(settings, name), name + " is written and never read")
+
+class TheHostAndRefererAreTheNextTargetsOwn(unittest.TestCase):
+  """
+  The 'Host' header is settled from the first target's address and kept, so every later target of a
+  bulk run was sent to carrying the first one's name.
+  """
+  class Options(object):
+    host = None
+    referer = None
+
+  def setUp(self):
+    self._baseline = (dict(settings._TARGET_STATE_BASELINE), dict(settings._OPTIONS_BASELINE))
+    settings._TARGET_STATE_BASELINE.clear()
+    settings._OPTIONS_BASELINE.clear()
+
+  def tearDown(self):
+    settings._TARGET_STATE_BASELINE.clear()
+    settings._OPTIONS_BASELINE.clear()
+    settings._TARGET_STATE_BASELINE.update(self._baseline[0])
+    settings._OPTIONS_BASELINE.update(self._baseline[1])
+
+  def test_both_are_listed_among_the_options_a_target_can_change(self):
+    self.assertIn("host", settings.RESTORED_OPTIONS)
+    self.assertIn("referer", settings.RESTORED_OPTIONS)
+
+  def test_what_the_last_target_settled_is_not_carried_to_the_next(self):
+    options = self.Options()
+    settings.reset_target_state(options)
+    options.host, options.referer = "first.example:8081", "http://first.example/a"
+    settings.reset_target_state(options)
+    self.assertIsNone(options.host)
+    self.assertIsNone(options.referer)
+
+  def test_one_the_user_gave_is_kept(self):
+    options = self.Options()
+    options.host = "virtual.example"
+    settings.reset_target_state(options)
+    options.host = "first.example:8081"
+    settings.reset_target_state(options)
+    self.assertEqual("virtual.example", options.host)

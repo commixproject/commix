@@ -97,6 +97,8 @@ checks, the file access, '--os-cmd' and the shell - reaches this technique the w
 """
 def injection(separator, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter):
   from src.core.techniques.boolean_based import bb_handler as handler
+  # Read against this finding's own calibration, whatever has calibrated since.
+  checks.restore_oracle((url, vuln_parameter, settings.INJECTION_TECHNIQUE.BOOLEAN_BASED, separator))
   channel = handler.Channel(separator, prefix, suffix, whitespace, http_request_method, url, vuln_parameter)
   return handler.retrieve(channel, cmd)
 

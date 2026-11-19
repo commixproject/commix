@@ -152,6 +152,8 @@ def _channel_for(separator, prefix, suffix, whitespace, http_request_method, url
   if channel is None and cache_key not in _ORACLE_CHANNEL_CACHE:
     channel, _, _ = _calibrate_file_oracle(separator, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, TAG)
     _ORACLE_CHANNEL_CACHE[cache_key] = channel
+    if channel:
+      checks.remember_oracle((url, vuln_parameter, settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED, separator))
     _announce_channel(channel)
   return channel
 
@@ -178,6 +180,7 @@ def try_oracle_confirm(separator, prefix, suffix, whitespace, http_request_metho
     # Seeded here so extraction, later, finds this same channel already calibrated instead of
     # calibrating a second time now that the parameter it landed on is known.
     _ORACLE_CHANNEL_CACHE[(url, vuln_parameter, separator)] = channel
+    checks.remember_oracle((url, vuln_parameter, settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED, separator))
     # The value actually sent, folded in during calibration - a fresh, unfolded recomputation here
     # would report a payload that replaces the parameter's value instead of following it.
     return reported_payload, vuln_parameter
@@ -198,6 +201,8 @@ def oracle_extract(separator, prefix, suffix, whitespace, http_request_method, u
     channel = _channel_for(separator, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, TAG)
     if not channel:
       return None
+    # Read against this channel's own calibration, whatever has calibrated since.
+    checks.restore_oracle((url, vuln_parameter, settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED, separator))
 
     from src.core.techniques.boolean_based import bb_handler
     from src.core.requests import requests

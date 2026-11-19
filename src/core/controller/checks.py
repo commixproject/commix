@@ -251,7 +251,7 @@ same question once more before it is reported, the way the earlier per-technique
 each asked it on their own. 'mark' is the length of settings.CONFIRMED_INJECTION_POINTS before this
 parameter's techniques ran, so only the entries they just added are the ones being re-asked about.
 """
-def final_false_positive_check(url, http_request_method, check_parameter, timesec, mark):
+def final_false_positive_check(url, http_request_method, check_parameter, timesec, mark, pending=None):
   new_points = settings.CONFIRMED_INJECTION_POINTS[mark:]
   if not new_points or settings.LOAD_SESSION:
     return
@@ -333,6 +333,13 @@ def final_false_positive_check(url, http_request_method, check_parameter, timese
     settings.IDENTIFIED_COMMAND_INJECTION = False
     for row in new_points:
       setattr(settings, _STATE_BY_TECHNIQUE[row[0]], False)
+    # What the discarded findings registered goes with them, or they would still be exploited and proved.
+    if pending is not None:
+      del settings.PENDING_POST_DETECTION_ACTIONS[pending[0]:]
+      del settings.PROOF_EXECUTORS[pending[1]:]
+      settings.PENDING_OS_SHELL_ENTRY = pending[2]
+    if not settings.CONFIRMED_INJECTION_POINTS:
+      settings.INJECTION_CHECKER = False
 
 """
 Check for quoted values
@@ -5627,6 +5634,34 @@ def calibrate_boolean_oracle(page_true, page_false, code_true=None, code_false=N
   settings.BOOLEAN_TRUE_PAGE, settings.BOOLEAN_FALSE_PAGE = true_page, false_page
   settings.BOOLEAN_TRUE_RAW, settings.BOOLEAN_FALSE_RAW = page_true, page_false
   return True
+
+"""
+What a finding's oracle looked like when it was confirmed, kept under the finding's own key.
+
+The calibration lives in settings, so whatever calibrates - or fails to - after it overwrites it, and
+what is read later, at quit(), would then be read against another parameter's pages.
+"""
+def remember_oracle(key):
+  settings.ORACLE_STATES[key] = (settings.BOOLEAN_TRUE_PAGE, settings.BOOLEAN_FALSE_PAGE,
+                                 settings.BOOLEAN_TRUE_RAW, settings.BOOLEAN_FALSE_RAW,
+                                 settings.BOOLEAN_TRUE_LENGTH, settings.BOOLEAN_FALSE_LENGTH,
+                                 settings.BOOLEAN_TRUE_CODE, settings.BOOLEAN_FALSE_CODE,
+                                 settings.BOOLEAN_PRINTED_STATE, list(settings.DYNAMIC_MARKINGS))
+
+"""
+Put a finding's own oracle back before anything is read through it - once per retrieval, from the
+thread that starts it, so the workers it fans out to only ever read it.
+"""
+def restore_oracle(key):
+  state = settings.ORACLE_STATES.get(key)
+  if state is None:
+    return
+  settings.BOOLEAN_TRUE_PAGE, settings.BOOLEAN_FALSE_PAGE = state[0], state[1]
+  settings.BOOLEAN_TRUE_RAW, settings.BOOLEAN_FALSE_RAW = state[2], state[3]
+  settings.BOOLEAN_TRUE_LENGTH, settings.BOOLEAN_FALSE_LENGTH = state[4], state[5]
+  settings.BOOLEAN_TRUE_CODE, settings.BOOLEAN_FALSE_CODE = state[6], state[7]
+  settings.BOOLEAN_PRINTED_STATE = state[8]
+  settings.DYNAMIC_MARKINGS = list(state[9])
 
 """
 Text one answer carries and the other does not, quoted back as the option that would name it.

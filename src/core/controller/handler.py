@@ -732,6 +732,8 @@ def do_boolean_based_process(url, timesec, filename, http_request_method, inject
   def _exploit(separator, prefix, suffix, whitespace, vuln_parameter, TAG):
     cmd = maxlen = OUTPUT_TEXTFILE = ""
     interpreter = menu.options.interpreter
+    # The oracle as this boundary just proved it, kept for when the deferred actions below read through it.
+    checks.remember_oracle((url, vuln_parameter, technique, separator))
     _register_post_detection_action(lambda: enumeration.stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, 0, technique))
     _register_post_detection_action(lambda: file_access.stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, 0, technique))
     _register_post_detection_action(lambda: registry_access.stored_session(separator, maxlen, TAG, cmd, prefix, suffix, whitespace, timesec, http_request_method, url, vuln_parameter, OUTPUT_TEXTFILE, interpreter, filename, 0, technique))
