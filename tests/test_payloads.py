@@ -1394,6 +1394,30 @@ class BooleanThroughAPipe(unittest.TestCase):
       payloads = self._stage(printed)
       self.assertIn("od -A n -t u1", payloads.get_char(self.SEP, "id", 2, 126))
 
+class BooleanBasedNeverBuildsOnCRLF(unittest.TestCase):
+  """
+  CRLF's '\r' glues onto the end of whatever precedes it rather than acting as whitespace, which
+  breaks the printed-marker 'if [ ... ]\r\nthen ...\r\nfi' construct this technique can build -
+  reproduced directly against bash and dash: the closing ']\r' is read as a word '[' does not
+  recognize, true or false alike, on every call. Excluded the same way 'checks.unix_separator()'
+  already excludes it for the rest of the codebase.
+  """
+  def test_nothing_is_built_on_crlf(self):
+    stage_exploitation("\r\n")
+    from src.core.techniques.boolean_based import bb_payloads
+    for printed in (False, True):
+      settings.BOOLEAN_PRINTED_STATE = printed
+      self.assertFalse(bb_payloads.condition_check("\r\n"), "condition_check printed=" + str(printed))
+      self.assertFalse(bb_payloads.decision("\r\n", "TAG", 3), "decision printed=" + str(printed))
+      self.assertFalse(bb_payloads.get_length("\r\n", "id", 5), "get_length printed=" + str(printed))
+      self.assertFalse(bb_payloads.get_char("\r\n", "id", 2, 126), "get_char printed=" + str(printed))
+
+  def test_the_printed_marker_construct_itself_is_never_reached_on_crlf(self):
+    stage_exploitation("\r\n")
+    settings.BOOLEAN_PRINTED_STATE = True
+    from src.core.techniques.boolean_based import bb_payloads
+    self.assertEqual("", bb_payloads._decide("\r\n", "1 -eq 1"))
+
 # eof
 
 class SubstitutionNesting(unittest.TestCase):
@@ -1757,8 +1781,12 @@ class FileOracleLengthIsBytes(unittest.TestCase):
   The file oracle reads a character by byte position, so the length it searches has to be a byte
   count too. A shell counting characters makes the two disagree on where the output ends, and the
   trailing bytes of a non-ASCII output - counted as one character, read as two - go unread.
+
+  CRLF is left out: its '\r' glues onto the end of whatever precedes it rather than acting as
+  whitespace, which boolean-based's own printed-marker construct cannot survive - see
+  bb_payloads._supported().
   """
-  SEPARATORS = (";", "&&", "\n", "\r\n")
+  SEPARATORS = (";", "&&", "\n")
 
   def _length_payload(self, separator):
     stage_exploitation(separator)

@@ -40,7 +40,7 @@ that would otherwise close it answers 0 whatever the test said. Printed, by prin
 through the pipe itself and taking it from the byte the comparison picks - which needs no 'if', and
 so no ';' to put before its 'then'.
 """
-SUPPORTED_SEPARATORS = (";", "\n", "\r\n", "&&", "|")
+SUPPORTED_SEPARATORS = (";", "\n", "&&", "|")
 
 # The same comparison, written the way arithmetic spells it - what a pipe needs, having
 # no 'if' to put a test inside of.
@@ -49,7 +49,12 @@ _ARITHMETIC = {"-eq": "==", "-le": "<=", "-ge": ">=", "-gt": ">", "-lt": "<", "-
 def _supported(separator):
   if settings.TARGET_OS == settings.OS.WINDOWS:
     return checks.windows_separator(separator) is not None
-  return separator in SUPPORTED_SEPARATORS
+  # Read through 'unix_separator()' rather than this tuple alone, so CRLF stays excluded here too -
+  # its '\r' glues onto the end of whatever precedes it rather than acting as whitespace, which
+  # breaks the printed-marker 'if [ ... ]\r\nthen ...\r\nfi' this technique can build (reproduced:
+  # both bash and dash read the closing ']\r' as a word '[' does not recognize, on every call,
+  # true or false alike).
+  return checks.unix_separator(separator) in SUPPORTED_SEPARATORS
 
 """
 The test, written so that the page can carry its answer - with the separator under test and nothing
@@ -67,7 +72,7 @@ def _decide(separator, expression, arithmetic=None):
   # What follows '&&' runs only where what precedes it succeeded, which is the whole conditional.
   if separator == "&&":
     return _test(expression) + separator + printing
-  if separator in (";", settings.END_LINE.LF, settings.END_LINE.CRLF):
+  if separator in (";", settings.END_LINE.LF):
     return "if " + _test(expression) + separator + "then " + printing + separator + "fi"
   if separator == settings.PIPE_SEPARATOR and arithmetic:
     return _printed_through_pipe(arithmetic)

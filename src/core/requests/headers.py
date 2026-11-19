@@ -703,9 +703,10 @@ def do_check(request, safe=False):
   request = encode_non_ascii_url(request)
   # The address this one was given is the user's own, asked for as it was written, and the token
   # belongs to the request being tested rather than to the one sent between them.
+  csrf_cookie = None
   if not safe:
     randomize_parameters(request)
-    anticsrf.apply_token(request)
+    csrf_cookie = anticsrf.apply_token(request)
 
   # Frame the body as chunks, so a filter inspecting it never sees the payload in one piece.
   if menu.options.chunked and request.data and not safe and not request.has_header(settings.TRANSFER_ENCODING):
@@ -713,12 +714,19 @@ def do_check(request, safe=False):
     request.add_unredirected_header(settings.TRANSFER_ENCODING, "chunked")
 
   # Check if defined any Cookie HTTP header.
-  # Whatever keeps the file up to date knows better than the value this run started with.
+  # Whatever keeps the file up to date knows better than the value this run started with - and
+  # supersedes the CSRF-adjusted one below, exactly as it did before this request-local value
+  # existed at all.
   if menu.options.live_cookies and not settings.COOKIE_INJECTION:
     menu.options.cookie = cookies.live_cookies()
+    csrf_cookie = None
 
-  if menu.options.cookie and not settings.COOKIE_INJECTION:
-    request.add_header(settings.COOKIE, checks.remove_tags(menu.options.cookie))
+  # This request's own adjusted value, where the token travels in the cookie - read back directly
+  # rather than off 'menu.options.cookie' again, which a concurrent thread's own token may have
+  # since overwritten with a value this request never validated. See anticsrf.apply_token().
+  cookie_value = csrf_cookie if csrf_cookie is not None else menu.options.cookie
+  if cookie_value and not settings.COOKIE_INJECTION:
+    request.add_header(settings.COOKIE, checks.remove_tags(cookie_value))
 
   # Check if defined any User-Agent HTTP header.
   if menu.options.agent and not settings.USER_AGENT_INJECTION:
@@ -836,8 +844,13 @@ def do_check(request, safe=False):
         # Extra HTTP Header value
         http_header_value = extra_header.split(':', 1)[1]
         http_header_value = ''.join(http_header_value).strip().replace(": ",":")
-        # Check if it is a custom header injection.
-        if http_header_name not in [settings.ACCEPT, settings.HOST, settings.USER_AGENT, settings.REFERER, settings.COOKIE]:
+        # Check if it is a custom header injection. HTTP header names are case-insensitive, so a
+        # differently-cased spelling of one of these ('accept' for 'Accept') must still be read as
+        # the same header - not as a newly-discovered custom one, which sends the payload through
+        # the wrong code path and misreports the vulnerable parameter's name.
+        if http_header_name.lower() not in (settings.ACCEPT.lower(), settings.HOST.lower(),
+                                            settings.USER_AGENT.lower(), settings.REFERER.lower(),
+                                            settings.COOKIE.lower()):
           if not settings.CUSTOM_HEADER_INJECTION:
             benign_value = re.sub(settings.PROBLEMATIC_CUSTOM_INJECTION_PATTERNS, "", http_header_value)
             if settings.CUSTOM_INJECTION_MARKER_CHAR in benign_value:

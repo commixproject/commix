@@ -14,10 +14,27 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import re
+import threading
 from src.thirdparty.six.moves import urllib as _urllib
 from src.core.parse import cmdline as menu
 from src.utils import settings
 from src.core.controller import checks
+
+"""
+Serializes 'apply_token()' end to end across worker threads.
+
+The token travels through global, process-wide state - 'menu.options.cookie', '.header',
+'.headers', 'settings.RAW_HTTP_HEADERS' - not through anything request-local, because the code
+that goes on to read those back and build the actual outgoing headers (in 'headers.do_check()')
+runs after this returns and knows nothing about tokens at all. Without this lock, two threads'
+calls interleave: one fetches token A and writes it in, the other fetches a fresher token B and
+overwrites it before the first thread's own request is built - so a request built from A sends
+B's cookie instead, fails the target's check, and reads back as "not injectable" rather than as
+the race it is. The fetch itself (one HTTP round trip) happens inside the lock too, so this does
+serialize CSRF-token requests among themselves - acceptable, since token issuance is commonly
+stateful on the target side regardless.
+"""
+LOCK = threading.Lock()
 
 """
 Anti-CSRF token handling.
@@ -93,7 +110,11 @@ def _fetch_token_page(url, http_request_method):
 Write the token into a string of parameters, whether they are written as pairs or as JSON.
 
 Anchored at a parameter boundary, so that a token named 'token' does not rewrite the value of
-'user_token' instead.
+'user_token' instead. A query string or a body chains pairs on '&'; a cookie header chains them
+on ';' - this is asked to adjust both, so a boundary is either, not '&' alone. Read, rather than
+written, with '[^&;]*': without it, a token that is not a cookie string's last pair has the rest
+of the string read as its own value and dropped, since nothing then stops the match at the next
+pair's own ';'.
 """
 def adjust_parameter(param_string, name, value):
   if not param_string:
@@ -101,7 +122,7 @@ def adjust_parameter(param_string, name, value):
   quoted = _urllib.parse.quote(name)
   if quoted in param_string:
     name = quoted
-  match = re.search(r"(?i)(?:\A|(?<=&))" + re.escape(name) + r"=[^&]*", param_string)
+  match = re.search(r"(?i)(?:\A|(?<=[&;]))\s*" + re.escape(name) + r"=[^&;]*", param_string)
   if match:
     return param_string[:match.start()] + name + "=" + value + param_string[match.end():]
   match = re.search(r"(?i)[\"']" + re.escape(name) + r"[\"']\s*:\s*[\"'](?P<value>[^\"']*)", param_string)
@@ -149,6 +170,8 @@ def apply_token(request):
   if not settings.CSRF_TOKEN or settings.in_side_request("csrf_token") or not _carries_token(request):
     return
   settings.set_side_request("csrf_token", True)
+  LOCK.acquire()
+  cookie_for_this_request = None
   try:
     url = request.get_full_url()
     method = request.get_method()
@@ -197,7 +220,11 @@ def apply_token(request):
       body = request.data.decode(settings.DEFAULT_CODEC, errors="replace")
       request.data = adjust_parameter(body, token_name, token_value).encode(settings.DEFAULT_CODEC)
     if menu.options.cookie:
-      menu.options.cookie = adjust_parameter(menu.options.cookie, token_name, token_value)
+      # Kept local too, and returned - 'headers.do_check()' reads this back once the lock below
+      # has already been released, by which point a concurrent call may have rewritten the global
+      # to a different request's token. The return value is this request's own, unaffected by that.
+      cookie_for_this_request = adjust_parameter(menu.options.cookie, token_name, token_value)
+      menu.options.cookie = cookie_for_this_request
     # A token the target expects back as a header, under the name it was given.
     for header_name in list(request.headers) + list(request.unredirected_hdrs):
       if header_name.lower() == token_name.lower():
@@ -208,6 +235,8 @@ def apply_token(request):
     menu.options.headers = adjust_header(menu.options.headers, token_name, token_value)
     settings.RAW_HTTP_HEADERS = adjust_header(settings.RAW_HTTP_HEADERS, token_name, token_value)
   finally:
+    LOCK.release()
     settings.set_side_request("csrf_token", False)
+  return cookie_for_this_request
 
 # eof

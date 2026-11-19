@@ -188,6 +188,48 @@ class TheVisitThatKeepsTheSessionIsAnOrdinaryOne(_AFreshRun):
     self.assertEqual("PHPSESSID=abc", sent[settings.COOKIE.lower()])
     self.assertIn(settings.USER_AGENT.lower(), sent)
 
+class ADifferentlyCasedExtraHeaderIsStillTheOneItNames(_AFreshRun):
+  """
+  HTTP header names are case-insensitive, so '--header="accept:..."' names the same header as
+  'Accept' - read any other way, it is taken for a newly-discovered custom one instead of the
+  header already handled elsewhere, which sends its payload through the wrong path and misreports
+  the vulnerable parameter's name.
+  """
+  EXTRA_STATE = ("EXTRA_HTTP_HEADERS", "RAW_HTTP_HEADERS", "CUSTOM_HEADER_INJECTION",
+                "CUSTOM_INJECTION_MARKER", "CUSTOM_INJECTION_MARKER_PARAMETERS_LIST",
+                "CUSTOM_HEADERS_NAMES")
+
+  def setUp(self):
+    _AFreshRun.setUp(self)
+    self._extra = {name: getattr(settings, name) for name in self.EXTRA_STATE}
+    self._custom_http_headers = settings.INJECTION_MARKER_LOCATION.CUSTOM_HTTP_HEADERS
+    self._header_option = getattr(menu.options, "header", None)
+    self._headers_option = getattr(menu.options, "headers", None)
+    settings.EXTRA_HTTP_HEADERS = True
+    settings.RAW_HTTP_HEADERS = ""
+    settings.CUSTOM_HEADER_INJECTION = False
+    settings.CUSTOM_INJECTION_MARKER = False
+    settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST = []
+    settings.CUSTOM_HEADERS_NAMES = []
+    settings.INJECTION_MARKER_LOCATION.CUSTOM_HTTP_HEADERS = False
+    menu.options.headers = None
+    menu.options.header = "accept:AAA" + settings.CUSTOM_INJECTION_MARKER_CHAR + "BBB"
+
+  def tearDown(self):
+    for name, value in self._extra.items():
+      setattr(settings, name, value)
+    settings.INJECTION_MARKER_LOCATION.CUSTOM_HTTP_HEADERS = self._custom_http_headers
+    menu.options.header = self._header_option
+    menu.options.headers = self._headers_option
+    _AFreshRun.tearDown(self)
+
+  def test_the_lowercase_spelling_is_not_read_as_a_new_header(self):
+    request = _urllib.request.Request("http://t/a.php?addr=1", method="GET")
+    headers.do_check(request)
+    self.assertNotIn("accept", settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST)
+    self.assertFalse(settings.INJECTION_MARKER_LOCATION.CUSTOM_HTTP_HEADERS)
+    self.assertFalse(any(name.lower().startswith("accept:") for name in settings.CUSTOM_HEADERS_NAMES))
+
 """
 The browser User-Agent values switch '--random-agent' draws from.
 """
