@@ -1601,6 +1601,18 @@ def percent_decoded(body, guard=None):
     return codecs.decode(match.group(1), "hex")
   return re.sub(b"(?i)%([0-9a-f]{2})", decoded, body)
 
+"""
+A page's text with its per-cent escapes read once more - where the reader that handed it over had not
+already read them, which it does for every text page, and never in a way that reaches into the marker.
+"""
+def percent_decoded_once(text, response, guard=None):
+  try:
+    if "text/" in (response.info().get(settings.CONTENT_TYPE) or "").lower():
+      return text
+  except Exception:
+    pass
+  return percent_decoded(text.encode(settings.DEFAULT_CODEC, errors="replace"), guard).decode(settings.DEFAULT_CODEC, errors="replace")
+
 def decode_page_body(body, response=None, percent_decode=True, entity_decode=True, guard=None):
   """
   A page already read from its response, as text: decompressed if it was compressed, and read in
@@ -2710,6 +2722,10 @@ def check_http_s(url):
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
   url_split = check_url(url)
   if url_split.username and url_split.password and "@" in url_split.netloc:
+    # Credentials written into the address are the ones to authenticate with, unless some were given for the purpose.
+    if not menu.options.auth_cred:
+      menu.options.auth_type = menu.options.auth_type or settings.AUTH_TYPE.BASIC
+      menu.options.auth_cred = _urllib.parse.unquote(url_split.username) + ":" + _urllib.parse.unquote(url_split.password)
     url = url.replace(url_split.netloc,url_split.netloc.split("@")[1])
  
   if settings.SINGLE_WHITESPACE in url:
@@ -3200,6 +3216,9 @@ def validate_techniques():
   for legacy, current in settings.LEGACY_TECHNIQUE_LETTERS.items():
     letters = letters.replace(legacy, current)
   selectable = list(settings.AVAILABLE_TECHNIQUES)
+  # The code injection sink was named here before '--eval' existed, and main.py still reads it from here.
+  if not settings.SKIP_TECHNIQUES:
+    selectable.append(settings.EVAL_TECHNIQUE_LETTER)
   ignored = settings.PARAMETER_SPLITTING_REGEX + settings.SINGLE_WHITESPACE
   unknown = [letter for letter in letters if letter not in selectable and letter not in ignored]
   if unknown:
@@ -7420,7 +7439,8 @@ def target_serves_concurrently(url, http_request_method, workers):
   # concurrency is settled later anyway, on payloads that carry a delay of their own.
   if one_after_another < settings.CONCURRENCY_PROBE_FLOOR:
     return True
-  return all_at_once < one_after_another * 0.5
+  # Two workers can do no better than half, so the line sits above it - three or more have room below.
+  return all_at_once < one_after_another * max(0.5, 1.5 / workers)
 
 """
 Decide whether persistent (Keep-Alive) connections are used.

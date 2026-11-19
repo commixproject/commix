@@ -147,12 +147,12 @@ one.
 """
 def run(cmd):
   return ("__import__(\"subprocess\").Popen(" + _literal(cmd) +
-          ",shell=True,stdout=-1).communicate()[0].decode()")
+          ",shell=True,stdout=-1).communicate()[0].decode(\"utf-8\",\"replace\")")
 
 # Read a file and yield its contents, as the bytes it holds - opened as text, a carriage return in
 # the file comes back as a newline, the same way a command's own output would.
 def read_file(path):
-  return "open(" + _literal(path) + ",\"rb\").read().decode()"
+  return "open(" + _literal(path) + ",\"rb\").read().decode(\"utf-8\",\"replace\")"
 
 """
 Drop the newlines an output ends with, so a length agrees with what a shell's own substitution

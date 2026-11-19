@@ -1489,12 +1489,9 @@ def injection_output(url, OUTPUT_TEXTFILE, timesec, technique):
           count = count + 1
         count = count - 1
         last_param = path_parts[count]
-        output = url.replace(last_param, OUTPUT_TEXTFILE)
-        if "?" in output and settings.OUTPUT_FILE_EXT in output:
-          try:
-            output = output.split("?")[0]
-          except (Exception, SystemExit):
-            pass
+        # Only the last segment of the path is the output file's place - the same text elsewhere in the address is not.
+        parsed = _urllib.parse.urlparse(url)
+        output = parsed.scheme + "://" + parsed.netloc + path[:path.rfind("/") + 1] + OUTPUT_TEXTFILE
       except IndexError:
         output = url + "/" + OUTPUT_TEXTFILE
     settings.DEFINED_WEBROOT = output
@@ -1677,7 +1674,8 @@ def remember_output_file(response):
 Evaluate test results.
 """
 def injection_test_results(response, TAG, randvcalc, technique, payload=None):
-  if type(response) is bool and response is not True or response is None:
+  # A bool is what a request that was not answered comes back as - a 404 included, which is not a page either.
+  if isinstance(response, bool) or response is None:
     return False
 
   if technique == settings.INJECTION_TECHNIQUE.RESULTS_BASED:
@@ -1690,7 +1688,7 @@ def injection_test_results(response, TAG, randvcalc, technique, payload=None):
     html_data = checks.process_page_content(response, action="decode", guard=TAG)
     html_data = html_data.replace(settings.END_LINE.LF,settings.SINGLE_WHITESPACE)
     # cleanup string / unescape html to string
-    html_data = _urllib.parse.unquote(html_data)
+    html_data = checks.percent_decoded_once(html_data, response, TAG)
     html_data = unescape(html_data)
     html_data = checks.remove_reflected_values(html_data, payload)
     if settings.SKIP_CALC:
@@ -1826,11 +1824,12 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
       for sequence, mark in page_marks:
         html_data = html_data.replace(sequence, mark)
       # cleanup string / unescape html to string
-      html_data = _urllib.parse.unquote(html_data)
+      html_data = checks.percent_decoded_once(html_data, response, TAG)
       html_data = unescape(html_data)
-      shell = re.findall(r"" + TAG + TAG + "(.*)" + TAG + TAG + settings.SINGLE_WHITESPACE, html_data)
+      # Lazily, so that output shown twice on a page is read as the output, not as everything between its two appearances.
+      shell = re.findall(r"" + TAG + TAG + "(.*?)" + TAG + TAG + settings.SINGLE_WHITESPACE, html_data)
       if not shell:
-        shell = re.findall(r"" + TAG + TAG + "(.*)" + TAG + TAG + "", html_data)
+        shell = re.findall(r"" + TAG + TAG + "(.*?)" + TAG + TAG + "", html_data)
       if not shell:
         return shell
       try:

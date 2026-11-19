@@ -189,7 +189,12 @@ def _parse_request(request, request_file):
   # connectivity check) uses the same pretty-printed form, not the raw file layout.
   if re.search(settings.JSON_RECOGNITION_REGEX, target["data"]) or re.search(settings.JSON_LIKE_RECOGNITION_REGEX, target["data"]):
     try:
-      parsed = json.loads(target["data"], object_pairs_hook=OrderedDict)
+      # Left as it was written where a key repeats - read into one, the others would be dropped from what is sent.
+      def _unique_pairs(pairs):
+        if len(set(key for key, _ in pairs)) != len(pairs):
+          raise ValueError("duplicate key")
+        return OrderedDict(pairs)
+      parsed = json.loads(target["data"], object_pairs_hook=_unique_pairs)
       target["data"] = json.dumps(parsed, indent=2, ensure_ascii=False)
     except Exception:
       pass
@@ -219,6 +224,9 @@ def _parse_request(request, request_file):
     host_value = _extract_header_value(settings.HOST, line)
     if host_value is not None:
       target["host"] = host_value
+      # The port a request was made to says what it spoke, where nothing else in it does.
+      if re.search(r":443\s*\Z", host_value):
+        scheme = "https://"
     agent_value = _extract_header_value(settings.USER_AGENT, line)
     if agent_value is not None:
       target["agent"] = agent_value
@@ -239,7 +247,8 @@ def _parse_request(request, request_file):
       auth_provided = auth_value.split()
       if auth_provided:
         target["auth_type"] = auth_provided[0].lower()
-        if target["auth_type"].lower() == settings.AUTH_TYPE.BASIC:
+        # A scheme named with nothing after it carries no credentials to read.
+        if target["auth_type"].lower() == settings.AUTH_TYPE.BASIC and len(auth_provided) > 1:
           try:
             # Add base64 padding if missing
             b64_string = auth_provided[1]
@@ -289,7 +298,7 @@ Remember what was given on the command line, before any parsed request overwrite
 """
 _command_line_options = {}
 
-# Keep the options the command line gave, so a parsed request cannot overrule them.
+# Keep the options the command line gave, so a request that does not carry one falls back to them and not to the previous target's.
 def _keep_command_line_options():
   if not _command_line_options:
     for option in ("host", "agent", "cookie", "referer", "auth_type", "auth_cred"):

@@ -143,16 +143,24 @@ def print_http_response(response_headers, code, page):
     settings.print_data_to_stdout("")
 
 """
+The realm a WWW-Authenticate challenge names, wherever among its parameters it sits - None where it names none.
+"""
+def realm_of(authline):
+  match = re.search(r'(?i)\brealm\s*=\s*(?:"([^"]*)"|([^,\s]*))', authline or "")
+  if not match:
+    return None
+  return match.group(1) if match.group(1) is not None else match.group(2)
+
+"""
 Probe once to read the realm off the target's own WWW-Authenticate challenge.
 """
 def discover_digest_realm(url):
   try:
     _urllib.request.urlopen(url, timeout=settings.TIMEOUT)
   except _urllib.error.HTTPError as e:
-    authline = e.headers.get('www-authenticate', '')
-    match = re.match(r'''(\w*)\s+realm=(.*)''', authline)
-    if match:
-      return match.group(2).split(',')[0].strip().strip('"')
+    realm = realm_of(e.headers.get('www-authenticate', ''))
+    if realm is not None:
+      return realm
   except Exception:
     pass
   return ""

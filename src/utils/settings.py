@@ -509,7 +509,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "358"
+REVISION = "359"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -2072,6 +2072,8 @@ PROOF_DONE = False
 CONFIRMED_BOUNDARY = {}
 # Whether the "keep testing others" prompt already fired for this target.
 ASKED_KEEP_TESTING = False
+# Whether the user ended the detection phase - for the whole target, not for the parameter it was asked on.
+END_DETECTION = False
 # Post-detection actions (enumeration, file access, --os-cmd), deferred until quit().
 PENDING_POST_DETECTION_ACTIONS = []
 OS_CMD_DONE = False

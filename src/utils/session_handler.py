@@ -177,9 +177,20 @@ Extract the host from a full URL string.
 Example: from 'http://example.com/path' returns 'example.com'
 """
 def get_host_from_url(url):
-  if '//' in url:
-    url = url.split('//', 1)[1]
-  return url.split('/', 1)[0]
+  # The site the address names, as the one name however it was written: case, credentials in front of it, a default port and a query straight after it do not make another.
+  parsed = _urllib.parse.urlparse(url if "//" in url else "//" + url)
+  host = (parsed.hostname or "").lower()
+  if not host:
+    return url.split("//", 1)[-1].split("/", 1)[0]
+  if ":" in host:
+    host = "[" + host + "]"
+  try:
+    port = parsed.port
+  except ValueError:
+    port = None
+  if port and port != {"http": 80, "https": 443}.get(parsed.scheme.lower()):
+    host += ":" + str(port)
+  return host
 
 """
 Generate a SQLite table name based on the SHA1 hash of the URL's host.
@@ -1092,6 +1103,8 @@ def reapply_testable_value(url, vuln_parameter, http_request_method, prefix=None
 Save valid authentication credentials (e.g. username and password) discovered during testing into the session database.
 """
 def import_valid_credentials(url, authentication_type, admin_panel, username, password):
+  # Kept in the one spelling it is looked up by.
+  authentication_type = (authentication_type or "").lower()
   try:
     with _session_connection() as conn:
       table = table_name(url) + "_creds"
@@ -1137,8 +1150,9 @@ def export_valid_credentials(url, authentication_type):
     with _session_connection() as conn:
       table = table_name(url) + "_creds"
       clause, url_params = url_match(url)
-      query = "SELECT username, password FROM \"" + table + "\" WHERE " + clause + " AND authentication_type = ?;"
-      cursor = conn.execute(query, url_params + (authentication_type,)).fetchall()
+      # Rows written under another spelling are still read, and the newest answer is the one that was last given.
+      query = "SELECT username, password FROM \"" + table + "\" WHERE " + clause + " AND lower(authentication_type) = ? ORDER BY id DESC;"
+      cursor = conn.execute(query, url_params + (authentication_type.lower(),)).fetchall()
     if cursor:
       return ":".join(cursor[0])
   except (sqlite3.OperationalError, sqlite3.DatabaseError):

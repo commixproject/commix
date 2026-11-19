@@ -129,6 +129,9 @@ def _try_credentials(url, realm, http_request_method, authentication_type, usern
     return True
   except KeyboardInterrupt:
     raise
+  except _urllib.error.HTTPError as err:
+    # Only a refusal of the credentials says they were wrong - a 404 or a 500 behind the login is an answer given to them.
+    return str(err.code) not in ("401", "403", "407")
   except (Exception, SystemExit):
     return False
 

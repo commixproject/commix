@@ -337,5 +337,18 @@ class AReplayIsMadeOnTheAddressGivenNow(SessionFixture):
     self.assertEqual("http://t/a.php?junk=NEW&addr=1" + tag + "#f",
                      session_handler.current_with_stored_point("http://t/a.php?addr=1" + tag + "&junk=OLD", "http://t/a.php?junk=NEW&addr=2#f"))
 
+class TheSessionKeysByTheSiteNotByHowItWasWritten(SessionFixture):
+  def test_case_credentials_default_port_and_query_do_not_make_another_site(self):
+    one = session_handler.table_name("http://h.example?a=1")
+    for url in ("http://H.EXAMPLE/x", "http://u:p@h.example:80/x", "h.example/p"):
+      self.assertEqual(one, session_handler.table_name(url), url)
+    self.assertNotEqual(one, session_handler.table_name("http://h.example:8080/x"))
+
+  def test_stored_credentials_are_found_whatever_the_type_was_spelled_and_the_newest_wins(self):
+    url = self.URL
+    session_handler.import_valid_credentials(url, "Basic", url, "admin", "old")
+    session_handler.import_valid_credentials(url, "basic", url, "admin", "new")
+    self.assertEqual("admin:new", session_handler.export_valid_credentials(url, "basic"))
+
 if __name__ == "__main__":
   unittest.main()

@@ -55,9 +55,18 @@ class RedirectHandler(_urllib.request.HTTPRedirectHandler, object):
       redirect leaves that host. A redirect is the target's to choose, so following one with the
       credentials still attached would hand them to whichever host it named.
       """
-      if _urllib.parse.urlparse(target).netloc != _urllib.parse.urlparse(request.get_full_url()).netloc:
+      leaving, origin = _urllib.parse.urlparse(target), _urllib.parse.urlparse(request.get_full_url())
+      # Another host, or the same one reached over plain HTTP after a secure request: either way what was said to the first is not said to the next.
+      if leaving.netloc != origin.netloc or (origin.scheme == "https" and leaving.scheme != "https"):
         for header in list(carried):
-          if header.lower().replace("-", "") in ("authorization", "proxyauthorization", "cookie"):
+          lowered = header.lower()
+          if lowered.replace("-", "") in ("authorization", "proxyauthorization", "cookie") or \
+             (leaving.netloc != origin.netloc and any(word in lowered for word in ("auth", "token", "api-key", "apikey", "secret", "session"))):
+            del carried[header]
+      # The name of the host the redirect leaves, which the one it arrives at would otherwise be reached under.
+      if leaving.netloc != origin.netloc:
+        for header in list(carried):
+          if header.lower() == "host":
             del carried[header]
       # Preserve the original method, not HEAD - except on 303, which asks for GET by definition.
       if code == 303 and request.get_method() != "HEAD":

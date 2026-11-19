@@ -42,7 +42,9 @@ The URL with the given names appended, each carrying a value the target has no r
 """
 def _with(url, names):
   query = "&".join(name + "=" + _decoy() for name in names)
-  return url + ("&" if "?" in url else "?") + query
+  # Ahead of any fragment: put behind one, the names are never sent.
+  base, hash_mark, fragment = url.partition("#")
+  return base + ("&" if "?" in base else "?") + query + hash_mark + fragment
 
 """
 The page a URL answers with, read the way every other comparison in the run reads one.
@@ -129,7 +131,9 @@ Each bucket of candidates is asked for in one request and only a bucket that cha
 taken apart, so the cost is the buckets rather than the names.
 """
 def mine_parameters(url, http_request_method):
-  names = [name for name in _candidates() if (name + "=") not in url]
+  # Those the address already carries, by name - 'id' is not carried by 'userid=1'.
+  carried = set(_urllib.parse.parse_qs(_urllib.parse.urlparse(url).query, keep_blank_values=True))
+  names = [name for name in _candidates() if name not in carried]
   if not names:
     return []
   info_msg = "Mining for parameters the target answers to but does not name."

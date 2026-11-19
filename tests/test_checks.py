@@ -1095,6 +1095,59 @@ class ParameterPollutionStatesOnlyWhatTheBannerSaid(unittest.TestCase):
     self.assertIn("not to a structured body", said)
     self.assertNotIn("Sending 'addr' twice", said)
 
+class ALowFixesInTheChecks(unittest.TestCase):
+  """
+  Small ones, each of which read a page, an answer or an option as something it was not.
+  """
+  def _served(self, content_type):
+    served = type("Served", (object,), {})()
+    served.info = lambda: {"Content-Type": content_type}
+    return served
+
+  def test_a_page_read_once_already_is_not_read_again(self):
+    text = "a%2520b"
+    self.assertEqual(text, checks.percent_decoded_once(text, self._served("text/html")))
+    self.assertEqual("a%20b", checks.percent_decoded_once(text, self._served("application/json")))
+
+  def test_the_marker_is_never_reached_into(self):
+    self.assertEqual("100%EFGHIJ", checks.percent_decoded_once("100%EFGHIJ", self._served("application/json"), "EFGHIJ"))
+
+  def test_an_unanswered_request_is_not_a_page(self):
+    from src.core.controller import injector
+    for answer in (True, False, None):
+      self.assertFalse(injector.injection_test_results(answer, "ABCDEF", 3, settings.INJECTION_TECHNIQUE.RESULTS_BASED))
+
+  def test_output_shown_twice_is_read_as_the_output(self):
+    from src.core.controller import injector
+    tag = "ABCDEF"
+    page = "<p>" + tag + tag + "root" + tag + tag + " </p><i>last</i> " + tag + tag + "root" + tag + tag + " "
+    served = type("Served", (object,), {"read": lambda s: page.encode(), "close": lambda s: None,
+                                        "info": lambda s: {"Content-Type": "text/html", "Content-Encoding": ""}})()
+    self.assertEqual(["root", "root"], injector.injection_results(served, tag, "id", settings.INJECTION_TECHNIQUE.RESULTS_BASED, "", "", 0))
+
+  def test_the_code_injection_sink_named_with_the_technique_option_is_accepted(self):
+    state = (menu.options.tech, settings.SKIP_TECHNIQUES)
+    try:
+      settings.SKIP_TECHNIQUES = False
+      menu.options.tech = "e"
+      checks.validate_techniques()
+    finally:
+      menu.options.tech, settings.SKIP_TECHNIQUES = state
+
+  def test_credentials_written_into_the_address_are_the_ones_to_authenticate_with(self):
+    state = (menu.options.auth_cred, menu.options.auth_type)
+    try:
+      menu.options.auth_cred = menu.options.auth_type = None
+      url = checks.check_http_s("http://user:p%40ss@t.example/a.php?x=1")
+      self.assertEqual("http://t.example/a.php?x=1", url)
+      self.assertEqual("user:p@ss", menu.options.auth_cred)
+      self.assertEqual("basic", menu.options.auth_type)
+      menu.options.auth_cred, menu.options.auth_type = "given:one", "digest"
+      checks.check_http_s("http://user:other@t.example/")
+      self.assertEqual("given:one", menu.options.auth_cred)
+    finally:
+      menu.options.auth_cred, menu.options.auth_type = state
+
 if __name__ == "__main__":
   unittest.main()
 

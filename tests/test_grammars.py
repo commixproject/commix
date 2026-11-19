@@ -260,3 +260,16 @@ class StatementEnders(unittest.TestCase):
   def test_every_grammar_states_its_own_terminator(self):
     for name, grammar in sorted(grammars().items()):
       self.assertTrue(getattr(grammar, "TERMINATOR", ""), name + " declares no terminator")
+
+class ACommandWithABacktickOrOddBytesIsCarried(unittest.TestCase):
+  def test_the_perl_literal_leaves_a_backtick_to_the_interpreter(self):
+    perl = grammars()["perl"]
+    self.assertNotIn("`", perl._literal("printf 'a`echo b`c'"))
+    if shutil.which("perl"):
+      out = subprocess.check_output(["perl", "-e", "print " + perl.run("printf 'a`echo b`c'")]).decode()
+      self.assertEqual("a`echo b`c", out)
+
+  def test_the_python_grammar_decodes_without_stopping_at_a_byte_that_is_not_text(self):
+    python = grammars()["python"]
+    self.assertIn("\"utf-8\",\"replace\"", python.run("printf '\\xff'"))
+    self.assertIn("\"utf-8\",\"replace\"", python.read_file("/etc/hostname"))

@@ -341,10 +341,8 @@ def _measure_response_time_with_auth_handling(url, http_request_method):
             auth_line = err.headers.get('www-authenticate', '')
           auth_type = auth_line.split()[0] if auth_line else ''
           
-          try:
-            auth_obj = re.match(r'''(\w*)\s+realm=(.*)''', auth_line).groups()
-            realm = auth_obj[1].split(',')[0].replace("\"", "")
-          except (AttributeError, IndexError, TypeError):
+          realm = headers.realm_of(auth_line)
+          if realm is None:
             realm = False
 
         except ValueError:
@@ -566,6 +564,18 @@ def _answered_with_status(code, err):
 """
 Exceptions regarding requests failure(s)
 """
+"""
+The status codes a failure names: the one an answer carries, or - for a failure that is only text -
+a code that stands alone in it. '4012 bytes read' names no '401', and a query that happens to hold
+'n=500' is not a '500' the target gave.
+"""
+def named_status_codes(err_msg, text, codes=None):
+  codes = settings.HTTP_ERROR_CODES if codes is None else codes
+  code = getattr(err_msg, "code", None)
+  if isinstance(code, int):
+    return [_ for _ in codes if _ == str(code)]
+  return [_ for _ in codes if re.search(r"(?<![\w=])" + re.escape(_) + r"(?!\w)", str(text))]
+
 def request_failed(err_msg):
 
   # Asked for with '--ignore-timeouts': the request is given up on and the run carries on without
@@ -610,7 +620,7 @@ def request_failed(err_msg):
     except IndexError:
       error_msg = str(err_msg)
 
-  if any(x in str(error_msg).lower() for x in ["wrong version number", "ssl", "https"]):
+  if any(x in str(error_msg).lower() for x in ["wrong version number", "ssl", "certificate", "sent to https"]):
     stability.disable_retries()
     error_msg = "Cannot establish SSL connection. "
     if settings.MULTI_TARGETS or settings.CRAWLING:
@@ -651,7 +661,7 @@ def request_failed(err_msg):
     else:
       return False
 
-  elif settings.UNAUTHORIZED_ERROR in str(err_msg).lower():
+  elif named_status_codes(err_msg, str(err_msg).lower(), [settings.UNAUTHORIZED_ERROR]):
     if int(settings.UNAUTHORIZED_ERROR) in settings.IGNORE_CODE or \
        settings.PERFORM_CRACKING:
       return False
@@ -682,12 +692,12 @@ def request_failed(err_msg):
   # would not take was never sent again without it, and every other error code passed in silence,
   # on every request but the one the run opens with.
   elif checks.detect_waf(err_msg):
-    if not settings.NOT_FOUND_ERROR in str(err_msg).lower():
+    if not named_status_codes(err_msg, str(err_msg).lower(), [settings.NOT_FOUND_ERROR]):
       return False
     return True
 
-  elif [True for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]:
-    status_code = [err_code for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]
+  elif named_status_codes(err_msg, error_msg):
+    status_code = named_status_codes(err_msg, error_msg)
     code = status_code[0]
     if not checks.ignored_http_error_code(code):
       # What the code says about the target, before it is written off as interference.
@@ -703,7 +713,7 @@ def request_failed(err_msg):
       warn_msg += "' which could interfere with the results of the tests."
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       settings.WARNED_HTTP_ERROR_CODES.add(int(code))
-    if not settings.NOT_FOUND_ERROR in str(err_msg).lower():
+    if not named_status_codes(err_msg, str(err_msg).lower(), [settings.NOT_FOUND_ERROR]):
       return False
     return True
 
@@ -738,7 +748,7 @@ def request_failed(err_msg):
       return False
 
   elif settings.IDENTIFIED_WARNINGS or settings.IDENTIFIED_EVAL_PROBE or settings.IDENTIFIED_COMMAND_INJECTION or \
-  any(checks.ignored_http_error_code(_) for _ in settings.HTTP_ERROR_CODES if _ in str(error_msg)):
+  any(checks.ignored_http_error_code(_) for _ in named_status_codes(err_msg, error_msg)):
     return False
 
   elif settings.IGNORE_ERR_MSG is False:
@@ -752,7 +762,7 @@ def request_failed(err_msg):
 
   else:
     if settings.VERBOSITY_LEVEL >= 1:
-      status_code = [err_code for err_code in settings.HTTP_ERROR_CODES if err_code in str(error_msg)]
+      status_code = named_status_codes(err_msg, error_msg)
       if status_code:
         # The warning above already named the code; repeating it for every request that meets it does not.
         if int(status_code[0]) not in settings.WARNED_HTTP_ERROR_CODES:

@@ -248,6 +248,61 @@ class CompressionIsOnlyPutBackByTheLastRequestThatTurnedItOff(unittest.TestCase)
     finally:
       settings.PAGE_COMPRESSION = saved
 
+class ALowFixesInTheRequests(unittest.TestCase):
+  def test_a_code_stands_alone_or_is_not_named(self):
+    self.assertEqual([], requests.named_status_codes(Exception(), "IncompleteRead(4012 bytes read, 3 more expected)"))
+    self.assertEqual(["401"], requests.named_status_codes(Exception(), "HTTP Error 401: Unauthorized"))
+    error = _urllib.error.HTTPError("http://t/", 404, "Not Found", {}, None)
+    self.assertEqual(["404"], requests.named_status_codes(error, str(error)))
+
+  def test_a_realm_is_read_wherever_it_sits(self):
+    self.assertEqual("My Realm", headers.realm_of('Digest qop="auth", realm="My Realm", nonce="x"'))
+    self.assertEqual("plain", headers.realm_of("Basic realm=plain"))
+    self.assertIsNone(headers.realm_of("Basic"))
+
+  def test_a_chunk_is_sized_in_bytes(self):
+    from src.core.requests import chunked
+    body = chunked.split_post_data("\u0391\u03b8\u03ae\u03bd\u03b1")
+    sizes = [int(line.split(";")[0], 16) for line in body.split("\r\n")[0:-3:2]]
+    self.assertEqual(len("\u0391\u03b8\u03ae\u03bd\u03b1".encode("utf-8")), sum(sizes))
+
+  def test_a_redirect_leaves_the_host_and_what_was_said_to_it_behind(self):
+    from src.core.requests import redirection
+    state = (menu.options.proxy, settings.FOLLOW_REDIRECT)
+    menu.options.proxy, settings.FOLLOW_REDIRECT = None, True
+    try:
+      original = redirection.Request("https://a.example/x", headers={"Host": "a.example", "Cookie": "s=1", "X-Api-Key": "k", "Accept": "*/*"}, method="GET")
+      handler = redirection.RedirectHandler()
+      across = handler.redirect_request(original, None, 302, "Found", {}, "https://b.example/n")
+      self.assertEqual(["Accept"], sorted(across.headers))
+      downgraded = handler.redirect_request(original, None, 302, "Found", {}, "http://a.example/n")
+      self.assertNotIn("Cookie", downgraded.headers)
+      same = handler.redirect_request(original, None, 302, "Found", {}, "https://a.example/n")
+      self.assertIn("Cookie", same.headers)
+    finally:
+      menu.options.proxy, settings.FOLLOW_REDIRECT = state
+
+class MiningSkipsOnlyTheNamesTheAddressCarries(unittest.TestCase):
+  def test_a_name_inside_another_is_not_carried(self):
+    from src.core.requests import mining
+    originals = (mining._candidates, mining._page)
+    sent = []
+    mining._candidates = lambda: ["id", "userid", "data", "metadata"]
+    mining._page = lambda url, method: (sent.append(url), "same page")[1]
+    try:
+      mining.mine_parameters("http://t/a?userid=1&metadata=2", "GET")
+    finally:
+      mining._candidates, mining._page = originals
+    asked = [url for url in sent if "&id=" in url or "&data=" in url]
+    self.assertTrue(asked, "'id' and 'data' were never asked for")
+    # 'userid' and 'metadata' are the address's own, and are not asked for a second time.
+    self.assertTrue(all(url.count("userid=") == 1 and url.count("metadata=") == 1 for url in sent))
+
+  def test_the_decoys_go_in_ahead_of_a_fragment(self):
+    from src.core.requests import mining
+    self.assertTrue(mining._with("http://t/a?x=1#f", ["id"]).endswith("#f"))
+    self.assertIn("?id=", mining._with("http://t/a#f", ["id"]))
+
 if __name__ == "__main__":
   unittest.main()
 

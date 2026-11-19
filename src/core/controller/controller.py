@@ -1071,8 +1071,12 @@ def injection_process(url, check_parameter, http_request_method, filename, times
   else:
     os_targets = [settings.TARGET_OS or settings.OS.UNIX]
 
+  # The shells already swept, by the one each pass actually ended up testing as - a heuristic can settle on the other one mid-pass.
+  swept = set()
   # Loop over the selected OS targets
   for os_target in os_targets:
+    if os_target in swept:
+      continue
     # A heuristic on an earlier pass may have settled which shell answers. Sweeping the other one
     # then costs a second full pass and, worse, writes over what was identified.
     if settings.IDENTIFIED_TARGET_OS and settings.TARGET_OS != os_target:
@@ -1194,6 +1198,7 @@ def injection_process(url, check_parameter, http_request_method, filename, times
             # No technique is running yet at this stage - just skip past heuristics.
             pass
           except settings.EndDetectionPhaseException:
+            settings.END_DETECTION = True
             break
 
         # Asked last and only where nothing else could answer, "no" still being a fair answer.
@@ -1308,6 +1313,7 @@ def injection_process(url, check_parameter, http_request_method, filename, times
           except settings.RetryTechniqueException:
             pass
           except settings.EndDetectionPhaseException:
+            settings.END_DETECTION = True
             return True
         return False
 
@@ -1555,6 +1561,7 @@ def injection_process(url, check_parameter, http_request_method, filename, times
           if checks.prompt_keep_testing(url):
             checks.quit(filename, url, hard_exit=False)
 
+    swept.add(settings.TARGET_OS)
     if not settings.CHECK_BOTH_OS or end_detection:
       break
 
@@ -1764,6 +1771,9 @@ def do_injection(found, data_type, url, http_request_method, filename, timesec):
     check_parameters.sort(key=lambda param: not has_stored_session(param))
 
   for check_param in check_parameters:
+    # Ended by the user, and so for every parameter still waiting - not only the one it was said on.
+    if settings.END_DETECTION:
+      break
     contextual_name = get_contextual_name(check_param)
     if contextual_name in settings.TESTED_PARAMETERS_LIST:
       continue

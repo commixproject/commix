@@ -204,3 +204,21 @@ class ATargetThatFailedIsSaidSo(unittest.TestCase):
     self._failed(SystemExit(1))
     self._failed(settings.NextTargetException())
     self.assertEqual([], self.said)
+
+class TheRequestFileIsReadAsWritten(unittest.TestCase):
+  def _target(self, text):
+    from src.core.parse import request as parser
+    return parser._parse_request(text, "request.txt")
+
+  def test_the_port_a_request_was_made_to_names_the_scheme(self):
+    target = self._target("GET /a.php?x=1 HTTP/1.1\nHost: example.com:443\n\n")
+    self.assertTrue(target["url"].startswith("https://"))
+
+  def test_a_scheme_named_without_credentials_is_not_an_error(self):
+    target = self._target("GET /a.php?x=1 HTTP/1.1\nHost: example.com\nAuthorization: Basic\n\n")
+    self.assertIsNone(target["auth_cred"])
+
+  def test_a_body_that_repeats_a_key_is_left_as_it_was_written(self):
+    body = '{"a": 1, "a": 2}'
+    target = self._target("POST /a.php HTTP/1.1\nHost: example.com\nContent-Type: application/json\n\n" + body)
+    self.assertEqual(body, target["data"])
