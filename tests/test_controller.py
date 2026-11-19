@@ -152,6 +152,28 @@ class TechniquesCarryingEitherSink(unittest.TestCase):
       self.assertIn("if not menu.options.eval_sink:", source,
                     heuristic.__name__ + " settles the sink whatever was asked for")
 
+class SkippingTheTimeBasedTechniqueRunsNothingInItsPlace(unittest.TestCase):
+  """
+  Skipped under its own name it ran the file-based flow labelled as the time-based one, and left the
+  timing flag set for every request after it.
+  """
+  def test_the_answer_skip_ends_it_with_the_flag_cleared(self):
+    from src.core.techniques.time_based import tb_handler
+    from src.utils import common
+    state = (tb_handler.checks.response_times_unsteady, common.read_input, tb_handler.tb_injection_handler,
+             settings.TIME_RELATED_ATTACK, settings.RESPONSE_DELAYS, settings.ADJUST_TIME_DELAY_DISABLED)
+    ran = []
+    tb_handler.checks.response_times_unsteady = lambda: True
+    common.read_input = lambda *args, **kwargs: "s"
+    tb_handler.tb_injection_handler = lambda *args: ran.append(args)
+    try:
+      self.assertFalse(tb_handler.exploitation("http://t/", 3, "f", "GET", 0, "type", settings.INJECTION_TECHNIQUE.TIME_BASED))
+      self.assertEqual([], ran)
+      self.assertFalse(settings.TIME_RELATED_ATTACK)
+    finally:
+      (tb_handler.checks.response_times_unsteady, common.read_input, tb_handler.tb_injection_handler,
+       settings.TIME_RELATED_ATTACK, settings.RESPONSE_DELAYS, settings.ADJUST_TIME_DELAY_DISABLED) = state
+
 if __name__ == "__main__":
   unittest.main()
 

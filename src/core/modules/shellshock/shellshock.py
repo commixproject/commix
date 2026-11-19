@@ -262,7 +262,13 @@ def shellshock_handler(url, http_request_method, filename):
         # Check if defined "--verbose" option.
         if settings.VERBOSITY_LEVEL != 0:
           settings.print_data_to_stdout(settings.print_payload(payload))
-        response = _send_header_payload(url, check_header, payload)
+        try:
+          response = _send_header_payload(url, check_header, payload)
+        except _urllib.error.HTTPError as err_msg:
+          # A 500 or 400 says this combination failed, not that the ones after it will - the sweep goes on.
+          if str(err_msg.code) not in (settings.INTERNAL_SERVER_ERROR, settings.BAD_REQUEST):
+            raise
+          response = False
 
         if type(response) is bool:
           response_info = ""

@@ -55,12 +55,13 @@ def exploitation(url, timesec, filename, http_request_method, url_time_response,
         if proceed_option.lower() == "c":
           result = tb_injection_handler(url, timesec, filename, http_request_method, url_time_response, injection_type, technique, tmp_path)
           if result is False:
+            settings.TIME_RELATED_ATTACK = False
             return False
           # Return when a technique was resumed or found; only False should continue prompting.
           return result
         elif proceed_option.lower() == "s":
-          from src.core.techniques.file_based import fb_handler
-          fb_handler.exploitation(url, timesec, filename, http_request_method, url_time_response, injection_type, technique)
+          # Skipped, and nothing else run in its place: the file-based technique has its own turn, under its own name.
+          settings.TIME_RELATED_ATTACK = False
           return False
         elif proceed_option.lower() == "q":
           raise SystemExit()

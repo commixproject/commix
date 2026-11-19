@@ -17,6 +17,7 @@ import os
 import re
 import time
 from src.core.parse import cmdline as menu
+from src.thirdparty.six.moves import urllib as _urllib
 from src.utils import common
 from src.utils import settings
 
@@ -38,6 +39,10 @@ tab-separated fields, of which the last two are the name and the value that the 
 """
 def _parse_netscape_format(content):
   cookies = []
+  # Where the cookies are going: a cookie is sent to the site it was set for, and only before it expires.
+  target = _urllib.parse.urlparse(menu.options.url or "")
+  # The name in a 'Host' header of the run's own stands for the site as well - the address may be only where it is reached.
+  hosts = set(_ for _ in ((target.hostname or "").lower(), (menu.options.host or "").split(":")[0].lower()) if _)
   # The prefix marks a cookie the browser keeps from scripts, which says nothing about sending it.
   content = re.sub("(?im)^#httpOnly_", "", content)
   for line in content.splitlines():
@@ -46,6 +51,15 @@ def _parse_netscape_format(content):
       continue
     fields = line.split("\t")
     if len(fields) == 7 and fields[5]:
+      if fields[4].isdigit() and 0 < int(fields[4]) < time.time():
+        continue
+      domain = fields[0].lstrip(".").lower()
+      if hosts and domain and not any(_ == domain or _.endswith("." + domain) for _ in hosts):
+        continue
+      if hosts and fields[2] and not (target.path or "/").startswith(fields[2]):
+        continue
+      if hosts and fields[3].upper() == "TRUE" and target.scheme != "https":
+        continue
       cookies.append(fields[5] + "=" + fields[6])
   return (settings.COOKIE_PARAM_DELIMITER + settings.SINGLE_WHITESPACE).join(cookies)
 

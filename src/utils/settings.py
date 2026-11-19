@@ -509,7 +509,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "357"
+REVISION = "358"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -1810,7 +1810,7 @@ def ascii_transparent_encoding(name):
 
 # Server banners list
 SERVER_OS_BANNERS = [
-    r"(Microsoft|Windows|Win[\w\.]+)",
+    r"(Microsoft|Windows|\bWin(?:32|64)\b)",
     "Debian",
     "Ubuntu",
     "Fedora",
@@ -2472,9 +2472,6 @@ HTTP_ERROR_CODES_SUM = []
 # Statuses a gateway gives about itself rather than about the request, so the same request put to
 # it again may well be answered - unlike a 4xx, which is the target's answer and will not change.
 TRANSIENT_HTTP_ERROR_CODES = (INTERNAL_SERVER_ERROR, BAD_GATEWAY, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT)
-
-# The status the last request came back with, where that status was an error - see headers.resend().
-LAST_HTTP_ERROR = None
 
 # Set once the target has been found unusable, so the phases behind the check are not spent on it.
 TARGET_UNUSABLE = False

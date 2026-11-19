@@ -254,7 +254,7 @@ def clear(url):
         return
 
       query = ("SELECT MAX(id) FROM \"" + table + "\" GROUP BY " + URL_UP_TO_QUERY +
-               ", technique, vuln_parameter, http_header;")
+               ", technique, vuln_parameter, http_header, http_request_method;")
       cursor = conn.execute(query)
 
       # Collect the ids to keep as strings
@@ -620,7 +620,7 @@ class StoredWebRootConflict(Exception):
 """
 Restore stored technique state and resume without querying the database again.
 """
-def apply_stored_technique(row):
+def apply_stored_technique(row, current_url=None):
   (url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix,
    TAG, interpreter, payload, http_header, http_request_method, url_time_response,
    timesec, exec_time, output_length, is_vulnerable, data, cookie) = row[:20]
@@ -752,9 +752,27 @@ def apply_stored_technique(row):
   if settings.USER_APPLIED_TIMESEC and timesec:
     announce_replay_conflict(timesec, int(menu.options.timesec), "delay", "--time-sec")
 
-  return (url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix,
+  return (current_with_stored_point(url, current_url), technique, injection_type, separator, shell, vuln_parameter, prefix, suffix,
           TAG, interpreter, payload, http_request_method, url_time_response, timesec,
           exec_time, output_length, is_vulnerable)
+
+"""
+The address a stored finding is replayed on: the one given now, carrying the stored finding's own
+marked parameter - what the finding was made with. Any other value in the query is the run's to
+choose, and a token or session value written into it last time is stale by now.
+"""
+def current_with_stored_point(stored_url, current_url):
+  tag = settings.INJECT_TAG
+  if not current_url or tag not in stored_url or "?" not in current_url:
+    return stored_url
+  stored = re.search(r"[?&]([^&=?#]+)=([^&#]*" + re.escape(tag) + r"[^&#]*)", stored_url)
+  if not stored:
+    return stored_url
+  name, pair_value = stored.group(1), stored.group(2)
+  pattern = r"([?&]" + re.escape(name) + r"=)[^&#]*"
+  if not re.search(pattern, current_url):
+    return stored_url
+  return re.sub(pattern, lambda match: match.group(1) + pair_value, current_url, count=1)
 
 """
 Check whether the output file for a stored technique has already been deleted from the target.

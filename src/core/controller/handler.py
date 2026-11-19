@@ -544,7 +544,7 @@ def do_oob_process(url, timesec, filename, http_request_method, injection_type, 
   stored_row = settings.STORED_TECHNIQUES.get(technique) if settings.LOAD_SESSION else None
   if stored_row:
     try:
-      url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, interpreter, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable = session_handler.apply_stored_technique(stored_row)
+      url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, interpreter, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable = session_handler.apply_stored_technique(stored_row, url)
       url, prefix = session_handler.reapply_testable_value(url, vuln_parameter, http_request_method, prefix)
       checks.check_for_stored_tamper(payload)
       settings.OOB_STATE = True
@@ -848,7 +848,7 @@ def do_boolean_based_process(url, timesec, filename, http_request_method, inject
   stored_row = settings.STORED_TECHNIQUES.get(technique) if settings.LOAD_SESSION else None
   if stored_row:
     try:
-      url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, interpreter, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable = session_handler.apply_stored_technique(stored_row)
+      url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, interpreter, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable = session_handler.apply_stored_technique(stored_row, url)
       url, prefix = session_handler.reapply_testable_value(url, vuln_parameter, http_request_method, prefix)
       checks.check_for_stored_tamper(payload)
       settings.DETECTION_PHASE = True
@@ -1140,6 +1140,8 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
   for whitespace, prefix, suffix, separator in combinations:
     bare_prefix = prefix
     bare_suffix = suffix
+    # An anomaly seen on one boundary is that boundary's, not a reason to treat every later one as unsteady.
+    false_positive_warning = False
     settings.DETECTION_PHASE = True
     settings.EXPLOITATION_PHASE = False
     # If a previous session is available for this specific technique.
@@ -1150,7 +1152,7 @@ def do_time_related_process(url, timesec, filename, http_request_method, url_tim
     stored_row = settings.STORED_TECHNIQUES.get(technique) if settings.LOAD_SESSION else None
     if stored_row:
       try:
-        url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, interpreter, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable = session_handler.apply_stored_technique(stored_row)
+        url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, interpreter, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable = session_handler.apply_stored_technique(stored_row, url)
         url, prefix = session_handler.reapply_testable_value(url, vuln_parameter, http_request_method, prefix)
         # Re-apply the minimum safe delay to the stored session.
         if technique in (settings.INJECTION_TECHNIQUE.TIME_BASED, settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED):
@@ -1545,7 +1547,7 @@ def do_results_based_process(url, timesec, filename, http_request_method, inject
     stored_row = settings.STORED_TECHNIQUES.get(technique) if settings.LOAD_SESSION else None
     if stored_row:
       try:
-        url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, interpreter, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable = session_handler.apply_stored_technique(stored_row)
+        url, technique, injection_type, separator, shell, vuln_parameter, prefix, suffix, TAG, interpreter, payload, http_request_method, url_time_response, timesec, exec_time, output_length, is_vulnerable = session_handler.apply_stored_technique(stored_row, url)
         url, prefix = session_handler.reapply_testable_value(url, vuln_parameter, http_request_method, prefix)
         if technique == settings.INJECTION_TECHNIQUE.FILE_BASED:
           settings.FILE_BASED_STATE = True

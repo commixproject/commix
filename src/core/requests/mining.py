@@ -160,7 +160,8 @@ def script_sources(url, content):
   sources = []
   for match in re.finditer(r'(?i)<script[^>]+src=["\']([^"\']+\.js[^"\']*)["\']', content or ""):
     href = _urllib.parse.urljoin(url, match.group(1))
-    if _urllib.parse.urlparse(url).netloc in href and href not in sources:
+    # The same site, not an address that merely contains its name - a script from anywhere else is fetched with this run's cookie and credentials.
+    if _urllib.parse.urlparse(url).netloc.lower() == _urllib.parse.urlparse(href).netloc.lower() and href not in sources:
       sources.append(href)
   return sources[:settings.MAX_MINED_SCRIPTS]
 

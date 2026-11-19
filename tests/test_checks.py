@@ -409,17 +409,18 @@ class ReAskedTechniques(unittest.TestCase):
   """
   Which findings are asked their question a second time before the parameter is reported.
   """
-  def test_a_finding_weighed_as_a_page_is_re_asked(self):
+  def test_a_finding_read_off_a_delay_is_re_asked(self):
+    self.assertIn(settings.INJECTION_TECHNIQUE.TIME_BASED, checks._INFERRED_TECHNIQUES)
+
+  def test_a_page_oracle_is_not_taken_back_by_a_delay(self):
     """
-    The tempfile-based technique reads its tag back with a command of its own and weighs the answer
-    as a page - the file is written where the web root could not be reached, so there is no URL to
-    fetch it through. That is the same kind of evidence the other two rest on, and a page that moves
-    on its own produces it without the command having run, so it is not exempt from the re-ask.
+    A page oracle is confirmed both ways round and once more before it is reported, so a delay adds
+    nothing to it - and a target that cannot hold one (a gateway cut-off, a short execution limit)
+    would take back a finding that was never wrong.
     """
     for technique in (settings.INJECTION_TECHNIQUE.BOOLEAN_BASED,
-                      settings.INJECTION_TECHNIQUE.TIME_BASED,
                       settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED):
-      self.assertIn(technique, checks._INFERRED_TECHNIQUES)
+      self.assertNotIn(technique, checks._INFERRED_TECHNIQUES)
 
   def test_a_finding_that_came_back_on_its_own_is_not(self):
     # A tag fetched out of the web root, or a hostname only this run knows being resolved, is not
@@ -1777,7 +1778,7 @@ class ADiscardedFindingTakesItsDeferredWorkWithIt(unittest.TestCase):
   and so went on being exploited and reported as proved after the run had said it was not injectable.
   """
   _NAMES = ("CONFIRMED_INJECTION_POINTS", "PENDING_POST_DETECTION_ACTIONS", "PROOF_EXECUTORS",
-            "PENDING_OS_SHELL_ENTRY", "INJECTION_CHECKER", "IDENTIFIED_COMMAND_INJECTION", "BOOLEAN_BASED_STATE",
+            "PENDING_OS_SHELL_ENTRY", "INJECTION_CHECKER", "IDENTIFIED_COMMAND_INJECTION", "TIME_BASED_STATE",
             "CHECKING_PARAMETER", "CONFIRMED_BOUNDARY", "LOAD_SESSION", "TIME_RELATED_ATTACK",
             "SKIP_SUBST", "AUTO_TAMPER", "MULTI_ENCODED_PAYLOAD")
 
@@ -1796,7 +1797,7 @@ class ADiscardedFindingTakesItsDeferredWorkWithIt(unittest.TestCase):
 
   def _discard(self, earlier_action, earlier_proof, earlier_entry):
     from src.core.controller import injector
-    settings.CONFIRMED_INJECTION_POINTS = [(settings.INJECTION_TECHNIQUE.BOOLEAN_BASED,)]
+    settings.CONFIRMED_INJECTION_POINTS = [(settings.INJECTION_TECHNIQUE.TIME_BASED,)]
     settings.PENDING_POST_DETECTION_ACTIONS = [earlier_action]
     settings.PROOF_EXECUTORS = [earlier_proof]
     settings.PENDING_OS_SHELL_ENTRY = earlier_entry
@@ -1824,3 +1825,83 @@ class ADiscardedFindingTakesItsDeferredWorkWithIt(unittest.TestCase):
     self.assertEqual([], settings.CONFIRMED_INJECTION_POINTS)
     self.assertFalse(settings.INJECTION_CHECKER)
     self.assertIsNone(settings.PENDING_OS_SHELL_ENTRY)
+
+class APageIsComparedWithoutWhatWasTakenOutOfIt(unittest.TestCase):
+  """
+  A reflected value is taken out of one page and left in another, so the same text read as two.
+  """
+  def setUp(self):
+    self._state = (menu.options.titles, menu.options.text_only, list(settings.DYNAMIC_MARKINGS))
+    menu.options.titles = menu.options.text_only = False
+    settings.DYNAMIC_MARKINGS = []
+
+  def tearDown(self):
+    menu.options.titles, menu.options.text_only, settings.DYNAMIC_MARKINGS = self._state
+
+  def test_a_page_that_was_filtered_reads_like_one_that_was_not(self):
+    filtered = "<h1>Pinging 127.0.0.1" + settings.REFLECTED_VALUE_MARKER + "</h1>"
+    self.assertEqual(checks.comparable_page(filtered), checks.comparable_page("<h1>Pinging 127.0.0.1</h1>"))
+
+  def test_nothing_is_taken_from_an_empty_page(self):
+    self.assertEqual(checks.comparable_page(""), checks.comparable_page(""))
+
+class AnEntityLikeRunIsNotScannedWithoutEnd(unittest.TestCase):
+  """
+  Every '&' scanned on to the next ';' or the end of the body, so a text page full of them took
+  seconds per response.
+  """
+  def _response(self, charset="utf-8"):
+    served = type("Served", (object,), {})()
+    served.info = lambda: {"Content-Encoding": "", "Content-Type": "text/plain; charset=" + charset}
+    return served
+
+  def test_a_body_of_ampersands_is_read_in_no_time(self):
+    import time
+    body = (b"a&b " * 40000)
+    start = time.time()
+    checks.decode_page_body(body, self._response(), entity_decode=True)
+    self.assertLess(time.time() - start, 2.0)
+
+  def test_a_named_entity_is_still_read(self):
+    self.assertEqual("caf\xe9", checks.decode_page_body(b"caf&eacute;", self._response("iso-8859-1"), entity_decode=True))
+
+class AListOfParametersIsReadWithoutTheSpacesAroundIt(unittest.TestCase):
+  def setUp(self):
+    self._state = (menu.options.test_parameter, menu.options.skip_parameter, settings.TESTABLE_PARAMETERS_LIST, settings.SKIP_PARAMETERS_LIST)
+
+  def tearDown(self):
+    (menu.options.test_parameter, menu.options.skip_parameter, settings.TESTABLE_PARAMETERS_LIST, settings.SKIP_PARAMETERS_LIST) = self._state
+
+  def test_a_name_after_a_comma_and_a_space_is_still_named(self):
+    menu.options.test_parameter, menu.options.skip_parameter = "id, name ,  ses", "a, b,"
+    checks.check_provided_parameters()
+    self.assertEqual(["id", "name", "ses"], settings.TESTABLE_PARAMETERS_LIST)
+    self.assertEqual(["a", "b"], settings.SKIP_PARAMETERS_LIST)
+
+class AServerBannerNamesWindowsOnlyWhereItSaysSo(unittest.TestCase):
+  def _family(self, banner):
+    import re
+    for pattern in settings.SERVER_OS_BANNERS:
+      if re.search(pattern, banner, re.IGNORECASE):
+        return pattern
+    return None
+
+  def test_a_name_that_merely_starts_with_win_is_not_windows(self):
+    for banner in ("Jetty(winstone-2.9)", "Apache/2.4 (Unix) Winnie", "nginx/1.25 (Ubuntu)"):
+      self.assertNotEqual(settings.SERVER_OS_BANNERS[0], self._family(banner), banner)
+
+  def test_a_server_that_names_windows_is(self):
+    for banner in ("Microsoft-IIS/10.0", "Apache/2.4.58 (Win64) PHP/8.2", "Apache/2.2 (Win32)", "Windows NT"):
+      self.assertEqual(settings.SERVER_OS_BANNERS[0], self._family(banner), banner)
+
+class ALengthControlIsOnlyAskedWhereTheProbeCanCarryALength(unittest.TestCase):
+  def test_without_the_substitution_there_is_no_length_to_control_with(self):
+    state = (settings.TARGET_OS, settings.SKIP_SUBST)
+    try:
+      settings.TARGET_OS = settings.OS.UNIX
+      settings.SKIP_SUBST = False
+      self.assertTrue(checks.decision_is_length_based())
+      settings.SKIP_SUBST = True
+      self.assertFalse(checks.decision_is_length_based())
+    finally:
+      settings.TARGET_OS, settings.SKIP_SUBST = state

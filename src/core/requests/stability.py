@@ -108,7 +108,15 @@ def request_was_retried(requests_before):
 True when the last request reached the target and was answered - with an error status, but answered, so its elapsed time is as good a measurement as a 200's.
 """
 def answered_with_http_error():
-  return settings.LAST_HTTP_ERROR is not None
+  return last_http_error() is not None
+
+# The error status this thread's last request came back with, kept per thread so that another thread's request cannot clear or replace it.
+def set_last_http_error(error):
+  _thread_state.last_http_error = error
+
+# What set_last_http_error() was last given on this thread.
+def last_http_error():
+  return getattr(_thread_state, "last_http_error", None)
 
 """
 True while the request loop should keep retrying: not succeeded, within budget, not unauthorized.

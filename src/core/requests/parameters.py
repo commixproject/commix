@@ -402,20 +402,13 @@ def json_int_check(parameter, value):
       # Fall back to the raw value if JSON formatting fails.
       return parameter
 
-  tag_free_keys = True
-  if isinstance(parameter, list):
-    parameter = parameter[(len(parameter) - 1)]
+  # An array is sent as the array it is, each of its objects settled on its own - cut down to one element, an endpoint that wants the array refuses every request.
+  elements = list(parameter) if isinstance(parameter, list) else [parameter]
+  for index, element in enumerate(elements):
+    if isinstance(element, OrderedDict) and not any(settings.INJECT_TAG in keys for keys in element):
+      elements[index] = unflatten_list(element)
 
-  if isinstance(parameter, OrderedDict):
-    for keys,values in parameter.items():
-      if settings.INJECT_TAG in keys:
-        tag_free_keys = False
-        break
-
-  if tag_free_keys and isinstance(parameter, OrderedDict):
-    parameter = unflatten_list(parameter)
-
-  parameter = checks.format_json(parameter)
+  parameter = checks.format_json(elements if isinstance(parameter, list) else elements[0])
   return parameter
 
 """

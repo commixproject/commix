@@ -223,24 +223,20 @@ _STATE_BY_TECHNIQUE = {
 """
 The techniques whose confirmation is read off the target rather than carried by the payload.
 
-A page that reads one way for a true condition and another for a false one, or that answers slower
-than it did before, is evidence about the target's own behaviour - which a flaky page, a loaded
-network or a coincidence can imitate, so it is worth asking a second time before it is believed.
+A response time that is longer than it was before is evidence about the target's own behaviour -
+which a loaded network or a coincidence can imitate, so it is worth asking a second time before it
+is believed.
 
-The rest prove themselves by what came back: a six-character tag this run invented, written to a
-file and then fetched out of the web root, or a hostname only this run knows being resolved, is not
-something a target produces without having run the command. Re-asking those adds nothing, and the
-litmus it re-asks with - built on 'test', '$?' and '$((...))' - is itself blocked by a filter on
-'-' or '$', so asking it of a finding that already proved itself can only take a true one back.
+The rest prove themselves by what came back, or are asked again by the technique itself: a page
+oracle is confirmed both ways round and once more before it is reported, so a different oracle
+cannot add to it - and a target that cannot hold a delay (a gateway cut-off, a short execution
+limit, a filter on the delay command) would take a finding back that was never wrong. A six-character
+tag this run invented, written to a file and fetched out of the web root, or a hostname only this
+run knows being resolved, is not something a target produces without having run the command. The
+litmus is built on 'test', '$?' and '$((...))' as well, which a filter on '-' or '$' blocks outright.
 """
 _INFERRED_TECHNIQUES = (
-  settings.INJECTION_TECHNIQUE.BOOLEAN_BASED,
   settings.INJECTION_TECHNIQUE.TIME_BASED,
-  # The tag it writes is read back by a command of its own and weighed as a page, never fetched:
-  # the file is written where the file-based technique could not reach the web root, so there is no
-  # URL to ask for it through. What proves it is a difference between two pages, same as the two
-  # above, and a page that moves on its own can produce one without the command having run.
-  settings.INJECTION_TECHNIQUE.TEMP_FILE_BASED,
 )
 
 """
@@ -1656,7 +1652,7 @@ def decode_page_body(body, response=None, percent_decode=True, entity_decode=Tru
     if percent_decode and b"%" in body:
       body = percent_decoded(body, guard)
     if entity_decode:
-      body = re.sub(b"&([^;]+);", lambda _: bytes(bytearray([settings.HTML_ENTITIES[_.group(1).decode("ascii", errors="replace")]])) if settings.HTML_ENTITIES.get(_.group(1).decode("ascii", errors="replace"), 256) < 256 else _.group(0), body)
+      body = re.sub(b"&([A-Za-z][A-Za-z0-9]{1,31});", lambda _: bytes(bytearray([settings.HTML_ENTITIES[_.group(1).decode("ascii", errors="replace")]])) if settings.HTML_ENTITIES.get(_.group(1).decode("ascii", errors="replace"), 256) < 256 else _.group(0), body)
     page_encoding = page_encoding or heuristic_charset(body)
     if (page_encoding or "").lower() == "utf-8-sig":
       page_encoding = "utf-8"
@@ -1806,6 +1802,9 @@ The page as it is worth comparing: without the regions that move by themselves, 
 nothing but the line that names what was rendered.
 """
 def comparable_page(page):
+  # What a reflected value was taken out as is not the page's own text, and an unfiltered page carries the value itself.
+  if page and settings.REFLECTED_VALUE_MARKER:
+    page = page.replace(settings.REFLECTED_VALUE_MARKER, "")
   if menu.options.titles:
     return page_title(page)
   if menu.options.text_only:
@@ -3774,8 +3773,8 @@ def check_provided_parameters():
   def parse_parameter_list(raw):
     if raw.startswith("="):
       raw = raw[1:]
-    parsed = raw.split(settings.PARAMETER_SPLITTING_REGEX)
-    return [p.split("=")[0] if "=" in p else p for p in parsed]
+    parsed = [p.strip() for p in raw.split(settings.PARAMETER_SPLITTING_REGEX)]
+    return [p.split("=")[0] if "=" in p else p for p in parsed if p]
 
   if menu.options.test_parameter:
     settings.TESTABLE_PARAMETERS_LIST = parse_parameter_list(menu.options.test_parameter)
@@ -5375,7 +5374,8 @@ and JSON parameter enumeration has not started yet.
 def nested_json_msg(data):
   if not settings.JSON_ENUMERATION_STARTED:
     # Detect nested structure by checking if flattening increases the number of keys
-    if len(flatten(data)) > len(data):
+    # An array is read object by object: flattened as a whole, its length alone reads as nesting.
+    if any(len(flatten(item)) > len(item) for item in (data if isinstance(data, list) else [data]) if isinstance(item, dict)):
       settings.JSON_ENUMERATION_STARTED = True
       info_msg = "Enumerating parameters due to nested JSON structure."
       settings.print_data_to_stdout(settings.print_info_msg(info_msg))
@@ -8398,7 +8398,8 @@ compares the marker straight back instead of measuring its length, so every cand
 the same way - and the shape of a sample of those says nothing about a false positive.
 """
 def decision_is_length_based():
-  return settings.TARGET_OS != settings.OS.WINDOWS
+  # Without the substitution the payload cannot carry a length, so the control it is compared with would be the probe itself.
+  return settings.TARGET_OS != settings.OS.WINDOWS and not settings.SKIP_SUBST
 
 """
 The delay a time-related payload asks the target for, in seconds. The same on either target: the

@@ -138,6 +138,116 @@ class AnHttpProxyFollowsARedirect(unittest.TestCase):
     menu.options.tor_type = settings.PROXY_TYPE.HTTP
     self.assertEqual("other.example", self._redirected().host)
 
+class AnErrorStatusIsKeptPerThread(unittest.TestCase):
+  """
+  Another thread's request cleared it, and the request that had been answered was sent again.
+  """
+  def test_what_one_thread_recorded_is_not_seen_by_another(self):
+    import threading
+    from src.core.requests import stability
+    stability.set_last_http_error("answered 404")
+    seen = []
+    worker = threading.Thread(target=lambda: seen.append(stability.last_http_error()))
+    worker.start()
+    worker.join()
+    self.assertEqual("answered 404", stability.last_http_error())
+    self.assertEqual([None], seen)
+    stability.set_last_http_error(None)
+
+class ABodyTravelsWithAMarkedAddress(unittest.TestCase):
+  def setUp(self):
+    from src.core.requests import parameters
+    self._state = (settings.USER_DEFINED_POST_DATA, settings.IGNORE_USER_DEFINED_POST_DATA, settings.TIME_RELATED_ATTACK,
+                   headers.do_check, requests.get_request_response, requests.second_order_response)
+    # Building a request reads the address and leaves what it learned in settings, which the other tests start from.
+    import copy
+    self._everything = dict((name, copy.deepcopy(value)) for name, value in vars(settings).items()
+                            if name.isupper() and isinstance(value, (str, int, float, bool, type(None), list, dict, tuple)))
+    headers.do_check = lambda request: None
+    self.sent = []
+    requests.get_request_response = lambda request: (self.sent.append(request), "")[1]
+    requests.second_order_response = lambda payload: None
+    settings.TIME_RELATED_ATTACK = False
+
+  def tearDown(self):
+    (settings.USER_DEFINED_POST_DATA, settings.IGNORE_USER_DEFINED_POST_DATA, settings.TIME_RELATED_ATTACK,
+     headers.do_check, requests.get_request_response, requests.second_order_response) = self._state
+    for name, value in self._everything.items():
+      setattr(settings, name, value)
+
+  def test_a_body_that_is_not_under_test_is_still_sent(self):
+    settings.USER_DEFINED_POST_DATA = "b=2&csrf=xyz"
+    settings.IGNORE_USER_DEFINED_POST_DATA = True
+    requests.init_injection("1", "POST", "http://t/x.php?a=1" + settings.INJECT_TAG)
+    self.assertEqual(b"b=2&csrf=xyz", self.sent[0].data)
+
+class ACookiesFileIsReadForTheSiteItIsSentTo(unittest.TestCase):
+  def setUp(self):
+    self._state = (menu.options.url, menu.options.host)
+    menu.options.url, menu.options.host = "http://127.0.0.1:18091/x.php?a=1", None
+
+  def tearDown(self):
+    menu.options.url, menu.options.host = self._state
+
+  def _file(self, *rows):
+    return "\n".join("\t".join(row) for row in rows)
+
+  def test_only_the_cookies_of_that_site_are_sent(self):
+    from src.core.requests import cookies
+    content = self._file((".google.com", "TRUE", "/", "FALSE", "0", "SID", "g"),
+                         (".bank.example", "TRUE", "/", "FALSE", "0", "session", "b"),
+                         ("127.0.0.1", "FALSE", "/", "FALSE", "0", "PHPSESSID", "abc"))
+    self.assertEqual("PHPSESSID=abc", cookies._parse_netscape_format(content))
+
+  def test_an_expired_cookie_is_not_sent(self):
+    from src.core.requests import cookies
+    content = self._file(("127.0.0.1", "FALSE", "/", "FALSE", "1000", "old", "x"),
+                         ("127.0.0.1", "FALSE", "/", "FALSE", "0", "kept", "y"))
+    self.assertEqual("kept=y", cookies._parse_netscape_format(content))
+
+  def test_a_name_the_run_gave_as_host_stands_for_the_site(self):
+    from src.core.requests import cookies
+    menu.options.host = "app.example:8080"
+    content = self._file((".example", "TRUE", "/", "FALSE", "0", "sid", "z"))
+    self.assertEqual("sid=z", cookies._parse_netscape_format(content))
+
+class AScriptIsMinedOnlyFromTheSiteItIsOn(unittest.TestCase):
+  def test_an_address_that_merely_contains_the_site_s_name_is_not_the_site(self):
+    from src.core.requests import mining
+    page = ('<script src="/a.js"></script>'
+            '<script src="https://evil.example/a.js?x=127.0.0.1:18091"></script>'
+            '<script src="//127.0.0.1:18091.evil.example/b.js"></script>')
+    self.assertEqual(["http://127.0.0.1:18091/a.js"], mining.script_sources("http://127.0.0.1:18091/p", page))
+
+class AnArrayBodyStaysAnArray(unittest.TestCase):
+  def test_the_objects_of_an_array_are_all_kept(self):
+    import json
+    from src.core.requests import parameters
+    tag = settings.INJECT_TAG
+    body = parameters.json_int_check('[{"cmd":"1' + tag + '","k":"v"},{"cmd":"2"}]', "1")
+    self.assertEqual([{"cmd": "1" + tag, "k": "v"}, {"cmd": "2"}], json.loads(body))
+
+  def test_an_object_is_still_an_object(self):
+    import json
+    from src.core.requests import parameters
+    tag = settings.INJECT_TAG
+    self.assertEqual({"cmd": "1" + tag}, json.loads(parameters.json_int_check('{"cmd":"1' + tag + '"}', "1")))
+
+class CompressionIsOnlyPutBackByTheLastRequestThatTurnedItOff(unittest.TestCase):
+  def test_the_first_to_finish_does_not_put_it_back_under_another(self):
+    from src.core.techniques.boolean_based import bb_injector
+    saved = settings.PAGE_COMPRESSION
+    try:
+      settings.PAGE_COMPRESSION = True
+      bb_injector._compression_off()
+      bb_injector._compression_off()
+      bb_injector._compression_restore()
+      self.assertFalse(settings.PAGE_COMPRESSION)
+      bb_injector._compression_restore()
+      self.assertTrue(settings.PAGE_COMPRESSION)
+    finally:
+      settings.PAGE_COMPRESSION = saved
+
 if __name__ == "__main__":
   unittest.main()
 

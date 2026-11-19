@@ -512,6 +512,17 @@ def prompt_skip_vulnerable_host(target_url):
     common.prompt_yes_no_setting(message, "SKIP_VULNERABLE_HOST", default="Y")
 
 """
+A target that failed for a reason of its own is said so and skipped, not read as one with nothing found.
+A target skipped on purpose, or one that ended its own run, is already accounted for.
+"""
+def target_failed(url):
+  error = sys.exc_info()[1]
+  if isinstance(error, (SystemExit, settings.NextTargetException)):
+    return
+  err_msg = "Unexpected error while testing '" + str(url) + "' (" + type(error).__name__ + ": " + str(error) + "), skipping to the next target."
+  settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+
+"""
 Test, one after the other, every request parsed from a request / proxy log file.
 """
 def scan_parsed_targets(os_checks_num):
@@ -556,7 +567,7 @@ def scan_parsed_targets(os_checks_num):
     except KeyboardInterrupt:
       checks.handle_early_interrupt(filename, url)
     except (Exception, SystemExit):
-      pass
+      target_failed(url)
 
 """
 Check if value is inside boundaries
@@ -1176,7 +1187,7 @@ def run():
             except KeyboardInterrupt:
               checks.handle_early_interrupt(filename, form_url)
             except (Exception, SystemExit):
-              pass
+              target_failed(form_url)
             menu.options.data = orig_data
             settings.USER_DEFINED_POST_DATA = orig_user_defined_post_data
 
@@ -1247,7 +1258,7 @@ def run():
                 except KeyboardInterrupt:
                   checks.handle_early_interrupt(filename, url)
                 except (Exception, SystemExit):
-                  pass
+                  target_failed(url)
             else:
               url_num += 1
               settings.print_data_to_stdout(settings.print_message("[" + str(url_num) + href_count_suffix + "] Skipping URL - " + http_request_method + " " + url))

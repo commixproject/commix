@@ -598,7 +598,7 @@ def request_failed(err_msg):
         settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
       time.sleep(waited)
 
-  if not settings.FOLLOW_REDIRECT and getattr(err_msg, "code", None) in (301, 302, 303, 307):
+  if not settings.FOLLOW_REDIRECT and getattr(err_msg, "code", None) in (301, 302, 303, 307, 308):
     stability.mark_url_valid()
     return False
 
@@ -927,7 +927,8 @@ def init_injection(payload, http_request_method, url):
   if settings.INJECT_TAG in url:
     vuln_parameter = parameters.vuln_GET_param(url)
     target = checks.process_injectable_value(encoded_for_url(payload), url, pollute=True)
-    if settings.USER_DEFINED_POST_DATA and not settings.IGNORE_USER_DEFINED_POST_DATA:
+    # A body that carries no mark of its own is not the one under test, but it is still part of the request - the fields the target requires travel with it.
+    if settings.USER_DEFINED_POST_DATA and (not settings.IGNORE_USER_DEFINED_POST_DATA or settings.INJECT_TAG not in settings.USER_DEFINED_POST_DATA):
       request = _urllib.request.Request(target, settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC), method=http_request_method)
     else:
       request = _urllib.request.Request(target, method=http_request_method)

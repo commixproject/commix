@@ -13,10 +13,32 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import threading
+
 from src.core.parse import cmdline as menu
 from src.core.requests import requests
 from src.utils import settings
 from src.core.controller import checks
+
+# Compression is one flag for the whole run, so requests that need it off take turns holding it: the first saves it, the last puts it back.
+_COMPRESSION_LOCK = threading.Lock()
+_COMPRESSION_HOLDERS = 0
+_COMPRESSION_SAVED = None
+
+def _compression_off():
+  global _COMPRESSION_HOLDERS, _COMPRESSION_SAVED
+  with _COMPRESSION_LOCK:
+    if _COMPRESSION_HOLDERS == 0:
+      _COMPRESSION_SAVED = settings.PAGE_COMPRESSION
+      settings.PAGE_COMPRESSION = False
+    _COMPRESSION_HOLDERS += 1
+
+def _compression_restore():
+  global _COMPRESSION_HOLDERS
+  with _COMPRESSION_LOCK:
+    _COMPRESSION_HOLDERS -= 1
+    if _COMPRESSION_HOLDERS == 0:
+      settings.PAGE_COMPRESSION = _COMPRESSION_SAVED
 
 """
 Send one question and read the answer off the page the target renders.
@@ -44,13 +66,12 @@ def answer(payload, prefix, suffix, whitespace, http_request_method, url, vuln_p
   """
   use_null_connection = menu.options.null_connection and settings.NULL_CONNECTION_WORTHWHILE
   if use_null_connection:
-    saved_compression = settings.PAGE_COMPRESSION
-    settings.PAGE_COMPRESSION = False
+    _compression_off()
   try:
     response, vuln_parameter, _, _, _ = requests.perform_injection(prefix, suffix, whitespace, payload, vuln_parameter, http_request_method, url)
   finally:
     if use_null_connection:
-      settings.PAGE_COMPRESSION = saved_compression
+      _compression_restore()
   if response is False or response is None:
     return None, vuln_parameter
   if use_null_connection:

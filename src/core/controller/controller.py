@@ -75,7 +75,8 @@ def basic_payload_generator():
     # has to print back between the markers is a marker it had to run a command to produce.
     expected = marker3
     settings.BASIC_STRING = checks.print_marker(marker3)
-    windows_proof = "echo " + marker3
+    # Run through 'cmd /c', since a bare 'echo' is a command a Unix shell runs too and would answer for it.
+    windows_proof = "cmd /c echo " + marker3
     alter_interpreter_basic_string = " -c \"print('" + marker3 + "')\""
   else:
     expected = str(rand_a + rand_b)
@@ -550,6 +551,8 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, p
       # version, so the grammar left in force at the end is the last language tried rather than
       # the one that answered, and the switch below would name that one instead.
       answered_language = None
+      # How many of a language's own warning words its answer carried - two languages can share one, and the one that carried more is the one that answered.
+      warning_score = 0
       for language in languages:
         settings.set_eval_grammar(language)
         if len(languages) > 1 and settings.VERBOSITY_LEVEL != 0:
@@ -571,16 +574,16 @@ def code_injections_heuristic_basic(url, http_request_method, check_parameter, p
             # shell's, not the language's, so it is not treated as evidence of an eval sink.
             if not checks.extract_error_message(html_data):
               baseline = settings.ORIGINAL_PAGE or ""
-              for warning in settings.EVAL_WARNINGS:
-                # A word the page was already carrying before anything was sent to it is the page's
-                # own - prose that happens to name an error reads exactly like one reported, and a
-                # page that explains itself ('..., a syntax error - ...') says it on every response
-                # whatever the probe was. What the probe caused is what is not there to begin with.
-                if warning in html_data and warning not in baseline:
-                  settings.IDENTIFIED_WARNINGS = True
-                  answered_language = language
-                  detail = "identified evaluated language: '" + settings.EVAL_GRAMMAR.LABEL + "'"
-                  break
+              # A word the page was already carrying before anything was sent to it is the page's
+              # own - prose that happens to name an error reads exactly like one reported, and a
+              # page that explains itself ('..., a syntax error - ...') says it on every response
+              # whatever the probe was. What the probe caused is what is not there to begin with.
+              carried = len([warning for warning in settings.EVAL_WARNINGS if warning in html_data and warning not in baseline])
+              if carried > warning_score:
+                warning_score = carried
+                settings.IDENTIFIED_WARNINGS = True
+                answered_language = language
+                detail = "identified evaluated language: '" + settings.EVAL_GRAMMAR.LABEL + "'"
         if settings.IDENTIFIED_EVAL_PROBE:
           break
 
@@ -1115,7 +1118,8 @@ def injection_process(url, check_parameter, http_request_method, filename, times
     # Take the timing model once, before the first technique that needs one.
     def _ensure_time_warmup():
       nonlocal timesec, url_time_response, _time_warmup_done
-      if _time_warmup_done or settings.SKIP_COMMAND_INJECTIONS:
+      # The time-related techniques of a code sink are held back by the flag of their own, not the command one.
+      if _time_warmup_done or (settings.SKIP_CODE_INJECTIONS if menu.options.eval_sink else settings.SKIP_COMMAND_INJECTIONS):
         return
       _time_warmup_done = True
       if time_techniques_resumed:
@@ -1198,6 +1202,11 @@ def injection_process(url, check_parameter, http_request_method, filename, times
           warn_msg = "Unable to fingerprint the target operating system."
           settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
           checks.define_target_os()
+          # "No" asks for both shells, and the list this loop walks was drawn before it was said.
+          if settings.CHECK_BOTH_OS:
+            for candidate in [settings.OS.UNIX, settings.OS.WINDOWS][:settings.OS_CHECKS_NUM]:
+              if candidate not in os_targets:
+                os_targets.append(candidate)
 
         # The probe above is written with the same '$(...)' every payload after it is, so a filter
         # on that one character refuses it before the sink is reached - and the parameter is put

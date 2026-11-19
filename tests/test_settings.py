@@ -289,3 +289,33 @@ class TheHostAndRefererAreTheNextTargetsOwn(unittest.TestCase):
     options.host = "first.example:8081"
     settings.reset_target_state(options)
     self.assertEqual("virtual.example", options.host)
+
+class WhatTheLastTargetTimedIsNotTheNextTargets(unittest.TestCase):
+  """
+  The delay one target needed, and the answers given about its lagging, are restored for the next.
+  """
+  NAMES = ("ESTIMATED_TIMESEC", "CALIBRATED_TIMESEC", "PAYLOAD_BASELINE_SAMPLED", "JITTER_SEEN",
+           "ADJUST_TIME_DELAY_DISABLED", "UNSTABLE_REQUEST_CHOICE", "UNSTABLE_REQUEST_BUMPS")
+
+  def setUp(self):
+    self._baseline = (dict(settings._TARGET_STATE_BASELINE), dict(settings._OPTIONS_BASELINE))
+    self._values = dict((name, getattr(settings, name)) for name in self.NAMES)
+    settings._TARGET_STATE_BASELINE.clear()
+    settings._OPTIONS_BASELINE.clear()
+
+  def tearDown(self):
+    settings._TARGET_STATE_BASELINE.clear()
+    settings._OPTIONS_BASELINE.clear()
+    settings._TARGET_STATE_BASELINE.update(self._baseline[0])
+    settings._OPTIONS_BASELINE.update(self._baseline[1])
+    for name, value in self._values.items():
+      setattr(settings, name, value)
+
+  def test_each_is_restored_to_what_it_was_before_the_first_target(self):
+    settings.reset_target_state()
+    settings.ESTIMATED_TIMESEC = settings.CALIBRATED_TIMESEC = 14
+    settings.PAYLOAD_BASELINE_SAMPLED = settings.JITTER_SEEN = settings.ADJUST_TIME_DELAY_DISABLED = True
+    settings.UNSTABLE_REQUEST_CHOICE, settings.UNSTABLE_REQUEST_BUMPS = "s", 2
+    settings.reset_target_state()
+    for name in self.NAMES:
+      self.assertEqual(self._values[name], getattr(settings, name), name)

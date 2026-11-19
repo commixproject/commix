@@ -70,15 +70,15 @@ class TheSessionKeepsOneRowPerThingItKnows(SessionFixture):
     with sqlite3.connect(settings.SESSION_FILE) as conn:
       return conn.execute("SELECT COUNT(*) FROM \"" + table + "\";").fetchone()[0]
 
-  def _point(self, placeholder, payload):
+  def _point(self, placeholder, payload, method="GET"):
     table = session_handler.table_name(self.URL) + "_ip"
     with sqlite3.connect(settings.SESSION_FILE) as conn:
       conn.execute("CREATE TABLE IF NOT EXISTS \"" + table + "\" (id INTEGER PRIMARY KEY, url VARCHAR, "
-                   "technique VARCHAR, vuln_parameter VARCHAR, http_header VARCHAR, payload VARCHAR);")
-      conn.execute("INSERT INTO \"" + table + "\" (url, technique, vuln_parameter, http_header, payload) "
-                   "VALUES (?, ?, ?, ?, ?);",
+                   "technique VARCHAR, vuln_parameter VARCHAR, http_header VARCHAR, payload VARCHAR, http_request_method VARCHAR);")
+      conn.execute("INSERT INTO \"" + table + "\" (url, technique, vuln_parameter, http_header, payload, http_request_method) "
+                   "VALUES (?, ?, ?, ?, ?, ?);",
                    ("http://t/a.php?addr=" + placeholder + "INJECT_HERE",
-                    "results-based command injection technique", "addr", "", payload))
+                    "results-based command injection technique", "addr", "", payload, method))
       conn.commit()
 
   def test_the_same_point_found_again_does_not_add_a_row(self):
@@ -86,6 +86,13 @@ class TheSessionKeepsOneRowPerThingItKnows(SessionFixture):
       self._point(placeholder, "payload-" + placeholder)
     session_handler.clear(self.URL)
     self.assertEqual(1, self._rows("_ip"))
+
+  def test_a_point_found_by_another_method_is_a_point_of_its_own(self):
+    # The same address answers to GET and to POST, and a resume looks one up by the method it is made with.
+    self._point("YJY", "payload-get", "GET")
+    self._point("AHF", "payload-post", "POST")
+    session_handler.clear(self.URL)
+    self.assertEqual(2, self._rows("_ip"))
 
   def test_the_row_kept_is_the_one_a_resumed_run_would_have_used(self):
     # Read back in order with the last of them kept, so the newest is the one that was in use - and
@@ -310,6 +317,25 @@ class AResumeNarrowsOnlyToTheTechniquesTheOptionTakes(SessionFixture):
     self.store(settings.INJECTION_TECHNIQUE.OOB)
     self.store(settings.INJECTION_TECHNIQUE.TIME_BASED)
     self.assertEqual("t", session_handler.applied_techniques(self.URL, "GET"))
+
+class AReplayIsMadeOnTheAddressGivenNow(SessionFixture):
+  """
+  What the finding was made with is the marked parameter alone: the rest of the query is this run's own.
+  """
+  def test_a_value_written_into_the_query_last_time_is_not_replayed(self):
+    tag = settings.INJECT_TAG
+    merged = session_handler.current_with_stored_point("http://t/a.php?junk=OLD&addr=ABC" + tag, "http://t/a.php?junk=NEW&addr=127.0.0.1" + tag)
+    self.assertEqual("http://t/a.php?junk=NEW&addr=ABC" + tag, merged)
+
+  def test_the_stored_address_stands_where_the_current_one_has_no_such_parameter(self):
+    stored = "http://t/a.php?addr=ABC" + settings.INJECT_TAG
+    self.assertEqual(stored, session_handler.current_with_stored_point(stored, "http://t/a.php?x=1"))
+    self.assertEqual(stored, session_handler.current_with_stored_point(stored, None))
+
+  def test_a_fragment_stays_where_it_was(self):
+    tag = settings.INJECT_TAG
+    self.assertEqual("http://t/a.php?junk=NEW&addr=1" + tag + "#f",
+                     session_handler.current_with_stored_point("http://t/a.php?addr=1" + tag + "&junk=OLD", "http://t/a.php?junk=NEW&addr=2#f"))
 
 if __name__ == "__main__":
   unittest.main()

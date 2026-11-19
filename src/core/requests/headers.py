@@ -300,7 +300,7 @@ What holds for a request whatever it was sent for: the pacing that was asked for
 part of, and the proxy rotation and safe visit that go by that count.
 """
 def apply_request_policy():
-  settings.LAST_HTTP_ERROR = None
+  stability.set_last_http_error(None)
   # What a redirect said is true of the request it answered and of no other. Set by the handler and
   # never cleared, it outlived its own request: the code named in the question put to the user, and
   # read by whatever asked later whether a redirect had happened at all, was whichever one the run
@@ -503,7 +503,9 @@ def check_http_traffic(request):
 
     except (_urllib.error.HTTPError, _urllib.error.URLError) as err_msg:
       # A deliberately unfollowed redirect - retrying won't help.
-      if not settings.FOLLOW_REDIRECT and getattr(err_msg, "code", None) in (301, 302, 303, 307):
+      if not settings.FOLLOW_REDIRECT and getattr(err_msg, "code", None) in (301, 302, 303, 307, 308):
+        # Kept as the answer it is: left empty, the request below is sent again, and the payload runs twice.
+        pending_error = err_msg
         break
       if settings.UNAUTHORIZED_ERROR in str(err_msg):
         settings.UNAUTHORIZED = unauthorized = True
@@ -611,7 +613,7 @@ def check_http_traffic(request):
       if str(err.code).startswith(('3', '4', '5')):
         settings.HTTP_ERROR_CODES_SUM.append(err.code)
         # Nothing is returned for it, so this is what tells a caller the request did reach the target.
-        settings.LAST_HTTP_ERROR = err
+        stability.set_last_http_error(err)
         # Except where the run was told to ignore this code: then it is the target's answer rather
         # than a failure, and the body of it is where the result of a payload would be. Read back
         # from what was already taken off it, since the body itself is only readable once.
@@ -664,7 +666,7 @@ def check_http_traffic(request):
 Send again a request check_http_traffic() came back from empty-handed - which it does both when nothing answered and when the answer was a 3xx/4xx/5xx already read off the wire, and only the first is worth repeating.
 """
 def resend(request):
-  error = settings.LAST_HTTP_ERROR
+  error = stability.last_http_error()
   # A code the run was told to ignore is an answer, not a failure to retry past - repeated until the
   # retries run out, a target that always answers with one is reported as unreachable instead.
   if error is not None and (checks.ignored_http_error_code(getattr(error, "code", None)) or

@@ -177,3 +177,30 @@ if __name__ == '__main__':
   unittest.main()
 
 # eof
+
+class ATargetThatFailedIsSaidSo(unittest.TestCase):
+  def setUp(self):
+    self._out = settings.print_data_to_stdout
+    self.said = []
+    settings.print_data_to_stdout = self.said.append
+
+  def tearDown(self):
+    settings.print_data_to_stdout = self._out
+
+  def _failed(self, error):
+    from src.core import main
+    try:
+      raise error
+    except BaseException:
+      main.target_failed("http://t/a.php")
+
+  def test_an_unexpected_error_is_named_with_its_target(self):
+    self._failed(TypeError("boom"))
+    self.assertEqual(1, len(self.said))
+    self.assertIn("http://t/a.php", self.said[0])
+    self.assertIn("TypeError", self.said[0])
+
+  def test_a_target_skipped_on_purpose_says_nothing_more(self):
+    self._failed(SystemExit(1))
+    self._failed(settings.NextTargetException())
+    self.assertEqual([], self.said)
