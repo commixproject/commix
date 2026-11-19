@@ -335,11 +335,15 @@ def get_char(separator, OUTPUT_TEXTFILE, num_of_chars, ascii_char, timesec, http
   if settings.TARGET_OS == settings.OS.WINDOWS:
     chain = checks.windows_separator(separator)
     if chain is not None:
-      # Split on '[char]32', so no quote of its own has to survive cmd.exe's own quote handling.
-      payload = checks.windows_probe(chain,
-                                     "powershell.exe -InputFormat none write-host " + windows_file_text(OUTPUT_TEXTFILE) +
-                                     ".split([char]32)[" + str(num_of_chars - 1) + "]",
-                                     win_operator, ascii_char, timesec)
+      # Read through 'for /f "tokens=N"' instead of PowerShell - the file already holds one
+      # decimal number per character (no caret-through-'set' hazard to read around the way
+      # tb_payloads.get_char() does, since a digit carries no meaning to cmd.exe), so the Nth
+      # token can be compared directly. Verified live under '&', '&&', '|' and '||'; the empty
+      # separator could not be measured the same way - no sink seen so far has a shape to
+      # inject through it at all - and rests on reasoning (no multi-stage chain, nothing for
+      # the leading separator to interact with) rather than a live run of its own.
+      payload = checks.windows_token_probe(chain, OUTPUT_TEXTFILE, num_of_chars, win_operator,
+                                           ascii_char, timesec)
   else:
     if separator in (";", "\n", "\r\n") :
       payload = (separator +

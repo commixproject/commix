@@ -1551,9 +1551,17 @@ class TheWindowsTimeBasedCharOracleReadsThroughCertutil(unittest.TestCase):
   """
   Proved live against a real Windows target: 'certutil -encodehex' never passes a raw caret
   through a cmd.exe variable, where 'set' corrupts one every time - see
-  checks.windows_hex_byte_probe(). Kept to the unconditional separator that chain alone was
-  measured and verified under; the other separators still read through PowerShell.
+  checks.windows_hex_byte_probe(). Proved under '&', '&&', '|' and '||', each measured live with
+  a clean, repeated delay/no-delay separation - '||' needed a base value ("a b c") that makes
+  the target's own command fail first, since an ordinary one here always succeeds and a '||'
+  payload never runs at all after one that does. The empty separator covers every value
+  'windows_separator()' can return, so PowerShell is never reached from here any more - but it
+  could not be measured the same way: this sink takes the whole field as a single argument, with
+  no shape for "no separator" to inject through at all. It rests on 'windows_tail()' already
+  treating it the identical way for the PowerShell payload it replaces, not on a live run.
   """
+  CERTUTIL_SEPARATORS = ("&", "&&", "|", "||", "")
+
   def setUp(self):
     self.was = settings.TARGET_OS
     settings.TARGET_OS = settings.OS.WINDOWS
@@ -1561,18 +1569,12 @@ class TheWindowsTimeBasedCharOracleReadsThroughCertutil(unittest.TestCase):
   def tearDown(self):
     settings.TARGET_OS = self.was
 
-  def test_the_unconditional_separator_reads_through_certutil_not_powershell(self):
+  def test_every_separator_reads_through_certutil_not_powershell(self):
     from src.core.techniques.time_based import tb_payloads
-    payload = tb_payloads.get_char("&", "ver", 1, 0x4c, 5, "GET")
-    self.assertIn("certutil", payload)
-    self.assertNotIn("powershell", payload)
-
-  def test_every_other_chaining_separator_still_reads_through_powershell(self):
-    from src.core.techniques.time_based import tb_payloads
-    for separator in ("&&", "|", "||"):
+    for separator in self.CERTUTIL_SEPARATORS:
       payload = tb_payloads.get_char(separator, "ver", 1, 0x4c, 5, "GET")
-      self.assertIn("powershell", payload, "no PowerShell fallback under " + repr(separator))
-      self.assertNotIn("certutil", payload, "certutil reached under " + repr(separator))
+      self.assertIn("certutil", payload, repr(separator))
+      self.assertNotIn("powershell", payload, repr(separator))
 
   def test_the_byte_is_never_held_in_a_variable_raw(self):
     """
@@ -1580,10 +1582,11 @@ class TheWindowsTimeBasedCharOracleReadsThroughCertutil(unittest.TestCase):
     own output - so a caret in that output has nothing of itself left for 'set' to corrupt.
     """
     from src.core.techniques.time_based import tb_payloads
-    payload = tb_payloads.get_char("&", "ver", 1, 0x4c, 5, "GET")
-    self.assertIn("-encodehex", payload)
-    self.assertRegex(payload, r"do set \w+=%a")
-    self.assertNotIn("set \"", payload)
+    for separator in self.CERTUTIL_SEPARATORS:
+      payload = tb_payloads.get_char(separator, "ver", 1, 0x4c, 5, "GET")
+      self.assertIn("-encodehex", payload, repr(separator))
+      self.assertRegex(payload, r"do set \w+=%a", repr(separator))
+      self.assertNotIn("set \"", payload, repr(separator))
 
   def test_the_comparison_is_the_two_digit_hex_form(self):
     from src.core.techniques.time_based import tb_payloads
@@ -1592,10 +1595,16 @@ class TheWindowsTimeBasedCharOracleReadsThroughCertutil(unittest.TestCase):
     payload = tb_payloads.get_char("&", "ver", 1, 0x5e, 5, "GET", operator="-ge")
     self.assertIn(" EQU 5e ", payload)
 
-  def test_the_position_within_the_first_sixteen_bytes_needs_no_extra_line(self):
+  def test_the_position_within_the_first_sixteen_bytes_carries_no_skip_clause(self):
+    """
+    'skip=0' is not the no-op its name suggests - a real cmd.exe silently refuses the whole 'for
+    /f' clause on it, confirmed live (the loop's own 'do' never runs, not even once). Left out
+    entirely for a position on the first line, where the default already starts there.
+    """
     from src.core.techniques.time_based import tb_payloads
     payload = tb_payloads.get_char("&", "ver", 1, 0x4c, 5, "GET")
-    self.assertIn("skip=0", payload)
+    self.assertNotIn("skip=0", payload)
+    self.assertNotIn("skip=", payload)
     self.assertIn(":~0,2%", payload)
 
   def test_the_offset_jumps_an_extra_column_past_the_eighth_byte(self):
@@ -1622,8 +1631,71 @@ class TheWindowsTimeBasedCharOracleReadsThroughCertutil(unittest.TestCase):
     never a 'for /f' built as the 'cmd' argument of 'windows_probe()'.
     """
     from src.core.techniques.time_based import tb_payloads
-    payload = tb_payloads.get_char("&", "ver", 1, 0x4c, 5, "GET")
-    self.assertEqual(payload.count("for /f"), 2)
+    for separator in self.CERTUTIL_SEPARATORS:
+      payload = tb_payloads.get_char(separator, "ver", 1, 0x4c, 5, "GET")
+      self.assertEqual(payload.count("for /f"), 2, repr(separator))
+
+  def test_only_the_leading_separator_is_the_one_under_test(self):
+    """
+    Everything from the first bare '&' on is unconditional - a pipe's right side is one command,
+    and '&&' only gates whether that first stage runs at all - so every internal join past the
+    leading separator is the plain, unconditional '&', not the separator being tested. It appears
+    exactly twice: once leading, once in the closing tail ('windows_tail') - never in between.
+    """
+    from src.core.techniques.time_based import tb_payloads
+    for separator in ("&&", "|", "||"):
+      payload = tb_payloads.get_char(separator, "ver", 1, 0x4c, 5, "GET")
+      self.assertTrue(payload.startswith(separator), repr(separator))
+      self.assertTrue(payload.endswith(separator + "rem "), repr(separator))
+      middle = payload[len(separator):-len(separator + "rem ")]
+      self.assertNotIn(separator, middle, repr(separator) + " reused internally: " + middle)
+
+
+class TheTempfileBasedCharOracleReadsThroughForF(unittest.TestCase):
+  """
+  Proved live against a real Windows target under '&', '&&', '|' and '||': the file this
+  technique's own 'cmd_execution()' writes already holds one decimal number per character, which
+  carries no meaning to cmd.exe at all - no caret-through-'set' hazard to read around the way
+  tb_payloads.get_char() does, so the FOR variable is compared directly in its own loop body, no
+  second 'for /f' or extra file needed. See checks.windows_token_probe(). The empty separator
+  covers every value 'windows_separator()' can return but rests on reasoning, not a live run -
+  no sink seen so far has a shape to inject through it at all.
+  """
+  def setUp(self):
+    self.was = settings.TARGET_OS
+    settings.TARGET_OS = settings.OS.WINDOWS
+
+  def tearDown(self):
+    settings.TARGET_OS = self.was
+
+  def test_every_separator_reads_through_for_f_not_powershell(self):
+    from src.core.techniques.tempfile_based import tfb_payloads
+    for separator in ("&", "&&", "|", "||", ""):
+      payload = tfb_payloads.get_char(separator, "C:\\t.txt", 3, 108, 5, "GET")
+      self.assertIn("for /f", payload, repr(separator))
+      self.assertNotIn("powershell", payload, repr(separator))
+
+  def test_the_token_asked_for_is_the_position_itself(self):
+    """
+    'tokens=N' already is 1-indexed exactly the way a character position is, so the position
+    reaches the payload unmodified - no "-1" the way an array index would need.
+    """
+    from src.core.techniques.tempfile_based import tfb_payloads
+    payload = tfb_payloads.get_char("&", "C:\\t.txt", 7, 108, 5, "GET")
+    self.assertIn("tokens=7", payload)
+
+  def test_no_second_for_f_or_extra_variable_is_needed(self):
+    """
+    Unlike the certutil-based oracle, a decimal digit has nothing a second pass of cmd.exe's own
+    re-expansion could corrupt - so there is exactly one 'for /f', no 'set' and no temp file of
+    this payload's own.
+    """
+    from src.core.techniques.tempfile_based import tfb_payloads
+    payload = tfb_payloads.get_char("&", "C:\\t.txt", 3, 108, 5, "GET")
+    self.assertEqual(payload.count("for /f"), 1)
+    self.assertNotIn(" set ", payload)
+    self.assertNotIn("certutil", payload)
+    self.assertNotIn("%temp%", payload)
 
 
 class OdIsAskedThePortableWay(unittest.TestCase):

