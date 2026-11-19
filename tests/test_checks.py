@@ -58,6 +58,44 @@ class WhatTheOutputHasAlreadyTurnedOutToBeMadeOf(unittest.TestCase):
     checks.record_observed_character(seen, None)
     self.assertEqual(before, checks.narrowed_characters(seen))
 
+class APayloadStillNamingTheTradedPrinterIsNamed(unittest.TestCase):
+  """
+  Trading 'printf' for 'echo' settles how the builders print, and a reading one script writes can
+  still be rewritten by another into one that names it again - the byte taken down a pipe without a
+  '-' is read with 'printf' whichever printer the run settled on. Read off what was built rather
+  than off a list of which scripts do it, so a pair nobody thought of is caught by the same reading.
+  """
+  def setUp(self):
+    self._state = (settings.PRINT_WITH_ECHO, settings.PRINTER_LEFTOVER_NOTICE_GIVEN,
+                   settings.PAYLOAD_EDGES, settings.print_data_to_stdout, settings.TARGET_OS)
+    self._said = []
+    settings.print_data_to_stdout = lambda message, *args, **kwargs: self._said.append(str(message))
+    settings.TARGET_OS = settings.OS.UNIX
+
+  def tearDown(self):
+    (settings.PRINT_WITH_ECHO, settings.PRINTER_LEFTOVER_NOTICE_GIVEN, settings.PAYLOAD_EDGES,
+     settings.print_data_to_stdout, settings.TARGET_OS) = self._state
+
+  def _ask(self, payload, echo=True, edges=("", "")):
+    settings.PRINT_WITH_ECHO = echo
+    settings.PRINTER_LEFTOVER_NOTICE_GIVEN = False
+    settings.PAYLOAD_EDGES = edges
+    self._said[:] = []
+    checks.printer_leftover_note(payload)
+    return self._said
+
+  def test_a_payload_that_still_names_it_is_said(self):
+    self.assertTrue(self._ask(";[ $(LC_ALL=C printf '%d' \"'x\") = 1 ];"))
+
+  def test_a_payload_that_does_not_is_left_quiet(self):
+    self.assertEqual([], self._ask(";[ $(expr \"Ax\" '<=' \"Ay\") = 1 ];"))
+
+  def test_a_run_that_kept_the_printer_is_left_quiet(self):
+    self.assertEqual([], self._ask(";printf '%d' x;", echo=False))
+
+  def test_the_value_the_parameter_carried_is_not_the_payload_s(self):
+    self.assertEqual([], self._ask("printf;[ 1 = 1 ];tail", edges=("printf", "tail")))
+
 class WhatTheDashlessScriptCouldNotReachIsNamed(unittest.TestCase):
   """
   The script rewrites what a payload's own comparisons and readings are written with, and nothing
@@ -105,6 +143,71 @@ class WhatTheDashlessScriptCouldNotReachIsNamed(unittest.TestCase):
     self._said[:] = []
     checks.dashless_leftover_note(";ping -c 1 x;")
     self.assertEqual([], self._said)
+
+class AScriptThatLeansOnTheTargetsOwnBinSaysSo(unittest.TestCase):
+  """
+  The glob a command name is rewritten as resolves against the target's '/bin', and only where one
+  file there is of that length - which a run has no way of seeing. A target holding several answers
+  such a payload exactly as it answers a parameter that was never injectable, so it is said at the
+  point the script is taken up rather than left to read as a finding that would not confirm.
+  """
+  def setUp(self):
+    self._said, self._kept = [], settings.print_once
+    settings.print_once = lambda message, *args, **kwargs: self._said.append(message)
+
+  def tearDown(self):
+    settings.print_once = self._kept
+
+  def _asked(self, name):
+    from tests._testutils import tamper_modules
+    stage(";")
+    self._said[:] = []
+    tamper_modules()[name].dependencies()
+    return [said for said in self._said if "/bin" in said]
+
+  def test_the_glob_script_names_what_it_leans_on(self):
+    said = self._asked("noletters")
+    self.assertTrue(said, "nothing said")
+    self.assertIn("one file of the name's length", said[0])
+
+  def test_a_script_that_leans_on_nothing_of_the_sort_is_left_unsaid(self):
+    for name in ("cmd2wildcard", "backslashes", "dashlesstest"):
+      self.assertEqual([], self._asked(name), name + " said something")
+
+class AScriptWrittenForOneShellFamilySaysSo(unittest.TestCase):
+  """
+  A brace expansion is read by 'bash' and 'ksh' and by no POSIX shell that is neither, and ANSI-C
+  quoting by those and 'zsh'. Which shell answers at the other end is not something a run is told,
+  so a target running another answers such a payload exactly as it answers a parameter that was
+  never injectable - said rather than refused, the choice being the one running it to make.
+  """
+  SHELL_BOUND = {"ansiquote": "zsh", "ansiquoteoctal": "zsh", "space2brace": "ksh"}
+
+  def setUp(self):
+    self._said, self._kept = [], settings.print_once
+    settings.print_once = lambda message, *args, **kwargs: self._said.append(message)
+
+  def tearDown(self):
+    settings.print_once = self._kept
+
+  def _asked(self, name):
+    from tests._testutils import tamper_modules
+    stage(";")
+    self._said[:] = []
+    tamper_modules()[name].dependencies()
+    return [said for said in self._said if "only read by" in said]
+
+  def test_each_one_names_the_shells_that_read_what_it_writes(self):
+    for name, shell in self.SHELL_BOUND.items():
+      said = self._asked(name)
+      self.assertTrue(said, name + " said nothing")
+      self.assertIn("'bash'", said[0])
+      self.assertIn(shell, said[0])
+      self.assertNotIn("or '", said[0].split("' or '")[0].rstrip("'"))
+
+  def test_a_script_every_posix_shell_reads_is_left_unsaid(self):
+    for name in ("backslashes", "dashlesstest", "singlequotes"):
+      self.assertEqual([], self._asked(name), name + " said something")
 
 class AnInterpreterIsHandedItsProgramByAnOption(unittest.TestCase):
   """

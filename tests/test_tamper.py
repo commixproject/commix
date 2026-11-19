@@ -335,6 +335,34 @@ class Printf2Echo(unittest.TestCase):
     finally:
       settings.WHITESPACES = kept
 
+  def test_the_byte_reading_goes_out_without_the_name_the_target_refuses(self):
+    """
+    What this script is named for is a byte's ordinal, which is read with 'printf' - so with the
+    printer traded away the comparison names the character instead, on every boundary, and the pool
+    the search runs over is held to the characters that can be named.
+    """
+    from src.core.controller import checks
+    from src.core.techniques.boolean_based import bb_payloads
+    from src.core.techniques.time_based import tb_payloads
+    kept = settings.PRINT_WITH_ECHO
+    try:
+      for separator in (";", "&&", settings.END_LINE.LF):
+        stage(separator)
+        settings.EXPLOITATION_PHASE = True
+        self._script().declare()
+        for built in (bb_payloads.get_char(separator, "id", 2, 100),
+                      tb_payloads.get_char(separator, "id", 2, 100, 5, "GET")):
+          if built:
+            self.assertNotIn("printf", built, "under " + repr(separator))
+        pool = checks.generate_char_pool(2)
+        self.assertEqual([], [one for one in pool if checks.byte_literal(one) is None])
+        # Left out only where the byte is asked for as one of a set, which is what a pipe gets:
+        # alone between brackets a '^' negates the set rather than standing in it.
+        self.assertEqual(separator not in ("|", "||"), ord("^") in pool, "under " + repr(separator))
+        self.assertFalse(checks.char_pool_expands())
+    finally:
+      settings.PRINT_WITH_ECHO = kept
+
   def test_it_is_not_written_where_a_pipe_is_not_what_is_proving(self):
     for separator in (";", "&", "&&", settings.END_LINE.LF):
       for name, payload in self._payloads(separator):

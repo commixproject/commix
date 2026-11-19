@@ -93,6 +93,24 @@ def dash_allows(transport):
   return not dashless() or "-" not in reach_command(transport, "h")
 
 """
+Report whether a transport is worth asking while 'printf' is a name the target refuses.
+
+Asked of what the transport would send, the same way the dash is: the client of last resort writes
+its request with 'printf', having no option of its own to put one on the connection with, so a run
+that has traded that name away cannot send its request at all.
+"""
+def printer_allows(transport):
+  if not settings.PRINT_WITH_ECHO:
+    return True
+  if "printf" not in reach_command(transport, "h") and "printf" not in (exfil_command(transport, "h", "x") or ""):
+    return True
+  # Said rather than dropped quietly: a client the sweep never asks for is one a reader would
+  # otherwise take for one that was asked and stayed silent.
+  settings.print_once("The '" + transport + "' client writes its request with 'printf', which this "
+                      "run traded for 'echo', so it is not asked for.")
+  return False
+
+"""
 The URL a payload sends the target to, over the same scheme the out-of-band server is reached on.
 """
 def _url(hostname, proof=""):
@@ -361,7 +379,8 @@ def transports():
   # whether a target has one of these is not something a boundary changes. They are asked once a
   # boundary is confirmed instead, through 'upgrade_candidates()'.
   order = [candidate for candidate in order if candidate not in FALLBACK_TRANSPORTS]
-  order = [candidate for candidate in order if scheme_allows(candidate) and dash_allows(candidate)]
+  order = [candidate for candidate in order
+           if scheme_allows(candidate) and dash_allows(candidate) and printer_allows(candidate)]
   if menu.options.interpreter and "python" in order:
     order.remove("python")
     order.insert(0, "python")
@@ -496,6 +515,8 @@ Report whether a transport can carry command output back.
 """
 def supports_exfiltration(transport):
   if dashless() and transport in DASHED_EXFILTRATION:
+    return False
+  if not printer_allows(transport):
     return False
   return transport in ("curl", "wget", "python", "powershell", "dns", "php", "ruby", "openssl")
 

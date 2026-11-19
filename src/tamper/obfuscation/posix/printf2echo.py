@@ -49,6 +49,11 @@ if not settings.TAMPER_SCRIPTS[__tamper__]:
 # builders read it as they build rather than having the result rewritten afterwards.
 def declare():
   settings.PRINT_WITH_ECHO = True
+  # An ordinal is what 'printf' reads, so without it a byte is compared as the character it is - and
+  # only a printable one can be written into a comparison as itself.
+  settings.print_once("The '" + __tamper__ + ".py' tamper script compares a byte against characters, "
+                      "not ordinals, so one outside the printable range is left unread, as is a '" + "-" +
+                      "' kept out of the payloads, or a '^' on a pipe.")
 
 # Say with 'echo' what the payload said with 'printf'.
 def tamper(payload):
@@ -56,8 +61,9 @@ def tamper(payload):
   # A target settled as Windows after this script was accepted: 'cmd.exe' has no 'od' to read with.
   if settings.TARGET_OS == settings.OS.WINDOWS:
     return payload
-  # The byte is handed to 'od' down a pipe, so the byte reading is only rewritten where a pipe is what
-  # is proving; the rest of what prints already goes out with 'echo'.
+  # The byte is handed to 'od' down a pipe, so this rewrite is written where a pipe is what is
+  # proving; on every other boundary the reading names the character instead, which the builders
+  # write themselves once this script has declared the printer - see checks.byte_collation().
   if checks.current_separator() not in ("|", "||"):
     return payload
   space = checks.current_whitespace()

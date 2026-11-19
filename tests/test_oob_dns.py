@@ -728,6 +728,26 @@ class TestDashlessPayloads(unittest.TestCase):
         settings.MULTI_ENCODED_PAYLOAD = []
         self.assertIn("wget", payloads.transports())
 
+    def test_a_client_that_writes_its_request_with_printf_is_left_out(self):
+        """
+        The client of last resort puts its request on the connection with 'printf', having no option
+        of its own to do it with - so a run that has traded that name away for 'echo' cannot send
+        the request at all, and asking for it costs a probe that was never going to answer.
+        """
+        kept = settings.PRINT_WITH_ECHO
+        try:
+            settings.PRINT_WITH_ECHO = True
+            settings.MULTI_ENCODED_PAYLOAD = []
+            self.assertFalse(payloads.printer_allows("openssl"))
+            self.assertFalse(payloads.supports_exfiltration("openssl"))
+            self.assertNotIn("openssl", payloads.upgrade_candidates())
+            for transport in ("curl", "python", "php", "ruby", "dns"):
+                self.assertTrue(payloads.printer_allows(transport), transport)
+            settings.PRINT_WITH_ECHO = False
+            self.assertTrue(payloads.supports_exfiltration("openssl"))
+        finally:
+            settings.PRINT_WITH_ECHO = kept
+
     def test_windows_target_is_left_alone(self):
         self._dashless()
         settings.TARGET_OS = settings.OS.WINDOWS

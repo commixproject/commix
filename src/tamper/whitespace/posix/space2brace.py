@@ -29,6 +29,8 @@ __priority__ = settings.PRIORITY.LOWER
 
 # Why this script cannot be applied to the target at hand, or nothing where it can.
 def dependencies():
+  # Written for a shell family rather than for any POSIX one, which is said rather than refused.
+  checks.tamper_shell_note(__tamper__, ("bash", "ksh"))
   return checks.tamper_dep_unix_only(__tamper__)
 
 # What a word may be made of and still come back out of the expansion as the word that went in.

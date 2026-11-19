@@ -36,6 +36,8 @@ def dependencies():
   doing the evaluating before ever reaching a shell - which spends '\\143' itself, leaving the
   shell a payload that says something else.
   """
+  # Written for a shell family rather than for any POSIX one, which is said rather than refused.
+  checks.tamper_shell_note(__tamper__, ("bash", "ksh", "zsh"))
   return checks.tamper_dep_eval_incompatible(__tamper__) or checks.tamper_dep_unix_only(__tamper__)
 
 # A word worth hiding: a command name or a path, which is what a signature is written against.

@@ -34,6 +34,10 @@ __priority__ = settings.PRIORITY.LOW
 
 # Why this script cannot be applied to the target at hand, or nothing where it can.
 def dependencies():
+  # What the glob resolves to is the target's own '/bin', which a run has no way of seeing - so it
+  # is said rather than refused, the way a script written for one shell family says so.
+  settings.print_once("The '" + __tamper__ + ".py' tamper script needs one file of the name's length "
+                      "in the target's '/bin', so several leave its payloads unrunnable.")
   # 'tamper_shell_spans' reads quoting the way a shell does, which an evaluated language's own
   # string/call syntax is not - a payload for '--eval' would come back with its own calls globbed.
   return checks.tamper_dep_eval_incompatible(__tamper__) or checks.tamper_dep_unix_only(__tamper__)

