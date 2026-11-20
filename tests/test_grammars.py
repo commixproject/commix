@@ -273,3 +273,8 @@ class ACommandWithABacktickOrOddBytesIsCarried(unittest.TestCase):
     python = grammars()["python"]
     self.assertIn("\"utf-8\",\"replace\"", python.run("printf '\\xff'"))
     self.assertIn("\"utf-8\",\"replace\"", python.read_file("/etc/hostname"))
+
+  def test_the_javascript_grammar_does_not_stop_at_a_command_that_exits_with_an_error(self):
+    javascript = grammars()["javascript"]
+    self.assertIn("spawnSync", javascript.run("ls /nonexistent"))
+    self.assertNotIn("execSync", javascript.run("ls /nonexistent"))

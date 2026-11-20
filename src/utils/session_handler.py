@@ -29,6 +29,8 @@ from src.thirdparty.six.moves import urllib as _urllib
 """
 Open the session DB and always close it; retry after recreating a deleted directory.
 """
+_SECURED_SESSION_FILES = set()
+
 @contextlib.contextmanager
 def _session_connection(session_file=None):
   if session_file is None:
@@ -41,6 +43,13 @@ def _session_connection(session_file=None):
       if session_dir and not os.path.isdir(session_dir):
         os.makedirs(session_dir, exist_ok=True)
       conn = sqlite3.connect(session_file, timeout=10)
+      # The session holds cookies and credentials, so it is the owner's alone - set once per file.
+      if session_file not in _SECURED_SESSION_FILES:
+        _SECURED_SESSION_FILES.add(session_file)
+        try:
+          os.chmod(session_file, 0o600)
+        except OSError:
+          pass
       break
     except sqlite3.OperationalError as err:
       last_err = err

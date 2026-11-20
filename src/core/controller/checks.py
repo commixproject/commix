@@ -3652,10 +3652,13 @@ def check_lagging():
     waiting bought against a target that was steady all along.
     """
     if deviation > settings.WARN_TIME_STDEV and deviation > pace * settings.WARN_TIME_RELATIVE_STDEV:
+      said = settings.LAGGING_DETECTED
       settings.LAGGING_DETECTED = settings.JITTER_SEEN = settings.ADJUST_TIME_DELAY_DISABLED = True
-      warn_msg = "Detected considerable lagging in the connection response(s). "
-      warn_msg += "Consider using a higher '--time-sec' value (e.g. '10' or more)."
-      settings.print_data_to_stdout(settings.print_critical_msg(warn_msg))
+      # Said once, however many times the model is taken again.
+      if not said:
+        warn_msg = "Detected considerable lagging in the connection response(s). "
+        warn_msg += "Consider using a higher '--time-sec' value (e.g. '10' or more)."
+        settings.print_data_to_stdout(settings.print_critical_msg(warn_msg))
   return settings.LAGGING_DETECTED
 
 """
@@ -5635,8 +5638,9 @@ def calibrate_boolean_oracle(page_true, page_false, code_true=None, code_false=N
     settings.BOOLEAN_TRUE_LENGTH, settings.BOOLEAN_FALSE_LENGTH = true_length, false_length
   if not true_page or true_page == false_page:
     # Content alone cannot tell the two apart - length still might, and is reported precisely
-    # because it is the only one of the two that just did.
-    return lengths_distinguish
+    # because it is the only one of the two that just did. Only where a length is what gets read: otherwise
+    # the oracle has no pages to compare, answers nothing to every question, and the finding is lost quietly.
+    return lengths_distinguish and bool(menu.options.lengths or menu.options.null_connection)
   """
   A page that is a plain shell error on both questions is not two answers - it is one error, with
   this run's own calibration digits echoed back inside it. A filter that corrupts the payload before

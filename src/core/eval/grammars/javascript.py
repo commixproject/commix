@@ -110,9 +110,9 @@ def _literal(text):
   text = text.replace("\\", "\\\\").replace("\"", "\\\"")
   return "\"" + text.replace("\r", "\\r").replace("\n", "\\n") + "\""
 
-# Run a command and yield its output. 'execSync' answers with a Buffer, not the string itself.
+# Run a command and yield its output. 'spawnSync' answers with an object holding a Buffer, not the string itself, and - unlike 'execSync' - does not throw for a command that exits with an error: what it printed is still the answer.
 def run(cmd):
-  return "require(\"child_process\").execSync(" + _literal(cmd) + ").toString()"
+  return "require(\"child_process\").spawnSync(" + _literal(cmd) + ",{shell:true}).stdout.toString()"
 
 # Read a file and yield its contents.
 def read_file(path):

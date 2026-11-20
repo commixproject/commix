@@ -218,7 +218,34 @@ class TheRequestFileIsReadAsWritten(unittest.TestCase):
     target = self._target("GET /a.php?x=1 HTTP/1.1\nHost: example.com\nAuthorization: Basic\n\n")
     self.assertIsNone(target["auth_cred"])
 
+  def test_a_number_is_sent_the_way_it_was_written(self):
+    body = '{"a": 1.10, "b": [1e3, 2]}'
+    target = self._target("POST /a.php HTTP/1.1\nHost: example.com\nContent-Type: application/json\n\n" + body)
+    self.assertEqual(body, target["data"])
+
   def test_a_body_that_repeats_a_key_is_left_as_it_was_written(self):
     body = '{"a": 1, "a": 2}'
     target = self._target("POST /a.php HTTP/1.1\nHost: example.com\nContent-Type: application/json\n\n" + body)
     self.assertEqual(body, target["data"])
+
+class AFileThatHoldsSecretsIsTheOwnersAlone(unittest.TestCase):
+  def test_the_saved_options_are_not_readable_by_others(self):
+    import os, stat, tempfile
+    from src.core.parse import configfile
+    from src.core.parse import cmdline
+    path = os.path.join(tempfile.mkdtemp(prefix="commix-save-"), "saved.conf")
+    out = settings.print_data_to_stdout
+    settings.print_data_to_stdout = lambda *args: None
+    try:
+      configfile.save(menu.parser, menu.options, path)
+    finally:
+      settings.print_data_to_stdout = out
+    self.assertEqual(0o600, stat.S_IMODE(os.stat(path).st_mode))
+    # An existing, looser file is tightened as well.
+    os.chmod(path, 0o644)
+    settings.print_data_to_stdout = lambda *args: None
+    try:
+      configfile.save(menu.parser, menu.options, path)
+    finally:
+      settings.print_data_to_stdout = out
+    self.assertEqual(0o600, stat.S_IMODE(os.stat(path).st_mode))

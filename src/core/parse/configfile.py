@@ -102,8 +102,13 @@ def save(parser, options, filename):
     directory = os.path.dirname(os.path.abspath(filename))
     if directory and not os.path.isdir(directory):
       os.makedirs(directory)
-    with open(filename, "w", encoding=settings.DEFAULT_CODEC) as output_file:
+    # Readable by its owner alone: what is saved includes the credentials, cookies and data of the run.
+    with os.fdopen(os.open(filename, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600), "w", encoding=settings.DEFAULT_CODEC) as output_file:
       config.write(output_file)
+    try:
+      os.chmod(filename, 0o600)
+    except OSError:
+      pass
   except (OSError, IOError) as err_msg:
     error_msg = "Unable to write the configuration file to '" + filename + "' (" + str(err_msg) + ")."
     settings.print_data_to_stdout(settings.print_critical_msg(error_msg))

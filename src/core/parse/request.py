@@ -195,7 +195,11 @@ def _parse_request(request, request_file):
           raise ValueError("duplicate key")
         return OrderedDict(pairs)
       parsed = json.loads(target["data"], object_pairs_hook=_unique_pairs)
-      target["data"] = json.dumps(parsed, indent=2, ensure_ascii=False)
+      normalized = json.dumps(parsed, indent=2, ensure_ascii=False)
+      # Left as written where a number would be spelled differently by the one that is sent: '1.10' is not '1.1' to a target that reads the text.
+      as_text = lambda text: json.loads(text, parse_float=str, parse_int=str, object_pairs_hook=_unique_pairs)
+      if as_text(normalized) == as_text(target["data"]):
+        target["data"] = normalized
     except Exception:
       pass
   target["raw_headers"] = settings.END_LINE.ESCAPED_LF.join(request_headers)

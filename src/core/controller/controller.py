@@ -1167,6 +1167,8 @@ def injection_process(url, check_parameter, http_request_method, filename, times
       info_msg = "Setting " + settings.CHECKING_PARAMETER  + " for tests."
       settings.print_data_to_stdout(settings.print_info_msg(info_msg))
 
+    # Whether the user cut the heuristic short, in which case what it found - nothing, so far - is not its answer.
+    heuristic_interrupted = False
     if menu.options.skip_heuristics:
       if settings.VERBOSITY_LEVEL != 0:
         debug_msg = "Skipping heuristic (basic) test on the " + settings.CHECKING_PARAMETER + "."
@@ -1196,7 +1198,7 @@ def injection_process(url, check_parameter, http_request_method, filename, times
             checks.handle_detection_interrupt(filename, url)
           except (settings.SkipTechniqueException, settings.RetryTechniqueException):
             # No technique is running yet at this stage - just skip past heuristics.
-            pass
+            heuristic_interrupted = True
           except settings.EndDetectionPhaseException:
             settings.END_DETECTION = True
             break
@@ -1228,7 +1230,8 @@ def injection_process(url, check_parameter, http_request_method, filename, times
             # script that turned out to be about something else.
             checks.drop_auto_tampers()
 
-        if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_EVAL_PROBE:
+        # An unfinished test says nothing about the parameter - least of all enough to skip it under '--smart'.
+        if not settings.IDENTIFIED_COMMAND_INJECTION and not settings.IDENTIFIED_WARNINGS and not settings.IDENTIFIED_EVAL_PROBE and not heuristic_interrupted:
           settings.HEURISTIC_TEST.POSITIVE = False
           warn_msg = "Heuristic (basic) test shows that "
           warn_msg += settings.CHECKING_PARAMETER + " might not be injectable."

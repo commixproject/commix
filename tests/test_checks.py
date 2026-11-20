@@ -1148,6 +1148,35 @@ class ALowFixesInTheChecks(unittest.TestCase):
     finally:
       menu.options.auth_cred, menu.options.auth_type = state
 
+class ARemainingLowFixesInTheChecks(unittest.TestCase):
+  def test_a_length_alone_is_an_oracle_only_where_a_length_is_what_is_read(self):
+    state = (menu.options.lengths, menu.options.null_connection)
+    try:
+      menu.options.lengths = menu.options.null_connection = False
+      self.assertFalse(checks.calibrate_boolean_oracle("same", "same"))
+      menu.options.lengths = True
+      self.assertFalse(checks.calibrate_boolean_oracle("same", "same"))
+      self.assertTrue(checks.calibrate_boolean_oracle("a" * 100, "b" * 200))
+    finally:
+      menu.options.lengths, menu.options.null_connection = state
+
+  def test_lagging_is_said_once_however_often_the_model_is_taken_again(self):
+    saved = (settings.RESPONSE_TIMES[:], settings.LAGGING_CHECKED, settings.LAGGING_DETECTED, settings.JITTER_SEEN,
+             settings.ADJUST_TIME_DELAY_DISABLED, settings.print_data_to_stdout)
+    said = []
+    settings.print_data_to_stdout = said.append
+    try:
+      for _ in range(2):
+        settings.RESPONSE_TIMES[:] = [0.1, 6.0] * max(settings.MIN_TIME_RESPONSES, 4)
+        settings.LAGGING_CHECKED = False
+        checks.check_lagging()
+      self.assertEqual(1, len(said))
+      self.assertTrue(settings.LAGGING_DETECTED)
+    finally:
+      settings.RESPONSE_TIMES[:] = saved[0]
+      (settings.LAGGING_CHECKED, settings.LAGGING_DETECTED, settings.JITTER_SEEN,
+       settings.ADJUST_TIME_DELAY_DISABLED, settings.print_data_to_stdout) = saved[1:]
+
 if __name__ == "__main__":
   unittest.main()
 

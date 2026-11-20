@@ -137,6 +137,8 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
     if fan_out > 1 and not settings.CONCURRENT_BASELINE:
       settings.CONCURRENT_BASELINE = True
       del settings.RESPONSE_TIMES[:]
+      # The verdict on lagging was read off the other model, so it is read again off this one.
+      settings.LAGGING_CHECKED = False
     # What a probe costs is a property of the command being asked, so the previous one's sample is
     # dropped rather than left to answer for this one.
     del settings.PROBE_RESPONSE_TIMES[:]
@@ -229,6 +231,7 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
     settings.THREADED_TIME_RETRIEVAL_CHOICE = False
     settings.CONCURRENT_BASELINE = False
     del settings.RESPONSE_TIMES[:]
+    settings.LAGGING_CHECKED = False
     _warm_up_baseline(announce=False)
 
   # Raise the delay until it stands clear of the target's own response times.

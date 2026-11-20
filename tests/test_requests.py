@@ -303,6 +303,29 @@ class MiningSkipsOnlyTheNamesTheAddressCarries(unittest.TestCase):
     self.assertTrue(mining._with("http://t/a?x=1#f", ["id"]).endswith("#f"))
     self.assertIn("?id=", mining._with("http://t/a#f", ["id"]))
 
+class AConnectionThatFailedIsNotAWrongPassword(unittest.TestCase):
+  def setUp(self):
+    from src.core.requests import authentication
+    self.module = authentication
+    self._once = authentication._try_credentials_once
+
+  def tearDown(self):
+    self.module._try_credentials_once = self._once
+
+  def _answers(self, *answers):
+    queue = list(answers)
+    self.module._try_credentials_once = lambda *args: queue.pop(0)
+    return self.module._try_credentials("http://t/", "r", "GET", "basic", "u", "p")
+
+  def test_a_pair_that_got_through_on_the_second_try_is_right(self):
+    self.assertTrue(self._answers(None, True))
+
+  def test_a_pair_the_target_refused_is_not_asked_again(self):
+    self.assertFalse(self._answers(False))
+
+  def test_a_target_never_reached_leaves_the_pair_unproved(self):
+    self.assertFalse(self._answers(None, None, None))
+
 if __name__ == "__main__":
   unittest.main()
 

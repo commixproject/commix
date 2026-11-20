@@ -350,5 +350,12 @@ class TheSessionKeysByTheSiteNotByHowItWasWritten(SessionFixture):
     session_handler.import_valid_credentials(url, "basic", url, "admin", "new")
     self.assertEqual("admin:new", session_handler.export_valid_credentials(url, "basic"))
 
+class TheSessionFileIsTheOwnersAlone(SessionFixture):
+  def test_a_session_file_is_not_readable_by_others(self):
+    import stat
+    session_handler._SECURED_SESSION_FILES.discard(settings.SESSION_FILE)
+    session_handler.store_cmd(self.URL, "id", "uid=33(www-data)", "addr")
+    self.assertEqual(0o600, stat.S_IMODE(os.stat(settings.SESSION_FILE).st_mode))
+
 if __name__ == "__main__":
   unittest.main()

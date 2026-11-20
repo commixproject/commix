@@ -105,9 +105,20 @@ def define_wordlists():
   return usernames, passwords
 
 """
-Try one (username, password) pair; True on success. Uses its own opener, not the global one.
+Try one (username, password) pair; True on success. A connection that failed is tried again before the
+pair is called wrong - it is not the target's answer to them.
 """
 def _try_credentials(url, realm, http_request_method, authentication_type, username, password):
+  for _ in range(3):
+    answer = _try_credentials_once(url, realm, http_request_method, authentication_type, username, password)
+    if answer is not None:
+      return answer
+  return False
+
+"""
+One attempt: True or False where the target answered, None where it could not be reached. Uses its own opener, not the global one.
+"""
+def _try_credentials_once(url, realm, http_request_method, authentication_type, username, password):
   try:
     if authentication_type.lower() == settings.AUTH_TYPE.BASIC:
       authhandler = _urllib.request.HTTPBasicAuthHandler()
@@ -133,7 +144,7 @@ def _try_credentials(url, realm, http_request_method, authentication_type, usern
     # Only a refusal of the credentials says they were wrong - a 404 or a 500 behind the login is an answer given to them.
     return str(err.code) not in ("401", "403", "407")
   except (Exception, SystemExit):
-    return False
+    return None
 
 """
 Simple Basic / Digest HTTP authentication cracker.
