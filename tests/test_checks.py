@@ -606,6 +606,22 @@ class DelayThreshold(unittest.TestCase):
     # Nothing to measure it against leaves the margin read off the target alone.
     self.assertAlmostEqual(30.0, checks.current_delay_threshold(), places=2)
 
+  def test_raising_the_delay_itself_reads_the_cap_too(self):
+    """
+    'checks.current_delay_threshold()' caps its margin against a 'timesec' it is given - but the
+    one place that decides how far to raise the delay to ('_needed_delay()', inside
+    'injector.time_related_injection') used to ask for the threshold with none, reading the
+    uncapped margin above and raising the delay by exactly that much more than it needed to on a
+    target whose baseline is merely jittery rather than genuinely slow.
+    """
+    import inspect
+    from src.core.controller import injector
+    source = inspect.getsource(injector.time_related_injection)
+    needed_delay = source[source.index("def _needed_delay("):]
+    needed_delay = needed_delay[:needed_delay.index("\n\n")]
+    self.assertIn("current_delay_threshold(timesec)", needed_delay,
+                 "_needed_delay() reads the threshold without the cap 'timesec' turns on")
+
 
 class SkippedValueIsAccountedFor(unittest.TestCase):
   """
@@ -2080,3 +2096,176 @@ class ALengthControlIsOnlyAskedWhereTheProbeCanCarryALength(unittest.TestCase):
       self.assertFalse(checks.decision_is_length_based())
     finally:
       settings.TARGET_OS, settings.SKIP_SUBST = state
+
+class ConcurrencyThatCouldNotBeMeasuredIsNeitherYesNorNo(unittest.TestCase):
+  """
+  A target that answered nothing at all was reported as one that serves requests concurrently - a
+  claim nothing had been seen to support - and the question that follows about threads was put on
+  the strength of it.
+  """
+  NAMES = ("THREADS", "THREADED_TIME_RETRIEVAL_CHOICE", "print_data_to_stdout")
+
+  def setUp(self):
+    self._saved = dict((name, getattr(settings, name)) for name in self.NAMES)
+    self._sample = checks.requests.quick_response_time_sample
+    settings.print_data_to_stdout = lambda *args: None
+
+  def tearDown(self):
+    checks.requests.quick_response_time_sample = self._sample
+    for name, value in self._saved.items():
+      setattr(settings, name, value)
+
+  def test_nothing_answering_is_not_read_as_a_yes(self):
+    checks.requests.quick_response_time_sample = lambda url, method: None
+    self.assertIsNone(checks.target_serves_concurrently("http://t/", "GET", 4))
+
+  def test_the_run_goes_on_with_a_single_thread(self):
+    from src.core.controller import handler
+    checks.requests.quick_response_time_sample = lambda url, method: None
+    settings.THREADS, settings.THREADED_TIME_RETRIEVAL_CHOICE = 4, None
+    handler._confirm_threaded_time_retrieval("http://t/", "GET", False)
+    self.assertIs(False, settings.THREADED_TIME_RETRIEVAL_CHOICE)
+
+class AFindingKeepsTheScriptsItWasProvedThrough(unittest.TestCase):
+  """
+  Found on 'addr' behind a filter that needed backticks and a substitute for the space, then read at
+  the end - after the next parameter had been tested and had given those scripts back: the output
+  was asked for through payloads written without them and came back as unresolved bytes.
+  """
+  NAMES = ("AUTO_TAMPER", "MULTI_ENCODED_PAYLOAD", "WHITESPACES", "CMD_SUB_PREFIX", "CMD_SUB_SUFFIX", "PRINT_WITH_ECHO")
+
+  def setUp(self):
+    self._saved = dict((name, (list(getattr(settings, name)) if isinstance(getattr(settings, name), list) else getattr(settings, name))) for name in self.NAMES)
+    self._flags = dict(settings.TAMPER_SCRIPTS)
+
+  def tearDown(self):
+    for name, value in self._saved.items():
+      setattr(settings, name, value)
+    settings.TAMPER_SCRIPTS.update(self._flags)
+
+  def _adopt(self):
+    settings.AUTO_TAMPER = ["backticks", "space2ifs"]
+    settings.MULTI_ENCODED_PAYLOAD = ["backticks", "space2ifs"]
+    settings.WHITESPACES = ["${IFS}"]
+    settings.CMD_SUB_PREFIX = settings.CMD_SUB_SUFFIX = "`"
+    settings.PRINT_WITH_ECHO = True
+
+  def test_what_was_adopted_is_put_back_exactly(self):
+    self._adopt()
+    state = checks.tamper_state()
+    # The next parameter gives it all back.
+    checks.drop_auto_tampers()
+    self.assertEqual([], settings.AUTO_TAMPER)
+    checks.restore_tamper_state(state)
+    self.assertEqual(["backticks", "space2ifs"], settings.AUTO_TAMPER)
+    self.assertEqual(["backticks", "space2ifs"], settings.MULTI_ENCODED_PAYLOAD)
+    self.assertEqual(["${IFS}"], settings.WHITESPACES)
+    self.assertEqual(("`", "`", True), (settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX, settings.PRINT_WITH_ECHO))
+
+  def test_the_snapshot_is_not_changed_by_what_happens_after_it(self):
+    self._adopt()
+    state = checks.tamper_state()
+    settings.AUTO_TAMPER.append("printf2echo")
+    settings.WHITESPACES[0] = " "
+    self.assertEqual(["backticks", "space2ifs"], state[0])
+    self.assertEqual(["${IFS}"], state[2])
+
+  def test_a_deferred_action_runs_in_the_scripts_it_was_registered_in(self):
+    from src.core.controller import handler
+    self._adopt()
+    seen = []
+    deferred = handler._deferred_action(lambda: seen.append((list(settings.MULTI_ENCODED_PAYLOAD), list(settings.WHITESPACES))))
+    checks.drop_auto_tampers()
+    deferred()
+    self.assertEqual([(["backticks", "space2ifs"], ["${IFS}"])], seen)
+
+  def test_a_deferred_action_runs_in_the_shell_it_was_registered_in(self):
+    # A run that tests for both shells ends on whichever it tried last, not on the one that answered.
+    from src.core.controller import handler
+    state = settings.TARGET_OS
+    try:
+      settings.TARGET_OS = settings.OS.UNIX
+      seen = []
+      deferred = handler._deferred_action(lambda: seen.append(settings.TARGET_OS))
+      settings.TARGET_OS = settings.OS.WINDOWS
+      deferred()
+      self.assertEqual([settings.OS.UNIX], seen)
+    finally:
+      settings.TARGET_OS = state
+
+  def test_a_proof_executor_runs_in_the_shell_it_was_registered_in(self):
+    from src.core.controller import proof
+    state = (menu.options.proof, list(settings.PROOF_EXECUTORS), settings.TARGET_OS)
+    try:
+      menu.options.proof = True
+      del settings.PROOF_EXECUTORS[:]
+      settings.TARGET_OS = settings.OS.UNIX
+      seen = []
+      proof.register("technique", "addr", "GET", lambda cmd: seen.append(settings.TARGET_OS))
+      settings.TARGET_OS = settings.OS.WINDOWS
+      settings.PROOF_EXECUTORS[0][3]("id")
+      self.assertEqual([settings.OS.UNIX], seen)
+    finally:
+      menu.options.proof = state[0]
+      settings.PROOF_EXECUTORS[:] = state[1]
+      settings.TARGET_OS = state[2]
+
+  def test_a_proof_executor_runs_in_the_scripts_it_was_registered_in(self):
+    from src.core.controller import proof
+    state = (menu.options.proof, list(settings.PROOF_EXECUTORS))
+    try:
+      menu.options.proof = True
+      del settings.PROOF_EXECUTORS[:]
+      self._adopt()
+      seen = []
+      proof.register("technique", "addr", "GET", lambda cmd: seen.append(list(settings.MULTI_ENCODED_PAYLOAD)))
+      checks.drop_auto_tampers()
+      settings.PROOF_EXECUTORS[0][3]("id")
+      self.assertEqual([["backticks", "space2ifs"]], seen)
+    finally:
+      menu.options.proof = state[0]
+      settings.PROOF_EXECUTORS[:] = state[1]
+
+
+class AFindingIsLabelledWhereItsParameterSits(unittest.TestCase):
+  """
+  The label of a finding is the parameter's place, as the message that found it says: a request that
+  carries '--data' is a POST, and a parameter named only in its query string is still a GET one.
+  """
+  def setUp(self):
+    from src.core.parse import cmdline as menu
+    self.menu = menu
+    self._state = (menu.options.url, menu.options.data)
+
+  def tearDown(self):
+    self.menu.options.url, self.menu.options.data = self._state
+
+  def _place(self, parameter, method, url, data=None):
+    from src.core.controller import checks
+    self.menu.options.url, self.menu.options.data = url, data
+    return checks.parameter_place(parameter, method)
+
+  def test_a_query_parameter_of_a_request_with_a_body_is_get(self):
+    self.assertEqual("GET", self._place("addr", "POST", "http://t/a.php?addr=1*", "token=keep"))
+
+  def test_a_body_parameter_stays_post(self):
+    self.assertEqual("POST", self._place("addr", "POST", "http://t/a.php", "addr=1&Submit=Submit"))
+    self.assertEqual("POST", self._place("addr", "POST", "http://t/a.php?x=1", "addr=1"))
+
+  def test_a_name_in_both_keeps_the_method(self):
+    self.assertEqual("POST", self._place("addr", "POST", "http://t/a.php?addr=1", "addr=2"))
+
+  def test_a_name_in_neither_keeps_the_method(self):
+    self.assertEqual("POST", self._place("a.b", "POST", "http://t/a.php?x=1", '{"a": {"b": 1}}'))
+
+  def test_a_method_of_the_runs_own_is_what_it_is_called_by(self):
+    self.assertEqual("PUT", self._place("addr", "PUT", "http://t/a.php?addr=1", "token=1"))
+    self.assertEqual("Cookie", self._place("addr", "Cookie", "http://t/a.php?addr=1", "token=1"))
+
+  def test_a_name_that_only_ends_the_same_is_not_the_parameter(self):
+    self.assertEqual("POST", self._place("addr", "POST", "http://t/a.php?xaddr=1", "token=1"))
+
+  def test_the_line_carries_the_place(self):
+    from src.core.controller import checks
+    self.menu.options.url, self.menu.options.data = "http://t/a.php?addr=1", "token=1"
+    self.assertTrue(checks.finding_parameter_line("addr", "POST").endswith("addr (GET)"))

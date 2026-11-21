@@ -37,10 +37,10 @@ def _read_cookies_file(cookies_file):
 Turn the Netscape/wget cookie format into the value of a Cookie HTTP header. Every line holds seven
 tab-separated fields, of which the last two are the name and the value that the target asked for.
 """
-def _parse_netscape_format(content):
+def _parse_netscape_format(content, url=None):
   cookies = []
   # Where the cookies are going: a cookie is sent to the site it was set for, and only before it expires.
-  target = _urllib.parse.urlparse(menu.options.url or "")
+  target = _urllib.parse.urlparse((menu.options.url if url is None else url) or "")
   # The name in a 'Host' header of the run's own stands for the site as well - the address may be only where it is reached.
   hosts = set(_ for _ in ((target.hostname or "").lower(), (menu.options.host or "").split(":")[0].lower()) if _)
   # The prefix marks a cookie the browser keeps from scripts, which says nothing about sending it.
@@ -66,13 +66,18 @@ def _parse_netscape_format(content):
 """
 Load the cookies of a Netscape/wget file, as given with the '--load-cookies' option.
 """
-def load_cookies():
+def load_cookies(url=None, strict=True):
   content = _read_cookies_file(menu.options.load_cookies)
-  cookie = _parse_netscape_format(content)
+  cookie = _parse_netscape_format(content, url)
   if not cookie:
+    # Read again for one target of many, a file holding nothing for it is no reason to stop the run.
+    if not strict:
+      return None
     err_msg = "No valid cookies found in the '" + menu.options.load_cookies + "' file."
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
     raise SystemExit(settings.EXIT_FAILURE)
+  if not strict:
+    return cookie
   info_msg = "Loading cookies from the '" + os.path.split(menu.options.load_cookies)[1] + "' file. "
   settings.print_data_to_stdout(settings.print_info_msg(info_msg))
   return cookie

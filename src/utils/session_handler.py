@@ -137,6 +137,25 @@ def say_once_about_session(warn_msg):
   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
+A stored value as it is shown: the middle of a long run of characters is left out, as the cookies the
+target hands back are shown elsewhere in the run - what a session holds can be a login, and the
+terminal it is printed on is kept, copied and screen-shared.
+"""
+def masked_session_value(value):
+  return re.sub(r"(=[^=;&]{10}[^=;&])[^=;&]+([^=;&]{10})", r"\g<1>...\g<2>", checks.remove_tags(value))
+
+"""
+Said once for the run, as a plain notice rather than a warning: a value put back that the run was
+not given is nothing to be concerned about, only to know.
+"""
+def say_once_that_a_stored_value_is_used(label, stored):
+  info_msg = "The stored session was found using the " + label + " '" + masked_session_value(stored) + "', which is put back for this run - pass your own to replace it, or '--flush-session' to forget it."
+  if info_msg in settings.REPLAY_NOTICES_SAID:
+    return
+  settings.REPLAY_NOTICES_SAID.add(info_msg)
+  settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+
+"""
 Say when a stored finding was made with something other than what this run was given.
 
 These are the values a replay cannot honour: the stored payload was built around them, so the one
@@ -469,6 +488,7 @@ and stored in the session for the given URL.
 """
 def applied_techniques(url, http_request_method): 
   techniques = []
+  code_sink_stored = False
   try:
     with _session_connection() as conn:
       table = table_name(url) + "_ip"
@@ -479,9 +499,16 @@ def applied_techniques(url, http_request_method):
         for session in cursor:
           technique_info = session[0]
           letter = technique_letter(technique_info)
-          # Only a letter '--technique' takes narrows the run; code injection and out-of-band are reached through their own switches.
+          # Only a letter '--technique' takes narrows the run; out-of-band is reached through its own switch.
           if letter and letter in settings.AVAILABLE_TECHNIQUES:
             techniques.append(letter)
+          elif settings.LEGACY_TECHNIQUE_NAMES.get(technique_info, technique_info) == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
+            code_sink_stored = True
+        # The code sink's results-based technique is asked for by the letter of the results-based one - its own is not
+        # a letter '--technique' takes - so beside other narrowed techniques it must be named, or the run drops it.
+        # Alone it narrows nothing, as before: every technique stays selected.
+        if techniques and code_sink_stored:
+          techniques.append(settings.INJECTION_TECHNIQUE.RESULTS_BASED[0])
         techniques = list(set(techniques))
         techniques = "".join(str(x) for x in techniques)
     return techniques
@@ -597,7 +624,9 @@ def check_stored_injection_points(url, check_parameter, http_request_method):
           found = True
           # Prefer more specific vulnerable parameter (e.g. HTTP header), if available
           vuln_parameter = vuln_param or http_header
-          session_url = session[1]
+          # The address the finding was made on, but with what the query holds today - a token or a session
+          # value written into it last time is stale by now, and is not the stored point's to replay.
+          session_url = current_with_stored_point(session[1], url)
 
           cookie = restore_option(session[20] if len(session) > 20 else None, settings.USER_APPLIED_COOKIE, "cookie")
           if cookie:
@@ -703,9 +732,14 @@ def apply_stored_technique(row, current_url=None):
   placeholder = check_stored_testable_value(url, vuln_parameter, http_request_method)
   cookie = restore_option(cookie, settings.USER_APPLIED_COOKIE, "cookie", placeholder)
   if cookie:
+    # Applied without having been asked for: said, so a cookie that has gone stale is not a mystery.
+    if not settings.USER_APPLIED_COOKIE:
+      say_once_that_a_stored_value_is_used("cookie", cookie)
     menu.options.cookie = cookie
   data = restore_option(data, settings.USER_APPLIED_DATA, "POST data", placeholder)
   if data:
+    if not settings.USER_APPLIED_DATA:
+      say_once_that_a_stored_value_is_used("POST data", data)
     settings.IGNORE_USER_DEFINED_POST_DATA = False
     menu.options.data = data
   if settings.INJECTION_LEVEL != is_vulnerable:
@@ -814,7 +848,14 @@ choose, and a token or session value written into it last time is stale by now.
 """
 def current_with_stored_point(stored_url, current_url):
   tag = settings.INJECT_TAG
-  if not current_url or tag not in stored_url or "?" not in current_url:
+  if not current_url:
+    return stored_url
+  # A finding made in the body, a cookie or a header has no marked parameter in the address to carry
+  # over - the address is simply the one given now, with whatever it holds today. Unless this one is
+  # marked where the stored one was not, which would move the injection point.
+  if tag not in stored_url:
+    return stored_url if tag in current_url else current_url
+  if "?" not in current_url:
     return stored_url
   stored = re.search(r"[?&]([^&=?#]+)=([^&#]*" + re.escape(tag) + r"[^&#]*)", stored_url)
   if not stored:

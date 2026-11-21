@@ -313,6 +313,20 @@ class AResumeNarrowsOnlyToTheTechniquesTheOptionTakes(SessionFixture):
     self.store(settings.INJECTION_TECHNIQUE.OOB)
     self.assertEqual("", session_handler.applied_techniques(self.URL, "GET"))
 
+  def test_a_code_injection_finding_beside_others_keeps_the_results_based_letter_selected(self):
+    self.store(settings.INJECTION_TECHNIQUE.DYNAMIC_CODE)
+    self.store(settings.INJECTION_TECHNIQUE.TIME_BASED)
+    self.store(settings.INJECTION_TECHNIQUE.FILE_BASED)
+    self.assertEqual("frt", "".join(sorted(session_handler.applied_techniques(self.URL, "GET"))))
+
+  def test_the_results_based_letter_is_not_named_twice(self):
+    self.store(settings.INJECTION_TECHNIQUE.DYNAMIC_CODE)
+    self.store(settings.INJECTION_TECHNIQUE.RESULTS_BASED)
+    self.store(settings.INJECTION_TECHNIQUE.FILE_BASED)
+    letters = session_handler.applied_techniques(self.URL, "GET")
+    self.assertEqual(len(letters), len(set(letters)))
+    self.assertEqual("fr", "".join(sorted(letters)))
+
   def test_the_letters_the_option_takes_survive_beside_one_it_does_not(self):
     self.store(settings.INJECTION_TECHNIQUE.OOB)
     self.store(settings.INJECTION_TECHNIQUE.TIME_BASED)
@@ -327,10 +341,38 @@ class AReplayIsMadeOnTheAddressGivenNow(SessionFixture):
     merged = session_handler.current_with_stored_point("http://t/a.php?junk=OLD&addr=ABC" + tag, "http://t/a.php?junk=NEW&addr=127.0.0.1" + tag)
     self.assertEqual("http://t/a.php?junk=NEW&addr=ABC" + tag, merged)
 
+  def test_the_address_a_resumed_run_starts_from_is_the_one_given_now(self):
+    # check_stored_injection_points is where the stored address replaced the current one before
+    # anything else got to read it.
+    tag = settings.INJECT_TAG
+    stored = "http://t/a.php?junk=OLD&addr=127.0.0.1" + tag
+    session_handler.import_injection_points(
+      stored, settings.INJECTION_TECHNIQUE.RESULTS_BASED, settings.INJECTION_TYPE.RESULTS_BASED_CI,
+      "", ";", True, "addr", "", "", "TAG", False, "127.0.0.1;echo TAG;", "GET", 0, 0, 0, 0, "1")
+    state = (settings.LOAD_SESSION, settings.TESTABLE_PARAMETERS_LIST, settings.MULTI_TARGETS)
+    try:
+      settings.TESTABLE_PARAMETERS_LIST = []
+      url, parameter = session_handler.check_stored_injection_points("http://t/a.php?junk=NEW&addr=127.0.0.1" + tag, "addr", "GET")
+    finally:
+      settings.LOAD_SESSION, settings.TESTABLE_PARAMETERS_LIST, settings.MULTI_TARGETS = state
+    self.assertEqual("addr", parameter)
+    self.assertIn("junk=NEW", url)
+    self.assertNotIn("junk=OLD", url)
+
   def test_the_stored_address_stands_where_the_current_one_has_no_such_parameter(self):
     stored = "http://t/a.php?addr=ABC" + settings.INJECT_TAG
     self.assertEqual(stored, session_handler.current_with_stored_point(stored, "http://t/a.php?x=1"))
     self.assertEqual(stored, session_handler.current_with_stored_point(stored, None))
+
+  def test_a_finding_made_in_the_body_replays_on_the_address_given_now(self):
+    # No marked parameter in the stored address - what its query held last time is simply stale.
+    self.assertEqual("http://t/a.php?token=NEW",
+                     session_handler.current_with_stored_point("http://t/a.php?token=OLD", "http://t/a.php?token=NEW"))
+
+  def test_a_mark_the_stored_address_did_not_have_is_not_moved_into_it(self):
+    tag = settings.INJECT_TAG
+    stored = "http://t/a.php?token=OLD"
+    self.assertEqual(stored, session_handler.current_with_stored_point(stored, "http://t/a.php?addr=1" + tag))
 
   def test_a_fragment_stays_where_it_was(self):
     tag = settings.INJECT_TAG
@@ -399,6 +441,48 @@ class ADiscardedFindingIsNotResumed(SessionFixture):
     menu.options.ignore_session = True
     session_handler.discard_injection_points(self.URL, "GET", [self._point(settings.INJECTION_TECHNIQUE.TIME_BASED)])
     self.assertFalse(os.path.isfile(settings.SESSION_FILE))
+
+class AStoredCookieThatIsPutBackIsSaid(SessionFixture):
+  """
+  The cookie and body a finding was made with are put back when the run is given none of its own -
+  silently, so a cookie that had gone stale was a mystery and a login sat on the terminal unmarked.
+  """
+  LONG = "PHPSESSID=0123456789abcdefghijklmnopqrstuvwxyz0123456789"
+
+  def setUp(self):
+    SessionFixture.setUp(self)
+    self._saved = (menu.options.cookie, settings.USER_APPLIED_COOKIE)
+    menu.options.cookie = self.LONG
+    session_handler.import_injection_points(
+      self.URL, settings.INJECTION_TECHNIQUE.RESULTS_BASED, settings.INJECTION_TYPE.RESULTS_BASED_CI,
+      "", ";", True, "addr", "", "", "TAG", False, "127.0.0.1;echo TAG;", "GET", 0, 0, 0, 0, "1")
+    menu.options.cookie = None
+    self.row = list(session_handler.load_stored_techniques(self.URL, "addr", "GET").values())[0]
+
+  def tearDown(self):
+    menu.options.cookie, settings.USER_APPLIED_COOKIE = self._saved
+    SessionFixture.tearDown(self)
+
+  def test_a_cookie_the_run_was_not_given_is_said_and_masked(self):
+    settings.USER_APPLIED_COOKIE = None
+    session_handler.apply_stored_technique(self.row)
+    self.assertEqual(self.LONG, menu.options.cookie)
+    said = " ".join(self.said)
+    self.assertIn("put back for this run", said)
+    self.assertNotIn(self.LONG, said)
+    self.assertIn("...", said)
+
+  def test_a_cookie_the_run_was_given_is_not_announced_as_restored(self):
+    settings.USER_APPLIED_COOKIE = self.LONG
+    menu.options.cookie = self.LONG
+    session_handler.apply_stored_technique(self.row)
+    self.assertNotIn("put back for this run", " ".join(self.said))
+
+  def test_it_is_said_once_however_many_techniques_read_the_row(self):
+    settings.USER_APPLIED_COOKIE = None
+    session_handler.apply_stored_technique(self.row)
+    session_handler.apply_stored_technique(self.row)
+    self.assertEqual(1, len([_ for _ in self.said if "put back for this run" in _]))
 
 if __name__ == "__main__":
   unittest.main()

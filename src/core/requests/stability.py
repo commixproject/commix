@@ -150,6 +150,23 @@ def last_http_error():
   return getattr(_thread_state, "last_http_error", None)
 
 """
+A request this thread gave up on without an answer of any kind - '--ignore-timeouts' on a target
+that never responded within the (possibly delay-widened) connection timeout. That is a request the
+target was never read to have answered, not one it answered slowly: the wall-clock time such a
+request took is the timeout's own length, not the target's, and reading it as a delay would credit
+the target with having run a command it was never shown to have run at all.
+"""
+def note_gave_up_on_timeout():
+  _thread_state.gave_up_on_timeout = True
+
+# Whether this thread's last request ended that way. Cleared once per request by apply_request_policy().
+def gave_up_on_timeout():
+  return getattr(_thread_state, "gave_up_on_timeout", False)
+
+def clear_gave_up_on_timeout():
+  _thread_state.gave_up_on_timeout = False
+
+"""
 True while the request loop should keep retrying: not succeeded, within budget, not unauthorized.
 """
 def should_keep_retrying(succeeded, unauthorized):

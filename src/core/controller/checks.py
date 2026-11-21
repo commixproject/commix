@@ -2240,10 +2240,32 @@ def finding_summary_lines(technique, injection_type, payload, title=None):
   return lines
 
 """
+Where a parameter sits, for the label of a finding.
+
+A method of the run's own choosing (PUT, PATCH, ...) is what it is called by. For GET and POST the
+request's method says whether it has a body, not where the parameter is: one named only in the
+query string of a request that also carries '--data' is a GET parameter, as the message that found
+it says. A name in both, or in neither, keeps the method - which of the two it was cannot be told
+from the name.
+"""
+def parameter_place(vuln_parameter, http_request_method):
+  if http_request_method != settings.HTTPMETHOD.POST or not vuln_parameter:
+    return http_request_method
+  name = re.escape(str(vuln_parameter).strip())
+  url = menu.options.url if isinstance(menu.options.url, str) else ""
+  query = url.split("?", 1)[1] if "?" in url else ""
+  body = menu.options.data if isinstance(menu.options.data, str) else ""
+  # Read for the names it holds, not the values - the injection marker and a custom one are neither.
+  tell = lambda text: re.search(r"(?:^|[&;?])\s*" + name + r"\s*=", text) is not None
+  if tell(query) and not tell(body):
+    return settings.HTTPMETHOD.GET
+  return http_request_method
+
+"""
 The parameter header line of a summary block.
 """
 def finding_parameter_line(vuln_parameter, http_request_method):
-  return settings.SUB_CONTENT_SIGN + "Parameter: " + vuln_parameter + " (" + http_request_method + ")"
+  return settings.SUB_CONTENT_SIGN + "Parameter: " + vuln_parameter + " (" + parameter_place(vuln_parameter, http_request_method) + ")"
 
 """
 Print one block per row, grouped by parameter - rows start with
@@ -3581,6 +3603,9 @@ def strip_time_outliers(values):
 Feed a genuinely non-delayed response time into the rolling baseline model.
 """
 def record_probe_response_time(exec_time):
+  # 'None' is a request given up on without an answer ('--ignore-timeouts') - nothing to learn the target's pace from.
+  if exec_time is None:
+    return
   """
   Only where the request it timed actually reached the sink.
 
@@ -3603,6 +3628,8 @@ def record_probe_response_time(exec_time):
 Record a plain request's response time
 """
 def record_baseline_response_time(exec_time):
+  if exec_time is None:
+    return
   settings.RESPONSE_TIMES.append(exec_time)
   if len(settings.RESPONSE_TIMES) > settings.MAX_TIME_RESPONSES:
     settings.RESPONSE_TIMES[:] = settings.RESPONSE_TIMES[-(settings.MAX_TIME_RESPONSES // 2):]
@@ -3741,6 +3768,9 @@ def current_delay_threshold(timesec=None):
 Time related shell condition. Uses the adaptive threshold once available, else a fixed one.
 """
 def time_related_shell(exec_time, timesec):
+  # Given up on without an answer ('--ignore-timeouts') is not evidence either way.
+  if exec_time is None:
+    return False
   if settings.BASELINE_TARGET:
     warm_up_response_baseline(*settings.BASELINE_TARGET)
   lower_limit = current_delay_threshold(timesec)
@@ -4808,6 +4838,28 @@ def escalate_waf_evasion(on_block=True):
   return True
 
 """
+Everything the scripts in use have settled, as it stands now: the ones adopted, the chain they make,
+the whitespace they hold, the way a substitution is written and what the payloads print with.
+
+A parameter that is tested after another gives back what the one before it adopted, so a finding
+whose output is read at the end - once every parameter has had its turn - would otherwise be read
+through payloads written without the very scripts that got it past the target.
+"""
+def tamper_state():
+  return (list(settings.AUTO_TAMPER), list(settings.MULTI_ENCODED_PAYLOAD), list(settings.WHITESPACES),
+          settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX, settings.PRINT_WITH_ECHO, dict(settings.TAMPER_SCRIPTS))
+
+# Put back what tamper_state() took, exactly - nothing is re-decided, so nothing is asked again.
+def restore_tamper_state(state):
+  auto, chain, whitespaces, prefix, suffix, echo, flags = state
+  settings.AUTO_TAMPER = list(auto)
+  settings.MULTI_ENCODED_PAYLOAD = list(chain)
+  settings.WHITESPACES = list(whitespaces)
+  settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = prefix, suffix
+  settings.PRINT_WITH_ECHO = echo
+  settings.TAMPER_SCRIPTS.update(flags)
+
+"""
 Take back every tamper script this run adopted on its own, leaving the ones '--tamper' named.
 
 Rebuilt from scratch rather than removed one by one, the way an evasion tier that replaces another
@@ -5483,12 +5535,18 @@ def warn_on_duplicate_json_keys(data):
 Parsing and unflattening JSON data.
 """
 def json_data(data):
+  # Kept as it came in: what is handed back where the body cannot be read as it should be is the body, not whatever half of it was parsed.
+  original = data
   try:
-    data = json.loads(data, object_pairs_hook=OrderedDict)
-    data = unflatten_list(data)
-    return format_json(data)
+    parsed = json.loads(data, object_pairs_hook=OrderedDict)
+    # An array is rebuilt object by object, being no more than the objects it holds.
+    if isinstance(parsed, list):
+      parsed = [unflatten_list(item) if isinstance(item, dict) else item for item in parsed]
+    else:
+      parsed = unflatten_list(parsed)
+    return format_json(parsed)
   except Exception:
-    return data
+    return original
 
 """
 No parameter(s) found for testing.
@@ -7438,12 +7496,16 @@ def define_vulnerable_http_header(http_header_name):
 """
 Whether the target actually serves requests concurrently. Parallel timing requests that queue
 behind each other make every response look delayed, which silently corrupts a retrieval.
+
+'None' where that could not be measured at all - nothing answered, or the threads this needs are not
+there - which is neither of the two answers: claiming the target serves them is a claim nothing was
+seen to support, and claiming it does not is just as unseen.
 """
 def target_serves_concurrently(url, http_request_method, workers):
   try:
     import concurrent.futures
   except ImportError:
-    return False
+    return None
   sample = lambda _=None: requests.quick_response_time_sample(url, http_request_method)
   # Opening the connections is paid for before either half is timed, so the half that runs second
   # does not simply inherit what the first one warmed up.
@@ -7459,7 +7521,7 @@ def target_serves_concurrently(url, http_request_method, workers):
   answered = [_ for _ in (sample() for _ in range(count)) if _ is not None]
   one_after_another = time.time() - start
   if not answered:
-    return True
+    return None
   start = time.time()
   with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
     list(executor.map(sample, range(count)))

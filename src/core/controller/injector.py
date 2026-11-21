@@ -215,7 +215,10 @@ def time_related_injection(separator, maxlen, TAG, cmd, prefix, suffix, whitespa
 
   # The delay that would stand above the target's own answers, as the model has them so far.
   def _needed_delay():
-    threshold = checks.current_delay_threshold()
+    # Read against the delay already asked for, the way every other caller of this reads it - the
+    # margin a jittery baseline adds is capped at a fraction of it, so a target slow enough to need
+    # raising the delay at all does not also drive the raise itself arbitrarily far past that need.
+    threshold = checks.current_delay_threshold(timesec)
     return None if threshold is None else int(threshold) + 1 + settings.TIME_DELAY_STEP
 
   # Give up the concurrency and take the model again without it, so that what follows is judged
@@ -1657,11 +1660,22 @@ command's own, that is a wrong answer rather than a missing one, which is the wo
 
 Both the contents and the file's own validator have to be what they were for the write to be called
 missing. A command run twice writes the file again, so the validator moves even where the output it
-wrote is identical - and where the target serves no validator at all, nothing is withheld.
+wrote is identical - except where the validator's own resolution (a 'Last-Modified' in whole
+seconds, an 'ETag' built from it) cannot tell two writes a moment apart from one write that never
+happened - and where the target serves no validator at all, nothing is withheld.
+
+The same command asked for a second time is exactly that case: its output is identical because it is
+the same command, not because nothing ran. Told apart from a write that never landed by the command
+each answer belongs to - carried in rather than read off the content again, since the content is
+what is in question. A content/validator match against the baseline no command has written yet
+(`previous_cmd` is 'None') is still read the strict way: nothing but a command has ever been asked to
+change that file, so a match against it is the file exactly as detection left it.
 """
-def output_file_is_stale(content, validator, previous_content, previous_validator):
-  return (validator is not None and previous_validator is not None and
-          validator == previous_validator and content == previous_content)
+def output_file_is_stale(content, validator, previous_content, previous_validator, cmd=None, previous_cmd=None):
+  if not (validator is not None and previous_validator is not None and
+          validator == previous_validator and content == previous_content):
+    return False
+  return previous_cmd is None or cmd != previous_cmd
 
 """
 What the output file holds before any command has been run through it, remembered so that a command
@@ -1672,6 +1686,8 @@ def remember_output_file(response):
     return
   settings.LAST_OUTPUT_FILE_CONTENT = output_file_content(response)
   settings.LAST_OUTPUT_FILE_VALIDATOR = output_file_validator(response)
+  # No command wrote this - it is whatever detection left the file holding.
+  settings.LAST_OUTPUT_FILE_CMD = None
 
 """
 Evaluate test results.
@@ -1944,21 +1960,23 @@ def injection_results(response, TAG, cmd, technique, url, OUTPUT_TEXTFILE, times
     validator = None
     previous_content = settings.LAST_OUTPUT_FILE_CONTENT
     previous_validator = settings.LAST_OUTPUT_FILE_VALIDATOR
+    previous_cmd = settings.LAST_OUTPUT_FILE_CMD
     for attempt in range(settings.MAX_OUTPUT_FILE_READS):
       response = fetch_output_response(url, OUTPUT_TEXTFILE, timesec, technique)
       if response is not None:
         shell = output_file_content(response)
         validator = output_file_validator(response)
       # What the file held before this command is what it still holds if the write has not landed.
-      if shell and not output_file_is_stale(shell, validator, previous_content, previous_validator):
+      if shell and not output_file_is_stale(shell, validator, previous_content, previous_validator, cmd, previous_cmd):
         break
       if attempt + 1 < settings.MAX_OUTPUT_FILE_READS:
         time.sleep(settings.OUTPUT_FILE_READ_DELAY)
-    if shell and output_file_is_stale(shell, validator, previous_content, previous_validator):
+    if shell and output_file_is_stale(shell, validator, previous_content, previous_validator, cmd, previous_cmd):
       shell = ""
     else:
       settings.LAST_OUTPUT_FILE_CONTENT = shell
       settings.LAST_OUTPUT_FILE_VALIDATOR = validator
+      settings.LAST_OUTPUT_FILE_CMD = cmd
 
   return shell
 # eof

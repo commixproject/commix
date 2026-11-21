@@ -313,6 +313,7 @@ def apply_request_policy():
 
 def _apply_request_policy():
   stability.set_last_http_error(None)
+  stability.clear_gave_up_on_timeout()
   # What a redirect said is true of the request it answered and of no other. Set by the handler and
   # never cleared, it outlived its own request: the code named in the question put to the user, and
   # read by whatever asked later whether a redirect had happened at all, was whichever one the run
@@ -327,6 +328,21 @@ def _apply_request_policy():
   time.sleep(settings.DELAY + settings.ADAPTIVE_DELAY + (random.uniform(0, menu.options.jitter) if menu.options.jitter else 0))
 
 """
+The handlers an opener needs for the authentication this run was given: Digest needs one, unlike
+Basic/Bearer's static header.
+"""
+def authentication_handlers():
+  handlers = []
+  if menu.options.auth_cred and menu.options.auth_type and menu.options.auth_type.lower() == settings.AUTH_TYPE.DIGEST:
+    if settings.DIGEST_AUTH_REALM is None:
+      settings.DIGEST_AUTH_REALM = discover_digest_realm(menu.options.url)
+    digest_handler = _urllib.request.HTTPDigestAuthHandler()
+    username, _, password = menu.options.auth_cred.partition(":")
+    digest_handler.add_password(settings.DIGEST_AUTH_REALM, menu.options.url, username, password)
+    handlers.append(digest_handler)
+  return handlers
+
+"""
 Send a request the caller reads or times itself, rather than through the opener the rest of the run
 goes out over - and have it paced and counted like any other request all the same.
 
@@ -339,7 +355,13 @@ def send_raw(request, timeout=None, policy=True):
   hooks.preprocess(request)
   with settings.REQUESTS_LOCK:
     settings.TOTAL_OF_REQUESTS = settings.TOTAL_OF_REQUESTS + 1
-  response = _urllib.request.urlopen(request, timeout=timeout or settings.TIMEOUT)
+  # A target asking for Digest credentials answers a request that carries none with a 401, and so does the
+  # response-time model built on these - which then never fills, and the time-related techniques with it.
+  handlers = authentication_handlers()
+  if handlers:
+    response = _urllib.request.build_opener(*handlers).open(request, timeout=timeout or settings.TIMEOUT)
+  else:
+    response = _urllib.request.urlopen(request, timeout=timeout or settings.TIMEOUT)
   # Spent from the count the retry budget is measured against, so the budget is grown with it.
   with settings.REQUESTS_LOCK:
     stability.expand_retry_budget()
@@ -447,15 +469,7 @@ def check_http_traffic(request):
       except (SocketError, _urllib.error.HTTPError, _urllib.error.URLError, _http_client.BadStatusLine, _http_client.RemoteDisconnected, _http_client.IncompleteRead, _http_client.InvalidURL, Exception) as err_msg:
         checks.connection_exceptions(err_msg)
 
-  # Digest needs a handler on the sending opener, unlike Basic/Bearer's static header.
-  extra_handlers = []
-  if menu.options.auth_cred and menu.options.auth_type and menu.options.auth_type.lower() == settings.AUTH_TYPE.DIGEST:
-    if settings.DIGEST_AUTH_REALM is None:
-      settings.DIGEST_AUTH_REALM = discover_digest_realm(menu.options.url)
-    digest_handler = _urllib.request.HTTPDigestAuthHandler()
-    username, _, password = menu.options.auth_cred.partition(":")
-    digest_handler.add_password(settings.DIGEST_AUTH_REALM, menu.options.url, username, password)
-    extra_handlers.append(digest_handler)
+  extra_handlers = authentication_handlers()
 
 
   request = encode_non_ascii_url(request)

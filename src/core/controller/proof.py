@@ -40,8 +40,14 @@ def register(technique, vuln_parameter, http_request_method, execute_cmd, bounda
   # The executor reads settings.TIME_RELATED_ATTACK when it runs, and a technique found later
   # changes it - so the value in force here is carried with it, as deferred actions do.
   time_related = settings.TIME_RELATED_ATTACK
+  # And so are the scripts it was proved through, which the parameters tested after it give back.
+  from src.core.controller import checks
+  tampers = checks.tamper_state()
+  target_os = settings.TARGET_OS
   def run(cmd):
     settings.TIME_RELATED_ATTACK = time_related
+    settings.TARGET_OS = target_os
+    checks.restore_tamper_state(tampers)
     return execute_cmd(cmd)
   settings.PROOF_EXECUTORS.append((technique, vuln_parameter, http_request_method, run, boundary))
 

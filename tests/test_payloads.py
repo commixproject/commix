@@ -2125,3 +2125,54 @@ class AnOutputIsPrintedAsItWasPrinted(unittest.TestCase):
     payload = rb_payloads.cmd_execution(";", self.TAG, self._command("uid=33 gid=33"))
     done = subprocess.run(["sh", "-c", "true" + payload], capture_output=True)
     self.assertIn((self.TAG * 2 + "uid=33 gid=33" + self.TAG * 2).encode(), done.stdout)
+
+class ATransientOracleMissIsNotReadAsEmptyOutput(unittest.TestCase):
+  """
+  'output_length' returned the empty string for two unlike reasons - a command that genuinely
+  printed nothing, and an oracle that could not answer the question at all - and the retrieval that
+  follows, and whoever reports on it afterward, could not tell the two apart.
+  """
+  class _StubPayloads(object):
+    def get_length(self, separator, cmd, candidate, operator="-ge"):
+      return "probe"
+
+  class _FakeChannel(object):
+    def __init__(self, answers):
+      self.separator = ";"
+      self._answers = list(answers)
+
+    def ask(self, payload):
+      return self._answers.pop(0) if self._answers else None
+
+  def setUp(self):
+    from src.core.techniques.boolean_based import bb_handler
+    self.bb_handler = bb_handler
+    self._saved = (settings.INCOMPLETE_OUTPUT, settings.print_data_to_stdout)
+    settings.INCOMPLETE_OUTPUT = False
+    settings.print_data_to_stdout = lambda *args: None
+
+  def tearDown(self):
+    settings.INCOMPLETE_OUTPUT, settings.print_data_to_stdout = self._saved
+
+  def test_an_oracle_that_never_answers_is_flagged(self):
+    # Every ask() - including _ask's own retry - comes back None, so the growth search gives up at once.
+    channel = self._FakeChannel([])
+    length = self.bb_handler.output_length(channel, "id", payloads=self._StubPayloads())
+    self.assertEqual("", length)
+    self.assertTrue(settings.INCOMPLETE_OUTPUT)
+
+  def test_a_command_that_prints_nothing_is_not_flagged(self):
+    # The growth question answers "no" outright, and the bisection that follows answers every
+    # question it asks too - a measured zero length, not a miss, so nothing is marked incomplete.
+    channel = self._FakeChannel([False, False])
+    length = self.bb_handler.output_length(channel, "id", payloads=self._StubPayloads())
+    self.assertFalse(length)
+    self.assertFalse(settings.INCOMPLETE_OUTPUT)
+
+  def test_retrieve_resets_the_flag_for_its_own_command(self):
+    # A miss on one command must not outlive it - the next command's own retrieval starts clean.
+    settings.INCOMPLETE_OUTPUT = True
+    channel = self._FakeChannel([False, False])
+    shell = self.bb_handler.retrieve(channel, "id", payloads=self._StubPayloads())
+    self.assertEqual("", shell)
+    self.assertFalse(settings.INCOMPLETE_OUTPUT)

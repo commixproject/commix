@@ -99,6 +99,57 @@ class AnswerThisCommandsOutputOrNothing(unittest.TestCase):
   def test_the_first_read_of_a_run_is_answered(self):
     self.assertFalse(injector.output_file_is_stale("uid=33", '"6-a"', None, None))
 
+class TheSameCommandAskedTwiceIsNotTakenForANeverLandedWrite(unittest.TestCase):
+  """
+  A command run a second time can write back the very output it wrote before, inside the same
+  second a weak validator (an 'ETag' or 'Last-Modified' resolved to whole seconds) cannot move in -
+  identical content and an unmoved validator is then what running it twice looks like, not a write
+  that never landed.
+  """
+  def test_the_same_command_run_again_is_not_stale(self):
+    self.assertFalse(injector.output_file_is_stale("uid=33", '"6-a"', "uid=33", '"6-a"', cmd="id", previous_cmd="id"))
+
+  def test_a_different_command_with_the_same_answer_still_is(self):
+    self.assertTrue(injector.output_file_is_stale("uid=33", '"6-a"', "uid=33", '"6-a"', cmd="whoami", previous_cmd="id"))
+
+  def test_the_detection_phase_marker_is_still_read_the_strict_way(self):
+    # Nothing has written the file yet - a match against what detection left is read exactly as before.
+    self.assertTrue(injector.output_file_is_stale("MARKER", '"1-a"', "MARKER", '"1-a"', cmd="id", previous_cmd=None))
+
+  def test_a_run_that_never_passes_a_command_behaves_as_it_always_did(self):
+    self.assertTrue(injector.output_file_is_stale("MARKER", '"1-a"', "MARKER", '"1-a"'))
+
+class TheGuardAppliesEndToEndThroughInjectionResults(unittest.TestCase):
+  """
+  The same guard, wired through the function the file-based technique actually calls - not just the
+  comparison it is built from.
+  """
+  NAMES = ("LAST_OUTPUT_FILE_CONTENT", "LAST_OUTPUT_FILE_VALIDATOR", "LAST_OUTPUT_FILE_CMD",
+           "MAX_OUTPUT_FILE_READS", "OUTPUT_FILE_READ_DELAY")
+
+  def setUp(self):
+    self._saved = dict((name, getattr(settings, name)) for name in self.NAMES)
+    settings.LAST_OUTPUT_FILE_CONTENT = settings.LAST_OUTPUT_FILE_VALIDATOR = settings.LAST_OUTPUT_FILE_CMD = None
+    settings.MAX_OUTPUT_FILE_READS = 1
+    self._fetch = injector.fetch_output_response
+
+  def tearDown(self):
+    for name, value in self._saved.items():
+      setattr(settings, name, value)
+    injector.fetch_output_response = self._fetch
+
+  def _served_result(self, content, validator, cmd):
+    injector.fetch_output_response = lambda url, OUTPUT_TEXTFILE, timesec, technique: served(content, {"ETag": validator})
+    return injector.injection_results(None, "TAG", cmd, settings.INJECTION_TECHNIQUE.FILE_BASED, "http://t/", "f.txt", 0)
+
+  def test_the_same_command_asked_twice_reads_both_times(self):
+    self.assertEqual("uid=33", self._served_result("uid=33", '"6-a"', "id"))
+    self.assertEqual("uid=33", self._served_result("uid=33", '"6-a"', "id"))
+
+  def test_a_different_command_with_the_same_answer_reads_as_no_output(self):
+    self._served_result("uid=33", '"6-a"', "id")
+    self.assertEqual("", self._served_result("uid=33", '"6-a"', "whoami"))
+
 if __name__ == "__main__":
   unittest.main()
 

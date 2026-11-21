@@ -1113,6 +1113,8 @@ def injection_process(url, check_parameter, http_request_method, filename, times
     if settings.IDENTIFIED_TARGET_OS and settings.TARGET_OS != os_target:
       continue
     settings.TARGET_OS = os_target
+    # What was confirmed before this pass, so that a finding made in it is known for this pass's own.
+    confirmed_before = len(settings.CONFIRMED_INJECTION_POINTS)
 
     if settings.PERFORM_BASIC_SCANS:
       if not settings.LOAD_SESSION:
@@ -1590,6 +1592,11 @@ def injection_process(url, check_parameter, http_request_method, filename, times
             checks.quit(filename, url, hard_exit=False)
 
     swept.add(settings.TARGET_OS)
+    # A finding made in this pass was made through this shell's own payloads, which is proof of it -
+    # and the other shell is not worth a pass of its own for a parameter this one has answered, nor
+    # to be left as the one in force when what was found is read at the end.
+    if len(settings.CONFIRMED_INJECTION_POINTS) > confirmed_before and not settings.IDENTIFIED_TARGET_OS:
+      checks.set_target_os(settings.TARGET_OS)
     if not settings.CHECK_BOTH_OS or end_detection:
       break
 

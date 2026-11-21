@@ -73,8 +73,24 @@ def _ask(channel, payload):
     answer = channel.ask(payload)
   return answer
 
+# What a halving returns when a question went unanswered - told apart from None, which is a search whose every answer was no.
+class _Missed(object):
+  def __repr__(self):
+    return "MISSED"
+  def __bool__(self):
+    return False
+  __nonzero__ = __bool__
+
+MISSED = _Missed()
+
+def _found(value):
+  return value is not None and value is not MISSED
+
 """
 The largest N the answer is still yes for, found by halving rather than by counting.
+
+None where every answer was no, and MISSED where one could not be read at all: the second says
+nothing about the value, the first says it sits below the range.
 """
 def _bisect(channel, question, low, high):
   found = None
@@ -82,7 +98,7 @@ def _bisect(channel, question, low, high):
     middle = (low + high) // 2
     answer = _ask(channel, question(middle))
     if answer is None:
-      return None
+      return MISSED
     if answer:
       found = middle
       low = middle + 1
@@ -120,6 +136,8 @@ def output_length(channel, cmd, ceiling=None, payloads=None):
   while high <= sanity:
     answer = _ask(channel, question(high))
     if answer is None:
+      # Neither a yes nor a no - a miss the oracle itself could not settle, not an output of zero length.
+      settings.INCOMPLETE_OUTPUT = True
       return ""
     if not answer:
       break
@@ -129,6 +147,10 @@ def output_length(channel, cmd, ceiling=None, payloads=None):
     # Yes all the way up is an oracle agreeing with whatever it is asked, not a very long output.
     return ""
   length = _bisect(channel, question, low, high)
+  if length is MISSED:
+    # A question the oracle never answered part-way through, which is not an output of zero length.
+    settings.INCOMPLETE_OUTPUT = True
+    return ""
   if length and length > ceiling:
     settings.INCOMPLETE_OUTPUT = True
     warn_msg = "The output is " + str(length) + " characters long, and this run reads "
@@ -171,7 +193,7 @@ def _byte_at(channel, cmd, position, payloads=None, seen=None):
     narrowed = checks.narrowed_characters(seen)
     if narrowed:
       index = _bisect(channel, lambda position_in_set: question(narrowed[position_in_set]), 0, len(narrowed) - 1)
-      if index is not None and _ask(channel, exact(narrowed[index])):
+      if _found(index) and _ask(channel, exact(narrowed[index])):
         return narrowed[index]
   # A pool with nothing missing between its ends is its own range, so it is halved directly rather
   # than by index. The answer is still asked for by name: what the halving cannot tell apart is a
@@ -184,7 +206,7 @@ def _byte_at(channel, cmd, position, payloads=None, seen=None):
   # span they are spread over - and one more question confirms the character found is the output's
   # own, rather than the nearest one below it that the pool happens to hold.
   index = _bisect(channel, lambda position_in_pool: question(char_pool[position_in_pool]), 0, len(char_pool) - 1)
-  if index is not None:
+  if _found(index):
     candidate = char_pool[index]
     if _ask(channel, payloads.get_char(channel.separator, cmd, position, candidate, operator="-eq")):
       return candidate
@@ -209,12 +231,15 @@ every member, so the halving settles on nothing at all rather than on a characte
 def _confirmed(channel, cmd, position, payloads, candidate, pool_low, pool_high):
   exact = lambda value: payloads.get_char(channel.separator, cmd, position, value, operator="-eq")
   question = lambda value: payloads.get_char(channel.separator, cmd, position, value, operator="-le")
+  # A question that went unanswered says nothing about where the byte sits, so no range is widened for it.
+  if candidate is MISSED:
+    return None
   # Nothing the pool holds was answered yes to, so the byte sits below the first of them.
   if candidate is None:
     if pool_low <= settings.LOWEST_BYTE or not checks.char_pool_expands():
       return None
     below = _bisect(channel, question, settings.LOWEST_BYTE, pool_low - 1)
-    if below is not None and _ask(channel, exact(below)):
+    if _found(below) and _ask(channel, exact(below)):
       return below
     return None
   if _ask(channel, exact(candidate)):
@@ -224,7 +249,7 @@ def _confirmed(channel, cmd, position, payloads, candidate, pool_low, pool_high)
   if candidate != pool_high or not checks.char_pool_expands():
     return None
   above = _bisect(channel, question, pool_high + 1, settings.HIGHEST_BYTE)
-  if above is not None and _ask(channel, exact(above)):
+  if _found(above) and _ask(channel, exact(above)):
     return above
   return None
 
@@ -241,6 +266,11 @@ That is what the time-related techniques cannot do: for them, overlapping reques
 measurement.
 """
 def retrieve(channel, cmd, length=None, payloads=None):
+  # One command's own retrieval - the time-related techniques reset the same flag at the same point,
+  # for the same reason: a byte this command could not resolve says nothing about the next command,
+  # or about a file write or download the oracle carries out afterward, reading the flag unaware it
+  # is stale.
+  settings.INCOMPLETE_OUTPUT = False
   workers = settings.THREADS if (settings.THREADS > 1 and _THREADS_SUPPORTED) else 1
   # Said before either un-timed phase below spends a request - the length search included, not
   # only the byte-by-byte one - since only there is it still useful advice.

@@ -205,6 +205,34 @@ class ACookiesFileIsReadForTheSiteItIsSentTo(unittest.TestCase):
                          ("127.0.0.1", "FALSE", "/", "FALSE", "0", "kept", "y"))
     self.assertEqual("kept=y", cookies._parse_netscape_format(content))
 
+  def test_the_file_is_read_again_for_each_target_of_many(self):
+    # The target is handed in rather than read off the option, which belongs to whichever came first.
+    from src.core.requests import cookies
+    content = self._file(("127.0.0.1", "FALSE", "/", "FALSE", "0", "one", "1"),
+                         ("other.example", "FALSE", "/", "FALSE", "0", "two", "2"))
+    self.assertEqual("one=1", cookies._parse_netscape_format(content, "http://127.0.0.1:18091/x"))
+    self.assertEqual("two=2", cookies._parse_netscape_format(content, "http://other.example/x"))
+
+  def test_a_file_with_nothing_for_one_target_does_not_stop_the_run(self):
+    import os, tempfile
+    from src.core.requests import cookies
+    path = os.path.join(tempfile.mkdtemp(prefix="commix-cookies-"), "cookies.txt")
+    with open(path, "w") as handle:
+      handle.write(self._file(("other.example", "FALSE", "/", "FALSE", "0", "two", "2")))
+    state = menu.options.load_cookies
+    menu.options.load_cookies = path
+    try:
+      self.assertIsNone(cookies.load_cookies("http://127.0.0.1:18091/x", strict=False))
+      with self.assertRaises(SystemExit):
+        out = settings.print_data_to_stdout
+        settings.print_data_to_stdout = lambda *args: None
+        try:
+          cookies.load_cookies("http://127.0.0.1:18091/x")
+        finally:
+          settings.print_data_to_stdout = out
+    finally:
+      menu.options.load_cookies = state
+
   def test_a_name_the_run_gave_as_host_stands_for_the_site(self):
     from src.core.requests import cookies
     menu.options.host = "app.example:8080"
@@ -226,6 +254,21 @@ class AnArrayBodyStaysAnArray(unittest.TestCase):
     tag = settings.INJECT_TAG
     body = parameters.json_int_check('[{"cmd":"1' + tag + '","k":"v"},{"cmd":"2"}]', "1")
     self.assertEqual([{"cmd": "1" + tag, "k": "v"}, {"cmd": "2"}], json.loads(body))
+
+  def test_the_array_is_text_again_when_it_is_sent(self):
+    # 'json_data' handed back the parsed list where it could not rebuild it - which the request then
+    # could not encode, and every injection request of the run failed without a word.
+    import json
+    from src.core.controller import checks
+    tag = settings.INJECT_TAG
+    sent = checks.json_data('[{"cmd":"1' + tag + '"},{"cmd":"2"}]')
+    self.assertTrue(isinstance(sent, str))
+    self.assertEqual([{"cmd": "1" + tag}, {"cmd": "2"}], json.loads(sent))
+
+  def test_a_body_that_cannot_be_rebuilt_is_handed_back_as_it_came(self):
+    from src.core.controller import checks
+    for body in ('[{"a":', "not json at all"):
+      self.assertEqual(body, checks.json_data(body))
 
   def test_an_object_is_still_an_object(self):
     import json
@@ -403,6 +446,80 @@ class ARequestIsTimedForWhatTheTargetDid(unittest.TestCase):
     worker.start()
     worker.join()
     self.assertEqual(before, stability.excluded_seconds())
+
+class AGivenUpTimeoutIsNotReadAsADelay(unittest.TestCase):
+  """
+  '--ignore-timeouts' gives up on a request that never answered rather than treating the target as
+  unreachable - but the elapsed time of that give-up is the connection timeout's own length, not
+  anything the target did, and reading it as a delay could confirm a finding from a target that
+  never ran anything at all.
+  """
+  def setUp(self):
+    import copy
+    from src.core.requests import stability
+    self._everything = dict((name, copy.deepcopy(value)) for name, value in vars(settings).items()
+                            if name.isupper() and isinstance(value, (str, int, float, bool, type(None), list, dict, tuple)))
+    self._saved = (headers.do_check, requests.get_request_response, requests.second_order_response)
+    self._ignore_timeouts = menu.options.ignore_timeouts
+    headers.do_check = lambda request: None
+    requests.second_order_response = lambda payload: None
+    menu.options.ignore_timeouts = True
+    settings.TIME_RELATED_ATTACK = True
+    settings.TIME_RELATED_ATTACK_RETRIES = 2
+    stability.clear_gave_up_on_timeout()
+
+  def tearDown(self):
+    from src.core.requests import stability
+    headers.do_check, requests.get_request_response, requests.second_order_response = self._saved
+    menu.options.ignore_timeouts = self._ignore_timeouts
+    stability.clear_gave_up_on_timeout()
+    for name, value in self._everything.items():
+      setattr(settings, name, value)
+
+  def test_every_attempt_timing_out_reads_as_no_answer(self):
+    from src.core.requests import stability
+    def never_answers(request):
+      stability.note_gave_up_on_timeout()
+      return False
+    requests.get_request_response = never_answers
+    elapsed, _ = requests.init_injection("1", "GET", "http://t/x.php?a=1" + settings.INJECT_TAG)
+    self.assertIsNone(elapsed)
+
+  def test_a_real_answer_after_a_timeout_is_still_timed(self):
+    from src.core.requests import stability
+    calls = []
+    def answers_on_second_try(request):
+      calls.append(request)
+      if len(calls) == 1:
+        stability.note_gave_up_on_timeout()
+        return False
+      stability.clear_gave_up_on_timeout()
+      return ""
+    requests.get_request_response = answers_on_second_try
+    elapsed, _ = requests.init_injection("1", "GET", "http://t/x.php?a=1" + settings.INJECT_TAG)
+    self.assertIsNotNone(elapsed)
+    self.assertGreaterEqual(elapsed, 0.0)
+
+  def test_a_header_injection_given_up_on_is_not_read_as_a_delay(self):
+    from src.core.requests import stability
+    headers.send_request = lambda request: (stability.note_gave_up_on_timeout(), False)[1]
+    elapsed = requests.header_injection("http://t/x.php", "1", "GET", lambda request, payload: None)
+    self.assertIsNone(elapsed)
+
+  def test_time_related_shell_reads_no_answer_as_not_delayed(self):
+    from src.core.controller import checks
+    self.assertFalse(checks.time_related_shell(None, 5))
+
+  def test_a_give_up_is_not_folded_into_the_timing_model(self):
+    from src.core.controller import checks
+    state = (list(settings.PROBE_RESPONSE_TIMES), list(settings.RESPONSE_TIMES))
+    try:
+      checks.record_probe_response_time(None)
+      checks.record_baseline_response_time(None)
+      self.assertEqual(state[0], settings.PROBE_RESPONSE_TIMES)
+      self.assertEqual(state[1], settings.RESPONSE_TIMES)
+    finally:
+      settings.PROBE_RESPONSE_TIMES[:], settings.RESPONSE_TIMES[:] = state
 
 if __name__ == "__main__":
   unittest.main()
