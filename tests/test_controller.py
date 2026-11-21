@@ -174,6 +174,55 @@ class SkippingTheTimeBasedTechniqueRunsNothingInItsPlace(unittest.TestCase):
       (tb_handler.checks.response_times_unsteady, common.read_input, tb_handler.tb_injection_handler,
        settings.TIME_RELATED_ATTACK, settings.RESPONSE_DELAYS, settings.ADJUST_TIME_DELAY_DISABLED) = state
 
+class AnUnknownSystemIsAskedAboutWhereTheHeuristicWasSkipped(unittest.TestCase):
+  """
+  Skipping the heuristic left the question of which shell the target runs unasked and unanswered, and
+  the run tested the one it started with - so Windows was never reached, and nothing said so.
+  """
+  NAMES = ("OS_IDENTIFICATION_PENDING", "CHECK_BOTH_OS", "OS_CHECKS_NUM", "print_data_to_stdout")
+
+  def setUp(self):
+    from src.core.controller import checks
+    self.checks = checks
+    self._saved = dict((name, getattr(settings, name)) for name in self.NAMES)
+    self._define = checks.define_target_os
+    settings.print_data_to_stdout = lambda *args: None
+    self.asked = []
+    def answered_no():
+      self.asked.append(True)
+      settings.CHECK_BOTH_OS = True
+    checks.define_target_os = answered_no
+
+  def tearDown(self):
+    self.checks.define_target_os = self._define
+    for name, value in self._saved.items():
+      setattr(settings, name, value)
+
+  def test_a_no_adds_the_other_shell_to_the_walk(self):
+    settings.OS_IDENTIFICATION_PENDING, settings.CHECK_BOTH_OS, settings.OS_CHECKS_NUM = True, False, 2
+    targets = [settings.OS.UNIX]
+    controller.settle_unknown_os(targets)
+    self.assertEqual([settings.OS.UNIX, settings.OS.WINDOWS], targets)
+    self.assertFalse(settings.OS_IDENTIFICATION_PENDING)
+
+  def test_a_system_something_already_answered_for_is_not_asked_about(self):
+    settings.OS_IDENTIFICATION_PENDING = False
+    targets = [settings.OS.UNIX]
+    controller.settle_unknown_os(targets)
+    self.assertEqual([], self.asked)
+    self.assertEqual([settings.OS.UNIX], targets)
+
+  def test_it_is_asked_once(self):
+    settings.OS_IDENTIFICATION_PENDING, settings.CHECK_BOTH_OS, settings.OS_CHECKS_NUM = True, False, 2
+    controller.settle_unknown_os([settings.OS.UNIX])
+    controller.settle_unknown_os([settings.OS.UNIX])
+    self.assertEqual(1, len(self.asked))
+
+  def test_the_skipped_heuristic_reaches_it(self):
+    import inspect
+    source = inspect.getsource(controller.do_injection if hasattr(controller, "do_injection") else controller)
+    self.assertIn("settle_unknown_os(os_targets)", inspect.getsource(controller))
+
 if __name__ == "__main__":
   unittest.main()
 

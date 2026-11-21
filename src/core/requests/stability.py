@@ -13,7 +13,9 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import time
 import threading
+import contextlib
 from src.utils import settings
 
 """
@@ -82,6 +84,35 @@ thread asking whether its own request was retried would be answered with everyon
 under '--threads' always "yes", and every measurement taken the maximum number of times.
 """
 _thread_state = threading.local()
+
+"""
+Time this thread spent on what the run does around a request rather than to the target: the pacing it
+keeps between requests, and the side requests it makes first (an anti-CSRF token, a keep-alive visit).
+
+A request's own time is what a delay is read from, so it has to be told apart from these - and from
+the very same sleep on every request, which would otherwise make every undelayed probe look like the
+payload had asked for it. Kept per thread, as the tally above is, and counted at the outermost span
+only: a side request paced in its turn is one stretch of time, not two.
+"""
+@contextlib.contextmanager
+def excluded_span():
+  depth = getattr(_thread_state, "excluded_depth", 0)
+  _thread_state.excluded_depth = depth + 1
+  began = time.time()
+  try:
+    yield
+  finally:
+    _thread_state.excluded_depth = depth
+    if depth == 0:
+      _thread_state.excluded = getattr(_thread_state, "excluded", 0.0) + (time.time() - began)
+
+# Everything excluded_span() has counted on this thread so far.
+def excluded_seconds():
+  return getattr(_thread_state, "excluded", 0.0)
+
+# How long a request took on its own: the stretch between two readings of the clock, less what was spent around it.
+def own_time(start, excluded_before):
+  return max(0.0, (time.time() - start) - (excluded_seconds() - excluded_before))
 
 # Count one request against this thread's own tally.
 def note_request_sent():

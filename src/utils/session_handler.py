@@ -251,6 +251,37 @@ def flush():
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 """
+Take back the records of findings that were written and then discarded as false positives, so that a
+later run does not resume what this one rejected.
+
+Only those rows: an address answering to several parameters or techniques keeps the ones that stood.
+The stand-in recorded for a parameter goes with its last finding, as it is recorded with its first.
+"""
+def discard_injection_points(url, http_request_method, points):
+  if menu.options.ignore_session or not os.path.isfile(settings.SESSION_FILE):
+    return
+  emptied = []
+  try:
+    with _session_connection() as conn:
+      table = table_name(url) + "_ip"
+      if not table_exists(conn, table):
+        return
+      clause, url_params = url_match(url)
+      for point in points:
+        technique, vuln_parameter = point[0], point[2] or ""
+        conn.execute("DELETE FROM \"" + table + "\" WHERE " + clause + " AND technique = ? AND vuln_parameter = ? AND http_request_method = ?;",
+                     url_params + (str(technique), str(vuln_parameter), str(http_request_method)))
+        left = conn.execute("SELECT 1 FROM \"" + table + "\" WHERE " + clause + " AND vuln_parameter = ? AND http_request_method = ? LIMIT 1;",
+                            url_params + (str(vuln_parameter), str(http_request_method))).fetchone()
+        if left is None and vuln_parameter not in emptied:
+          emptied.append(vuln_parameter)
+      conn.commit()
+  except (sqlite3.OperationalError, sqlite3.DatabaseError):
+    return
+  for vuln_parameter in emptied:
+    clear_testable_value_status(url, vuln_parameter, http_request_method)
+
+"""
 Remove every injection point record but the one a resumed run would use, for each address,
 technique and place a point was found at.
 

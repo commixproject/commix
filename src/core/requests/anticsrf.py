@@ -17,6 +17,7 @@ import re
 import threading
 from src.thirdparty.six.moves import urllib as _urllib
 from src.core.parse import cmdline as menu
+from src.core.requests import stability
 from src.utils import settings
 from src.core.controller import checks
 
@@ -167,6 +168,11 @@ The value travels wherever the parameter does: the query string, the body, a hea
 the cookie - which is also where it is read from, for a target that hands it back that way.
 """
 def apply_token(request):
+  # The fetch of the token, and the wait for the lock around it, are not the target's time to answer the request they are for.
+  with stability.excluded_span():
+    return _apply_token(request)
+
+def _apply_token(request):
   if not settings.CSRF_TOKEN or settings.in_side_request("csrf_token") or not _carries_token(request):
     return
   settings.set_side_request("csrf_token", True)

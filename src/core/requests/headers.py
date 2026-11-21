@@ -308,6 +308,10 @@ What holds for a request whatever it was sent for: the pacing that was asked for
 part of, and the proxy rotation and safe visit that go by that count.
 """
 def apply_request_policy():
+  with stability.excluded_span():
+    _apply_request_policy()
+
+def _apply_request_policy():
   stability.set_last_http_error(None)
   # What a redirect said is true of the request it answered and of no other. Set by the handler and
   # never cleared, it outlived its own request: the code named in the question put to the user, and

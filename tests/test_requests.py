@@ -326,6 +326,84 @@ class AConnectionThatFailedIsNotAWrongPassword(unittest.TestCase):
   def test_a_target_never_reached_leaves_the_pair_unproved(self):
     self.assertFalse(self._answers(None, None, None))
 
+class ARequestIsTimedForWhatTheTargetDid(unittest.TestCase):
+  """
+  The plain baseline is taken outside the pacing and the token fetch, and a probe was taken inside
+  them: with a delay of any size every undelayed probe was later than the baseline's threshold, and
+  was read as the payload having asked for it.
+  """
+  def setUp(self):
+    import copy
+    self._everything = dict((name, copy.deepcopy(value)) for name, value in vars(settings).items()
+                            if name.isupper() and isinstance(value, (str, int, float, bool, type(None), list, dict, tuple)))
+    self._saved = (headers.do_check, requests.get_request_response, requests.second_order_response, headers.send_request)
+    requests.second_order_response = lambda payload: None
+    settings.TIME_RELATED_ATTACK = True
+    settings.DELAY, settings.ADAPTIVE_DELAY = 0.3, 0
+    self._jitter = menu.options.jitter
+    menu.options.jitter = None
+
+  def tearDown(self):
+    headers.do_check, requests.get_request_response, requests.second_order_response, headers.send_request = self._saved
+    menu.options.jitter = self._jitter
+    for name, value in self._everything.items():
+      setattr(settings, name, value)
+
+  def test_the_pacing_a_run_keeps_is_not_the_targets_time(self):
+    headers.do_check = lambda request: None
+    requests.get_request_response = lambda request: (headers.apply_request_policy(), "")[1]
+    elapsed, _ = requests.init_injection("1", "GET", "http://t/x.php?a=1" + settings.INJECT_TAG)
+    self.assertLess(elapsed, 0.15)
+
+  def test_a_token_fetched_for_the_request_is_not_the_targets_time(self):
+    import time
+    from src.core.requests import stability
+    def fetch(request):
+      with stability.excluded_span():
+        time.sleep(0.3)
+    headers.do_check = fetch
+    requests.get_request_response = lambda request: ""
+    elapsed, _ = requests.init_injection("1", "GET", "http://t/x.php?a=1" + settings.INJECT_TAG)
+    self.assertLess(elapsed, 0.15)
+
+  def test_what_the_target_took_is_still_counted(self):
+    import time
+    headers.do_check = lambda request: None
+    requests.get_request_response = lambda request: (headers.apply_request_policy(), time.sleep(0.3), "")[2]
+    elapsed, _ = requests.init_injection("1", "GET", "http://t/x.php?a=1" + settings.INJECT_TAG)
+    self.assertGreaterEqual(elapsed, 0.28)
+    self.assertLess(elapsed, 0.5)
+
+  def test_a_header_injection_is_timed_the_same_way(self):
+    headers.send_request = lambda request: (headers.apply_request_policy(), "")[1]
+    elapsed = requests.header_injection("http://t/x.php", "1", "GET", lambda request, payload: None)
+    self.assertLess(elapsed, 0.15)
+
+  def test_a_span_inside_a_span_is_one_stretch_of_time(self):
+    import time
+    from src.core.requests import stability
+    before = stability.excluded_seconds()
+    with stability.excluded_span():
+      with stability.excluded_span():
+        time.sleep(0.1)
+    spent = stability.excluded_seconds() - before
+    self.assertGreaterEqual(spent, 0.09)
+    self.assertLess(spent, 0.17)
+
+  def test_the_time_is_kept_per_thread(self):
+    import time
+    import threading
+    from src.core.requests import stability
+    seen = []
+    def work():
+      with stability.excluded_span():
+        time.sleep(0.1)
+    worker = threading.Thread(target=work)
+    before = stability.excluded_seconds()
+    worker.start()
+    worker.join()
+    self.assertEqual(before, stability.excluded_seconds())
+
 if __name__ == "__main__":
   unittest.main()
 

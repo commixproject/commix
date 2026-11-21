@@ -509,7 +509,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "360"
+REVISION = "361"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -2815,6 +2815,12 @@ UNAUTHORIZED = False
 # Multiple OS checks
 CHECK_BOTH_OS = False
 OS_CHECKS_NUM = 2
+
+# The server banner named an operating system - a guess about what answers HTTP, which orders the
+# work but proves nothing about the shell a command runs in: that takes a payload that executed,
+# '--os', or the user's own answer.
+OS_HINTED = False
+SHELLSHOCK_WINDOWS_WARNED = False
 
 # The banner did not name an operating system, and no heuristic has answered yet either. While this
 # stands, the question is still open - it is put to the user only once nothing else has settled it.

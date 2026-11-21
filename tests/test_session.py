@@ -357,5 +357,48 @@ class TheSessionFileIsTheOwnersAlone(SessionFixture):
     session_handler.store_cmd(self.URL, "id", "uid=33(www-data)", "addr")
     self.assertEqual(0o600, stat.S_IMODE(os.stat(settings.SESSION_FILE).st_mode))
 
+class ADiscardedFindingIsNotResumed(SessionFixture):
+  """
+  A finding is written to the session the moment it is found, and the final re-ask can take it back
+  afterwards - after which the next run resumed what this one had rejected.
+  """
+  def _store(self, technique, parameter="addr", method="GET"):
+    session_handler.import_injection_points(
+      self.URL, technique, settings.INJECTION_TYPE.RESULTS_BASED_CI,
+      "", ";", True, parameter, "", "", "TAG", False, "127.0.0.1;echo TAG;", method, 0, 0, 0, 0, "1")
+
+  def _techniques(self):
+    table = session_handler.table_name(self.URL) + "_ip"
+    with sqlite3.connect(settings.SESSION_FILE) as conn:
+      return sorted(row[0] for row in conn.execute("SELECT technique FROM \"" + table + "\";"))
+
+  def _point(self, technique, parameter="addr"):
+    return (technique, "type", parameter, "payload", "GET", 1, "title")
+
+  def test_only_the_discarded_row_goes(self):
+    self._store(settings.INJECTION_TECHNIQUE.TIME_BASED)
+    self._store(settings.INJECTION_TECHNIQUE.RESULTS_BASED)
+    session_handler.discard_injection_points(self.URL, "GET", [self._point(settings.INJECTION_TECHNIQUE.TIME_BASED)])
+    self.assertEqual([settings.INJECTION_TECHNIQUE.RESULTS_BASED], self._techniques())
+
+  def test_another_parameter_and_another_method_are_left_alone(self):
+    self._store(settings.INJECTION_TECHNIQUE.TIME_BASED, "addr")
+    self._store(settings.INJECTION_TECHNIQUE.TIME_BASED, "other")
+    self._store(settings.INJECTION_TECHNIQUE.TIME_BASED, "addr", "POST")
+    session_handler.discard_injection_points(self.URL, "GET", [self._point(settings.INJECTION_TECHNIQUE.TIME_BASED, "addr")])
+    self.assertEqual(2, len(self._techniques()))
+
+  def test_the_stand_in_goes_with_the_last_finding_of_its_parameter(self):
+    settings.TESTABLE_VALUE_OPTIMIZED, settings.TESTABLE_VALUE = True, "ABC"
+    self._store(settings.INJECTION_TECHNIQUE.TIME_BASED)
+    self.assertEqual("ABC", self.stored_placeholder())
+    session_handler.discard_injection_points(self.URL, "GET", [self._point(settings.INJECTION_TECHNIQUE.TIME_BASED)])
+    self.assertIsNone(self.stored_placeholder())
+
+  def test_nothing_is_created_for_a_run_that_keeps_no_session(self):
+    menu.options.ignore_session = True
+    session_handler.discard_injection_points(self.URL, "GET", [self._point(settings.INJECTION_TECHNIQUE.TIME_BASED)])
+    self.assertFalse(os.path.isfile(settings.SESSION_FILE))
+
 if __name__ == "__main__":
   unittest.main()

@@ -283,7 +283,8 @@ def quick_response_time_sample(url, http_request_method):
       if not checks.ignored_http_error_code(getattr(err, "code", None)):
         raise
       response = err
-    response.read(1)
+    # The whole answer, as a probe's is read: a page that takes long to arrive is part of what a request costs.
+    response.read()
     response.close()
     return time.time() - start
   except Exception:
@@ -312,7 +313,8 @@ def _measure_response_time_with_auth_handling(url, http_request_method):
   start = time.time()
   try:
     response = headers.send_raw(request, policy=False)
-    response.read(1)
+    # The whole answer, as a probe's is read: a page that takes long to arrive is part of what a request costs.
+    response.read()
     response.close()
   except _http_client.InvalidURL as err_msg:
     settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
@@ -918,6 +920,7 @@ def init_injection(payload, http_request_method, url):
     start = 0
     end = 0
     start = time.time()
+    skipped = stability.excluded_seconds()
 
   """
   Encoded as the last thing before it is spliced into a carrier that is URL-encoded.
@@ -981,9 +984,10 @@ def init_injection(payload, http_request_method, url):
     while response is False and not stability.answered_with_http_error() and failed_attempts < settings.TIME_RELATED_ATTACK_RETRIES:
       failed_attempts += 1
       start = time.time()
+      skipped = stability.excluded_seconds()
       response = get_request_response(request)
-    end = time.time()
-    response = end - start
+    # The request's own time: what the run spent pacing and fetching tokens around it is not the target's.
+    response = stability.own_time(start, skipped)
 
   return response, vuln_parameter
 
@@ -1011,6 +1015,7 @@ def header_injection(url, payload, http_request_method, set_header):
     start = 0
     end = 0
     start = time.time()
+    skipped = stability.excluded_seconds()
 
   try:
     response = inject_header(url, payload, http_request_method)
@@ -1025,12 +1030,12 @@ def header_injection(url, payload, http_request_method, set_header):
     while response is False and not stability.answered_with_http_error() and failed_attempts < settings.TIME_RELATED_ATTACK_RETRIES:
       failed_attempts += 1
       start = time.time()
+      skipped = stability.excluded_seconds()
       try:
         response = inject_header(url, payload, http_request_method)
       except Exception as err_msg:
         response = request_failed(err_msg)
-    end  = time.time()
-    exec_time = end - start
+    exec_time = stability.own_time(start, skipped)
     return exec_time
   else:
     return response
@@ -1180,12 +1185,13 @@ def check_os(server_header):
     if match:
       # What the banner spells out, rather than the family it puts the target in.
       named = match.group(0)
-      checks.set_target_os(named)
+      checks.hint_target_os(named)
 
-      if settings.TARGET_OS == settings.OS.WINDOWS and menu.options.shellshock:
-        err_msg = "The 'shellshock' module is not available for Windows targets."
-        settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-        raise SystemExit(settings.EXIT_FAILURE)
+      # Said, not enforced: a banner is a claim about what answers HTTP, and stopping the run on it would be taking it for the shell.
+      if settings.TARGET_OS == settings.OS.WINDOWS and menu.options.shellshock and not settings.SHELLSHOCK_WINDOWS_WARNED:
+        settings.SHELLSHOCK_WINDOWS_WARNED = True
+        warn_msg = "The server banner names Windows, for which the 'shellshock' module is not available."
+        settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       break
 
   if named and settings.VERBOSITY_LEVEL != 0:

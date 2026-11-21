@@ -811,7 +811,7 @@ def main(filename, url, http_request_method):
           # Procedure for target server's operating system identification.
           if not settings.IDENTIFIED_TARGET_OS:
             requests.os_identification(response)
-          if settings.IDENTIFIED_TARGET_OS:
+          if settings.IDENTIFIED_TARGET_OS or settings.OS_HINTED:
             # Store the Server's root dir
             settings.DEFAULT_WEB_ROOT = settings.WEB_ROOT
             if menu.options.is_admin or menu.options.is_root and not menu.options.current_user:

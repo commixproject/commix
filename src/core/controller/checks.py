@@ -336,6 +336,9 @@ def final_false_positive_check(url, http_request_method, check_parameter, timese
       settings.PENDING_OS_SHELL_ENTRY = pending[2]
     if not settings.CONFIRMED_INJECTION_POINTS:
       settings.INJECTION_CHECKER = False
+    # And out of the session, where each was written the moment it was found - or the next run resumes it.
+    from src.utils import session_handler
+    session_handler.discard_injection_points(url, http_request_method, new_points)
 
 """
 Check for quoted values
@@ -2823,6 +2826,7 @@ def define_target_os():
       got_os = common.read_input(message, default="N", check_batch=True)
       if got_os.lower() in settings.CHOICE_OS :
         if got_os.lower() == "u":
+          settings.TARGET_OS = settings.OS.UNIX
           return
         elif got_os.lower() == "w":
           settings.TARGET_OS = settings.OS.WINDOWS
@@ -2965,6 +2969,7 @@ def set_target_os(identified):
   identified = settings.OS.WINDOWS if re.search(r"microsoft|win", identified, re.IGNORECASE) else settings.OS.UNIX
   previous = settings.TARGET_OS
   settings.TARGET_OS = identified
+  settings.OS_HINTED = False
   settings.IDENTIFIED_TARGET_OS = True
   # Kept for the next run against this target, which then has nothing left to work out here.
   if not menu.options.ignore_session and settings.TARGET_NETLOC:
@@ -2975,6 +2980,26 @@ def set_target_os(identified):
     if user_os != identified and identified_os():
       settings.TARGET_OS = user_os
   # A document root guessed before the operating system was settled is not one now.
+  if settings.TARGET_OS != previous and not settings.USER_APPLIED_WEB_ROOT and not settings.CUSTOM_WEB_ROOT:
+    if not web_root_matches_os(settings.WEB_ROOT):
+      settings.WEB_ROOT = settings.DEFAULT_WEB_ROOT = ""
+
+"""
+What a server banner suggests about the operating system, kept as the order to try things in and
+nothing more.
+
+The banner names whatever answers HTTP - a proxy, a CDN, a WAF - and the command runs behind it, so
+it is neither relied on to leave a shell out nor remembered for the next run. 'IDENTIFIED_TARGET_OS'
+stays unset, which is what keeps the other shell in play until something has run.
+"""
+def hint_target_os(named):
+  if not named or menu.options.os:
+    return
+  hinted = settings.OS.WINDOWS if re.search(r"microsoft|win", named, re.IGNORECASE) else settings.OS.UNIX
+  previous = settings.TARGET_OS
+  settings.TARGET_OS = hinted
+  settings.OS_HINTED = True
+  # A document root guessed before the operating system was suggested is not one now.
   if settings.TARGET_OS != previous and not settings.USER_APPLIED_WEB_ROOT and not settings.CUSTOM_WEB_ROOT:
     if not web_root_matches_os(settings.WEB_ROOT):
       settings.WEB_ROOT = settings.DEFAULT_WEB_ROOT = ""

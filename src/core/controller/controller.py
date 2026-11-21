@@ -330,6 +330,31 @@ def probe_skip_testable_value_early(url, http_request_method, check_parameter, p
     settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
   return url
 
+"""
+Put the question of which shell the target runs, where nothing - the server banner, '--os', a payload
+that executed, a stored session - has answered it. "No" is a fair answer and asks for both shells, and
+the list of them the caller walks was drawn before it was said, so it is extended here.
+
+Asked after the heuristic where there is one, and in its place where '--skip-heuristics' removed it:
+skipping a test does not turn an unknown system into a Unix one.
+"""
+def settle_unknown_os(os_targets):
+  if not settings.OS_IDENTIFICATION_PENDING:
+    return
+  settings.OS_IDENTIFICATION_PENDING = False
+  warn_msg = "Unable to fingerprint the target operating system."
+  if settings.OS_HINTED:
+    warn_msg += " The server banner suggests '" + checks.target_os_label() + "', which says what answers HTTP and not which shell the command runs in."
+  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  checks.define_target_os()
+  if settings.CHECK_BOTH_OS:
+    for candidate in [settings.OS.UNIX, settings.OS.WINDOWS][:settings.OS_CHECKS_NUM]:
+      if candidate not in os_targets:
+        os_targets.append(candidate)
+  else:
+    # An answer of "Unix-like" or "Windows" is the one shell to test, whichever the banner said.
+    os_targets[:] = [settings.TARGET_OS]
+
 def command_injection_heuristic_basic(url, http_request_method, check_parameter, place):
   check_parameter = check_parameter.lstrip().rstrip()
   checks.perform_payload_modification(payload="")
@@ -349,9 +374,12 @@ def command_injection_heuristic_basic(url, http_request_method, check_parameter,
   '--os' did - the other shape cannot execute, and sending it only doubles the requests.
   """
   shaped = list(zip(basic_payloads, ("Unix-like", "Windows")))
+  wanted = "Windows" if settings.TARGET_OS == settings.OS.WINDOWS else "Unix-like"
   if settings.IDENTIFIED_TARGET_OS or menu.options.os:
-    wanted = "Windows" if settings.TARGET_OS == settings.OS.WINDOWS else "Unix-like"
     shaped = [pair for pair in shaped if pair[1] == wanted] or shaped
+  elif settings.OS_HINTED:
+    # Only suggested by the banner, so the shape it names goes first and the other still follows - one more request where it was wrong, rather than a shell never tried.
+    shaped.sort(key=lambda pair: pair[1] != wanted)
 
   settings.RESULTS_BASED_STATE = True
   try:
@@ -1068,6 +1096,9 @@ def injection_process(url, check_parameter, http_request_method, filename, times
   # module path as an operating system.
   if settings.CHECK_BOTH_OS:
     os_targets = [settings.OS.UNIX, settings.OS.WINDOWS][:settings.OS_CHECKS_NUM]
+    # The one the banner suggested first, where it suggested one.
+    if settings.OS_HINTED and settings.TARGET_OS in os_targets:
+      os_targets.sort(key=lambda name: name != settings.TARGET_OS)
   else:
     os_targets = [settings.TARGET_OS or settings.OS.UNIX]
 
@@ -1173,6 +1204,9 @@ def injection_process(url, check_parameter, http_request_method, filename, times
       if settings.VERBOSITY_LEVEL != 0:
         debug_msg = "Skipping heuristic (basic) test on the " + settings.CHECKING_PARAMETER + "."
         settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+      # Nothing was asked of the target, so nothing has said which shell it is - which is still a question, not an answer of "Unix".
+      if not settings.LOAD_SESSION:
+        settle_unknown_os(os_targets)
     else:
       if not settings.LOAD_SESSION:
         checks.recognise_payload(payload=settings.TESTABLE_VALUE)
@@ -1204,16 +1238,7 @@ def injection_process(url, check_parameter, http_request_method, filename, times
             break
 
         # Asked last and only where nothing else could answer, "no" still being a fair answer.
-        if settings.OS_IDENTIFICATION_PENDING:
-          settings.OS_IDENTIFICATION_PENDING = False
-          warn_msg = "Unable to fingerprint the target operating system."
-          settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-          checks.define_target_os()
-          # "No" asks for both shells, and the list this loop walks was drawn before it was said.
-          if settings.CHECK_BOTH_OS:
-            for candidate in [settings.OS.UNIX, settings.OS.WINDOWS][:settings.OS_CHECKS_NUM]:
-              if candidate not in os_targets:
-                os_targets.append(candidate)
+        settle_unknown_os(os_targets)
 
         # The probe above is written with the same '$(...)' every payload after it is, so a filter
         # on that one character refuses it before the sink is reached - and the parameter is put

@@ -1177,6 +1177,99 @@ class ARemainingLowFixesInTheChecks(unittest.TestCase):
       (settings.LAGGING_CHECKED, settings.LAGGING_DETECTED, settings.JITTER_SEEN,
        settings.ADJUST_TIME_DELAY_DISABLED, settings.print_data_to_stdout) = saved[1:]
 
+class ABannerSuggestsButDoesNotProveTheShell(unittest.TestCase):
+  """
+  The server banner names whatever answers HTTP - a proxy, a CDN, a WAF - not the shell a command
+  runs in. Treated as proof, it could rule out the real shell before anything had run.
+  """
+  NAMES = ("TARGET_OS", "OS_HINTED", "IDENTIFIED_TARGET_OS", "USER_APPLIED_WEB_ROOT", "CUSTOM_WEB_ROOT", "WEB_ROOT", "DEFAULT_WEB_ROOT")
+
+  def setUp(self):
+    self._saved = dict((name, getattr(settings, name)) for name in self.NAMES)
+    self._opt = menu.options.os
+    menu.options.os = None
+    settings.TARGET_OS, settings.OS_HINTED, settings.IDENTIFIED_TARGET_OS = settings.OS.UNIX, False, False
+    settings.USER_APPLIED_WEB_ROOT = settings.CUSTOM_WEB_ROOT = False
+
+  def tearDown(self):
+    for name, value in self._saved.items():
+      setattr(settings, name, value)
+    menu.options.os = self._opt
+
+  def test_a_hint_orders_the_work_without_identifying_anything(self):
+    checks.hint_target_os("Microsoft-IIS/10.0")
+    self.assertEqual(settings.OS.WINDOWS, settings.TARGET_OS)
+    self.assertTrue(settings.OS_HINTED)
+    self.assertFalse(settings.IDENTIFIED_TARGET_OS)
+
+  def test_a_payload_that_ran_outranks_the_hint(self):
+    checks.hint_target_os("Microsoft-IIS/10.0")
+    checks.set_target_os("Unix-like shell")
+    self.assertEqual(settings.OS.UNIX, settings.TARGET_OS)
+    self.assertTrue(settings.IDENTIFIED_TARGET_OS)
+    self.assertFalse(settings.OS_HINTED)
+
+  def test_the_user_s_own_os_is_not_overruled_by_a_hint(self):
+    menu.options.os = "unix-like"
+    checks.hint_target_os("Microsoft-IIS/10.0")
+    self.assertEqual(settings.OS.UNIX, settings.TARGET_OS)
+    self.assertFalse(settings.OS_HINTED)
+
+class TheHeuristicTriesTheHintedShapeFirstAndTheOtherStill(unittest.TestCase):
+  def test_the_hinted_shape_goes_first_but_the_other_is_kept(self):
+    from src.core.controller import controller
+    state = (settings.TARGET_OS, settings.OS_HINTED, settings.IDENTIFIED_TARGET_OS, menu.options.os)
+    try:
+      menu.options.os = None
+      settings.TARGET_OS, settings.OS_HINTED, settings.IDENTIFIED_TARGET_OS = settings.OS.WINDOWS, True, False
+      shaped = list(zip(("unix-payload", "windows-payload"), ("Unix-like", "Windows")))
+      wanted = "Windows" if settings.TARGET_OS == settings.OS.WINDOWS else "Unix-like"
+      if settings.IDENTIFIED_TARGET_OS or menu.options.os:
+        shaped = [pair for pair in shaped if pair[1] == wanted] or shaped
+      elif settings.OS_HINTED:
+        shaped.sort(key=lambda pair: pair[1] != wanted)
+      self.assertEqual(["windows-payload", "unix-payload"], [p for p, _ in shaped])
+    finally:
+      settings.TARGET_OS, settings.OS_HINTED, settings.IDENTIFIED_TARGET_OS, menu.options.os = state
+
+class TheOSSweepPutsTheHintedShellFirst(unittest.TestCase):
+  def test_the_candidate_list_starts_with_the_hinted_shell(self):
+    os_targets = [settings.OS.UNIX, settings.OS.WINDOWS]
+    hinted = settings.OS.WINDOWS
+    if hinted in os_targets:
+      os_targets.sort(key=lambda name: name != hinted)
+    self.assertEqual([settings.OS.WINDOWS, settings.OS.UNIX], os_targets)
+
+class AnUnknownOSFollowsTheAnswerNotTheBanner(unittest.TestCase):
+  """
+  A 'No' leaves both shells to test when nothing has settled the question; 'Unix-like' or 'Windows'
+  settles it outright, whatever the banner suggested - the same answer either way the banner pointed.
+  """
+  NAMES = ("OS_IDENTIFICATION_PENDING", "CHECK_BOTH_OS", "OS_CHECKS_NUM", "OS_HINTED", "TARGET_OS", "print_data_to_stdout")
+
+  def setUp(self):
+    from src.core.controller import controller
+    self.controller = controller
+    self._saved = dict((name, getattr(settings, name)) for name in self.NAMES)
+    settings.print_data_to_stdout = lambda *args: None
+
+  def tearDown(self):
+    for name, value in self._saved.items():
+      setattr(settings, name, value)
+
+  def test_unix_like_settles_it_to_one_shell(self):
+    from src.core.controller import checks as checks_module
+    original = checks_module.define_target_os
+    checks_module.define_target_os = lambda: setattr(settings, "TARGET_OS", settings.OS.UNIX)
+    try:
+      settings.OS_IDENTIFICATION_PENDING, settings.CHECK_BOTH_OS, settings.OS_HINTED = True, False, True
+      settings.TARGET_OS = settings.OS.WINDOWS
+      targets = [settings.OS.WINDOWS]
+      self.controller.settle_unknown_os(targets)
+      self.assertEqual([settings.OS.UNIX], targets)
+    finally:
+      checks_module.define_target_os = original
+
 if __name__ == "__main__":
   unittest.main()
 
