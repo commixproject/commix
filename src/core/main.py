@@ -38,7 +38,6 @@ from src.core.requests import proxy
 from src.core.requests import cookies
 from src.core.requests import headers
 from src.core.requests import requests
-from src.core.requests import stability
 from src.core.requests import mining
 from src.core.requests import redirection
 from src.core.requests import hooks
@@ -362,12 +361,6 @@ def url_response(url, http_request_method):
   # Found unusable rather than merely unanswered, so the phases behind this are not spent on it.
   if settings.TARGET_UNUSABLE:
     return False, url
-  # What the target answered the connection with, kept for the run to settle once its session is open.
-  settings.UNAUTHORIZED_RESPONSE = None
-  unauthorized = stability.last_http_error()
-  if unauthorized is not None and not settings.CRAWLING and not menu.options.auth_cred and not settings.PERFORM_CRACKING and \
-     str(getattr(unauthorized, "code", "")) == settings.UNAUTHORIZED_ERROR and int(settings.UNAUTHORIZED_ERROR) not in settings.IGNORE_CODE:
-    settings.UNAUTHORIZED_RESPONSE = unauthorized
   if response is not False and response is not None:
     _conn_end = time.time()
     settings.INIT_CONNECTION_TIME = _conn_end - _conn_start
@@ -696,8 +689,7 @@ def main(filename, url, http_request_method):
       settings.USER_APPLIED_TECHNIQUE = True
     else:
       settings.USER_APPLIED_TECHNIQUE = None
-      # What a stored session names narrows the run only where the session is in use - '--ignore-session' leaves it out of the run.
-      if not menu.options.ignore_session and len(session_handler.applied_techniques(url, http_request_method)) != 0:
+      if len(session_handler.applied_techniques(url, http_request_method)) != 0:
         settings.SESSION_APPLIED_TECHNIQUES = session_handler.applied_techniques(url, http_request_method)
         menu.options.tech = settings.SESSION_APPLIED_TECHNIQUES
       else:
@@ -854,14 +846,6 @@ def main(filename, url, http_request_method):
       err_msg = "You must specify the target URL."
       settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       raise SystemExit(settings.EXIT_FAILURE)
-
-    # A target that wants credentials is settled with them ahead of every technique, and of every
-    # request that reads its page: asked for at the first response time instead, a run that tests no
-    # time-based technique never asked at all, and the techniques before it were spent on a page that
-    # was only ever the login challenge. Here, with the session open, so what an earlier run found is read.
-    if settings.UNAUTHORIZED_RESPONSE is not None:
-      unauthorized, settings.UNAUTHORIZED_RESPONSE = settings.UNAUTHORIZED_RESPONSE, None
-      requests.resolve_unauthorized(url, http_request_method, unauthorized)
 
     # Said before anything is tested, so what the request already carries is known going in.
     if menu.options.jwt:

@@ -509,7 +509,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "362"
+REVISION = "363"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -2409,9 +2409,6 @@ IGNORE_TAMPER_TRANSFORMATION = [
 # HTTP Errors
 BAD_REQUEST = "400"
 UNAUTHORIZED_ERROR = "401"
-
-# The 401 a target answered the connection with, until the run has settled it.
-UNAUTHORIZED_RESPONSE = None
 FORBIDDEN_ERROR = "403"
 NOT_FOUND_ERROR = "404"
 NOT_ALLOWED = "405"

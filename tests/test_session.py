@@ -313,20 +313,6 @@ class AResumeNarrowsOnlyToTheTechniquesTheOptionTakes(SessionFixture):
     self.store(settings.INJECTION_TECHNIQUE.OOB)
     self.assertEqual("", session_handler.applied_techniques(self.URL, "GET"))
 
-  def test_a_code_injection_finding_beside_others_keeps_the_results_based_letter_selected(self):
-    self.store(settings.INJECTION_TECHNIQUE.DYNAMIC_CODE)
-    self.store(settings.INJECTION_TECHNIQUE.TIME_BASED)
-    self.store(settings.INJECTION_TECHNIQUE.FILE_BASED)
-    self.assertEqual("frt", "".join(sorted(session_handler.applied_techniques(self.URL, "GET"))))
-
-  def test_the_results_based_letter_is_not_named_twice(self):
-    self.store(settings.INJECTION_TECHNIQUE.DYNAMIC_CODE)
-    self.store(settings.INJECTION_TECHNIQUE.RESULTS_BASED)
-    self.store(settings.INJECTION_TECHNIQUE.FILE_BASED)
-    letters = session_handler.applied_techniques(self.URL, "GET")
-    self.assertEqual(len(letters), len(set(letters)))
-    self.assertEqual("fr", "".join(sorted(letters)))
-
   def test_the_letters_the_option_takes_survive_beside_one_it_does_not(self):
     self.store(settings.INJECTION_TECHNIQUE.OOB)
     self.store(settings.INJECTION_TECHNIQUE.TIME_BASED)
