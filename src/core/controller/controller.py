@@ -1316,6 +1316,7 @@ def injection_process(url, check_parameter, http_request_method, filename, times
         return filebased_command_injection_technique(url, timesec, filename, http_request_method, url_time_response)
 
       end_detection = False
+      held_findings = []
       techniques = [
         lambda: results_based_command_injection_technique(url, timesec, filename, http_request_method),
         lambda: dynamic_code_evaluation_technique(url, timesec, filename, http_request_method),
@@ -1374,8 +1375,15 @@ def injection_process(url, check_parameter, http_request_method, filename, times
       def _run_and_verify():
         mark = len(settings.CONFIRMED_INJECTION_POINTS)
         pending = (len(settings.PENDING_POST_DETECTION_ACTIONS), len(settings.PROOF_EXECUTORS), settings.PENDING_OS_SHELL_ENTRY)
+        identified_before = settings.IDENTIFIED_COMMAND_INJECTION
         ended = _run_techniques()
         checks.final_false_positive_check(url, http_request_method, check_parameter, timesec, mark, pending)
+        # A finding the output cannot be read back through does not end the passes still ahead.
+        if not ended:
+          held = checks.set_aside_unreadable_findings(mark, pending, identified_before)
+          # The first one stands for the parameter; a later pass that finds the same again only repeats it.
+          if held and not held_findings:
+            held_findings.append(held)
         return ended
 
       # An escalation already handled during the heuristic test, ahead of this first pass, would
@@ -1523,7 +1531,8 @@ def injection_process(url, check_parameter, http_request_method, filename, times
       # A backtick opens the same substitution and is a different character, which is the whole of
       # what is being asked here. Not offered where the substitution is not the shell's to make:
       # 'cmd.exe' has no backtick, and an interpreter is handed a program rather than a shell line.
-      if not end_detection and checks.injection_techniques_status() is False and \
+      # Not asked again of a finding already set aside: it was made through them, which is why it was set aside.
+      if not end_detection and checks.injection_techniques_status() is False and not held_findings and \
             checks.may_retry_through_backticks() and checks.backtick_retry_consent():
         settings.AUTO_TAMPER.append("backticks")
         checks.tamper_scripts(stored_tamper_scripts=False)
@@ -1573,6 +1582,9 @@ def injection_process(url, check_parameter, http_request_method, filename, times
           settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
         _reset_web_root_detection()
         end_detection = _run_and_verify()
+
+      # What was set aside stands only where no pass found a boundary that can carry the retrieval.
+      checks.settle_held_findings(held_findings)
 
       # All injection techniques seems to be failed!
       if checks.injection_techniques_status() is False:

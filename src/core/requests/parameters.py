@@ -88,9 +88,9 @@ def resolve_marker_component(default_value, marker_char):
   # all the same - read off the part in front, that text was dropped from the suffix entirely.
   if settings.CUSTOM_INJECTION_MARKER and len(marker_char) != 0:
     return marker_char
-  if settings.IS_JSON or (settings.LOAD_SESSION and not any((settings.COOKIE_INJECTION, settings.USER_AGENT_INJECTION,
-                                                               settings.REFERER_INJECTION, settings.HOST_INJECTION,
-                                                               settings.CUSTOM_HEADER_INJECTION))):
+  if (settings.LOAD_SESSION and not any((settings.COOKIE_INJECTION, settings.USER_AGENT_INJECTION,
+                                         settings.REFERER_INJECTION, settings.HOST_INJECTION,
+                                         settings.CUSTOM_HEADER_INJECTION))):
     return None
   return default_value
 

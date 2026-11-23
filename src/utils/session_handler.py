@@ -488,6 +488,7 @@ and stored in the session for the given URL.
 """
 def applied_techniques(url, http_request_method): 
   techniques = []
+  code_sink_stored = False
   try:
     with _session_connection() as conn:
       table = table_name(url) + "_ip"
@@ -498,9 +499,16 @@ def applied_techniques(url, http_request_method):
         for session in cursor:
           technique_info = session[0]
           letter = technique_letter(technique_info)
-          # Only a letter '--technique' takes narrows the run; code injection and out-of-band are reached through their own switches.
+          # Only a letter '--technique' takes narrows the run; out-of-band is reached through its own switch.
           if letter and letter in settings.AVAILABLE_TECHNIQUES:
             techniques.append(letter)
+          elif settings.LEGACY_TECHNIQUE_NAMES.get(technique_info, technique_info) == settings.INJECTION_TECHNIQUE.DYNAMIC_CODE:
+            code_sink_stored = True
+        # The code sink's results-based technique is asked for by the letter of the results-based one - its own is not
+        # a letter '--technique' takes - so beside other narrowed techniques it must be named, or the run drops it.
+        # Alone it narrows nothing, as before: every technique stays selected.
+        if techniques and code_sink_stored:
+          techniques.append(settings.INJECTION_TECHNIQUE.RESULTS_BASED[0])
         techniques = list(set(techniques))
         techniques = "".join(str(x) for x in techniques)
     return techniques

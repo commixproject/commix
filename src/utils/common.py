@@ -57,8 +57,10 @@ def invalid_cmd_output(cmd):
   so the ceiling is this script's and worth telling apart from an empty answer.
   """
   boundary = settings.CONFIRMED_BOUNDARY.get(settings.CHECKING_PARAMETER)
+  # Not where the substitution cannot nest: that pipe carries no retrieval at all, which is said where the finding is read.
   if (settings.TARGET_OS != settings.OS.WINDOWS and boundary and boundary[2] == settings.PIPE_SEPARATOR
-      and settings.DASHLESS_TAMPER in settings.MULTI_ENCODED_PAYLOAD):
+      and settings.DASHLESS_TAMPER in settings.MULTI_ENCODED_PAYLOAD
+      and settings.CMD_SUB_PREFIX != settings.BACKTICK_SUBSTITUTION):
     err_msg += " An output longer than one argument can hold is refused by the reading '"
     err_msg += settings.DASHLESS_TAMPER + ".py' writes for a pipe, so it arrives as none at all."
   return err_msg

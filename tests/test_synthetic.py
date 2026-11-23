@@ -317,6 +317,102 @@ class M20_AShellshockSweepOutlivesAnErrorPage(unittest.TestCase):
     self.assertGreater(len(probed), 1, "the sweep stopped at the first header: " + repr(sorted(probed)))
 
 
+class M22_ASlowerSecondTargetIsMeasuredForItself(unittest.TestCase):
+  """
+  The delay and the response time worked out for the first target stayed in force for the second,
+  whose latency is its own: the second was never measured. Two targets in a list, a quick one and
+  one that answers late. Each is left as soon as its timing model has been taken, which is the
+  point at which what it holds is read.
+  """
+  WATCH = (
+    "import os\n"
+    "from src.utils import settings\n"
+    "from src.core.controller import checks as _c\n"
+    "def _watched(*a, **k):\n"
+    "  open(os.environ['SYNTHETIC_MARK'], 'a').write('TARGET %r %r\\n' % (settings.ESTIMATED_TIMESEC, settings.URL_TIME_RESPONSE))\n"
+    "  raise settings.NextTargetException()\n"
+    "_c.warm_up_response_baseline = _watched\n"
+  )
+
+  @unittest.skipUnless(os.environ.get("COMMIX_SLOW_TESTS"), "about 2.5 minutes - set COMMIX_SLOW_TESTS=1")
+  def test_each_target_in_a_list_is_measured_for_itself(self):
+    import time as _time
+    def late(handler, number):
+      _time.sleep(1.5)
+      reply(handler, "<html>late</html>")
+    with Server(lambda h, n: reply(h, "<html>quick</html>")) as quick:
+      with Server(late) as slow:
+        listing = tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False)
+        mark = tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False)
+        mark.close()
+        try:
+          listing.write(quick.url("/q.php?a=1") + "\n" + slow.url("/s.php?b=2") + "\n")
+          listing.close()
+          run_commix(["-m", listing.name, "--technique=t", "--time-sec=3"], before=self.WATCH, timeout=240, extra_env={"SYNTHETIC_MARK": mark.name})
+          with open(mark.name) as handle:
+            seen = [line.split() for line in handle if line.startswith("TARGET")]
+        finally:
+          os.unlink(listing.name)
+          os.unlink(mark.name)
+    self.assertEqual(2, len(seen), seen)
+    quick_response, slow_response = float(seen[0][2]), float(seen[1][2])
+    self.assertGreater(slow_response, quick_response + 1.0, seen)
+
+
+class Auth_ATargetThatWantsCredentialsIsSettledBeforeAnyTechnique(unittest.TestCase):
+  """
+  The dictionary attack was started from the first response-time measurement, so a run that tests
+  no time-based technique never asked for credentials and reported the login challenge as not
+  injectable - and one that did test it spent the techniques before it on that challenge.
+  """
+  def _server(self):
+    import base64
+    wanted = "Basic " + base64.b64encode(b"admin:admin").decode()
+    def respond(handler, number):
+      if handler.headers.get("Authorization") == wanted:
+        reply(handler, "<html>welcome</html>")
+      else:
+        reply(handler, "Authentication required", code=401, headers=(("WWW-Authenticate", 'Basic realm="Restricted area"'),))
+    return Server(respond)
+
+  def test_a_run_without_a_time_based_technique_still_finds_the_credentials(self):
+    with self._server() as server:
+      output = run_commix(["-u", server.url("/a.php?addr=1"), "--technique=r"], timeout=120)
+    self.assertIn("Authentication succeeded using credentials: 'admin:admin'", output)
+
+  def test_the_credentials_come_before_the_first_technique(self):
+    with self._server() as server:
+      output = run_commix(["-u", server.url("/a.php?addr=1"), "--technique=rb"], timeout=120)
+    self.assertIn("Authentication succeeded using credentials", output)
+    self.assertLess(output.index("Authentication succeeded"), output.index("Testing the results-based classic command injection technique"))
+
+  def test_credentials_given_are_not_attacked(self):
+    with self._server() as server:
+      output = run_commix(["-u", server.url("/a.php?addr=1"), "--technique=r", "--auth-type=basic", "--auth-cred=admin:admin"], timeout=120)
+    self.assertNotIn("dictionary-based attack", output)
+
+
+class A7_APageThatEchoesTheQuestionIsNotAnAnswer(unittest.TestCase):
+  """
+  A page that repeats the value it was given, with quotes and expansions taken out of it, differs between a
+  true and a false question by the text of the questions alone. The reflection filter cannot recognise
+  what the page made of them, and a boolean finding was announced for a target that runs nothing.
+  """
+  def _echoing_target(self):
+    def respond(handler, number):
+      from urllib.parse import urlparse, parse_qs
+      value = (parse_qs(urlparse(handler.path).query).get("user") or [""])[0]
+      for dropped in ("'", '"', "\\", "${IFS}"):
+        value = value.replace(dropped, "")
+      reply(handler, "<html><body><b>" + value + "</b></body></html>")
+    return Server(respond)
+
+  def test_an_echoing_page_yields_no_boolean_finding(self):
+    with self._echoing_target() as server:
+      output = run_commix(["-u", server.url("/e.php?user=abc"), "--technique=b", "--os=unix", "--skip-waf"], timeout=180)
+    self.assertNotIn("injectable via boolean-based blind command injection", output)
+
+
 class M26_ASkippedTimeBasedTechniqueRunsNothingElse(unittest.TestCase):
   """
   Answering 'skip' to the lagging question used to run the file-based flow under the time-based
@@ -523,3 +619,84 @@ class Bisect_AMissAndAnEmptyAnswerAreTold(unittest.TestCase):
 
 if __name__ == "__main__":
   unittest.main()
+
+
+class JSON_TheParametersOwnValueStaysInFrontOfThePayload(unittest.TestCase):
+  """
+  A JSON body had the payload stand in place of the parameter's value, so a sink that echoes the value gave a true-answer page unlike the page the
+  value returns, and the boolean sweep refused every boundary until the replace-value pass. The value is put in front of the payload as it is for
+  a form, and only the replace-value retry (REPLACE_VALUE) or a resumed session leaves it off.
+  """
+  NAMES = ("IS_JSON", "TESTABLE_VALUE", "LOAD_SESSION", "REPLACE_VALUE")
+
+  def setUp(self):
+    from src.core.parse import cmdline as menu
+    self.menu = menu
+    self._saved = dict((name, getattr(settings, name)) for name in self.NAMES)
+    self._options = (menu.options.data, menu.options.prefix)
+    menu.options.prefix = None
+    settings.LOAD_SESSION = settings.REPLACE_VALUE = False
+    settings.TESTABLE_VALUE = "127.0.0.1"
+
+  def tearDown(self):
+    for name, value in self._saved.items():
+      setattr(settings, name, value)
+    self.menu.options.data, self.menu.options.prefix = self._options
+
+  def _sent(self, data, is_json=True, value="127.0.0.1"):
+    from src.core.requests import requests
+    settings.IS_JSON = is_json
+    settings.TESTABLE_VALUE = value
+    self.menu.options.data = data.replace("<TAG>", settings.INJECT_TAG)
+    with Server(lambda h, n: reply(h, "<html>ok</html>")) as server:
+      requests.perform_injection("", "", " ", "PAYLOAD", "", "POST", server.url("/x.php"))
+      return server.requests[-1]["body"].decode("utf-8")
+
+  def test_the_value_comes_first_in_a_json_body(self):
+    body = self._sent('{"addr":"127.0.0.1<TAG>"}')
+    self.assertEqual("127.0.0.1PAYLOAD", json.loads(body)["addr"])
+
+  def test_a_form_body_carries_it_the_same_way(self):
+    body = self._sent("addr=127.0.0.1<TAG>", is_json=False)
+    self.assertTrue(body.startswith("addr=127.0.0.1PAYLOAD"), body)
+
+  def test_a_numeric_looking_value_is_kept_too(self):
+    body = self._sent('{"addr":"127<TAG>"}', value="127")
+    self.assertEqual("127PAYLOAD", json.loads(body)["addr"])
+
+  def test_the_other_members_of_the_body_are_untouched(self):
+    body = self._sent('{"addr":"127.0.0.1<TAG>","name":"ancst"}')
+    self.assertEqual({"addr": "127.0.0.1PAYLOAD", "name": "ancst"}, json.loads(body))
+
+  def test_standing_in_place_of_the_value_still_drops_it(self):
+    settings.REPLACE_VALUE = True
+    body = self._sent('{"addr":"127.0.0.1<TAG>"}')
+    self.assertEqual("PAYLOAD", json.loads(body)["addr"])
+
+  def test_a_resumed_session_is_left_as_it_was(self):
+    settings.LOAD_SESSION = True
+    body = self._sent('{"addr":"127.0.0.1<TAG>"}')
+    self.assertEqual("PAYLOAD", json.loads(body)["addr"])
+
+
+class JSON_LiveAgainstTheTestbed(unittest.TestCase):
+  """
+  The two scenarios the change was found on. Opt-in: needs the commix-testbed container, with its address in COMMIX_TESTBED (for example http://localhost:8081).
+  """
+  BASE = os.environ.get("COMMIX_TESTBED")
+
+  def _run(self, path, data, *extra):
+    return run_commix(["-u", self.BASE + path, "--host=www.commix-testbed.com", "--data=" + data, "--flush-session"] + list(extra), timeout=420)
+
+  @unittest.skipUnless(BASE, "needs the commix-testbed container - set COMMIX_TESTBED=http://localhost:8081")
+  def test_blind_json_is_confirmed_without_a_retry_pass(self):
+    out = self._run("/scenarios/regular/POST/blind_json.php", '{"addr":"127.0.0.1"}', "--technique=b", "--os-cmd=hostname")
+    self.assertIn("appears to be injectable via boolean-based blind command injection technique", out)
+    for script in ("space2ifs", "space2htab", "dashlesstest", "printf2echo"):
+      self.assertNotIn("Loading tamper module '" + script + "'", out)
+    self.assertNotIn("????", out)
+
+  @unittest.skipUnless(BASE, "needs the commix-testbed container - set COMMIX_TESTBED=http://localhost:8081")
+  def test_eval_json_also_reports_the_boolean_based_technique(self):
+    out = self._run("/scenarios/regular/POST/eval_json.php", '{"name":"ancst"}')
+    self.assertIn("appears to be injectable via boolean-based blind code injection technique", out)

@@ -106,6 +106,11 @@ def _bisect(channel, question, low, high):
       high = middle - 1
   return found
 
+# Said where the length search lost an answer: an empty result after this is not an output of no bytes.
+def _length_unread():
+  warn_msg = "The length of the output could not be read - the page gave no answer on a second attempt, so what follows is not an empty output."
+  settings.print_data_to_stdout(settings.END_LINE.CR + settings.print_warning_msg(warn_msg))
+
 """
 How many bytes the command's output is.
 
@@ -138,6 +143,7 @@ def output_length(channel, cmd, ceiling=None, payloads=None):
     if answer is None:
       # Neither a yes nor a no - a miss the oracle itself could not settle, not an output of zero length.
       settings.INCOMPLETE_OUTPUT = True
+      _length_unread()
       return ""
     if not answer:
       break
@@ -150,6 +156,7 @@ def output_length(channel, cmd, ceiling=None, payloads=None):
   if length is MISSED:
     # A question the oracle never answered part-way through, which is not an output of zero length.
     settings.INCOMPLETE_OUTPUT = True
+    _length_unread()
     return ""
   if length and length > ceiling:
     settings.INCOMPLETE_OUTPUT = True

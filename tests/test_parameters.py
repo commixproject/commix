@@ -147,6 +147,38 @@ class NamedBoundary(unittest.TestCase):
     self.assertEqual(";", prefix)
     self.assertEqual("&", suffix)
 
+class TheParametersOwnValueInFrontOfAPayload(unittest.TestCase):
+  """
+  What 'prefixes' glues in front of a payload so that it reaches the sink behind the value the parameter arrived with - for a JSON body as for a form.
+  """
+  NAMES = ("IS_JSON", "TESTABLE_VALUE", "LOAD_SESSION", "REPLACE_VALUE")
+
+  def setUp(self):
+    self._saved = dict((name, getattr(settings, name)) for name in self.NAMES)
+    self._prefix = menu.options.prefix
+    menu.options.prefix = None
+    settings.TESTABLE_VALUE = "127.0.0.1"
+    settings.LOAD_SESSION = settings.REPLACE_VALUE = False
+
+  def tearDown(self):
+    for name, value in self._saved.items():
+      setattr(settings, name, value)
+    menu.options.prefix = self._prefix
+
+  def test_a_json_payload_follows_the_value_as_a_form_one_does(self):
+    for is_json in (True, False):
+      settings.IS_JSON = is_json
+      payload, prefix = parameters.prefixes(";echo", "")
+      self.assertEqual(("127.0.0.1;echo", "127.0.0.1"), (payload, prefix))
+
+  def test_standing_in_place_of_the_value_leaves_it_off_for_json_too(self):
+    settings.IS_JSON = settings.REPLACE_VALUE = True
+    self.assertEqual((";echo", ""), parameters.prefixes(";echo", ""))
+
+  def test_a_resumed_session_leaves_it_off(self):
+    settings.IS_JSON = settings.LOAD_SESSION = True
+    self.assertEqual((";echo", ""), parameters.prefixes(";echo", ""))
+
 class TestableValue(unittest.TestCase):
   """
   Whether the parameter's own value is handed to the target, or a placeholder put in its place.

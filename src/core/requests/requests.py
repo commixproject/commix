@@ -336,113 +336,7 @@ def _measure_response_time_with_auth_handling(url, http_request_method):
       if str(err_code) != settings.UNAUTHORIZED_ERROR:
         settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
       else:
-        try:
-          # Safely get auth header if present
-          auth_line = ''
-          if hasattr(err, 'headers') and err.headers:
-            auth_line = err.headers.get('www-authenticate', '')
-          auth_type = auth_line.split()[0] if auth_line else ''
-          
-          realm = headers.realm_of(auth_line)
-          if realm is None:
-            realm = False
-
-        except ValueError:
-          err_msg = "The identified HTTP authentication type (" + str(auth_type) + ") "
-          err_msg += "is not yet supported."
-          settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-          raise SystemExit(settings.EXIT_FAILURE)
-
-        except IndexError:
-          err_msg = "The provided pair of " + str(menu.options.auth_type)
-          err_msg += " HTTP authentication credentials '" + str(menu.options.auth_cred) + "'"
-          err_msg += " seems to be invalid."
-          settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
-          raise SystemExit(settings.EXIT_FAILURE)
-
-
-        if menu.options.auth_type and menu.options.auth_type != auth_type.lower():
-          if checks.identified_http_auth_type(auth_type):
-            menu.options.auth_type = auth_type.lower()
-        else:
-          menu.options.auth_type = auth_type.lower()
-
-        # Check for stored auth credentials.
-        if not menu.options.auth_cred:
-          try:
-            stored_auth_creds = session_handler.export_valid_credentials(url, auth_type.lower())
-          except (Exception, SystemExit):
-            stored_auth_creds = False
-          if stored_auth_creds and not menu.options.ignore_session:
-            menu.options.auth_cred = stored_auth_creds
-            # The user name only: the password is the part worth keeping off a screen.
-            info_msg = "Restoring credentials '"
-            info_msg += menu.options.auth_cred.partition(":")[0] + ":***' from previous stored session."
-            settings.print_data_to_stdout(settings.print_info_msg(info_msg))
-          else:
-            # Basic authentication
-            if menu.options.auth_type.lower() == settings.AUTH_TYPE.BASIC:
-              if not int(settings.UNAUTHORIZED_ERROR) in settings.IGNORE_CODE:
-                warn_msg = "This target requires " + menu.options.auth_type.lower() + " "
-                warn_msg += "HTTP authentication credentials."
-                settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-                while True:
-                  message = "Do you want to perform a dictionary-based attack? [Y/n] "
-                  do_update = common.read_input(message, default="Y", check_batch=True)
-                  if do_update in settings.CHOICE_YES:
-                    auth_creds = authentication.http_auth_cracker(url, realm, http_request_method)
-                    if auth_creds is not False:
-                      # Put to use, not only announced: what builds the Authorization header for
-                      # every request after this is the option, so a pair found and left there
-                      # would have the run carry on unauthenticated against a target that just
-                      # said it needs credentials.
-                      menu.options.auth_cred = auth_creds
-                      settings.REQUIRED_AUTHENTICATION = True
-                      break
-                    else:
-                      raise SystemExit()
-                  elif do_update in settings.CHOICE_NO:
-                    checks.http_auth_err_msg()
-                  elif do_update in settings.CHOICE_QUIT:
-                    raise SystemExit()
-                  else:
-                    common.invalid_option(do_update)
-                    pass
-
-            # Digest authentication
-            elif menu.options.auth_type.lower() == settings.AUTH_TYPE.DIGEST:
-              if not int(settings.UNAUTHORIZED_ERROR) in settings.IGNORE_CODE:
-                warn_msg = "This target requires " + menu.options.auth_type.lower() + " "
-                warn_msg += "HTTP authentication credentials."
-                settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-                # Check if failed to identify the realm attribute.
-                if not realm:
-                  warn_msg = "Failed to identify the realm attribute."
-                  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
-                while True:
-                  message = "Do you want to perform a dictionary-based attack? [Y/n] "
-                  do_update = common.read_input(message, default="Y", check_batch=True)
-                  if do_update in settings.CHOICE_YES:
-                    auth_creds = authentication.http_auth_cracker(url, realm, http_request_method)
-                    if auth_creds is not False:
-                      # Put to use, not only announced: what builds the Authorization header for
-                      # every request after this is the option, so a pair found and left there
-                      # would have the run carry on unauthenticated against a target that just
-                      # said it needs credentials.
-                      menu.options.auth_cred = auth_creds
-                      settings.REQUIRED_AUTHENTICATION = True
-                      break
-                    else:
-                      raise SystemExit()
-                  elif do_update in settings.CHOICE_NO:
-                    checks.http_auth_err_msg()
-                  elif do_update in settings.CHOICE_QUIT:
-                    raise SystemExit()
-                  else:
-                    common.invalid_option(do_update)
-                    pass
-        else:
-          raise SystemExit()
+        resolve_unauthorized(url, http_request_method, err)
 
     ignore_end = time.time()
     start = start - (ignore_start - ignore_end)
@@ -458,6 +352,121 @@ def _measure_response_time_with_auth_handling(url, http_request_method):
   end = time.time()
   diff = end - start
   return diff
+
+"""
+What a target that answered 401 needs before anything can be asked of it: the credentials it names the kind of, taken from a stored session or found by a dictionary attack.
+
+Put where the connection is first made, so no technique is spent on a page that was never the target's own - and so a run that never measures a response time still gets to it.
+"""
+def resolve_unauthorized(url, http_request_method, err):
+  stored_auth_creds = False
+  try:
+    # Safely get auth header if present
+    auth_line = ''
+    if hasattr(err, 'headers') and err.headers:
+      auth_line = err.headers.get('www-authenticate', '')
+    auth_type = auth_line.split()[0] if auth_line else ''
+
+    realm = headers.realm_of(auth_line)
+    if realm is None:
+      realm = False
+
+  except ValueError:
+    err_msg = "The identified HTTP authentication type (" + str(auth_type) + ") "
+    err_msg += "is not yet supported."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit(settings.EXIT_FAILURE)
+
+  except IndexError:
+    err_msg = "The provided pair of " + str(menu.options.auth_type)
+    err_msg += " HTTP authentication credentials '" + str(menu.options.auth_cred) + "'"
+    err_msg += " seems to be invalid."
+    settings.print_data_to_stdout(settings.print_critical_msg(err_msg))
+    raise SystemExit(settings.EXIT_FAILURE)
+
+
+  if menu.options.auth_type and menu.options.auth_type != auth_type.lower():
+    if checks.identified_http_auth_type(auth_type):
+      menu.options.auth_type = auth_type.lower()
+  else:
+    menu.options.auth_type = auth_type.lower()
+
+  # Check for stored auth credentials.
+  if not menu.options.auth_cred:
+    try:
+      stored_auth_creds = session_handler.export_valid_credentials(url, auth_type.lower())
+    except (Exception, SystemExit):
+      stored_auth_creds = False
+    if stored_auth_creds and not menu.options.ignore_session:
+      menu.options.auth_cred = stored_auth_creds
+      # The user name only: the password is the part worth keeping off a screen.
+      info_msg = "Restoring credentials '"
+      info_msg += menu.options.auth_cred.partition(":")[0] + ":***' from previous stored session."
+      settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    else:
+      # Basic authentication
+      if menu.options.auth_type.lower() == settings.AUTH_TYPE.BASIC:
+        if not int(settings.UNAUTHORIZED_ERROR) in settings.IGNORE_CODE:
+          warn_msg = "This target requires " + menu.options.auth_type.lower() + " "
+          warn_msg += "HTTP authentication credentials."
+          settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+          while True:
+            message = "Do you want to perform a dictionary-based attack? [Y/n] "
+            do_update = common.read_input(message, default="Y", check_batch=True)
+            if do_update in settings.CHOICE_YES:
+              auth_creds = authentication.http_auth_cracker(url, realm, http_request_method)
+              if auth_creds is not False:
+                # Put to use, not only announced: what builds the Authorization header for
+                # every request after this is the option, so a pair found and left there
+                # would have the run carry on unauthenticated against a target that just
+                # said it needs credentials.
+                menu.options.auth_cred = auth_creds
+                settings.REQUIRED_AUTHENTICATION = True
+                break
+              else:
+                raise SystemExit()
+            elif do_update in settings.CHOICE_NO:
+              checks.http_auth_err_msg()
+            elif do_update in settings.CHOICE_QUIT:
+              raise SystemExit()
+            else:
+              common.invalid_option(do_update)
+              pass
+
+      # Digest authentication
+      elif menu.options.auth_type.lower() == settings.AUTH_TYPE.DIGEST:
+        if not int(settings.UNAUTHORIZED_ERROR) in settings.IGNORE_CODE:
+          warn_msg = "This target requires " + menu.options.auth_type.lower() + " "
+          warn_msg += "HTTP authentication credentials."
+          settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+          # Check if failed to identify the realm attribute.
+          if not realm:
+            warn_msg = "Failed to identify the realm attribute."
+            settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+          while True:
+            message = "Do you want to perform a dictionary-based attack? [Y/n] "
+            do_update = common.read_input(message, default="Y", check_batch=True)
+            if do_update in settings.CHOICE_YES:
+              auth_creds = authentication.http_auth_cracker(url, realm, http_request_method)
+              if auth_creds is not False:
+                # Put to use, not only announced: what builds the Authorization header for
+                # every request after this is the option, so a pair found and left there
+                # would have the run carry on unauthenticated against a target that just
+                # said it needs credentials.
+                menu.options.auth_cred = auth_creds
+                settings.REQUIRED_AUTHENTICATION = True
+                break
+              else:
+                raise SystemExit()
+            elif do_update in settings.CHOICE_NO:
+              checks.http_auth_err_msg()
+            elif do_update in settings.CHOICE_QUIT:
+              raise SystemExit()
+            else:
+              common.invalid_option(do_update)
+              pass
+  else:
+    raise SystemExit()
 
 """
 Estimating the response time (in seconds) - median of several samples, since one alone is too noisy to trust for the slow-target decision.

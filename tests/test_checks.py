@@ -2269,3 +2269,416 @@ class AFindingIsLabelledWhereItsParameterSits(unittest.TestCase):
     from src.core.controller import checks
     self.menu.options.url, self.menu.options.data = "http://t/a.php?addr=1", "token=1"
     self.assertTrue(checks.finding_parameter_line("addr", "POST").endswith("addr (GET)"))
+
+
+class ABooleanOracleDoesNotAnswerForAPageThatIsNeitherAnswer(unittest.TestCase):
+  """
+  Read as the nearer of the two calibration pages, a maintenance page or an interstitial was taken for
+  a yes or a no and bisected on - a length of 65 instead of 12, with padding in the output and nothing
+  to say the length was wrong.
+  """
+  NAMES = ("BOOLEAN_TRUE_PAGE", "BOOLEAN_FALSE_PAGE", "BOOLEAN_TRUE_RAW", "BOOLEAN_FALSE_RAW", "BOOLEAN_TRUE_LENGTH",
+           "BOOLEAN_FALSE_LENGTH", "BOOLEAN_TRUE_CODE", "BOOLEAN_FALSE_CODE", "BOOLEAN_PAGES_SHARED", "BOOLEAN_PAGES_SHARED_FULL", "DYNAMIC_MARKINGS")
+  # A page of the size a real one is: the boilerplate around a few words is what makes two answers alike.
+  PAGE = "<html><body><h1>Ping</h1>" + "<p>The address answered the request in the usual way and the result follows.</p>" * 40 + "<pre>%s</pre></body></html>"
+
+  def setUp(self):
+    from src.core.parse import cmdline as menu
+    self._saved = dict((name, getattr(settings, name)) for name in self.NAMES)
+    self._options = (menu.options.string, menu.options.not_string, menu.options.regexp, menu.options.code, menu.options.lengths)
+    menu.options.string = menu.options.not_string = menu.options.regexp = menu.options.code = menu.options.lengths = None
+    settings.DYNAMIC_MARKINGS = []
+    from src.core.controller import checks
+    self.checks = checks
+    self.true_page, self.false_page = self.PAGE % "Host is up", self.PAGE % "Host is down"
+    self.assertTrue(checks.calibrate_boolean_oracle(self.true_page, self.false_page, 200, 200))
+
+  def tearDown(self):
+    from src.core.parse import cmdline as menu
+    for name, value in self._saved.items():
+      setattr(settings, name, value)
+    menu.options.string, menu.options.not_string, menu.options.regexp, menu.options.code, menu.options.lengths = self._options
+
+  def test_the_two_calibration_pages_are_answered_as_they_were_taught(self):
+    self.assertIs(True, self.checks.boolean_oracle(self.true_page, 200))
+    self.assertIs(False, self.checks.boolean_oracle(self.false_page, 200))
+
+  def test_a_page_of_neither_kind_is_no_answer(self):
+    unavailable = "<html><body><h1>Service temporarily unavailable</h1><p>Please try again later.</p></body></html>"
+    self.assertIsNone(self.checks.boolean_oracle(unavailable, 200))
+
+  def test_an_empty_or_truncated_body_is_no_answer(self):
+    self.assertIsNone(self.checks.boolean_oracle("<html>", 200))
+
+  def test_a_page_that_moves_a_little_is_still_an_answer(self):
+    moved = (self.PAGE % "Host is up").replace("usual way", "usual manner", 3)
+    self.assertIs(True, self.checks.boolean_oracle(moved, 200))
+
+  def test_the_bound_is_kept_with_the_oracle_a_finding_was_made_with(self):
+    self.checks.remember_oracle(("u", "p", "t", ";"))
+    shared = settings.BOOLEAN_PAGES_SHARED
+    settings.BOOLEAN_PAGES_SHARED = None
+    self.checks.restore_oracle(("u", "p", "t", ";"))
+    self.assertEqual(shared, settings.BOOLEAN_PAGES_SHARED)
+
+
+class ASmallCalibrationPageIsHeldToTheOrderAwareMeasureToo(ABooleanOracleDoesNotAnswerForAPageThatIsNeitherAnswer):
+  """
+  The cheap measure counts characters and not their order, so a short gateway or block page made of the same
+  letters scores about half against short answers and slips under a bound drawn from it.
+  """
+  PAGE = "<html><head><title>Ping</title></head><body><h1>Ping</h1>" + "<p>The address answered the request in the usual way and the result follows.</p>" * 3 + "<pre>%s</pre></body></html>"
+  BAD_GATEWAY = "<html><head><title>502 Bad Gateway</title></head><body><center><h1>502 Bad Gateway</h1></center><hr><center>nginx</center></body></html>"
+  BLOCKED = "<html><body><h1>Access Denied</h1><p>Your request was blocked by the security policy. Reference 18.7a3d1002.1700</p></body></html>"
+
+  def test_a_short_gateway_page_is_no_answer(self):
+    self.assertIsNone(self.checks.boolean_oracle(self.BAD_GATEWAY, 200))
+
+  def test_a_short_block_page_is_no_answer(self):
+    self.assertIsNone(self.checks.boolean_oracle(self.BLOCKED, 200))
+
+  def test_a_short_page_with_a_fresh_token_is_still_an_answer(self):
+    token = self.PAGE.replace("Ping</h1>", "Ping</h1><input type=hidden name=t value=0123456789abcdef0123456789abcdef>") % "Host is up"
+    self.assertIs(True, self.checks.boolean_oracle(token, 200))
+
+  def test_the_order_aware_figure_is_kept_with_the_saved_oracle(self):
+    self.checks.remember_oracle(("u2", "p", "t", ";"))
+    shared = settings.BOOLEAN_PAGES_SHARED_FULL
+    self.assertIsNotNone(shared)
+    settings.BOOLEAN_PAGES_SHARED_FULL = None
+    self.checks.restore_oracle(("u2", "p", "t", ";"))
+    self.assertEqual(shared, settings.BOOLEAN_PAGES_SHARED_FULL)
+
+
+class TheOrderAwareMeasureIsAskedInTheOrderThatKeepsItAccurate(ABooleanOracleDoesNotAnswerForAPageThatIsNeitherAnswer):
+  """
+  'difflib' takes its junk heuristic from the second sequence. Asked the other way round (response first,
+  calibration page second) a response with a block added ahead of its content measures 0.03 against a page
+  it resembles at 0.89, and the oracle would refuse it. The oracle asks (calibration page, response); this
+  keeps it that way.
+  """
+  @staticmethod
+  def _text(length):
+    # The second text drawn from a seeded generator: a fixed page for which the other order collapses (0.03 against 0.89).
+    import random
+    rng = random.Random(11)
+    words = "the address answered request usual way result follows please wait status host network packets time loss sent received alpha beta gamma delta".split()
+    def draw(size):
+      out = []
+      while sum(len(x) for x in out) < size:
+        out.append(" ".join(rng.choice(words) for _ in range(10)).capitalize() + ".")
+      return "<p>" + "</p><p>".join(out) + "</p>"
+    draw(200)
+    return draw(length)
+
+  PAGE = "<html><body><h1>Ping</h1>%s<pre>%%s</pre></body></html>"
+  BANNER = "<div class=cookie>We use cookies to improve your experience. <a href=/privacy>Learn more</a> <button>Accept</button></div>"
+
+  def setUp(self):
+    self.PAGE = self.PAGE % self._text(400)
+    super(TheOrderAwareMeasureIsAskedInTheOrderThatKeepsItAccurate, self).setUp()
+
+  def test_a_page_with_a_banner_added_is_not_refused(self):
+    # What is being kept from regressing is the refusal, not the answer (see the expected failure below).
+    for repeats in (2, 3, 4):
+      with_banner = (self.PAGE % "Host is up").replace("<h1>", self.BANNER * repeats + "<h1>")
+      self.assertLess(max(self.checks.page_ratio(with_banner, self.true_page), self.checks.page_ratio(with_banner, self.false_page)), settings.BOOLEAN_SUSPECT_RATIO)
+      self.assertIsNotNone(self.checks.boolean_oracle(with_banner, 200), repeats)
+
+  def test_the_figure_agrees_with_the_accurate_one_in_the_oracles_order(self):
+    import difflib
+    page = self.PAGE % "Host is up"
+    with_banner = page.replace("<h1>", self.BANNER * 3 + "<h1>")
+    accurate = difflib.SequenceMatcher(None, page, with_banner, autojunk=False).ratio()
+    self.assertLess(abs(self.checks._ordered_ratio(page, with_banner) - accurate), 0.05)
+
+  def test_a_true_page_that_gained_content_is_read_as_true(self):
+    # Was an expected failure (AUDIT_dev364 D7): the nearest-page reading leaned to the longer calibration page and read a true response
+    # with a banner added as false. Read from the text only the true answer carries, it is true.
+    with_banner = (self.PAGE % "Host is up").replace("<h1>", self.BANNER + "<h1>")
+    self.assertIs(True, self.checks.boolean_oracle(with_banner, 200))
+
+
+class TheAnswerIsReadFromTheTextOnlyOneAnswerCarries(unittest.TestCase):
+  """
+  By overall likeness a response that gained or lost content leans to the longer calibration page (the false one is two characters longer), so a
+  true page with a banner added read as false. Calibration now takes the text the two pages disagree on, and a response is asked for that.
+  """
+  NAMES = ("BOOLEAN_TRUE_PAGE", "BOOLEAN_FALSE_PAGE", "BOOLEAN_TRUE_RAW", "BOOLEAN_FALSE_RAW", "BOOLEAN_TRUE_LENGTH", "BOOLEAN_FALSE_LENGTH",
+           "BOOLEAN_TRUE_CODE", "BOOLEAN_FALSE_CODE", "BOOLEAN_PAGES_SHARED", "BOOLEAN_PAGES_SHARED_FULL", "BOOLEAN_TRUE_MARKERS",
+           "BOOLEAN_FALSE_MARKERS", "DYNAMIC_MARKINGS")
+  BANNER = "<div class=cookie>We use cookies to improve your experience. <a href=/privacy>Learn more</a> <button>Accept</button></div>"
+  NOTICE = "<div class=flash>Your session will expire in 5 minutes.</div>"
+
+  @staticmethod
+  def _text(length, seed=3):
+    import random
+    rng = random.Random(seed)
+    words = "the address answered request usual way result follows please wait status host network packets time loss sent received alpha beta gamma delta".split()
+    out = []
+    while sum(len(x) for x in out) < length:
+      out.append(" ".join(rng.choice(words) for _ in range(10)).capitalize() + ".")
+    return "<p>" + "</p><p>".join(out) + "</p>"
+
+  def setUp(self):
+    from src.core.parse import cmdline as menu
+    from src.core.controller import checks
+    self.checks, self.menu = checks, menu
+    self._saved = dict((name, getattr(settings, name)) for name in self.NAMES)
+    self._options = (menu.options.string, menu.options.not_string, menu.options.regexp, menu.options.code, menu.options.lengths)
+    menu.options.string = menu.options.not_string = menu.options.regexp = menu.options.code = menu.options.lengths = None
+    settings.DYNAMIC_MARKINGS = []
+
+  def tearDown(self):
+    for name, value in self._saved.items():
+      setattr(settings, name, value)
+    (self.menu.options.string, self.menu.options.not_string, self.menu.options.regexp, self.menu.options.code, self.menu.options.lengths) = self._options
+
+  def _calibrate(self, true_page, false_page):
+    self.assertTrue(self.checks.calibrate_boolean_oracle(true_page, false_page, 200, 200))
+
+  def _page(self, size, answer):
+    return "<html><body><h1>Ping</h1>" + self._text(size) + "<pre>" + answer + "</pre></body></html>"
+
+  def test_a_banner_or_a_notice_added_after_calibration_changes_no_answer(self):
+    for size in (300, 5000):
+      true_page, false_page = self._page(size, "Host is up"), self._page(size, "Host is down")
+      self._calibrate(true_page, false_page)
+      for added in (self.BANNER, self.BANNER * 4, self.NOTICE):
+        self.assertIs(True, self.checks.boolean_oracle(true_page.replace("<h1>", added + "<h1>"), 200), (size, added[:20]))
+        self.assertIs(False, self.checks.boolean_oracle(false_page.replace("<h1>", added + "<h1>"), 200), (size, added[:20]))
+
+  def test_a_page_that_lost_content_changes_no_answer(self):
+    for size in (400, 5000):
+      true_page, false_page = self._page(size, "Host is up"), self._page(size, "Host is down")
+      self._calibrate(true_page, false_page)
+      block = self._text(size)[: size // 10]
+      self.assertIs(True, self.checks.boolean_oracle(true_page.replace(block, ""), 200), size)
+      self.assertIs(False, self.checks.boolean_oracle(false_page.replace(block, ""), 200), size)
+
+  def test_a_page_that_is_neither_answer_is_still_no_answer(self):
+    true_page, false_page = self._page(5000, "Host is up"), self._page(5000, "Host is down")
+    self._calibrate(true_page, false_page)
+    for foreign in ("<html><body><h1>Service temporarily unavailable</h1></body></html>", "", '{"error":"upstream timeout","status":504}'):
+      self.assertIsNone(self.checks.boolean_oracle(foreign, 200), foreign[:30])
+
+  def test_a_marker_is_never_shorter_than_the_least_that_names_something(self):
+    true_markers, false_markers = self.checks.boolean_markers("<b>Host is up</b>", "<b>Host is down</b>")
+    self.assertTrue(true_markers and false_markers)
+    for marker in true_markers + false_markers:
+      self.assertGreaterEqual(len(marker.strip()), settings.BOOLEAN_MARKER_MIN)
+    # 'up' is inside 'upstream': a page that merely says so is not the true answer.
+    self.assertFalse(all(marker in '{"error":"upstream timeout"}' for marker in true_markers))
+
+  def test_answers_that_are_short_json_are_read_from_their_own_text(self):
+    true_page, false_page = '{"status":"up","code":0,"items":[1,2,3]}', '{"status":"down","code":1,"items":[]}'
+    self._calibrate(true_page, false_page)
+    self.assertIs(True, self.checks.boolean_oracle('{"status":"up","code":0,"items":[1,2,3],"extra":"added"}', 200))
+    self.assertIs(False, self.checks.boolean_oracle('{"status":"down","code":1,"items":[],"extra":"added"}', 200))
+
+  def test_a_token_elsewhere_on_the_page_changes_no_answer(self):
+    true_page = self._page(2000, "Host is up").replace("<h1>", "<input name=t value=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa><h1>")
+    false_page = self._page(2000, "Host is down").replace("<h1>", "<input name=t value=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa><h1>")
+    self._calibrate(true_page, false_page)
+    fresh = "<input name=t value=0123456789abcdef0123456789abcdef>"
+    self.assertIs(True, self.checks.boolean_oracle(true_page.replace("<input name=t value=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa>", fresh), 200))
+    self.assertIs(False, self.checks.boolean_oracle(false_page.replace("<input name=t value=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa>", fresh), 200))
+
+  def test_pages_that_differ_everywhere_have_no_markers_and_are_read_by_order(self):
+    true_page = "".join("<li>%d true %s</li>" % (i, "abcdefghij"[i % 10] * 3) for i in range(40))
+    false_page = "".join("<li>%d false %s</li>" % (i, "klmnopqrst"[i % 10] * 3) for i in range(40))
+    self.assertEqual(([], []), self.checks.boolean_markers(true_page, false_page))
+    self._calibrate(true_page, false_page)
+    self.assertIs(True, self.checks.boolean_oracle(true_page, 200))
+    self.assertIs(False, self.checks.boolean_oracle(false_page, 200))
+    self.assertIs(True, self.checks.boolean_oracle(true_page + "<p>added at the end for this visitor</p>", 200))
+
+  def test_identical_pages_have_no_markers(self):
+    self.assertEqual(([], []), self.checks.boolean_markers("same page", "same page"))
+
+  def test_a_stretch_of_disagreement_too_long_to_compare_gives_no_markers(self):
+    long_true = "<p>" + "a" * (settings.BOOLEAN_FULL_COMPARE_MAX + 5) + "</p>"
+    long_false = "<p>" + "b" * (settings.BOOLEAN_FULL_COMPARE_MAX + 5) + "</p>"
+    self.assertEqual(([], []), self.checks.boolean_markers(long_true, long_false))
+
+  def test_a_large_page_with_a_small_difference_still_has_markers(self):
+    body = self._text(60000)
+    true_markers, false_markers = self.checks.boolean_markers("<html>" + body + "<pre>Host is up</pre></html>", "<html>" + body + "<pre>Host is down</pre></html>")
+    self.assertTrue(true_markers and false_markers)
+
+  def test_the_markers_are_kept_with_the_oracle_a_finding_was_made_with(self):
+    true_page, false_page = self._page(500, "Host is up"), self._page(500, "Host is down")
+    self._calibrate(true_page, false_page)
+    true_markers, false_markers = list(settings.BOOLEAN_TRUE_MARKERS), list(settings.BOOLEAN_FALSE_MARKERS)
+    self.assertTrue(true_markers and false_markers)
+    self.checks.remember_oracle(("u3", "p", "t", ";"))
+    settings.BOOLEAN_TRUE_MARKERS, settings.BOOLEAN_FALSE_MARKERS = [], []
+    self.checks.restore_oracle(("u3", "p", "t", ";"))
+    self.assertEqual((true_markers, false_markers), (settings.BOOLEAN_TRUE_MARKERS, settings.BOOLEAN_FALSE_MARKERS))
+
+
+class AFindingTheOutputCannotBeReadBackThroughDoesNotEndThePasses(unittest.TestCase):
+  """
+  A pipe proves the injection, but with the substitution written as backticks it cannot carry the retrieval of a command's output. Such a boolean-based
+  finding is set aside while the passes still ahead look for a boundary that can; it stands, saying what it cannot do, only if none is found.
+  """
+  NAMES = ("CONFIRMED_INJECTION_POINTS", "CONFIRMED_BOUNDARY", "CHECKING_PARAMETER", "PENDING_POST_DETECTION_ACTIONS", "PROOF_EXECUTORS",
+           "PENDING_OS_SHELL_ENTRY", "IDENTIFIED_COMMAND_INJECTION", "INJECTION_CHECKER", "RESULTS_BASED_STATE", "EVAL_BASED_STATE",
+           "BOOLEAN_BASED_STATE", "TIME_BASED_STATE", "FILE_BASED_STATE", "TEMPFILE_BASED_STATE", "OOB_STATE", "AUTO_TAMPER",
+           "MULTI_ENCODED_PAYLOAD", "TAMPER_SCRIPTS", "CMD_SUB_PREFIX", "CMD_SUB_SUFFIX", "WHITESPACES", "PRINT_WITH_ECHO", "LOAD_SESSION",
+           "OUTPUT_UNAVAILABLE_SAID", "print_data_to_stdout", "TARGET_OS")
+  PARAMETER = "POST parameter 'addr'"
+
+  def setUp(self):
+    self._saved = dict((name, copy.deepcopy(getattr(settings, name))) for name in self.NAMES)
+    self._tamper = menu.options.tamper
+    menu.options.tamper = None
+    self.said = []
+    settings.print_data_to_stdout = self.said.append
+    settings.LOAD_SESSION = False
+    settings.OUTPUT_UNAVAILABLE_SAID = set()
+    for name in ("RESULTS_BASED_STATE", "EVAL_BASED_STATE", "BOOLEAN_BASED_STATE", "TIME_BASED_STATE", "FILE_BASED_STATE", "TEMPFILE_BASED_STATE", "OOB_STATE"):
+      setattr(settings, name, False)
+    settings.CONFIRMED_INJECTION_POINTS, settings.CONFIRMED_BOUNDARY = [], {}
+    settings.PENDING_POST_DETECTION_ACTIONS, settings.PROOF_EXECUTORS, settings.PENDING_OS_SHELL_ENTRY = [], [], None
+    settings.IDENTIFIED_COMMAND_INJECTION = settings.INJECTION_CHECKER = False
+    settings.CHECKING_PARAMETER = self.PARAMETER
+    settings.AUTO_TAMPER, settings.MULTI_ENCODED_PAYLOAD = ["space2ifs"], ["space2ifs"]
+
+  def tearDown(self):
+    for name, value in self._saved.items():
+      setattr(settings, name, value)
+    menu.options.tamper = self._tamper
+
+  def _backticks(self):
+    settings.AUTO_TAMPER.append("backticks")
+    settings.MULTI_ENCODED_PAYLOAD.append("backticks")
+    settings.TAMPER_SCRIPTS["backticks"] = True
+    settings.CMD_SUB_PREFIX = settings.CMD_SUB_SUFFIX = settings.BACKTICK_SUBSTITUTION
+
+  def _confirm(self, technique=None, separator="|", state="BOOLEAN_BASED_STATE"):
+    """A finding confirmed by the pass that is about to be checked; returns what the controller takes before the pass."""
+    technique = technique or settings.INJECTION_TECHNIQUE.BOOLEAN_BASED
+    before = (len(settings.CONFIRMED_INJECTION_POINTS), (len(settings.PENDING_POST_DETECTION_ACTIONS), len(settings.PROOF_EXECUTORS), settings.PENDING_OS_SHELL_ENTRY))
+    self.action = lambda: None
+    settings.CONFIRMED_INJECTION_POINTS.append((technique, settings.INJECTION_TYPE.BLIND, "addr", "p", "POST", 10, None))
+    settings.CONFIRMED_BOUNDARY[self.PARAMETER] = ("", "", separator, " ")
+    settings.PENDING_POST_DETECTION_ACTIONS.append(self.action)
+    setattr(settings, state, True)
+    settings.IDENTIFIED_COMMAND_INJECTION = settings.INJECTION_CHECKER = True
+    return before
+
+  def _set_aside(self, before):
+    return checks.set_aside_unreadable_findings(before[0], before[1], False)
+
+  def test_only_a_pipe_written_with_backticks_cannot_carry_the_retrieval(self):
+    settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = settings.NESTING_SUBSTITUTION
+    self.assertFalse(checks.blind_retrieval_unavailable("|"))
+    self._backticks()
+    self.assertTrue(checks.blind_retrieval_unavailable("|"))
+    self.assertTrue(checks.blind_retrieval_unavailable("||"))
+    self.assertFalse(checks.blind_retrieval_unavailable(";"))
+    self.assertFalse(checks.blind_retrieval_unavailable("&"))
+
+  def test_the_finding_is_set_aside_and_the_passes_see_nothing_confirmed(self):
+    self._backticks()
+    before = self._confirm()
+    self.assertTrue(checks.injection_techniques_status())
+    held = self._set_aside(before)
+    self.assertIsNotNone(held)
+    self.assertFalse(checks.injection_techniques_status())
+    self.assertEqual([], settings.CONFIRMED_INJECTION_POINTS)
+    self.assertEqual([], settings.PENDING_POST_DETECTION_ACTIONS)
+    self.assertNotIn(self.PARAMETER, settings.CONFIRMED_BOUNDARY)
+    self.assertFalse(settings.IDENTIFIED_COMMAND_INJECTION or settings.INJECTION_CHECKER)
+    self.assertTrue(any("set aside" in _ for _ in self.said))
+
+  def test_the_passes_ahead_are_written_with_the_substitution_that_nests_and_keep_the_other_scripts(self):
+    self._backticks()
+    self._set_aside(self._confirm())
+    self.assertEqual((settings.NESTING_SUBSTITUTION[0], settings.NESTING_SUBSTITUTION[1]), (settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX))
+    self.assertEqual(["space2ifs"], settings.AUTO_TAMPER)
+    self.assertEqual(["space2ifs"], settings.MULTI_ENCODED_PAYLOAD)
+    self.assertFalse(settings.TAMPER_SCRIPTS["backticks"])
+
+  def test_where_no_pass_finds_a_readable_boundary_the_finding_stands_as_it_was(self):
+    self._backticks()
+    held = [self._set_aside(self._confirm())]
+    settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = settings.NESTING_SUBSTITUTION
+    checks.settle_held_findings(held)
+    self.assertEqual([], held)
+    self.assertEqual(1, len(settings.CONFIRMED_INJECTION_POINTS))
+    self.assertTrue(checks.injection_techniques_status())
+    self.assertEqual([self.action], settings.PENDING_POST_DETECTION_ACTIONS)
+    self.assertEqual("|", settings.CONFIRMED_BOUNDARY[self.PARAMETER][2])
+    # The substitution it was confirmed through comes back with it, so the retrieval is recognised as unavailable.
+    self.assertTrue(checks.blind_retrieval_unavailable("|"))
+    self.assertTrue(any("output retrieval is unavailable" in _ for _ in self.said))
+
+  def test_a_readable_finding_made_in_the_meantime_replaces_it(self):
+    self._backticks()
+    held = [self._set_aside(self._confirm())]
+    settings.RESULTS_BASED_STATE = True
+    settings.CONFIRMED_INJECTION_POINTS.append((settings.INJECTION_TECHNIQUE.RESULTS_BASED, settings.INJECTION_TYPE.RESULTS_BASED_CI, "addr", "q", "POST", 20, None))
+    checks.settle_held_findings(held)
+    self.assertEqual([], held)
+    self.assertEqual([settings.INJECTION_TECHNIQUE.RESULTS_BASED], [row[0] for row in settings.CONFIRMED_INJECTION_POINTS])
+    self.assertFalse(settings.BOOLEAN_BASED_STATE)
+    self.assertFalse(any("output retrieval is unavailable" in _ for _ in self.said))
+
+  def test_a_finding_on_a_boundary_that_can_carry_the_retrieval_is_left_alone(self):
+    self._backticks()
+    self.assertIsNone(self._set_aside(self._confirm(separator=";")))
+    self.assertTrue(checks.injection_techniques_status())
+    self.assertEqual(1, len(settings.CONFIRMED_INJECTION_POINTS))
+
+  def test_a_pipe_written_with_the_substitution_that_nests_is_left_alone(self):
+    settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = settings.NESTING_SUBSTITUTION
+    self.assertIsNone(self._set_aside(self._confirm()))
+    self.assertTrue(checks.injection_techniques_status())
+
+  def test_a_finding_that_reads_its_output_another_way_is_left_alone(self):
+    self._backticks()
+    before = self._confirm(technique=settings.INJECTION_TECHNIQUE.RESULTS_BASED, state="RESULTS_BASED_STATE")
+    self.assertIsNone(self._set_aside(before))
+    self.assertTrue(checks.injection_techniques_status())
+
+  def test_a_resumed_finding_is_left_alone(self):
+    self._backticks()
+    settings.LOAD_SESSION = True
+    self.assertIsNone(self._set_aside(self._confirm()))
+
+  def test_the_substitution_the_user_named_is_not_withdrawn(self):
+    self._backticks()
+    menu.options.tamper = "backticks"
+    self.assertIsNone(self._set_aside(self._confirm()))
+    self.assertEqual(settings.BACKTICK_SUBSTITUTION, settings.CMD_SUB_PREFIX)
+
+  def test_the_empty_output_error_does_not_blame_the_argument_size_where_the_substitution_is_the_reason(self):
+    from src.utils import common
+    settings.TARGET_OS = settings.OS.UNIX
+    settings.CONFIRMED_BOUNDARY[self.PARAMETER] = ("", "", "|", " ")
+    settings.MULTI_ENCODED_PAYLOAD = [settings.DASHLESS_TAMPER]
+    settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = settings.NESTING_SUBSTITUTION
+    self.assertIn("one argument can hold", common.invalid_cmd_output("hostname"))
+    self._backticks()
+    self.assertNotIn("one argument can hold", common.invalid_cmd_output("hostname"))
+
+  def test_no_character_is_asked_of_a_boundary_known_not_to_carry_the_retrieval(self):
+    from src.core.techniques.boolean_based import bb_injector, bb_handler
+    asked = []
+    real, real_restore = bb_handler.retrieve, checks.restore_oracle
+    bb_handler.retrieve = lambda channel, cmd, **kwargs: asked.append(cmd) or "value"
+    checks.restore_oracle = lambda key: None
+    try:
+      self._backticks()
+      self.assertEqual("", bb_injector.injection("|", "hostname", "", "", " ", "POST", "http://t/", "addr"))
+      self.assertEqual("", bb_injector.injection("|", "hostname", "", "", " ", "POST", "http://t/", "addr"))
+      self.assertEqual([], asked)
+      # Said once for the parameter, not once per command.
+      self.assertEqual(1, len([_ for _ in self.said if "cannot be retrieved" in _]))
+      # A boundary that can carry it is asked as it always was.
+      self.assertEqual("value", bb_injector.injection(";", "hostname", "", "", " ", "POST", "http://t/", "addr"))
+      self.assertEqual(["hostname"], asked)
+    finally:
+      bb_handler.retrieve, checks.restore_oracle = real, real_restore

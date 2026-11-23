@@ -13,6 +13,7 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import io
 import unittest
 
 from src.utils import settings
@@ -80,7 +81,8 @@ class ResponseTimeSample(unittest.TestCase):
   # A target answering every request with the same error code, as '--ignore-code' was given for.
   def refuse_with(self, code):
     def send_raw(request, policy=True):
-      raise _urllib.error.HTTPError(request.full_url, code, "refused", {}, None)
+      # With a body, as a real error carries one: HTTPError(fp=None).read() raises KeyError on Python 3.8, 3.9 and 3.11.1 and gives b"" on 3.10 and 3.12.
+      raise _urllib.error.HTTPError(request.full_url, code, "refused", {}, io.BytesIO(b""))
     headers.send_raw = send_raw
 
   def test_an_ignored_error_code_is_still_a_timed_answer(self):

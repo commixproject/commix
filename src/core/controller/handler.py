@@ -764,6 +764,7 @@ def do_boolean_based_process(url, timesec, filename, http_request_method, inject
   prefixes, suffixes, separators, whitespaces = _prioritize_confirmed_boundary(prefixes, suffixes, separators, whitespaces)
 
   TAG = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
+  echo_said = []
 
   # One boundary, asked both ways round and then once more - which way the page answers is all this
   # technique reads, so a boundary that cannot answer both ways has not been shown to run anything.
@@ -844,6 +845,30 @@ def do_boolean_based_process(url, timesec, filename, http_request_method, inject
     if again is not True:
       checks.unexploitable_point()
       return None
+    """
+    Both questions once more with a tag this run has not used before, one character longer.
+
+    A page that echoes the value back in a form the filter above cannot recognise - quotes dropped, an
+    expansion taken out - differs between the two questions by the text of the questions themselves
+    (the length each one compares against), and a boundary confirmed on that was never run through.
+    The same questions written with other digits read differently from the pages the oracle was taught
+    on exactly where the page depends on the text sent, and identically where it depends on what ran.
+    """
+    fresh_tag = ''.join(random.choice(string.ascii_uppercase) for _ in range(len(TAG) + 1))
+    for holds in (True, False):
+      fresh_payload = payloads.decision(separator, fresh_tag, len(fresh_tag), holds=holds)
+      if not fresh_payload:
+        break
+      fresh_answer, _ = injector.answer(fresh_payload, prefix, suffix, whitespace, http_request_method, url, vuln_parameter)
+      if fresh_answer is not holds:
+        # Said once for the sweep: on a page that echoes what it is given, every boundary is turned away for the same reason.
+        if not echo_said:
+          echo_said.append(True)
+          if settings.VERBOSITY_LEVEL == 0:
+            settings.print_data_to_stdout(settings.SINGLE_WHITESPACE)
+          warn_msg = "The page answers the same question differently when it is written with other digits, which reads as the page repeating the question rather than a command running."
+          settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+        return None
     return reported_payload, vuln_parameter, prefix, suffix
 
   """

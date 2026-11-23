@@ -509,7 +509,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "363"
+REVISION = "364"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -688,6 +688,8 @@ CMD_NUL = "<nul"
 BACKTICK_SUBSTITUTION = "`"
 # Said once, where a confirmed pipe cannot carry the retrieval the finding would be read with.
 PIPE_RETRIEVAL_NOTICE_GIVEN = False
+# The parameters already told that a confirmed finding cannot be read back through its technique.
+OUTPUT_UNAVAILABLE_SAID = set()
 # The one that can, to go back to where a script that chose otherwise turns out not to apply.
 NESTING_SUBSTITUTION = ("$(", ")")
 CMD_SUB_PREFIX = "$("
@@ -978,6 +980,20 @@ BOOLEAN_FALSE_RAW = None
 
 BOOLEAN_TRUE_PAGE = None
 BOOLEAN_FALSE_PAGE = None
+# How alike the two calibration pages are, so that a response far less alike either of them than they are of each other is read as no answer.
+BOOLEAN_PAGES_SHARED = None
+BOOLEAN_ABSTAIN_FACTOR = 0.5
+# The same measure with the order of the text counted, kept for the pages small enough for its cost not to matter, and asked only of a response the first measure finds less alike than a repeat of an answer would be.
+BOOLEAN_PAGES_SHARED_FULL = None
+BOOLEAN_SUSPECT_RATIO = 0.9
+BOOLEAN_FULL_COMPARE_MAX = 20000
+# What only the true page says and what only the false page says, with enough around each to be told from the rest of the page.
+BOOLEAN_TRUE_MARKERS = []
+BOOLEAN_FALSE_MARKERS = []
+BOOLEAN_MARKER_MIN = 6
+BOOLEAN_MARKER_MAX = 120
+BOOLEAN_MARKER_MARGINS = (0, 4, 8, 12, 20, 32)
+BOOLEAN_MARKER_SEGMENTS = 8
 
 # The raw length of the two calibration pages, read alongside them - what '--lengths' (and
 # '--null-connection', which has no body to compare at all) bisects on instead of page content.
@@ -2409,6 +2425,9 @@ IGNORE_TAMPER_TRANSFORMATION = [
 # HTTP Errors
 BAD_REQUEST = "400"
 UNAUTHORIZED_ERROR = "401"
+
+# The 401 a target answered the connection with, until the run has settled it.
+UNAUTHORIZED_RESPONSE = None
 FORBIDDEN_ERROR = "403"
 NOT_FOUND_ERROR = "404"
 NOT_ALLOWED = "405"

@@ -4394,8 +4394,7 @@ def confirm_boundary(bare_prefix, bare_suffix, separator, whitespace):
   would count the newline the other spelling drops, and the retrieval indexes by that count - so it
   is left alone and said out loud rather than answered with nothing and no reason given.
   """
-  if (separator in ("|", "||") and not substitution_nests()
-      and not settings.PIPE_RETRIEVAL_NOTICE_GIVEN):
+  if blind_retrieval_unavailable(separator) and not settings.PIPE_RETRIEVAL_NOTICE_GIVEN:
     settings.PIPE_RETRIEVAL_NOTICE_GIVEN = True
     warn_msg = "The pipe this finding was confirmed on cannot carry the retrieval of a command's "
     warn_msg += "output while the payload is written with backticks, so execution is proved but "
@@ -4403,6 +4402,87 @@ def confirm_boundary(bare_prefix, bare_suffix, separator, whitespace):
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
   if whitespace and settings.WHITESPACES and settings.WHITESPACES[0] != whitespace:
     settings.WHITESPACES = [whitespace] + [_ for _ in settings.WHITESPACES if _ != whitespace]
+
+"""
+Whether a boundary proves the injection without carrying the retrieval of a command's output: the pipe, where the substitution cannot nest.
+
+>>> blind_retrieval_unavailable("|") == (not substitution_nests())
+True
+>>> blind_retrieval_unavailable(";")
+False
+"""
+def blind_retrieval_unavailable(separator):
+  return separator in (settings.PIPE_SEPARATOR, settings.PIPE_SEPARATOR * 2) and not substitution_nests()
+
+# Said once per parameter: execution is confirmed, and the output cannot be read back through the boolean-based finding.
+def output_unavailable_notice(vuln_parameter):
+  if vuln_parameter in settings.OUTPUT_UNAVAILABLE_SAID:
+    return
+  settings.OUTPUT_UNAVAILABLE_SAID.add(vuln_parameter)
+  warn_msg = "Command execution on parameter '" + str(vuln_parameter) + "' was confirmed, but the output of a command cannot be "
+  warn_msg += "retrieved through the boolean-based technique: the pipe ('|') it was confirmed on cannot carry the "
+  warn_msg += "retrieval while commands are substituted with backticks."
+  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+
+# Takes back, whole, a boolean-based finding whose boundary cannot carry the retrieval, so the passes ahead can look for one that can; settle_held_findings() puts it back if none does.
+def set_aside_unreadable_findings(mark, pending, identified_before):
+  new_points = settings.CONFIRMED_INJECTION_POINTS[mark:]
+  if not new_points or settings.LOAD_SESSION or any(row[0] != settings.INJECTION_TECHNIQUE.BOOLEAN_BASED for row in new_points):
+    return None
+  # A '--tamper' that names the script is the user's own choice of substitution, not the run's to withdraw.
+  if menu.options.tamper and "backticks" in menu.options.tamper.lower():
+    return None
+  boundary = settings.CONFIRMED_BOUNDARY.get(settings.CHECKING_PARAMETER)
+  if not boundary or not blind_retrieval_unavailable(boundary[2]):
+    return None
+  held = {"points": list(new_points), "boundary": boundary, "parameter": settings.CHECKING_PARAMETER, "tampers": tamper_state(),
+          "actions": settings.PENDING_POST_DETECTION_ACTIONS[pending[0]:], "proofs": settings.PROOF_EXECUTORS[pending[1]:],
+          "os_shell": settings.PENDING_OS_SHELL_ENTRY if settings.PENDING_OS_SHELL_ENTRY != pending[2] else None,
+          "identified": settings.IDENTIFIED_COMMAND_INJECTION}
+  settings.CONFIRMED_INJECTION_POINTS = settings.CONFIRMED_INJECTION_POINTS[:mark]
+  for row in new_points:
+    setattr(settings, _STATE_BY_TECHNIQUE[row[0]], False)
+  del settings.PENDING_POST_DETECTION_ACTIONS[pending[0]:]
+  del settings.PROOF_EXECUTORS[pending[1]:]
+  settings.PENDING_OS_SHELL_ENTRY = pending[2]
+  settings.IDENTIFIED_COMMAND_INJECTION = identified_before
+  if not settings.CONFIRMED_INJECTION_POINTS:
+    settings.INJECTION_CHECKER = False
+  del settings.CONFIRMED_BOUNDARY[settings.CHECKING_PARAMETER]
+  # The passes ahead are written with '$( )', the substitution that nests, and the finding waits.
+  settings.AUTO_TAMPER = [_ for _ in settings.AUTO_TAMPER if _ != "backticks"]
+  settings.MULTI_ENCODED_PAYLOAD = [_ for _ in settings.MULTI_ENCODED_PAYLOAD if _ != "backticks"]
+  settings.TAMPER_SCRIPTS["backticks"] = False
+  settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = settings.NESTING_SUBSTITUTION
+  warn_msg = "The finding on " + settings.CHECKING_PARAMETER + " is set aside while the remaining passes are tried for a boundary that can carry the retrieval."
+  settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  return held
+
+# Once every pass has had its turn: a readable finding made meanwhile replaces what was set aside, and where there is none it stands as it was.
+def settle_held_findings(held_findings):
+  if not held_findings:
+    return
+  if injection_techniques_status() is not False:
+    if settings.VERBOSITY_LEVEL != 0:
+      debug_msg = "A boundary that can carry the retrieval was found, so the finding set aside is discarded."
+      settings.print_data_to_stdout(settings.print_debug_msg(debug_msg))
+    del held_findings[:]
+    return
+  for held in held_findings:
+    settings.CONFIRMED_INJECTION_POINTS.extend(held["points"])
+    for row in held["points"]:
+      setattr(settings, _STATE_BY_TECHNIQUE[row[0]], True)
+    settings.PENDING_POST_DETECTION_ACTIONS.extend(held["actions"])
+    settings.PROOF_EXECUTORS.extend(held["proofs"])
+    if held["os_shell"] is not None and settings.PENDING_OS_SHELL_ENTRY is None:
+      settings.PENDING_OS_SHELL_ENTRY = held["os_shell"]
+    settings.CONFIRMED_BOUNDARY[held["parameter"]] = held["boundary"]
+    settings.IDENTIFIED_COMMAND_INJECTION = held["identified"]
+    settings.INJECTION_CHECKER = True
+    restore_tamper_state(held["tampers"])
+    warn_msg = "No other pass found a boundary that can carry the retrieval, so the finding on " + held["parameter"] + " stands: command execution is confirmed, output retrieval is unavailable through it."
+    settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
+  del held_findings[:]
 
 """
 Undo a per-character obfuscation (obf_char inserted before each letter) on any whole word that settings.IGNORE_TAMPER_TRANSFORMATION says must survive intact (e.g. shell keywords like 'if'/'then').
@@ -5629,6 +5709,72 @@ def boolean_oracle_given():
   return any((menu.options.string, menu.options.not_string, menu.options.regexp, menu.options.code))
 
 """
+How alike two pages are with the order of their text counted.
+
+The first argument is the page the oracle was taught on and the second is the response, and that order
+matters: 'difflib' decides what to treat as junk from the SECOND sequence, and with the two the other way
+round a page with a block added ahead of its content measured 0.03 against one it resembled at 0.89.
+In this order the figure agrees with the accurate one to within 0.05 on every case measured (AUDIT_dev364 D6).
+Costs under 10 ms for pages up to 20000 characters, and is asked only of a response the cheap measure
+finds less alike than a repeat of an answer would be.
+"""
+def _ordered_ratio(first, second):
+  return difflib.SequenceMatcher(None, first, second).ratio()
+
+"""
+A stretch of one page that the other page does not hold, around a place the two disagree on.
+
+Grown outwards from the difference until it is at least 'BOOLEAN_MARKER_MIN' characters, is not found in the other page and is found
+once in its own - a word as short as 'up' is inside 'upstream', and a marker that is inside other text names nothing.
+"""
+def _unique_window(page, start, end, other):
+  for margin in settings.BOOLEAN_MARKER_MARGINS:
+    window = page[max(0, start - margin):end + margin]
+    if len(window.strip()) < settings.BOOLEAN_MARKER_MIN or len(window) > settings.BOOLEAN_MARKER_MAX:
+      continue
+    if window not in other and page.count(window) == 1:
+      return window
+  return None
+
+"""
+What each calibration page says that the other does not, as text a later response can be asked for.
+
+Taken once, where the two pages are calibrated: a response that gained or lost content around the answer (a notice, a banner, a list of another
+length) still carries one answer's text and not the other's, where its overall likeness to either page moves with the size of what changed. Only
+differences that give a unique window on both sides are kept; a page with none, with too many, or too large to compare has no markers and is
+read by likeness alone.
+"""
+def boolean_markers(true_page, false_page):
+  if not true_page or not false_page:
+    return [], []
+  # What the two pages share at the start and at the end is not where they disagree, so only what lies between is compared: the cost
+  # follows the stretch the answer lives in and not the size of the page.
+  limit = min(len(true_page), len(false_page))
+  head = 0
+  while head < limit and true_page[head] == false_page[head]:
+    head += 1
+  tail = 0
+  while tail < limit - head and true_page[-1 - tail] == false_page[-1 - tail]:
+    tail += 1
+  true_middle, false_middle = true_page[head:len(true_page) - tail], false_page[head:len(false_page) - tail]
+  if max(len(true_middle), len(false_middle)) > settings.BOOLEAN_FULL_COMPARE_MAX:
+    return [], []
+  try:
+    segments = [_ for _ in difflib.SequenceMatcher(None, true_middle, false_middle, autojunk=False).get_opcodes() if _[0] != "equal"]
+  except (MemoryError, TypeError, ValueError):
+    return [], []
+  if not segments or len(segments) > settings.BOOLEAN_MARKER_SEGMENTS:
+    return [], []
+  true_markers, false_markers = [], []
+  for _, i1, i2, j1, j2 in segments:
+    on_true = _unique_window(true_page, head + i1, head + i2, false_page)
+    on_false = _unique_window(false_page, head + j1, head + j2, true_page)
+    if on_true is not None and on_false is not None:
+      true_markers.append(on_true)
+      false_markers.append(on_false)
+  return true_markers, false_markers
+
+"""
 Whether the page says the injected condition held.
 
 The answer a target gives where it branches on the command rather than printing what it returned -
@@ -5686,6 +5832,47 @@ def boolean_oracle(page, code=None, page_length=None, headers=None):
   to_false = page_ratio(settings.BOOLEAN_FALSE_PAGE, current)
   if to_true == to_false:
     return None
+  """
+  A page that is neither answer is no answer.
+
+  Nearest-page reading always names a side, and a response that resembles neither - a maintenance page,
+  an interstitial, a truncated body - is then taken for a yes or a no and bisected on. The two pages
+  calibration was taught on say how alike two real answers are; a response much less like either than they
+  are like each other is not one of them. Read as no answer, it is asked again and, if it stays, marked
+  as unresolved rather than counted.
+  """
+  shared = settings.BOOLEAN_PAGES_SHARED
+  best = max(to_true, to_false)
+  if shared is not None and best < shared * settings.BOOLEAN_ABSTAIN_FACTOR:
+    return None
+  """
+  The cheap measure counts which characters two pages share and not where, so a short foreign page made of
+  the same letters (a gateway error, a block notice) can still pass it. Where the page is small enough for
+  the order-aware measure to cost nothing, a response that is not a near repeat of an answer is put to it.
+  """
+  shared_full = settings.BOOLEAN_PAGES_SHARED_FULL
+  if shared_full is not None and best < settings.BOOLEAN_SUSPECT_RATIO and len(current) <= settings.BOOLEAN_FULL_COMPARE_MAX:
+    best_full = max(_ordered_ratio(settings.BOOLEAN_TRUE_PAGE, current), _ordered_ratio(settings.BOOLEAN_FALSE_PAGE, current))
+    if best_full < shared_full * settings.BOOLEAN_ABSTAIN_FACTOR:
+      return None
+  """
+  Which answer's own text the response carries, where calibration found some.
+
+  A response that gained or lost content leans, by overall likeness, to the longer of the two pages; the text only one
+  answer says does not move with that. Neither or both is left to the reading below.
+  """
+  true_markers, false_markers = settings.BOOLEAN_TRUE_MARKERS, settings.BOOLEAN_FALSE_MARKERS
+  if true_markers and false_markers:
+    has_true = all(marker in current for marker in true_markers)
+    has_false = all(marker in current for marker in false_markers)
+    if has_true != has_false:
+      return has_true
+  elif shared_full is not None and len(current) <= settings.BOOLEAN_FULL_COMPARE_MAX:
+    # No text to ask for: the likeness that counts the order of the text, which a longer page does not favour.
+    order_true = _ordered_ratio(settings.BOOLEAN_TRUE_PAGE, current)
+    order_false = _ordered_ratio(settings.BOOLEAN_FALSE_PAGE, current)
+    if order_true != order_false:
+      return order_true > order_false
   return to_true > to_false
 
 """
@@ -5696,6 +5883,8 @@ and everything bisected on it would be noise.
 """
 def calibrate_boolean_oracle(page_true, page_false, code_true=None, code_false=None):
   settings.BOOLEAN_TRUE_PAGE = settings.BOOLEAN_FALSE_PAGE = None
+  settings.BOOLEAN_PAGES_SHARED = settings.BOOLEAN_PAGES_SHARED_FULL = None
+  settings.BOOLEAN_TRUE_MARKERS, settings.BOOLEAN_FALSE_MARKERS = [], []
   settings.BOOLEAN_TRUE_RAW = settings.BOOLEAN_FALSE_RAW = None
   settings.BOOLEAN_TRUE_LENGTH = settings.BOOLEAN_FALSE_LENGTH = None
   settings.BOOLEAN_TRUE_CODE, settings.BOOLEAN_FALSE_CODE = code_true, code_false
@@ -5738,6 +5927,10 @@ def calibrate_boolean_oracle(page_true, page_false, code_true=None, code_false=N
     if normalized(true_error) == normalized(false_error):
       return False
   settings.BOOLEAN_TRUE_PAGE, settings.BOOLEAN_FALSE_PAGE = true_page, false_page
+  settings.BOOLEAN_PAGES_SHARED = page_ratio(true_page, false_page)
+  if max(len(true_page), len(false_page)) <= settings.BOOLEAN_FULL_COMPARE_MAX:
+    settings.BOOLEAN_PAGES_SHARED_FULL = _ordered_ratio(true_page, false_page)
+  settings.BOOLEAN_TRUE_MARKERS, settings.BOOLEAN_FALSE_MARKERS = boolean_markers(true_page, false_page)
   settings.BOOLEAN_TRUE_RAW, settings.BOOLEAN_FALSE_RAW = page_true, page_false
   return True
 
@@ -5752,7 +5945,9 @@ def remember_oracle(key):
                                  settings.BOOLEAN_TRUE_RAW, settings.BOOLEAN_FALSE_RAW,
                                  settings.BOOLEAN_TRUE_LENGTH, settings.BOOLEAN_FALSE_LENGTH,
                                  settings.BOOLEAN_TRUE_CODE, settings.BOOLEAN_FALSE_CODE,
-                                 settings.BOOLEAN_PRINTED_STATE, list(settings.DYNAMIC_MARKINGS))
+                                 settings.BOOLEAN_PRINTED_STATE, list(settings.DYNAMIC_MARKINGS),
+                                 settings.BOOLEAN_PAGES_SHARED, settings.BOOLEAN_PAGES_SHARED_FULL,
+                                 list(settings.BOOLEAN_TRUE_MARKERS), list(settings.BOOLEAN_FALSE_MARKERS))
 
 """
 Put a finding's own oracle back before anything is read through it - once per retrieval, from the
@@ -5768,6 +5963,10 @@ def restore_oracle(key):
   settings.BOOLEAN_TRUE_CODE, settings.BOOLEAN_FALSE_CODE = state[6], state[7]
   settings.BOOLEAN_PRINTED_STATE = state[8]
   settings.DYNAMIC_MARKINGS = list(state[9])
+  settings.BOOLEAN_PAGES_SHARED = state[10] if len(state) > 10 else None
+  settings.BOOLEAN_PAGES_SHARED_FULL = state[11] if len(state) > 11 else None
+  settings.BOOLEAN_TRUE_MARKERS = list(state[12]) if len(state) > 12 else []
+  settings.BOOLEAN_FALSE_MARKERS = list(state[13]) if len(state) > 13 else []
 
 """
 Text one answer carries and the other does not, quoted back as the option that would name it.
