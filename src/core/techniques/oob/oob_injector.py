@@ -28,6 +28,8 @@ The out-of-band technique on OS command injection.
 Run a command on the target and read its output back off the out-of-band channel.
 """
 def injection(separator, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, transport=None):
+  # One command's own retrieval, as the boolean and time-related ones reset it: an output an earlier command left incomplete says nothing about this one.
+  settings.INCOMPLETE_OUTPUT = False
   channel = settings.OOB_CHANNEL
   transport = transport or settings.OOB_TRANSPORT
   if channel is None or not payloads.supports_exfiltration(transport):

@@ -86,7 +86,7 @@ class OOBProvider(object):
   Block until an interaction carrying the token arrives, or the timeout expires.
   A protocol keeps waiting for that kind - name resolution always lands before the request itself.
   """
-  def wait_for(self, token, timeout, protocol=None):
+  def wait_for(self, token, timeout, protocol=None, until=None):
     deadline = time.time() + timeout
     next_poll = 0
     while True:
@@ -100,7 +100,8 @@ class OOBProvider(object):
         hits = list(self._interactions.get(token, []))
       if protocol:
         hits = [_ for _ in hits if _.protocol == protocol]
-      if hits or time.time() >= deadline:
+      # A caller that knows what it is waiting for keeps waiting past an interaction that does not carry it - a resolver may look up a shortened name first.
+      if (hits and (until is None or until(hits))) or time.time() >= deadline:
         return hits
       time.sleep(0.5)
 

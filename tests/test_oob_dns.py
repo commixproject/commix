@@ -762,5 +762,87 @@ class TestDashlessPayloads(unittest.TestCase):
         self.assertIn("expr", command)
 
 
+class TestEachCommandIsJudgedOnItsOwnOutput(unittest.TestCase):
+    """
+    The incomplete-output flag was reset by the boolean and time-related retrievals but never by this one, so an earlier
+    incomplete command left every later out-of-band output marked incomplete: not stored, and reported as such.
+    """
+
+    class Channel:
+        def new_payload(self):
+            return "tok", "tok.example"
+
+    def setUp(self):
+        self._saved = (settings.INCOMPLETE_OUTPUT, settings.OOB_CHANNEL, settings.OOB_TRANSPORT, settings.OOB_EVAL)
+        settings.OOB_CHANNEL, settings.OOB_TRANSPORT, settings.OOB_EVAL = self.Channel(), "dns", False
+
+    def tearDown(self):
+        settings.INCOMPLETE_OUTPUT, settings.OOB_CHANNEL, settings.OOB_TRANSPORT, settings.OOB_EVAL = self._saved
+
+    def _run(self, dns_output):
+        with mock.patch.object(oob_injector.handler, "oob_inject", lambda *a, **k: None), \
+             mock.patch.object(oob_injector, "_dns_output", dns_output):
+            return oob_injector.injection(";", "id", "", "", " ", "GET", "http://t/", "addr")
+
+    def test_a_complete_output_after_an_incomplete_one_is_complete(self):
+        settings.INCOMPLETE_OUTPUT = True
+        self.assertEqual("uid=33", self._run(lambda channel, token: "uid=33"))
+        self.assertFalse(settings.INCOMPLETE_OUTPUT)
+
+    def test_an_incomplete_output_is_still_marked(self):
+        def truncated(channel, token):
+            settings.INCOMPLETE_OUTPUT = True
+            return "uid="
+        settings.INCOMPLETE_OUTPUT = False
+        self.assertEqual("uid=", self._run(truncated))
+        self.assertTrue(settings.INCOMPLETE_OUTPUT)
+
+    def test_no_channel_leaves_no_stale_mark(self):
+        settings.INCOMPLETE_OUTPUT = True
+        settings.OOB_CHANNEL = None
+        self.assertEqual("", oob_injector.injection(";", "id", "", "", " ", "GET", "http://t/", "addr"))
+        self.assertFalse(settings.INCOMPLETE_OUTPUT)
+
+
+class TestTheReconfirmationWaitsForTheLookupThatCarriesTheAnswer(unittest.TestCase):
+    """
+    The wait returned on the first interaction carrying the token, and a resolver that looks up a shortened name first
+    (QNAME minimisation) delivers one without the label the proof is read from - so a real injection point was rejected.
+    """
+
+    def setUp(self):
+        from src.core.oob.provider import OOBProvider
+        from src.core.controller import checks
+        self.checks = checks
+        self.provider = OOBProvider()
+        self.provider._interactions["tok"] = [Interaction("dns", "tok.oast.example", "")]
+        self.full = Interaction("dns", "1337.tok.oast.example", "")
+
+    def _sleep_then_arrive(self):
+        def sleep(_):
+            if self.full not in self.provider._interactions["tok"]:
+                self.provider._interactions["tok"].append(self.full)
+        return sleep
+
+    def test_the_wait_goes_on_until_the_answer_arrives(self):
+        holds = lambda hits: self.checks.oob_proof_holds(hits, "1337")
+        with mock.patch("time.sleep", self._sleep_then_arrive()):
+            hits = self.provider.wait_for("tok", 5, protocol="dns", until=holds)
+        self.assertTrue(self.checks.oob_proof_holds(hits, "1337"))
+
+    def test_without_a_condition_the_first_interaction_still_ends_the_wait(self):
+        with mock.patch("time.sleep", self._sleep_then_arrive()):
+            hits = self.provider.wait_for("tok", 5, protocol="dns")
+        self.assertEqual(1, len(hits))
+        self.assertFalse(self.checks.oob_proof_holds(hits, "1337"))
+
+    def test_an_answer_that_never_arrives_ends_at_the_timeout(self):
+        holds = lambda hits: self.checks.oob_proof_holds(hits, "1337")
+        clock = iter([0, 0, 0, 1, 1, 6, 6, 6, 6])
+        with mock.patch("time.sleep", lambda _: None), mock.patch("time.time", lambda: next(clock)):
+            hits = self.provider.wait_for("tok", 5, protocol="dns", until=holds)
+        self.assertFalse(self.checks.oob_proof_holds(hits, "1337"))
+
+
 if __name__ == "__main__":
     unittest.main()

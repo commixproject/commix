@@ -484,5 +484,74 @@ class AStoredCookieThatIsPutBackIsSaid(SessionFixture):
     session_handler.apply_stored_technique(self.row)
     self.assertEqual(1, len([_ for _ in self.said if "put back for this run" in _]))
 
+class AFindingIsReplayedWithTheValueAsItWasMade(SessionFixture):
+  """
+  A finding made with the value replaced was replayed with it kept, so the stored boundary no longer answered and the run started over.
+  The session says which of the two it was, and a session written before it said so is left as it was.
+  """
+  def setUp(self):
+    SessionFixture.setUp(self)
+    self._replace = settings.REPLACE_VALUE
+
+  def tearDown(self):
+    settings.REPLACE_VALUE = self._replace
+    SessionFixture.tearDown(self)
+
+  def _store(self, replaced, payload="127.0.0.1;echo TAG;"):
+    settings.REPLACE_VALUE = replaced
+    session_handler.import_injection_points(
+      self.URL, settings.INJECTION_TECHNIQUE.RESULTS_BASED, settings.INJECTION_TYPE.RESULTS_BASED_CI,
+      "", ";", True, "addr", "", "", "TAG", False, payload, "GET", 0, 0, 0, 0, "1")
+
+  def _row(self):
+    return list(session_handler.load_stored_techniques(self.URL, "addr", "GET").values())[0]
+
+  def _stored_flags(self):
+    with sqlite3.connect(settings.SESSION_FILE) as conn:
+      table = session_handler.table_name(self.URL) + "_ip"
+      return [_[0] for _ in conn.execute("SELECT value_replaced FROM \"" + table + "\" ORDER BY id;")]
+
+  def test_a_finding_made_with_the_value_replaced_is_replayed_with_it_replaced(self):
+    self._store(True)
+    settings.REPLACE_VALUE = False
+    session_handler.apply_stored_technique(self._row())
+    self.assertTrue(settings.REPLACE_VALUE)
+
+  def test_a_finding_made_behind_the_value_is_replayed_behind_it(self):
+    self._store(False)
+    # What an earlier parameter's replay left in force is not carried into this one.
+    settings.REPLACE_VALUE = True
+    session_handler.apply_stored_technique(self._row())
+    self.assertFalse(settings.REPLACE_VALUE)
+
+  def test_the_session_holds_one_for_replaced_and_empty_otherwise(self):
+    self._store(True)
+    self._store(False, payload="127.0.0.1|echo TAG;")
+    self.assertEqual(["1", ""], self._stored_flags())
+
+  def test_a_row_written_before_the_column_existed_leaves_the_setting_as_it_was(self):
+    self._store(True)
+    older = tuple(self._row())[:32]
+    for before in (True, False):
+      settings.REPLACE_VALUE = before
+      session_handler.apply_stored_technique(older)
+      self.assertEqual(before, settings.REPLACE_VALUE)
+
+  def test_a_session_file_from_before_the_column_gets_it_when_written_to(self):
+    self._store(True)
+    table = session_handler.table_name(self.URL) + "_ip"
+    with sqlite3.connect(settings.SESSION_FILE) as conn:
+      columns = [_[1] for _ in conn.execute("PRAGMA table_info(\"" + table + "\");") if _[1] not in ("id", "value_replaced")]
+      conn.execute("DROP TABLE \"" + table + "\";")
+      conn.execute("CREATE TABLE \"" + table + "\" (id INTEGER PRIMARY KEY, " + ", ".join(_ + " VARCHAR" for _ in columns) + ");")
+    self._store(True)
+    self.assertEqual(["1"], self._stored_flags())
+
+  def test_the_same_finding_with_a_different_flag_is_a_row_of_its_own(self):
+    self._store(True)
+    self._store(True)
+    self._store(False)
+    self.assertEqual(["1", ""], self._stored_flags())
+
 if __name__ == "__main__":
   unittest.main()

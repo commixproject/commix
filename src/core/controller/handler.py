@@ -711,7 +711,8 @@ def _oob_sweep(is_eval, injection_type, prefixes, suffixes, separators, url, tim
       verify_payload = payloads.decision(separator, transport, verify_hostname, verify_expression, verify_prologue)
     oob_inject(prefix, suffix, whitespace, verify_payload, vuln_parameter, http_request_method, url)
     if not checks.oob_proof_holds(channel.wait_for(verify_token, settings.OOB_TIMEOUT,
-                                                   protocol=payloads.required_protocol(transport)),
+                                                   protocol=payloads.required_protocol(transport),
+                                                   until=lambda hits: checks.oob_proof_holds(hits, verify_expected)),
                                   verify_expected):
       checks.unexploitable_point()
       return False

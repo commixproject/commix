@@ -384,19 +384,19 @@ def import_injection_points(url, technique, injection_type, filename, separator,
                    "target_os VARCHAR, file_deleted VARCHAR DEFAULT '', web_root VARCHAR DEFAULT '', tmp_path VARCHAR DEFAULT '', "
                    "second_url VARCHAR DEFAULT '', second_req VARCHAR DEFAULT '', csrf_token VARCHAR DEFAULT '', "
                    "csrf_url VARCHAR DEFAULT '', csrf_method VARCHAR DEFAULT '', csrf_data VARCHAR DEFAULT '', "
-                   "value_encoding VARCHAR DEFAULT '');")
+                   "value_encoding VARCHAR DEFAULT '', value_replaced VARCHAR DEFAULT '');")
 
       # The options a stored payload was made with, for a session file that predates them.
       _ensure_columns(conn, table, (("second_url", "VARCHAR DEFAULT ''"), ("second_req", "VARCHAR DEFAULT ''"), ("csrf_token", "VARCHAR DEFAULT ''"),
                                     ("csrf_url", "VARCHAR DEFAULT ''"), ("csrf_method", "VARCHAR DEFAULT ''"), ("csrf_data", "VARCHAR DEFAULT ''"),
-                                    ("value_encoding", "VARCHAR DEFAULT ''")))
+                                    ("value_encoding", "VARCHAR DEFAULT ''"), ("value_replaced", "VARCHAR DEFAULT ''")))
 
       # Check if an exact matching record already exists to avoid duplicates
       query_check = ("SELECT 1 FROM \"" + table + "\" WHERE url = ? AND technique = ? AND injection_type = ? AND separator = ? AND "
                      "shell = ? AND vuln_parameter = ? AND prefix = ? AND suffix = ? AND TAG = ? AND interpreter = ? AND payload = ? AND "
                      "http_header = ? AND http_request_method = ? AND url_time_response = ? AND timesec = ? AND exec_time = ? AND "
                      "output_length = ? AND is_vulnerable = ? AND data = ? AND cookie = ? AND tamper = ? AND target_os = ? AND web_root = ? AND tmp_path = ? AND "
-                     "second_url = ? AND second_req = ? AND csrf_token = ? AND csrf_url = ? AND csrf_method = ? AND csrf_data = ? AND value_encoding = ? LIMIT 1;")
+                     "second_url = ? AND second_req = ? AND csrf_token = ? AND csrf_url = ? AND csrf_method = ? AND csrf_data = ? AND value_encoding = ? AND value_replaced = ? LIMIT 1;")
 
       params = (str(url), str(technique), str(injection_type), str(separator), str(shell), str(vuln_parameter or ""),
                 str(prefix), str(suffix), str(TAG), str(interpreter), str(payload), str(settings.HTTP_HEADER),
@@ -405,7 +405,7 @@ def import_injection_points(url, technique, injection_type, filename, separator,
                 str(menu.options.tamper or ""), str(settings.TARGET_OS), str(settings.WEB_ROOT or ""), str(_stored_tmp_path(technique)),
                 str(menu.options.second_url or ""), str(menu.options.second_req or ""), str(settings.CSRF_TOKEN_ORIGINAL or ""),
                 str(menu.options.csrf_url or ""), str(menu.options.csrf_method or ""), str(menu.options.csrf_data or ""),
-                json.dumps(settings.VALUE_ENCODING) if settings.VALUE_ENCODING else "")
+                json.dumps(settings.VALUE_ENCODING) if settings.VALUE_ENCODING else "", "1" if settings.REPLACE_VALUE else "")
 
       if settings.BASE64_PADDING in params[0]:
         params = (params[0].replace(settings.BASE64_PADDING, _urllib.parse.quote(settings.BASE64_PADDING)),) + params[1:]
@@ -417,8 +417,8 @@ def import_injection_points(url, technique, injection_type, filename, separator,
         conn.execute("INSERT INTO \"" + table + "\" (url, technique, injection_type, separator, "
                      "shell, vuln_parameter, prefix, suffix, TAG, interpreter, payload, http_header, http_request_method, "
                      "url_time_response, timesec, exec_time, output_length, is_vulnerable, data, cookie, tamper, target_os, web_root, tmp_path, "
-                     "second_url, second_req, csrf_token, csrf_url, csrf_method, csrf_data, value_encoding) "
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", params)
+                     "second_url, second_req, csrf_token, csrf_url, csrf_method, csrf_data, value_encoding, value_replaced) "
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", params)
         conn.commit()
 
     # Any stand-in for the parameter's value is recorded with the finding rather than before it, so
@@ -725,6 +725,8 @@ def apply_stored_technique(row, current_url=None):
   csrf_method = row[29] if len(row) > 29 else None
   csrf_data = row[30] if len(row) > 30 else None
   value_encoding = row[31] if len(row) > 31 else None
+  # Whether the finding was made with the value replaced, which the replay has to repeat to be asked the same way.
+  value_replaced = row[32] if len(row) > 32 else None
 
   if http_header:
     settings.HTTP_HEADER = http_header
@@ -815,6 +817,9 @@ def apply_stored_technique(row, current_url=None):
       settings.VALUE_ENCODING = json.loads(value_encoding)
     except Exception:
       settings.VALUE_ENCODING = None
+  # A session written before the column existed says nothing either way, so it is left as it was.
+  if value_replaced is not None:
+    settings.REPLACE_VALUE = value_replaced == "1"
 
   # Read back the way it was given, so what the token is looked up by is what it was found with.
   if csrf_token and csrf_token != "None":

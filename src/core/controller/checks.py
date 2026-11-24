@@ -4430,8 +4430,7 @@ def set_aside_unreadable_findings(mark, pending, identified_before):
   if not new_points or settings.LOAD_SESSION or any(row[0] != settings.INJECTION_TECHNIQUE.BOOLEAN_BASED for row in new_points):
     return None
   # A '--tamper' that names the script is the user's own choice of substitution, not the run's to withdraw.
-  if menu.options.tamper and "backticks" in menu.options.tamper.lower():
-    return None
+  named = bool(menu.options.tamper and "backticks" in menu.options.tamper.lower())
   boundary = settings.CONFIRMED_BOUNDARY.get(settings.CHECKING_PARAMETER)
   if not boundary or not blind_retrieval_unavailable(boundary[2]):
     return None
@@ -4449,11 +4448,12 @@ def set_aside_unreadable_findings(mark, pending, identified_before):
   if not settings.CONFIRMED_INJECTION_POINTS:
     settings.INJECTION_CHECKER = False
   del settings.CONFIRMED_BOUNDARY[settings.CHECKING_PARAMETER]
-  # The passes ahead are written with '$( )', the substitution that nests, and the finding waits.
-  settings.AUTO_TAMPER = [_ for _ in settings.AUTO_TAMPER if _ != "backticks"]
-  settings.MULTI_ENCODED_PAYLOAD = [_ for _ in settings.MULTI_ENCODED_PAYLOAD if _ != "backticks"]
-  settings.TAMPER_SCRIPTS["backticks"] = False
-  settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = settings.NESTING_SUBSTITUTION
+  # The passes ahead are written with '$( )', the substitution that nests, and the finding waits; one the user named stays, and the passes ahead look for a separator that carries the retrieval through it.
+  if not named:
+    settings.AUTO_TAMPER = [_ for _ in settings.AUTO_TAMPER if _ != "backticks"]
+    settings.MULTI_ENCODED_PAYLOAD = [_ for _ in settings.MULTI_ENCODED_PAYLOAD if _ != "backticks"]
+    settings.TAMPER_SCRIPTS["backticks"] = False
+    settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = settings.NESTING_SUBSTITUTION
   warn_msg = "The finding on " + settings.CHECKING_PARAMETER + " is set aside while the remaining passes are tried for a boundary that can carry the retrieval."
   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
   return held

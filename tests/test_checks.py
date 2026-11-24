@@ -2651,8 +2651,13 @@ class AFindingTheOutputCannotBeReadBackThroughDoesNotEndThePasses(unittest.TestC
   def test_the_substitution_the_user_named_is_not_withdrawn(self):
     self._backticks()
     menu.options.tamper = "backticks"
-    self.assertIsNone(self._set_aside(self._confirm()))
+    # Set aside like any other, so the passes ahead can still look for a separator that carries the retrieval through it.
+    self.assertIsNotNone(self._set_aside(self._confirm()))
+    self.assertFalse(checks.injection_techniques_status())
     self.assertEqual(settings.BACKTICK_SUBSTITUTION, settings.CMD_SUB_PREFIX)
+    self.assertIn("backticks", settings.AUTO_TAMPER)
+    self.assertIn("backticks", settings.MULTI_ENCODED_PAYLOAD)
+    self.assertTrue(settings.TAMPER_SCRIPTS["backticks"])
 
   def test_the_empty_output_error_does_not_blame_the_argument_size_where_the_substitution_is_the_reason(self):
     from src.utils import common
