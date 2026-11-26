@@ -1202,8 +1202,8 @@ def check_os(server_header):
   for banner in settings.SERVER_OS_BANNERS:
     match = re.search(banner, server_header, re.IGNORECASE)
     if match:
-      # What the banner spells out, rather than the family it puts the target in.
-      named = match.group(0)
+      # What the banner spells out, rather than the family it puts the target in - a plain name as the list writes it, since a packaged build writes it in lower case ("1ubuntu1").
+      named = banner if re.match(r"\A\w+\Z", banner) else match.group(0)
       checks.hint_target_os(named)
 
       # Said, not enforced: a banner is a claim about what answers HTTP, and stopping the run on it would be taking it for the shell.
@@ -1213,7 +1213,9 @@ def check_os(server_header):
         settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
       break
 
-  if named and settings.VERBOSITY_LEVEL != 0:
+  # Said once for each system: the X-Powered-By and the Server header can both name it.
+  if named and settings.VERBOSITY_LEVEL != 0 and named.lower() not in settings.TARGET_OS_NAMES_SAID:
+    settings.TARGET_OS_NAMES_SAID.add(named.lower())
     debug_msg = "The web server operating system is '" + named + "'"
     debug_msg += " (" + checks.target_os_label() + ")."
     settings.print_data_to_stdout(settings.print_bold_debug_msg(debug_msg))

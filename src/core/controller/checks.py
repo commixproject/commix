@@ -5714,7 +5714,7 @@ How alike two pages are with the order of their text counted.
 The first argument is the page the oracle was taught on and the second is the response, and that order
 matters: 'difflib' decides what to treat as junk from the SECOND sequence, and with the two the other way
 round a page with a block added ahead of its content measured 0.03 against one it resembled at 0.89.
-In this order the figure agrees with the accurate one to within 0.05 on every case measured (AUDIT_dev364 D6).
+In this order the figure agrees with the accurate one to within 0.05 on every case measured.
 Costs under 10 ms for pages up to 20000 characters, and is asked only of a response the cheap measure
 finds less alike than a repeat of an answer would be.
 """

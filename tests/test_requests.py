@@ -646,3 +646,41 @@ class ACodeTheRequestWentLookingForIsNotInterference(unittest.TestCase):
     settings.DEFINED_WEBROOT = ""
     checks.output_file_still_served()
     self.assertFalse(settings.in_side_request("file_check"))
+
+class AnOperatingSystemIsNamedOnce(unittest.TestCase):
+  """
+  The X-Powered-By header and the Server header are both read for the operating system, and a
+  packaged build names its distribution in the first ("1ubuntu1") as the server names it in the
+  second ("(Ubuntu)"). One system, said once, and spelled the way the list spells it.
+  """
+  NAMES = ("VERBOSITY_LEVEL", "TARGET_OS", "OS_HINTED", "TARGET_OS_NAMES_SAID", "WEB_ROOT", "DEFAULT_WEB_ROOT")
+
+  def setUp(self):
+    self._saved = dict((name, getattr(settings, name)) for name in self.NAMES)
+    self._os, self._shellshock = menu.options.os, menu.options.shellshock
+    menu.options.os, menu.options.shellshock = None, False
+    settings.VERBOSITY_LEVEL = 1
+    settings.TARGET_OS_NAMES_SAID = set()
+    self.said = []
+    self._print = settings.print_data_to_stdout
+    settings.print_data_to_stdout = lambda text: self.said.append(str(text))
+
+  def tearDown(self):
+    settings.print_data_to_stdout = self._print
+    for name, value in self._saved.items():
+      setattr(settings, name, value)
+    menu.options.os, menu.options.shellshock = self._os, self._shellshock
+
+  def _named(self):
+    return [_ for _ in self.said if "operating system is" in _]
+
+  def test_the_same_system_in_both_headers_is_said_once(self):
+    requests.check_os("PHP/8.3.6-1ubuntu1")
+    requests.check_os("nginx/1.24.0 (Ubuntu)")
+    self.assertEqual(1, len(self._named()))
+    self.assertIn("'Ubuntu'", self._named()[0])
+
+  def test_two_different_systems_are_both_said(self):
+    requests.check_os("PHP/8.3.6-1ubuntu1")
+    requests.check_os("Apache/2.4.58 (Debian)")
+    self.assertEqual(2, len(self._named()))

@@ -2393,7 +2393,7 @@ class TheOrderAwareMeasureIsAskedInTheOrderThatKeepsItAccurate(ABooleanOracleDoe
     self.assertLess(abs(self.checks._ordered_ratio(page, with_banner) - accurate), 0.05)
 
   def test_a_true_page_that_gained_content_is_read_as_true(self):
-    # Was an expected failure (AUDIT_dev364 D7): the nearest-page reading leaned to the longer calibration page and read a true response
+    # Was an expected failure: the nearest-page reading leaned to the longer calibration page and read a true response
     # with a banner added as false. Read from the text only the true answer carries, it is true.
     with_banner = (self.PAGE % "Host is up").replace("<h1>", self.BANNER + "<h1>")
     self.assertIs(True, self.checks.boolean_oracle(with_banner, 200))

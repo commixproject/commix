@@ -13,6 +13,8 @@ the Free Software Foundation, either version 3 of the License, or
 For more see the file 'readme/COPYING' for copying permission.
 """
 
+import copy
+import os
 import unittest
 
 from src.utils import settings
@@ -401,3 +403,153 @@ class WhatStoodInForOneParametersValueIsNotCarriedToTheNext(unittest.TestCase):
     controller.reset_parameter_state()
     self.assertFalse(settings.TESTABLE_VALUE_OPTIMIZED)
     self.assertEqual("", settings.TESTABLE_VALUE_STOOD_IN_FOR)
+
+class ANameIsTestedWhateverItIsSpelledWith(unittest.TestCase):
+  """
+  A form built by ASP.NET names its fields "ctl00$Main$txtHost", one built by JSF "form:host", and a
+  SOAP or JSON document can name an element or a key "ns:host". Each is a parameter like any other;
+  only a candidate the parser split out of a body it could not read is left out.
+  """
+  def setUp(self):
+    from src.core.requests import parameters
+    self.parameters = parameters
+    # Splitting and testing a body settle the run's state (the value under test, the format, the lists
+    # of names), so every plain setting is put back afterwards, not only the ones set here.
+    self._settings = dict((name, copy.deepcopy(value)) for name, value in vars(settings).items()
+                          if name.isupper() and isinstance(value, (str, int, float, bool, type(None), list, dict, set, tuple)))
+    self._options = (menu.options.data, menu.options.ignore_session, menu.options.test_parameter, menu.options.skip_parameter, menu.options.batch)
+    self._calls = (controller.injection_process, controller.check_for_stored_sessions)
+    self.tested = []
+    controller.injection_process = lambda url, name, *args, **kwargs: self.tested.append(name)
+    controller.check_for_stored_sessions = lambda url, name, method: (url, name)
+    # The JSON and XML bodies are taken as they are, without the question a run would put.
+    menu.options.ignore_session = menu.options.batch = True
+    menu.options.test_parameter = menu.options.skip_parameter = None
+
+  def tearDown(self):
+    for name, value in self._settings.items():
+      setattr(settings, name, value)
+    menu.options.data, menu.options.ignore_session, menu.options.test_parameter, menu.options.skip_parameter, menu.options.batch = self._options
+    controller.injection_process, controller.check_for_stored_sessions = self._calls
+
+  def _post(self, body):
+    for name in ("IS_JSON", "IS_XML", "IS_GRAPHQL"):
+      setattr(settings, name, False)
+    settings.TESTED_PARAMETERS_LIST, settings.TESTABLE_PARAMETERS_LIST, settings.SKIP_PARAMETERS_LIST = [], [], []
+    settings.POST_DATA_PARAM_DELIMITER = "&"
+    menu.options.data = settings.USER_DEFINED_POST_DATA = body
+    found = self.parameters.do_POST_check(body, settings.HTTPMETHOD.POST)
+    controller.do_injection(found, settings.HTTPMETHOD.POST, "http://t/a.aspx", settings.HTTPMETHOD.POST, "f", 1)
+    return self.tested
+
+  def test_form_names_carrying_symbols_are_tested(self):
+    tested = self._post("ctl00$Main$txtHost=1&form:host=2&user@host=3&other=4")
+    for name in ("ctl00$Main$txtHost", "form:host", "user@host", "other"):
+      self.assertIn(name, tested)
+
+  def test_a_json_key_carrying_a_colon_is_tested(self):
+    self.assertIn("ns:host", self._post('{"ns:host":"1","other":"2"}'))
+
+  def test_a_fragment_the_parser_could_not_read_is_still_left_out(self):
+    tested = self._post('{\n  "a": [\n    1,\n    2,\n    {\n      "d": "x"\n    }\n  ],\n  "e": "y"\n}')
+    self.assertIn("e", tested)
+    self.assertFalse([_ for _ in tested if "\n" in _ or settings.INJECT_TAG in _])
+
+class AnOutputWithCharactersLeftUnreadIsNotKept(unittest.TestCase):
+  """
+  A command answered one character at a time can come back with characters that were never read.
+  Kept as the command's answer, the next run would print it as the real output without asking again;
+  an output read in full is kept and served as before.
+  """
+  def setUp(self):
+    import tempfile
+    from src.core.controller import execution, handler, proof
+    from src.utils import session_handler
+    self.execution, self.handler, self.proof, self.session = execution, handler, proof, session_handler
+    self._settings = dict((name, copy.deepcopy(value)) for name, value in vars(settings).items()
+                          if name.isupper() and isinstance(value, (str, int, float, bool, type(None), list, dict, set, tuple)))
+    self._options = menu.options.ignore_session
+    self._print = settings.print_data_to_stdout
+    self._register = proof.register
+    self._dir = tempfile.mkdtemp(prefix="commix-output-")
+    settings.SESSION_FILE = os.path.join(self._dir, "session.db")
+    settings.print_data_to_stdout = lambda *args, **kwargs: None
+    settings.TIME_RELATED_ATTACK = False
+    menu.options.ignore_session = False
+    self.url, self.log = "http://t/a.php?a=1", os.path.join(self._dir, "logs.txt")
+
+  def tearDown(self):
+    import shutil
+    for name, value in self._settings.items():
+      setattr(settings, name, value)
+    menu.options.ignore_session = self._options
+    settings.print_data_to_stdout = self._print
+    self.proof.register = self._register
+    shutil.rmtree(self._dir, ignore_errors=True)
+
+  def _answering(self, output, incomplete, asked):
+    def injection(*args, **kwargs):
+      asked.append(1)
+      settings.INCOMPLETE_OUTPUT = incomplete
+      return output
+    return injection
+
+  def _twice(self, run, cmd):
+    run(cmd)
+    settings.INCOMPLETE_OUTPUT = False
+    run(cmd)
+
+  def _executor(self, output, incomplete, asked):
+    import types
+    return self.execution.make_execute_cmd(types.SimpleNamespace(injection=self._answering(output, incomplete, asked)), ";", 100, "TAG",
+                                           "", "", " ", 1, "GET", self.url, "a", None, None, 0,
+                                           settings.INJECTION_TECHNIQUE.BOOLEAN_BASED, "")
+
+  def _shell(self, module, opener, output, incomplete, asked):
+    captured = {}
+    def register(technique, parameter, method, execute_cmd):
+      captured["run"] = execute_cmd
+      raise StopIteration
+    self.proof.register = register
+    saved = module.injection
+    module.injection = self._answering(output, incomplete, asked)
+    self.addCleanup(setattr, module, "injection", saved)
+    try:
+      opener()
+    except StopIteration:
+      pass
+    return captured["run"]
+
+  def test_the_enumeration_and_file_read_runner_asks_again(self):
+    asked = []
+    run = self._executor("uid=33(www-data) gr?ups=33", True, asked)
+    self._twice(run, "id")
+    self.assertEqual(2, len(asked))
+
+  def test_an_output_read_in_full_is_still_served_from_the_session(self):
+    asked = []
+    run = self._executor("www-data", False, asked)
+    self._twice(run, "whoami")
+    self.assertEqual(1, len(asked))
+
+  def test_the_record_an_interrupted_extraction_left_is_not_overwritten(self):
+    from src.core.controller import checks
+    self.session.store_cmd(self.url, "hostname", settings.PARTIAL_VALUE_MARKER + "8:1=117,2=105", "a")
+    self._executor("ui??????", True, [])("hostname")
+    self.assertFalse(checks.usable_stored_cmd(self.session.export_stored_cmd(self.url, "hostname", "a")))
+
+  def test_the_boolean_shell_asks_again(self):
+    from src.core.techniques.boolean_based import bb_injector
+    asked = []
+    run = self._shell(bb_injector, lambda: self.handler.boolean_based_pseudo_terminal_shell(
+      ";", "", "", " ", "a", "GET", self.url, self.log, settings.INJECTION_TECHNIQUE.BOOLEAN_BASED), "Lin?x", True, asked)
+    self._twice(run, "uname")
+    self.assertEqual(2, len(asked))
+
+  def test_the_out_of_band_shell_asks_again(self):
+    from src.core.techniques.oob import oob_injector
+    asked = []
+    run = self._shell(oob_injector, lambda: self.handler.oob_pseudo_terminal_shell(
+      ";", "", "", " ", "a", "GET", self.url, self.log, settings.INJECTION_TECHNIQUE.BOOLEAN_BASED, None), "Lin?x", True, asked)
+    self._twice(run, "uname")
+    self.assertEqual(2, len(asked))

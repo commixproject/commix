@@ -357,7 +357,11 @@ def multi_params_get_value(param, all_params):
     except Exception:
       # The whitespace after the colon belongs to the document's layout, not to the value, and a
       # value carrying it would no longer be found in the fragment it came from.
-      value = re.findall(r'\:\s*(.*)', all_params[param])
+      # Read after the key rather than after the first colon where the key holds one of its own ("ns:host").
+      if re.match(r'^\s*[\{\[]?\s*"[^"]*\:', all_params[param]):
+        value = re.findall(r'^\s*[\{\[]?\s*"(?:[^"\\]|\\.)*"\s*\:\s*(.*)', all_params[param])
+      else:
+        value = re.findall(r'\:\s*(.*)', all_params[param])
       if not value:
         value = all_params[param]
       value = ''.join(value)

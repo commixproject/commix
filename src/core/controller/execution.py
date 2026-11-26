@@ -163,7 +163,8 @@ def make_execute_cmd(injector, separator, maxlen, TAG, prefix, suffix, whitespac
       shell = fire(cmd)
       if not settings.TIME_RELATED_ATTACK:
         shell = postprocess(shell)
-      if shell:
+      # An output with characters left unread is not the command's answer; stored, a later run would serve it as one.
+      if shell and not settings.INCOMPLETE_OUTPUT:
         session_handler.store_cmd(url, cmd, shell, vuln_parameter)
     else:
       shell = stored

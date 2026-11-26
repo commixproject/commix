@@ -964,7 +964,8 @@ def boolean_based_pseudo_terminal_shell(separator, prefix, suffix, whitespace, v
       return stored
     shell = injector.injection(separator, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter)
     logs.executed_command(filename, cmd, shell)
-    if shell and not menu.options.ignore_session:
+    # Kept only when every character was read, as the main shell does.
+    if shell and not menu.options.ignore_session and not settings.INCOMPLETE_OUTPUT:
       session_handler.store_cmd(url, cmd, shell, vuln_parameter)
     return shell
 
@@ -1088,7 +1089,8 @@ def oob_pseudo_terminal_shell(separator, prefix, suffix, whitespace, vuln_parame
       return stored
     shell = injector.injection(separator, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter, transport)
     logs.executed_command(filename, cmd, shell)
-    if shell and not menu.options.ignore_session:
+    # Kept only when every character was read, as the main shell does.
+    if shell and not menu.options.ignore_session and not settings.INCOMPLETE_OUTPUT:
       session_handler.store_cmd(url, cmd, shell, vuln_parameter)
     return shell
 

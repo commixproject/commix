@@ -1738,16 +1738,18 @@ Process a list of parameters to test for injection vulnerabilities.
 def do_injection(found, data_type, url, http_request_method, filename, timesec):
 
   """
-  Validate parameter names using allowed characters:
-  letters, digits, underscores, hyphens, dots, and square brackets.
+  A name is whatever the request spells it with, symbols included ('ctl00$Main$txtHost', 'form:host',
+  'ns:host', '$where'). What is left out is a candidate the parser split out of a body it could not
+  read - a fragment of a pretty-printed document or a whole multipart body - which carries line breaks
+  or the marker in place of a name.
   """
   def is_valid_param_name(name):
     if not isinstance(name, str):
       return False
     name = name.strip()
-    if not name:
+    if not name or settings.INJECT_TAG in name:
       return False
-    return bool(re.match(r'^[\w._\-\[\]]+$', name, re.UNICODE))
+    return not any(ord(_) < 32 or ord(_) == 127 for _ in name)
 
   """
   Define the check parameter based on the data type (POST, GET, COOKIE).

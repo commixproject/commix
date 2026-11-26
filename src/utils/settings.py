@@ -509,7 +509,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "365"
+REVISION = "366"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -2843,6 +2843,8 @@ OS_CHECKS_NUM = 2
 # '--os', or the user's own answer.
 OS_HINTED = False
 SHELLSHOCK_WINDOWS_WARNED = False
+# The operating systems a response header has already named for this target, lower-cased.
+TARGET_OS_NAMES_SAID = set()
 
 # The banner did not name an operating system, and no heuristic has answered yet either. While this
 # stands, the question is still open - it is put to the user only once nothing else has settled it.
