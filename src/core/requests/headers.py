@@ -328,6 +328,32 @@ def _apply_request_policy():
   time.sleep(settings.DELAY + settings.ADAPTIVE_DELAY + (random.uniform(0, menu.options.jitter) if menu.options.jitter else 0))
 
 """
+The answer to a Digest challenge is the request the challenge interrupted, sent again with the
+credentials it asked for. That one send is counted as part of the request, not as a second one: read
+as a retry, every timing taken against a target that asks for Digest credentials was thrown away. A
+send after it - the answer itself failing and going out again - is a retry, and is counted as one.
+"""
+class DigestAuthHandler(_urllib.request.HTTPDigestAuthHandler):
+  def http_error_401(self, req, fp, code, msg, headers):
+    stability.expect_challenge_answer(True)
+    try:
+      return _urllib.request.HTTPDigestAuthHandler.http_error_401(self, req, fp, code, msg, headers)
+    finally:
+      stability.expect_challenge_answer(False)
+
+"""
+Whether the request goes out as a URL-encoded form. Read off the Content-Type its headers settle on -
+a type the user named, a request file's, the one the body's format calls for, or the default - rather
+than off the body itself, and settled on a request of the same shape without what only the real one
+is given (an anti-CSRF token, chunked framing, the tamper scripts' headers), none of which names a type.
+"""
+def form_encoded_request(url, http_request_method):
+  probe = _urllib.request.Request(url, b"", method=http_request_method)
+  do_check(probe, safe=True)
+  content_type = probe.get_header(settings.CONTENT_TYPE.capitalize()) or settings.DEFAULT_HTTP_CONTENT_TYPE_VALUE
+  return "urlencoded" in content_type.lower()
+
+"""
 The handlers an opener needs for the authentication this run was given: Digest needs one, unlike
 Basic/Bearer's static header.
 """
@@ -336,7 +362,7 @@ def authentication_handlers():
   if menu.options.auth_cred and menu.options.auth_type and menu.options.auth_type.lower() == settings.AUTH_TYPE.DIGEST:
     if settings.DIGEST_AUTH_REALM is None:
       settings.DIGEST_AUTH_REALM = discover_digest_realm(menu.options.url)
-    digest_handler = _urllib.request.HTTPDigestAuthHandler()
+    digest_handler = DigestAuthHandler()
     username, _, password = menu.options.auth_cred.partition(":")
     digest_handler.add_password(settings.DIGEST_AUTH_REALM, menu.options.url, username, password)
     handlers.append(digest_handler)

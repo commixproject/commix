@@ -684,3 +684,71 @@ class AnOperatingSystemIsNamedOnce(unittest.TestCase):
     requests.check_os("PHP/8.3.6-1ubuntu1")
     requests.check_os("Apache/2.4.58 (Debian)")
     self.assertEqual(2, len(self._named()))
+
+class ABodyIsUrlEncodedOnlyWhereItGoesOutAsAForm(unittest.TestCase):
+  """
+  A form body is URL-decoded by the target, so the payload is encoded for it; a multipart or plain-text
+  body is not, and a payload encoded for one arrives as '%3B' and '%20' where ';' and ' ' were meant.
+  Which one a request is comes from the Content-Type it goes out with - the default, one the user names
+  with '-H' or '--headers', or the one a request file carries - not from the look of the body.
+  """
+  def setUp(self):
+    import copy
+    self._everything = dict((name, copy.deepcopy(value)) for name, value in vars(settings).items()
+                            if name.isupper() and isinstance(value, (str, int, float, bool, type(None), list, dict, tuple)))
+    self._options = dict((name, getattr(menu.options, name)) for name in ("data", "header", "headers", "requestfile", "logfile", "batch", "url"))
+    self._sending = (requests.get_request_response, requests.second_order_response)
+    menu.options.header = menu.options.headers = menu.options.requestfile = menu.options.logfile = None
+    menu.options.batch, menu.options.url = True, "http://t/upload.php"
+    settings.EXTRA_HTTP_HEADERS, settings.RAW_HTTP_HEADERS, settings.TIME_RELATED_ATTACK = False, "", False
+    self.sent = []
+    requests.get_request_response = lambda request: (self.sent.append(request), "")[1]
+    requests.second_order_response = lambda payload: None
+
+  def tearDown(self):
+    requests.get_request_response, requests.second_order_response = self._sending
+    for name, value in self._options.items():
+      setattr(menu.options, name, value)
+    for name, value in self._everything.items():
+      setattr(settings, name, value)
+
+  def _form(self):
+    menu.options.data = "host=127.0.0.1&x=1"
+    # As a run sets it on finding '-H' or '--headers' among the options.
+    settings.EXTRA_HTTP_HEADERS = bool(menu.options.header or menu.options.headers)
+    return requests.headers.form_encoded_request(menu.options.url, "POST")
+
+  def test_a_body_with_no_type_named_goes_out_as_a_form(self):
+    self.assertTrue(self._form())
+
+  def test_a_form_type_named_with_its_charset_is_still_a_form(self):
+    menu.options.header = "Content-Type: application/x-www-form-urlencoded; charset=UTF-8"
+    self.assertTrue(self._form())
+
+  def test_a_multipart_type_named_with_h_is_not_a_form(self):
+    menu.options.header = "Content-Type: multipart/form-data; boundary=BB"
+    self.assertFalse(self._form())
+
+  def test_a_type_named_with_headers_is_not_a_form(self):
+    menu.options.headers = "Accept: */*" + settings.END_LINE.ESCAPED_LF + "Content-Type: text/plain"
+    self.assertFalse(self._form())
+
+  def test_the_type_a_request_file_carries_decides(self):
+    menu.options.requestfile = "request.txt"
+    settings.RAW_HTTP_HEADERS = "Host: t" + settings.END_LINE.ESCAPED_LF + "Content-Type: multipart/form-data; boundary=BB"
+    self.assertFalse(self._form())
+
+  def _sent_body(self):
+    menu.options.data = settings.USER_DEFINED_POST_DATA = "host=127.0.0.1" + settings.INJECT_TAG + "&x=1"
+    settings.EXTRA_HTTP_HEADERS = bool(menu.options.header or menu.options.headers)
+    requests.init_injection(";echo a b;", "POST", menu.options.url)
+    return self.sent[-1].data.decode()
+
+  def test_the_payload_is_encoded_in_a_form(self):
+    self.assertIn("%3Becho%20a%20b%3B", self._sent_body())
+
+  def test_the_payload_goes_as_written_in_a_plain_text_body(self):
+    menu.options.header = "Content-Type: text/plain"
+    body = self._sent_body()
+    self.assertIn(";echo a b;", body)
+    self.assertNotIn("%3B", body)

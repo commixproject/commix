@@ -123,7 +123,15 @@ def note_request_sent():
   # thread alone, for the same reason the tally above is kept per thread.
   if settings.in_side_request():
     return
+  # The one send that answers a Digest challenge completes the request it interrupted; a send after it is a retry and is counted.
+  if getattr(_thread_state, "challenge_answer", False):
+    _thread_state.challenge_answer = False
+    return
   _thread_state.sent = getattr(_thread_state, "sent", 0) + 1
+
+# Expect, or stop expecting, the send that answers a Digest challenge on this thread.
+def expect_challenge_answer(expected):
+  _thread_state.challenge_answer = expected
 
 # How many requests this thread has sent.
 def requests_sent():
