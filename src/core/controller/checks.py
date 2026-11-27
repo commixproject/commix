@@ -5631,7 +5631,9 @@ A body that is reflowed no longer matches what the target was given, so keep the
 def json_formatting(data):
   if settings.END_LINE.LF in data.strip():
     return (2, None)
-  return (None, (", ", ": ") if ", " in data else (",", ":"))
+  # Read from the separators alone: a ', ' inside a string is part of a value, not of the layout.
+  layout = re.sub(r'"(?:[^"\\]|\\.)*"', '""', data)
+  return (None, (", ", ": ") if ", " in layout else (",", ":"))
 
 """
 A repeated key cannot survive being parsed into an object, so warn rather than drop one quietly.

@@ -359,6 +359,59 @@ def json_fragment_depths(fragments):
   return depths
 
 """
+The candidates of a JSON body, one per value, read from the document rather than from its text: every
+member of every object and every element of every array, at any depth, an empty value included - so
+a comma inside a string is a character of that string and not where a parameter ends. Each is the
+whole document with that one value carrying the tag, written out the way the request writes it.
+None where the body is not one JSON document, which is then read as before.
+"""
+def json_candidates(body):
+  import copy
+  try:
+    document = json.loads(body, object_pairs_hook=OrderedDict)
+  except ValueError:
+    return None
+  if not isinstance(document, (dict, list)):
+    return None
+  marked = settings.CUSTOM_INJECTION_MARKER and settings.ASTERISK_MARKER in body
+  leaves = []
+  def walk(node, path):
+    pairs = node.items() if isinstance(node, dict) else enumerate(node)
+    for key, value in pairs:
+      if isinstance(value, (dict, list)):
+        walk(value, path + [key])
+      else:
+        leaves.append((path + [key], value))
+  walk(document, [])
+  candidates = []
+  for path, value in leaves:
+    text = value if isinstance(value, str) else json.dumps(value)
+    # Set aside by its own name, the last key above it - an array element by the name of its array.
+    names = [_ for _ in path if not isinstance(_, int)]
+    pair = (names[-1] if names else "") + "=" + text
+    if checks.ignore_anticsrf_parameter(pair) or checks.ignore_stateful_parameter(pair) or checks.ignore_randomized_parameter(pair):
+      continue
+    if marked:
+      if settings.ASTERISK_MARKER not in text:
+        continue
+      tagged = text.replace(settings.ASTERISK_MARKER, settings.INJECT_TAG, 1)
+    elif menu.options.skip_empty and not text:
+      continue
+    else:
+      # A GraphQL document carried as a string is tested at its argument, as one sent on its own is.
+      argument = re.search(settings.GRAPHQL_ARGUMENT_REGEX, text) if isinstance(value, str) and checks.is_GraphQL_check(text) else None
+      tagged = text[:argument.end(2)] + settings.INJECT_TAG + text[argument.end(2):] if argument else text + settings.INJECT_TAG
+    candidate = copy.deepcopy(document)
+    holder = candidate
+    for key in path[:-1]:
+      holder = holder[key]
+    holder[path[-1]] = tagged.replace(settings.ASTERISK_MARKER, "")
+    written = checks.format_json(candidate)
+    if written.replace(settings.ASTERISK_MARKER, "") not in candidates:
+      candidates.append(written.replace(settings.ASTERISK_MARKER, ""))
+  return candidates
+
+"""
 Check if a JSON string is an empty object.
 """
 def is_empty_json_object(s):
@@ -456,8 +509,9 @@ def configure_post_data_format(parameter, http_request_method):
   parameter = checks.process_custom_injection_data(parameter)
   # Single quotes and spacing are rewritten to make JSON-shaped data parseable, so that rewrite is
   # only kept when the result is in fact JSON - a form body must reach the target as it was given.
+  # A body that already is JSON is left exactly as written: the rewrite would reach inside its strings.
   json_shaped = parameter.replace("'","\"").replace(", ",",").replace(",\"", ", \"")
-  if checks.is_JSON_check(json_shaped) or checks.is_JSON_check(checks.check_quotes_json_data(json_shaped)):
+  if not checks.is_JSON_check(parameter) and (checks.is_JSON_check(json_shaped) or checks.is_JSON_check(checks.check_quotes_json_data(json_shaped))):
     parameter = json_shaped
   # Check if JSON Object.
   if checks.is_JSON_check(parameter) or checks.is_JSON_check(checks.check_quotes_json_data(parameter)):
@@ -766,7 +820,8 @@ def handle_multiple_post_parameters(parameter, multi_parameters, http_request_me
         if settings.IS_JSON:
           all_params[param] = tag_empty_json_value(''.join(all_params[param]))
         elif settings.IS_XML:
-          all_params[param] = ''.join(all_params[param]).replace("></", ">" + settings.INJECT_TAG + "</")
+          # Measured with the backfill stripped, and tagged with it stripped too, or there is no '></' left to tag.
+          all_params[param] = ''.join(all_params[param]).replace(settings.RANDOM_TAG, "").replace("></", ">" + settings.INJECT_TAG + "</")
         else:
           all_params[param] = ''.join(all_params[param] + settings.INJECT_TAG)
       else:
@@ -808,6 +863,18 @@ def do_POST_check(parameter, http_request_method):
   if parameter is None:
     return ""
 
+  # A JSON document is read for its values rather than cut at its commas; a candidate already
+  # carrying the tag is the one under test. A body that does not parse is read as before.
+  if settings.IS_JSON:
+    if settings.INJECT_TAG in parameter and checks.is_JSON_check(parameter):
+      return parameter
+    if settings.INJECT_TAG not in parameter:
+      candidates = json_candidates(parameter)
+      if candidates is not None:
+        if not candidates:
+          checks.no_parameters_found()
+        return candidates
+
   # A multipart body is not a list of pairs: its fields are found in the parts, and a candidate
   # already carrying the tag is the one under test.
   if settings.IS_MULTIPART:
@@ -840,21 +907,29 @@ def vuln_POST_param(parameter, url):
   # JSON data format.
   if settings.IS_JSON:
     try:
-      flat = flatten(json.loads(parameter, object_pairs_hook=OrderedDict))
+      document = json.loads(parameter, object_pairs_hook=OrderedDict)
     except Exception:
       # Return unchanged if the value is not valid JSON.
       return parameter
-    vuln_key = None
-    for key in flat:
-      if settings.INJECT_TAG in str(flat[key]):
-        vuln_key = key
+    # A top-level array is named by its index first, as an array anywhere else is.
+    elements = list(enumerate(document)) if isinstance(document, list) else [(None, document)]
+    vuln_key = index = None
+    for index, element in elements:
+      flat = flatten(element) if isinstance(element, (dict, list)) else {"": element}
+      for key in flat:
+        if settings.INJECT_TAG in str(flat[key]):
+          vuln_key = key
+          break
+      if vuln_key is not None:
         break
     if vuln_key is None:
       return parameter
     # Convert key to dot notation.
-    key_parts = vuln_key.split(settings.FLATTEN_JSON_SEPARATOR)
-    vuln_parameter = key_parts[0]
-    for key_part in key_parts[1:]:
+    key_parts = [_ for _ in vuln_key.split(settings.FLATTEN_JSON_SEPARATOR) if _ != ""]
+    vuln_parameter = "" if index is not None else key_parts.pop(0)
+    if index is not None:
+      vuln_parameter = "[" + str(index) + "]"
+    for key_part in key_parts:
       vuln_parameter += "[" + key_part + "]" if key_part.isdigit() else "." + key_part
     settings.TESTABLE_VALUE = str(flat[vuln_key]).split(settings.INJECT_TAG)[0]
     if settings.CUSTOM_INJECTION_MARKER:

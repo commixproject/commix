@@ -574,7 +574,7 @@ class ANestedJsonFieldIsHeldToTheSameRules(unittest.TestCase):
   def test_other_shapes_are_read_as_before(self):
     self.assertEqual(["a", "e.f", "e.g"], self._tested('{"a":"1","e":{"f":"1","g":"2"}}')[0])
     self.assertEqual(["a.x", "a.d.e"], self._tested('{"a":{"x":"1","d":{"e":"1"}}}')[0])
-    self.assertEqual(["e"], self._tested('{"a":["p","q"],"e":"y"}')[0])
+    self.assertEqual(["a[0]", "a[1]", "e"], self._tested('{"a":["p","q"],"e":"y"}')[0])
 
   def test_a_bracket_inside_a_string_does_not_count_as_depth(self):
     self.assertEqual([0, 2, 1], parameters.json_fragment_depths(['{"a":{"x":"}{\\""', ' "y":"]"}', ' "c":"2"}']))
@@ -591,3 +591,95 @@ class ANestedJsonFieldIsHeldToTheSameRules(unittest.TestCase):
   def test_no_field_is_tested_twice(self):
     names = self._tested('{"a":{"k":"1"},"b":{"k":"1"}}')[0]
     self.assertEqual(len(names), len(set(names)))
+
+class AJsonDocumentIsReadForEveryValue(unittest.TestCase):
+  """
+  A JSON body is read as the document it is: every member of every object and every element of every
+  array is a parameter of its own, an empty one included, named by its path; a comma inside a string
+  belongs to that string, so the value is sent as it was written; and a body that already is JSON is
+  never rewritten on its way in.
+  """
+  def setUp(self):
+    import copy
+    self._settings = dict((name, copy.deepcopy(value)) for name, value in vars(settings).items()
+                          if name.isupper() and isinstance(value, (str, int, float, bool, type(None), list, dict, set, tuple)))
+    self._options = dict((name, getattr(menu.options, name)) for name in ("batch", "skip_empty", "data", "test_parameter"))
+    menu.options.batch, menu.options.skip_empty, menu.options.test_parameter = True, False, None
+    settings.TESTABLE_PARAMETERS_LIST, settings.RANDOMIZE_PARAMETERS_LIST = [], []
+
+  def tearDown(self):
+    for name, value in self._options.items():
+      setattr(menu.options, name, value)
+    for name, value in self._settings.items():
+      setattr(settings, name, value)
+
+  def _tested(self, body, marked=False):
+    import io, contextlib
+    from src.core.controller import checks
+    settings.CUSTOM_INJECTION_MARKER = marked
+    body = body.replace("*", settings.ASTERISK_MARKER)
+    settings.USER_DEFINED_POST_DATA = menu.options.data = body
+    names, sent = [], {}
+    with contextlib.redirect_stdout(io.StringIO()):
+      found = parameters.do_POST_check(body, "POST")
+      for candidate in ([found] if isinstance(found, str) else found):
+        if settings.INJECT_TAG not in candidate:
+          continue
+        name = parameters.vuln_POST_param(candidate, "http://t/")
+        names.append(name)
+        if settings.IS_JSON:
+          sent[name] = checks.json_data(checks.process_injectable_value(checks.escape_json_value("PAYLOAD"), candidate))
+    return names, sent
+
+  def test_every_element_of_an_array_is_a_parameter(self):
+    self.assertEqual(["a[0]", "a[1]", "e"], self._tested('{"a":["p","q"],"e":"y"}')[0])
+    self.assertEqual(["l[0].k", "l[0].m", "z"], self._tested('{"l":[{"k":"1","m":"2"}],"z":"3"}')[0])
+
+  def test_a_top_level_array_is_named_by_its_index(self):
+    names, sent = self._tested('[{"addr":"1"},{"addr":"2"}]')
+    self.assertEqual(["[0].addr", "[1].addr"], names)
+    self.assertEqual('[{"addr":"1"},{"addr":"PAYLOAD"}]', sent["[1].addr"])
+
+  def test_a_marker_in_an_array_marks_that_element_alone(self):
+    names, sent = self._tested('{"a":["x","y*"],"b":"z"}', marked=True)
+    self.assertEqual(["a[1]"], names)
+    self.assertNotIn(settings.ASTERISK_MARKER, sent["a[1]"])
+
+  def test_an_empty_value_is_tested_unless_asked_not_to(self):
+    self.assertEqual(["x", "y"], self._tested('{"x":"","y":"1"}')[0])
+    menu.options.skip_empty = True
+    self.assertEqual(["y"], self._tested('{"x":"","y":"1"}')[0])
+
+  def test_a_comma_in_a_string_is_part_of_the_value_and_not_of_the_layout(self):
+    names, sent = self._tested('{"a":"x","b":"Smith, Jane"}')
+    self.assertEqual(["a", "b"], names)
+    self.assertEqual('{"a":"PAYLOAD","b":"Smith, Jane"}', sent["a"])
+
+  def test_a_body_that_is_json_is_not_rewritten_on_the_way_in(self):
+    body = '{"a":"x","b":"Smith, Jane"}'
+    self.assertEqual(body, parameters.configure_post_data_format(body, "POST"))
+
+  def test_a_single_quoted_body_is_still_read(self):
+    self.assertEqual(["a"], self._tested("{'a':'x'}")[0])
+
+  def test_a_value_holding_escaped_quotes_is_tested(self):
+    self.assertEqual(["s", "t"], self._tested('{"s":"say \\"hi\\"","t":"1"}')[0])
+
+  def test_a_graphql_document_in_a_string_is_tested_at_its_argument(self):
+    names, sent = self._tested('{"query":"query { ping(host: \\"127.0.0.1\\") }"}')
+    self.assertEqual(["query"], names)
+    self.assertIn('127.0.0.1PAYLOAD\\")', sent["query"])
+
+  def test_a_number_is_sent_as_the_string_it_becomes(self):
+    self.assertEqual('{"n":"PAYLOAD","s":"1"}', self._tested('{"n":5,"s":"1"}')[1]["n"])
+
+  def test_an_empty_xml_element_is_tested(self):
+    self.assertEqual(["a", "b"], self._tested("<r><a></a><b>2</b></r>")[0])
+    self.assertEqual(["a", "b"], self._tested("<r><a/><b>2</b></r>")[0])
+
+  def test_every_candidate_carries_the_tag_once(self):
+    settings.IS_JSON, settings.CUSTOM_INJECTION_MARKER = True, True
+    body = '{"a":["x","y' + settings.ASTERISK_MARKER + '"],"b":"z"}'
+    candidates = parameters.json_candidates(body)
+    self.assertEqual(1, len(candidates))
+    self.assertTrue(all(_.count(settings.INJECT_TAG) == 1 for _ in candidates))
