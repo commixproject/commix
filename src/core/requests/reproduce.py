@@ -89,11 +89,14 @@ def curl_command(url, http_request_method, vuln_parameter, payload):
         headers.append(header_name + ": " + checks.process_injectable_value(payload, menu.options.cookie))
       else:
         headers.append(header_name + ": " + payload)
-    elif settings.USER_DEFINED_POST_DATA and (settings.IS_JSON or settings.IS_XML):
+    elif settings.USER_DEFINED_POST_DATA and (settings.IS_JSON or settings.IS_XML or settings.IS_MULTIPART):
       # A structured body is not a list of pairs: it goes over whole, with the payload written in.
       body = checks.process_injectable_value(payload, settings.USER_DEFINED_POST_DATA)
       parameters = ["--data-raw", _quote(body)]
-      headers.append("Content-Type: " + ("application/json" if settings.IS_JSON else "application/xml"))
+      if settings.IS_MULTIPART:
+        headers.append("Content-Type: " + settings.HTTP_CONTENT_TYPE_MULTIPART_HEADER_VALUE + "; boundary=" + checks.multipart_boundary(settings.USER_DEFINED_POST_DATA))
+      else:
+        headers.append("Content-Type: " + ("application/json" if settings.IS_JSON else "application/xml"))
     elif settings.USER_DEFINED_POST_DATA:
       parameters, _ = _parameter_arguments(settings.USER_DEFINED_POST_DATA, vuln_parameter, payload)
     else:

@@ -143,6 +143,9 @@ value of its own that turned out not to be needed, would otherwise still be stan
 parameter is judged - and the verdict on that parameter read off them.
 """
 def reset_parameter_state():
+  # What the last parameter's stored finding brought in - its options, its tamper state - is put
+  # back, so this parameter is tested with what the run was given rather than with the last one's.
+  checks.put_back_replayed_state()
   # The other technique states are put back as each technique starts; this one is reached as a
   # fallback from the file-based technique instead, so nothing else clears it.
   settings.TEMPFILE_BASED_STATE = False
@@ -225,6 +228,9 @@ def heuristic_request(url, http_request_method, check_parameter, payload, whites
       body_payload = checks.graphql_escape_payload(payload)
     elif settings.IS_XML:
       body_payload = checks.xml_encode_payload(checks.strip_xml_forbidden(payload))
+    elif settings.IS_MULTIPART:
+      # A part's value is read as it is written, not URL-decoded.
+      body_payload = payload
     else:
       body_payload = checks.encode_payload(payload)
     data = checks.restore_xml_layout(checks.process_injectable_value(body_payload, menu.options.data, pollute=True)).encode(settings.DEFAULT_CODEC)
@@ -1175,7 +1181,7 @@ def injection_process(url, check_parameter, http_request_method, filename, times
     settings.CHECKING_PARAMETER = ""
     if not header_name == settings.COOKIE and not the_type == "HTTP Header":
       settings.CHECKING_PARAMETER = checks.check_http_method(url)
-      settings.CHECKING_PARAMETER += ('', ' JSON')[settings.IS_JSON] + ('', ' SOAP/XML')[settings.IS_XML]
+      settings.CHECKING_PARAMETER += ('', ' JSON')[settings.IS_JSON] + ('', ' SOAP/XML')[settings.IS_XML] + ('', ' multipart')[settings.IS_MULTIPART]
     if header_name == settings.COOKIE :
        settings.CHECKING_PARAMETER += str(header_name) + str(the_type) + str(inject_parameter)
     elif the_type == "HTTP Header":
@@ -1861,12 +1867,9 @@ def post_request(url, http_request_method, filename, timesec):
     found_parameter_list.append(found_parameter)
     found_parameter = found_parameter_list
 
-  if any((settings.IS_JSON, settings.IS_XML)):
+  if any((settings.IS_JSON, settings.IS_XML, settings.IS_MULTIPART)):
     # Remove junk data
     found_parameter = [x for x in found_parameter if settings.INJECT_TAG in x]
-  else:
-    # Remove whitespaces
-    found_parameter = [x.replace(settings.SINGLE_WHITESPACE, "") for x in found_parameter]
 
   do_injection(found_parameter, settings.HTTPMETHOD.POST, url, http_request_method, filename, timesec)
 

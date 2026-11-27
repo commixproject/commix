@@ -298,34 +298,65 @@ def vuln_GET_param(url):
   return vuln_parameter
 
 """
-Build one tagged candidate per leaf for a fragment whose value is itself a nested object.
+Build one tagged candidate per leaf for a fragment whose value is itself a nested object, each leaf
+held to the rules a field of its own is: the marker, and the parameters set aside by name. A
+fragment whose value is not a nested object gives None.
 """
 def json_nested_leaf_candidates(fragment, full_parameter):
   candidates = []
   key_match = re.match(r'\s*\{?\s*"([^"]+)"\s*:', fragment)
   if not key_match:
-    return candidates
+    return None
   try:
     full_json = json.loads(full_parameter, object_pairs_hook=OrderedDict)
   except Exception:
-    return candidates
+    return None
   nested_value = full_json.get(key_match.group(1)) if isinstance(full_json, dict) else None
   if not isinstance(nested_value, dict):
-    return candidates
+    return None
   for leaf_key, leaf_value in flatten(nested_value).items():
     last_key = leaf_key.split(settings.FLATTEN_JSON_SEPARATOR)[-1]
     dumped = json.dumps(leaf_value)
+    text = leaf_value if isinstance(leaf_value, str) else dumped
+    pair = last_key + "=" + text
+    if checks.ignore_anticsrf_parameter(pair) or checks.ignore_stateful_parameter(pair) or checks.ignore_randomized_parameter(pair):
+      continue
+    if settings.CUSTOM_INJECTION_MARKER and settings.ASTERISK_MARKER not in text:
+      continue
     anchor = "\"" + last_key + "\":" + settings.SINGLE_WHITESPACE + dumped
     if anchor not in full_parameter:
       anchor = "\"" + last_key + "\":" + dumped
       if anchor not in full_parameter:
         continue
-    if isinstance(leaf_value, str):
+    if settings.CUSTOM_INJECTION_MARKER:
+      replacement = anchor.replace(settings.ASTERISK_MARKER, settings.INJECT_TAG, 1)
+    elif isinstance(leaf_value, str):
       replacement = anchor[:-1] + settings.INJECT_TAG + "\""
     else:
       replacement = anchor[:anchor.rindex(dumped)] + "\"" + dumped + settings.INJECT_TAG + "\""
-    candidates.append(full_parameter.replace(anchor, replacement, 1))
+    candidates.append(full_parameter.replace(anchor, replacement, 1).replace(settings.ASTERISK_MARKER, ""))
   return candidates
+
+"""
+How deep inside the document each fragment of a JSON body starts: 1 for a member of the top-level
+object, more for one inside a nested object or array. Brackets inside strings are not counted.
+"""
+def json_fragment_depths(fragments):
+  depths, depth, quoted, escaped = [], 0, False, False
+  for fragment in fragments:
+    depths.append(depth)
+    for char in fragment:
+      if escaped:
+        escaped = False
+      elif quoted and char == "\\":
+        escaped = True
+      elif char == "\"":
+        quoted = not quoted
+      elif not quoted and char in "{[":
+        depth += 1
+      elif not quoted and char in "}]":
+        depth -= 1
+  return depths
 
 """
 Check if a JSON string is an empty object.
@@ -439,6 +470,13 @@ def configure_post_data_format(parameter, http_request_method):
       checks.warn_on_duplicate_json_keys(parameter)
     if supplied is not None:
       settings.JSON_FORMATTING = checks.json_formatting(supplied)
+  # Check if multipart/form-data.
+  elif re.search(settings.MULTIPART_RECOGNITION_REGEX, parameter) and multipart_fields(parameter):
+    if not settings.IS_MULTIPART:
+      data_type = "Multipart"
+      settings.IS_MULTIPART = checks.process_data(data_type, http_request_method)
+      settings.POST_DATA_PARAM_DELIMITER = ""
+
   # Check if GraphQL document.
   elif checks.is_GraphQL_check(parameter):
     if not settings.IS_GRAPHQL:
@@ -485,6 +523,33 @@ The string an argument is given, taken from the piece of the document that carri
 def graphql_value(fragment):
   match = re.search(settings.GRAPHQL_ARGUMENT_REGEX, fragment)
   return match.group(2) if match else ""
+
+"""
+A JSON, XML or GraphQL piece of the body written as 'name=value', the way a form pair reads, so that
+a parameter set aside by its name is set aside by its own name - not by everything the piece holds,
+its value included. Any other piece, and one no name can be read from, is returned as it is.
+"""
+def named_fragment(fragment):
+  if settings.IS_GRAPHQL:
+    match = re.search(settings.GRAPHQL_ARGUMENT_REGEX, fragment)
+    if match:
+      return match.group(1) + "=" + match.group(2)
+  elif settings.IS_JSON:
+    # A document carried inside the envelope is tested at its argument, so it is named by it.
+    match = re.search(settings.GRAPHQL_ARGUMENT_ESCAPED_REGEX, fragment)
+    if match:
+      return match.group(1) + "=" + match.group(2)
+    keys = list(re.finditer(r'"((?:[^"\\]|\\.)*)"\s*:', fragment))
+    if keys:
+      value = fragment[keys[-1].end():].strip().rstrip("}]").strip()
+      if len(value) > 1 and value.startswith("\"") and value.endswith("\""):
+        value = value[1:-1]
+      return keys[-1].group(1) + "=" + value.replace(settings.RANDOM_TAG, "")
+  elif settings.IS_XML:
+    element = re.search(r'<([^\s>/]+)[^>]*>(.*)</\1>', fragment, re.S)
+    if element:
+      return element.group(1) + "=" + unwrap_cdata(element.group(2))
+  return fragment
 
 """
 The argument a document carried inside a JSON envelope gives, as the body itself spells it.
@@ -541,6 +606,50 @@ def split_post_parameters(parameter):
   return multi_parameters, parameter
 
 """
+The text fields of a multipart body, as (name, where its value starts, where it ends).
+
+A part is a field when it names one and is neither a file ('filename=') nor a multipart body of its
+own ('boundary='): those carry an upload rather than a value typed into a form. The value runs from
+the blank line under the part's headers to the line ending in front of the next boundary, so a value
+that spans several lines is read whole, and the body's own line endings are kept as they are.
+"""
+def multipart_fields(body):
+  boundary = checks.multipart_boundary(body)
+  if not boundary:
+    return []
+  pattern = r'(?i)Content-Disposition:[ \t]*form-data[^\r\n]*?;[ \t]*name="([^"]*)"[^\r\n]*\r?\n(?:[^\r\n]+\r?\n)*\r?\n(.*?)(?=\r?\n--' + re.escape(boundary) + r')'
+  fields = []
+  for match in re.finditer(pattern, body, re.S):
+    if re.search(r'(?i)\bfilename\*?=|\bboundary=', body[match.start():match.start(2)]):
+      continue
+    fields.append((match.group(1), match.start(2), match.end(2)))
+  return fields
+
+"""
+One candidate for each field of a multipart body: the whole body with the tag where that field's
+value ends, the parts, their headers and the boundaries left as they are. Where the user marked
+fields, only those are candidates; a field is skipped for the same reasons a form field is.
+"""
+def multipart_candidates(body):
+  fields = multipart_fields(body)
+  marked = settings.CUSTOM_INJECTION_MARKER and settings.ASTERISK_MARKER in body
+  candidates = []
+  for name, start, end in fields:
+    value = body[start:end]
+    if marked:
+      if settings.ASTERISK_MARKER not in value:
+        continue
+      candidate = body[:start] + value.replace(settings.ASTERISK_MARKER, settings.INJECT_TAG, 1) + body[end:]
+    else:
+      pair = name + "=" + value
+      if (menu.options.skip_empty and not value) or checks.ignore_anticsrf_parameter(pair) or \
+         checks.ignore_stateful_parameter(pair) or checks.ignore_randomized_parameter(pair):
+        continue
+      candidate = body[:start] + value + settings.INJECT_TAG + body[end:]
+    candidates.append(candidate.replace(settings.ASTERISK_MARKER, ""))
+  return candidates
+
+"""
 Handle a POST body that split into exactly one parameter fragment.
 """
 def handle_single_post_parameter(parameter, multi_parameters, http_request_method):
@@ -563,7 +672,8 @@ def handle_single_post_parameter(parameter, multi_parameters, http_request_metho
       return parameter
     else:
       # Ignoring the anti-CSRF parameter(s).
-      if checks.ignore_anticsrf_parameter(parameter) or checks.ignore_stateful_parameter(parameter) or checks.ignore_randomized_parameter(parameter):
+      pair = named_fragment(parameter)
+      if checks.ignore_anticsrf_parameter(pair) or checks.ignore_stateful_parameter(pair) or checks.ignore_randomized_parameter(pair):
         return parameter
       # Replace the value of parameter with INJECT_HERE tag
       if len(value) == 0:
@@ -622,12 +732,27 @@ def handle_multiple_post_parameters(parameter, multi_parameters, http_request_me
   if settings.INJECT_TAG not in parameter:
     if checks.is_empty(multi_parameters, http_request_method):
       return parameter
+    depths = json_fragment_depths(all_params) if original_json_text else []
+    expanded = False
     for param in range(0, len(all_params)):
       original_fragment = all_params[param]
+      # A nested object is expanded leaf by leaf at the fragment that opens it, and the fragments inside it are covered by that.
+      if depths:
+        if depths[param] <= 1:
+          nested = json_nested_leaf_candidates(original_fragment, original_json_text)
+          expanded = nested is not None
+          if expanded:
+            parameters_list.extend(_ for _ in nested if _ not in parameters_list)
+        if expanded:
+          if param > 0:
+            all_params[param - 1] = ''.join(all_params[param - 1]).replace(settings.INJECT_TAG, "")
+          parameter = parameters_list
+          continue
       # Grab the value of parameter.
       value = multi_params_get_value(param, all_params)
       # Ignoring the anti-CSRF parameter(s).
-      if checks.ignore_anticsrf_parameter(all_params[param]) or checks.ignore_stateful_parameter(all_params[param]) or checks.ignore_randomized_parameter(all_params[param]):
+      pair = named_fragment(all_params[param])
+      if checks.ignore_anticsrf_parameter(pair) or checks.ignore_stateful_parameter(pair) or checks.ignore_randomized_parameter(pair):
         if param > 0:
           all_params[param - 1] = ''.join(all_params[param - 1]).replace(settings.INJECT_TAG, "")
         continue
@@ -663,8 +788,6 @@ def handle_multiple_post_parameters(parameter, multi_parameters, http_request_me
       # wrapper line, or a JSON fragment whose value is itself nested).
       if type(parameter) != list and settings.INJECT_TAG in parameter:
         parameters_list.append(parameter)
-      elif settings.IS_JSON and original_json_text:
-        parameters_list.extend(json_nested_leaf_candidates(original_fragment, original_json_text))
       parameter = parameters_list
   else:
     for param in range(0, len(multi_parameters)):
@@ -684,6 +807,16 @@ def do_POST_check(parameter, http_request_method):
   parameter = configure_post_data_format(parameter, http_request_method)
   if parameter is None:
     return ""
+
+  # A multipart body is not a list of pairs: its fields are found in the parts, and a candidate
+  # already carrying the tag is the one under test.
+  if settings.IS_MULTIPART:
+    if settings.INJECT_TAG in parameter:
+      return parameter
+    candidates = multipart_candidates(parameter)
+    if not candidates:
+      checks.no_parameters_found()
+    return candidates
 
   multi_parameters, parameter = split_post_parameters(parameter)
 
@@ -728,6 +861,17 @@ def vuln_POST_param(parameter, url):
       settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST else settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST
       settings.TESTABLE_PARAMETERS_LIST.append(vuln_parameter) if vuln_parameter not in settings.TESTABLE_PARAMETERS_LIST else settings.TESTABLE_PARAMETERS_LIST
 
+  # Multipart data format: the field whose value carries the tag.
+  elif settings.IS_MULTIPART:
+    for name, start, end in multipart_fields(parameter):
+      value = parameter[start:end]
+      if settings.INJECT_TAG in value:
+        vuln_parameter = name
+        if settings.CUSTOM_INJECTION_MARKER:
+          register_custom_injection_marker(vuln_parameter, value)
+        settings.TESTABLE_VALUE = value.split(settings.INJECT_TAG)[0]
+        break
+
   # GraphQL data format.
   elif settings.IS_GRAPHQL:
     for name, value in re.findall(settings.GRAPHQL_ARGUMENT_REGEX, parameter):
@@ -763,7 +907,8 @@ def vuln_POST_param(parameter, url):
     # Allow a value with a space, and escape the delimiter (--pdel).
     if re.search(re.escape(settings.POST_DATA_PARAM_DELIMITER) + r"(.*)=.*" + settings.INJECT_TAG, parameter) or \
        re.search(r"(.*)=.*" + settings.INJECT_TAG , parameter):
-      vuln_parameter = extract_vuln_param_from_pairs(parameter, settings.POST_DATA_PARAM_DELIMITER, check_base64_padding=True)
+      # The body is sent as written, so a name written after a delimiter's space is read without it.
+      vuln_parameter = extract_vuln_param_from_pairs(parameter, settings.POST_DATA_PARAM_DELIMITER, strip_leading_space=True, check_base64_padding=True)
 
   if vuln_parameter is None:
     return parameter

@@ -144,6 +144,26 @@ def _target_signature(target):
 """
 Parse a single raw HTTP request into the target it describes.
 """
+"""
+A multipart body as the file holds it. The file is read with its line endings turned into line feeds,
+and a multipart body is cut into parts at CRLF - so where the file holds this one request, its body is
+taken from the file as written, boundaries, part headers and values alike. Any other body, and a
+request out of a file holding several, is left as it was read.
+"""
+def _multipart_body_as_written(request, request_file, body):
+  if not (re.search(settings.MULTIPART_RECOGNITION_REGEX, body) and checks.multipart_boundary(body)):
+    return body
+  try:
+    with open(request_file, encoding=settings.DEFAULT_CODEC, newline="") as file:
+      raw = file.read()
+  except (IOError, OSError, TypeError, ValueError):
+    return body
+  if raw.replace("\r\n", "\n") != request:
+    return body
+  match = re.search(r"\r?\n\r?\n", raw)
+  written = raw[match.end():].rstrip("\r\n") if match else ""
+  return written if written.replace("\r\n", "\n") == body else body
+
 def _parse_request(request, request_file):
   # Normalize CRLF line endings.
   request = request.replace(settings.END_LINE.CRLF, settings.END_LINE.LF)
@@ -184,6 +204,7 @@ def _parse_request(request, request_file):
     c += 1
   # A body is line-based (multipart boundaries, XML, form data), so keep its line endings.
   target["data"] = settings.END_LINE.LF.join(request_lines[c:]).rstrip(settings.END_LINE.LF) if c < len(request_lines) else ""
+  target["data"] = _multipart_body_as_written(request, request_file, target["data"])
 
   # Normalize a JSON body right away, so every request (including the first
   # connectivity check) uses the same pretty-printed form, not the raw file layout.

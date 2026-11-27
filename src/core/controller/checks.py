@@ -407,7 +407,7 @@ query, so nothing sent this way would run.
 def polluted_parameter(target, payload):
   if not menu.options.hpp or not payload:
     return target
-  if settings.IS_JSON or settings.IS_XML or settings.IS_GRAPHQL:
+  if settings.IS_JSON or settings.IS_XML or settings.IS_GRAPHQL or settings.IS_MULTIPART:
     if not settings.HPP_POSITION_SAID:
       settings.HPP_POSITION_SAID = True
       warn_msg = "Parameter pollution applies to ordinary GET and POST parameters, not to a structured body."
@@ -1291,7 +1291,8 @@ Ignoring the anti-CSRF parameter(s).
 def explicitly_testable(parameter):
   # Asking for a parameter by name is asking for it to be tested, whatever it is called.
   name = parameter.split("=")[0].strip().lower()
-  return any(name == _.split("=")[0].strip().lower() for _ in settings.TESTABLE_PARAMETERS_LIST)
+  # A nested JSON field is asked for by its path, while the piece of the body holding it names its last key.
+  return any(name == _.split("=")[0].strip().lower() or (name and _.strip().lower().endswith("." + name)) for _ in settings.TESTABLE_PARAMETERS_LIST)
 
 """
 Settle what names the anti-CSRF token, from what the user wrote.
@@ -5420,13 +5421,58 @@ def recognise_payload(payload):
   
 """
 Restore stored payloads and tampers as-is when resuming a session; skip re-detection and prompts.
+
+Where the session recorded the tamper state the finding was made with, that state is put back as it
+was: read off the payload instead, a substitution left in force without its script, or a plain space,
+reads as something else and the replay is asked differently from the finding. A session that never
+recorded one is read off the payload as before.
 """
 def check_for_stored_tamper(payload):
-  whitespace_check(payload)
-  other_symbols(payload)
-  check_backslashes(payload)
-  check_quotes(payload)
+  for name in ("WHITESPACES", "AUTO_TAMPER", "TAMPER_SCRIPTS", "MULTI_ENCODED_PAYLOAD", "CMD_SUB_PREFIX", "CMD_SUB_SUFFIX", "PRINT_WITH_ECHO"):
+    remember_before_replay(settings, name)
+  state = settings.STORED_TAMPER_STATE
+  if state is None:
+    whitespace_check(payload)
+    other_symbols(payload)
+    check_backslashes(payload)
+    check_quotes(payload)
+    tamper_scripts(stored_tamper_scripts=True)
+    return
+  provided = re.split(settings.PARAMETER_SPLITTING_REGEX, menu.options.tamper.lower()) if menu.options.tamper else []
+  settings.AUTO_TAMPER = [_ for _ in state.get("auto") or [] if _ in settings.TAMPER_SCRIPTS and _ not in provided]
+  for name in settings.AUTO_TAMPER:
+    settings.TAMPER_SCRIPTS[name] = True
+  settings.MULTI_ENCODED_PAYLOAD = []
   tamper_scripts(stored_tamper_scripts=True)
+  # Set after the scripts are loaded, since a script settles its own when it is.
+  settings.WHITESPACES[0] = state.get("whitespace") or settings.SINGLE_WHITESPACE
+  settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = state.get("substitution") or settings.NESTING_SUBSTITUTION
+
+"""
+The tamper state a finding is made with, as the session records it.
+"""
+def finding_tamper_state():
+  return json.dumps({"whitespace": settings.WHITESPACES[0], "auto": list(settings.AUTO_TAMPER),
+                     "substitution": [settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX]}, sort_keys=True)
+
+"""
+Keep what replaying a stored finding is about to replace, once per parameter, so the parameter after
+it starts from what the run had rather than from what the stored row brought in.
+"""
+def remember_before_replay(owner, name):
+  key = (id(owner), name)
+  if key not in settings.REPLAYED_STATE_PRIOR:
+    import copy
+    settings.REPLAYED_STATE_PRIOR[key] = (owner, copy.deepcopy(getattr(owner, name, None)))
+
+"""
+Put back what the last parameter's replay replaced.
+"""
+def put_back_replayed_state():
+  for (_, name), (owner, value) in settings.REPLAYED_STATE_PRIOR.items():
+    setattr(owner, name, value)
+  settings.REPLAYED_STATE_PRIOR = {}
+  settings.STORED_TAMPER_STATE = None
 
 """
 Run a tamper script's tamper(), turning an exception or a non-string return value into a clean error instead of crashing raw or corrupting the payload.
@@ -6121,6 +6167,13 @@ def is_GraphQL_check(parameter):
     return bool(re.search(settings.GRAPHQL_RECOGNITION_REGEX, parameter.replace(settings.INJECT_TAG, "")))
   except (ValueError, TypeError):
     return False
+
+"""
+The boundary a multipart body is written with, read off its first line ("--" and the boundary).
+"""
+def multipart_boundary(body):
+  first = (body or "").lstrip().split("\n", 1)[0].strip()
+  return first[2:] if first.startswith("--") and len(first) > 2 else ""
 
 # Check if valid SOAP/XML
 def is_XML_check(parameter):

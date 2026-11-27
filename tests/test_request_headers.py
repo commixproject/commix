@@ -199,5 +199,39 @@ class LogfileTarget(_OfflineRequests):
     self.assertTrue(settings.RAW_HTTP_HEADERS.startswith("Host:"))
     self.assertEqual(targets, settings.MULTI_REQUEST_TARGETS)
 
+class AMultipartBodyIsSentAsTheFileHoldsIt(_OfflineRequests):
+  """
+  A captured file is read with its line endings turned into line feeds, and a multipart body is cut
+  into parts at CRLF. A multipart body is taken from the file as written - its boundaries, its part
+  headers and every value, a file's own line feeds included; any other body is read as before.
+  """
+  BODY = ('--BB\r\nContent-Disposition: form-data; name="host"\r\n\r\n127.0.0.1\r\n'
+          '--BB\r\nContent-Disposition: form-data; name="note"\r\n\r\nline one\r\nline two\r\n'
+          '--BB\r\nContent-Disposition: form-data; name="file"; filename="a.txt"\r\nContent-Type: text/plain\r\n\r\nfirst\nsecond\r\n'
+          '--BB--')
+
+  def _request(self, body, content_type, newline="\r\n"):
+    head = newline.join(("POST /upload.php HTTP/1.1", "Host: asset.invalid", "Content-Type: " + content_type))
+    return head + newline + newline + body + newline
+
+  def _data(self, text):
+    with open(self.path, "w", encoding=settings.DEFAULT_CODEC, newline="") as handle:
+      handle.write(text)
+    try:
+      return request.parse_requests(self.path)[0]["data"]
+    except SystemExit:
+      self.fail("a valid captured request was rejected")
+
+  def test_a_multipart_body_keeps_the_line_endings_it_was_captured_with(self):
+    self.assertEqual(self.BODY, self._data(self._request(self.BODY, "multipart/form-data; boundary=BB")))
+
+  def test_a_multipart_body_captured_with_line_feeds_is_left_as_written(self):
+    body = self.BODY.replace("\r\n", "\n")
+    self.assertEqual(body, self._data(self._request(body, "multipart/form-data; boundary=BB", newline="\n")))
+
+  def test_any_other_body_is_read_as_before(self):
+    xml = "<root>\r\n  <host>127.0.0.1</host>\r\n</root>"
+    self.assertEqual(xml.replace("\r\n", "\n"), self._data(self._request(xml, "application/xml")))
+
 if __name__ == "__main__":
   unittest.main()

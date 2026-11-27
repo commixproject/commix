@@ -14,6 +14,7 @@ For more see the file 'readme/COPYING' for copying permission.
 """
 
 import os
+import json
 import shutil
 import sqlite3
 import tempfile
@@ -468,7 +469,7 @@ class AStoredCookieThatIsPutBackIsSaid(SessionFixture):
     session_handler.apply_stored_technique(self.row)
     self.assertEqual(self.LONG, menu.options.cookie)
     said = " ".join(self.said)
-    self.assertIn("put back for this run", said)
+    self.assertIn("from stored session", said)
     self.assertNotIn(self.LONG, said)
     self.assertIn("...", said)
 
@@ -476,13 +477,13 @@ class AStoredCookieThatIsPutBackIsSaid(SessionFixture):
     settings.USER_APPLIED_COOKIE = self.LONG
     menu.options.cookie = self.LONG
     session_handler.apply_stored_technique(self.row)
-    self.assertNotIn("put back for this run", " ".join(self.said))
+    self.assertNotIn("from stored session", " ".join(self.said))
 
   def test_it_is_said_once_however_many_techniques_read_the_row(self):
     settings.USER_APPLIED_COOKIE = None
     session_handler.apply_stored_technique(self.row)
     session_handler.apply_stored_technique(self.row)
-    self.assertEqual(1, len([_ for _ in self.said if "put back for this run" in _]))
+    self.assertEqual(1, len([_ for _ in self.said if "from stored session" in _]))
 
 class AFindingIsReplayedWithTheValueAsItWasMade(SessionFixture):
   """
@@ -552,6 +553,165 @@ class AFindingIsReplayedWithTheValueAsItWasMade(SessionFixture):
     self._store(True)
     self._store(False)
     self.assertEqual(["1", ""], self._stored_flags())
+
+class AFindingIsReplayedWithTheTamperStateItWasMadeWith(SessionFixture):
+  """
+  A replay read the tamper state off the stored payload: a plain space read as '%20', and two
+  backticks switched the backticks script on over a payload built with '$('. The session records the
+  state the finding was made with, and a replay puts it back as it was; what it put back is undone
+  before the next parameter, and a session from before the record is read as it always was.
+  """
+  PAYLOAD = "127.0.0.1|echo `echo X` $(echo Y)|tr a b"
+  SETTINGS = ("WHITESPACES", "AUTO_TAMPER", "TAMPER_SCRIPTS", "MULTI_ENCODED_PAYLOAD", "CMD_SUB_PREFIX", "CMD_SUB_SUFFIX",
+              "PRINT_WITH_ECHO", "STORED_TAMPER_STATE", "REPLAYED_STATE_PRIOR", "TARGET_OS", "REPLACE_VALUE", "WEB_ROOT",
+              "INJECTION_LEVEL", "IGNORE_USER_DEFINED_POST_DATA", "HTTP_HEADER", "LOAD_SESSION",
+              "TECHNIQUES_BEFORE_NARROWING", "TEMPFILE_BASED_STATE", "VALUE_ENCODING", "TESTABLE_VALUE_STOOD_IN_FOR")
+  OPTIONS = ("tamper", "cookie", "tmp_path", "batch", "tech")
+
+  def setUp(self):
+    import copy
+    SessionFixture.setUp(self)
+    self._kept = dict((_, copy.deepcopy(getattr(settings, _))) for _ in self.SETTINGS)
+    self._kept_options = dict((_, getattr(menu.options, _)) for _ in self.OPTIONS)
+    menu.options.batch, menu.options.tamper, menu.options.cookie = True, None, None
+    self._clean()
+
+  def tearDown(self):
+    for name, value in self._kept.items():
+      setattr(settings, name, value)
+    for name, value in self._kept_options.items():
+      setattr(menu.options, name, value)
+    SessionFixture.tearDown(self)
+
+  def _clean(self):
+    # A flag another test left set would make a script read as already in use.
+    for name in settings.TAMPER_SCRIPTS:
+      settings.TAMPER_SCRIPTS[name] = False
+    settings.WHITESPACES, settings.AUTO_TAMPER, settings.MULTI_ENCODED_PAYLOAD = [settings.SINGLE_WHITESPACE], [], []
+    settings.CMD_SUB_PREFIX, settings.CMD_SUB_SUFFIX = settings.NESTING_SUBSTITUTION
+    settings.STORED_TAMPER_STATE, settings.REPLAYED_STATE_PRIOR = None, {}
+    settings.TARGET_OS = settings.OS.UNIX
+
+  def _store(self, whitespace=" ", auto=(), backticks=False, tamper=None, payload=None):
+    menu.options.tamper = tamper
+    settings.WHITESPACES, settings.AUTO_TAMPER = [whitespace], list(auto)
+    if backticks:
+      settings.CMD_SUB_PREFIX = settings.CMD_SUB_SUFFIX = settings.BACKTICK_SUBSTITUTION
+    session_handler.import_injection_points(
+      self.URL, settings.INJECTION_TECHNIQUE.RESULTS_BASED, settings.INJECTION_TYPE.RESULTS_BASED_CI,
+      "", ";", True, "addr", "", "", "TAG", False, payload or self.PAYLOAD, "GET", 0, 0, 0, 0, "1")
+    self._clean()
+    menu.options.tamper = None
+
+  def _replay(self, row=None):
+    row = row or list(session_handler.load_stored_techniques(self.URL, "addr", "GET").values())[0]
+    settings.LOAD_SESSION = True
+    session_handler.apply_stored_technique(row)
+    checks.check_for_stored_tamper(row[10])
+
+  def _scripts(self):
+    own = [_ for _ in (menu.options.tamper or "").split(",") if _]
+    return sorted(set(own) | set(settings.AUTO_TAMPER))
+
+  def test_a_plain_space_and_dollar_paren_are_replayed_as_they_were(self):
+    self._store()
+    self._replay()
+    self.assertEqual((settings.SINGLE_WHITESPACE, [], "$("), (settings.WHITESPACES[0], self._scripts(), settings.CMD_SUB_PREFIX))
+
+  def test_backticks_left_in_force_without_the_script_are_replayed_without_it(self):
+    self._store(backticks=True)
+    self._replay()
+    self.assertEqual((settings.SINGLE_WHITESPACE, [], "`"), (settings.WHITESPACES[0], self._scripts(), settings.CMD_SUB_PREFIX))
+
+  def test_a_script_commix_reached_for_is_replayed_with_its_whitespace(self):
+    self._store(whitespace="${IFS}", auto=("space2ifs",), payload=self.PAYLOAD.replace(" ", "${IFS}"))
+    self._replay()
+    self.assertEqual(("${IFS}", ["space2ifs"], "$("), (settings.WHITESPACES[0], self._scripts(), settings.CMD_SUB_PREFIX))
+
+  def test_a_whitespace_left_over_before_the_replay_does_not_stand(self):
+    self._store()
+    settings.WHITESPACES = ["\t"]
+    self._replay()
+    self.assertEqual(settings.SINGLE_WHITESPACE, settings.WHITESPACES[0])
+
+  def test_a_multiplied_whitespace_is_replayed_exactly(self):
+    self._store(whitespace="\t" * 9, auto=("space2htab", "multiplespaces"), payload=self.PAYLOAD.replace(" ", "\t" * 9))
+    self._replay()
+    self.assertEqual("\t" * 9, settings.WHITESPACES[0])
+
+  def test_the_users_own_script_is_replayed_with_the_space_it_was_found_with(self):
+    self._store(tamper="backticks", backticks=True)
+    self._replay()
+    self.assertEqual((settings.SINGLE_WHITESPACE, ["backticks"], "`"), (settings.WHITESPACES[0], self._scripts(), settings.CMD_SUB_PREFIX))
+
+  def test_a_row_from_before_the_record_is_read_off_the_payload_as_before(self):
+    self._store()
+    self._replay(tuple(list(session_handler.load_stored_techniques(self.URL, "addr", "GET").values())[0])[:33])
+    self.assertEqual(("%20", "`"), (settings.WHITESPACES[0], settings.CMD_SUB_PREFIX))
+    self.assertIn("backticks", settings.AUTO_TAMPER)
+
+  def test_a_session_file_from_before_the_record_gets_it_when_written_to(self):
+    self._store()
+    table = session_handler.table_name(self.URL) + "_ip"
+    with sqlite3.connect(settings.SESSION_FILE) as conn:
+      columns = [_[1] for _ in conn.execute("PRAGMA table_info(\"" + table + "\");") if _[1] not in ("id", "tamper_state")]
+      conn.execute("DROP TABLE \"" + table + "\";")
+      conn.execute("CREATE TABLE \"" + table + "\" (id INTEGER PRIMARY KEY, " + ", ".join(_ + " VARCHAR" for _ in columns) + ");")
+    self._store(backticks=True)
+    self._replay()
+    self.assertEqual("`", settings.CMD_SUB_PREFIX)
+
+  def test_the_same_finding_made_another_way_is_a_row_of_its_own(self):
+    self._store()
+    self._store()
+    self._store(backticks=True)
+    with sqlite3.connect(settings.SESSION_FILE) as conn:
+      table = session_handler.table_name(self.URL) + "_ip"
+      self.assertEqual(2, conn.execute("SELECT COUNT(*) FROM \"" + table + "\";").fetchone()[0])
+
+  def test_the_next_parameter_starts_from_what_the_run_had(self):
+    self._store(whitespace="${IFS}", auto=("space2ifs",), tamper="nested", payload=self.PAYLOAD.replace(" ", "${IFS}"))
+    with sqlite3.connect(settings.SESSION_FILE) as conn:
+      table = session_handler.table_name(self.URL) + "_ip"
+      conn.execute("UPDATE \"" + table + "\" SET cookie = 'sess=abc', target_os = 'windows', tmp_path = '/tmp/x';")
+    self._replay()
+    from src.core.controller import controller
+    controller.reset_parameter_state()
+    self.assertEqual((settings.SINGLE_WHITESPACE, [], "$(", None, None, settings.OS.UNIX, None),
+                     (settings.WHITESPACES[0], settings.AUTO_TAMPER, settings.CMD_SUB_PREFIX, menu.options.tamper,
+                      menu.options.cookie, settings.TARGET_OS, settings.STORED_TAMPER_STATE))
+    self.assertNotEqual("/tmp/x", menu.options.tmp_path)
+
+  def test_what_the_run_learned_on_its_own_is_kept(self):
+    self._store()
+    with sqlite3.connect(settings.SESSION_FILE) as conn:
+      conn.execute("UPDATE \"" + session_handler.table_name(self.URL) + "_ip\" SET target_os = 'None';")
+    self._replay()
+    settings.TARGET_OS = settings.OS.WINDOWS
+    checks.put_back_replayed_state()
+    self.assertEqual(settings.OS.WINDOWS, settings.TARGET_OS)
+
+  def test_the_record_written_with_a_finding_leaves_the_runs_own_snapshot_alone(self):
+    # The snapshot a technique takes and puts back around a replay is another thing than this record.
+    checks.restore_tamper_state(checks.tamper_state())
+    self.assertTrue(json.loads(checks.finding_tamper_state()))
+
+  def test_a_finding_made_without_post_data_stores_none_and_announces_none(self):
+    menu.options.data = False
+    self._store()
+    with sqlite3.connect(settings.SESSION_FILE) as conn:
+      table = session_handler.table_name(self.URL) + "_ip"
+      self.assertEqual("", conn.execute("SELECT data FROM \"" + table + "\";").fetchone()[0])
+    self._replay()
+    self.assertFalse([_ for _ in self.said if "POST data" in str(_)])
+
+  def test_an_older_sessions_stored_false_is_read_as_no_post_data(self):
+    self._store()
+    with sqlite3.connect(settings.SESSION_FILE) as conn:
+      conn.execute("UPDATE \"" + session_handler.table_name(self.URL) + "_ip\" SET data = 'False';")
+    self._replay()
+    self.assertFalse([_ for _ in self.said if "POST data" in str(_)])
+    self.assertIn(menu.options.data, (None, False))
 
 if __name__ == "__main__":
   unittest.main()

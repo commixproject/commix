@@ -108,7 +108,8 @@ Restore a value the session stored, unless this run was given one of its own on 
 what the user asked for now outranks what a previous run happened to be using.
 """
 def restore_option(stored, applied, label, placeholder=None):
-  if not stored or stored == "None":
+  # Written as 'False' by a run that had none, in a session from before that was stored as empty.
+  if not stored or stored in ("None", "False"):
     return None
   # A value the previous run shortened to a placeholder of its own is that same value, written the
   # way that run was sending it. The difference is commix's own doing, so there is nothing to report
@@ -149,7 +150,7 @@ Said once for the run, as a plain notice rather than a warning: a value put back
 not given is nothing to be concerned about, only to know.
 """
 def say_once_that_a_stored_value_is_used(label, stored):
-  info_msg = "The stored session was found using the " + label + " '" + masked_session_value(stored) + "', which is put back for this run - pass your own to replace it, or '--flush-session' to forget it."
+  info_msg = "Resuming " + label + " '" + masked_session_value(stored) + "' from stored session."
   if info_msg in settings.REPLAY_NOTICES_SAID:
     return
   settings.REPLAY_NOTICES_SAID.add(info_msg)
@@ -384,28 +385,30 @@ def import_injection_points(url, technique, injection_type, filename, separator,
                    "target_os VARCHAR, file_deleted VARCHAR DEFAULT '', web_root VARCHAR DEFAULT '', tmp_path VARCHAR DEFAULT '', "
                    "second_url VARCHAR DEFAULT '', second_req VARCHAR DEFAULT '', csrf_token VARCHAR DEFAULT '', "
                    "csrf_url VARCHAR DEFAULT '', csrf_method VARCHAR DEFAULT '', csrf_data VARCHAR DEFAULT '', "
-                   "value_encoding VARCHAR DEFAULT '', value_replaced VARCHAR DEFAULT '');")
+                   "value_encoding VARCHAR DEFAULT '', value_replaced VARCHAR DEFAULT '', tamper_state VARCHAR DEFAULT '');")
 
       # The options a stored payload was made with, for a session file that predates them.
       _ensure_columns(conn, table, (("second_url", "VARCHAR DEFAULT ''"), ("second_req", "VARCHAR DEFAULT ''"), ("csrf_token", "VARCHAR DEFAULT ''"),
                                     ("csrf_url", "VARCHAR DEFAULT ''"), ("csrf_method", "VARCHAR DEFAULT ''"), ("csrf_data", "VARCHAR DEFAULT ''"),
-                                    ("value_encoding", "VARCHAR DEFAULT ''"), ("value_replaced", "VARCHAR DEFAULT ''")))
+                                    ("value_encoding", "VARCHAR DEFAULT ''"), ("value_replaced", "VARCHAR DEFAULT ''"),
+                                    ("tamper_state", "VARCHAR DEFAULT ''")))
 
       # Check if an exact matching record already exists to avoid duplicates
       query_check = ("SELECT 1 FROM \"" + table + "\" WHERE url = ? AND technique = ? AND injection_type = ? AND separator = ? AND "
                      "shell = ? AND vuln_parameter = ? AND prefix = ? AND suffix = ? AND TAG = ? AND interpreter = ? AND payload = ? AND "
                      "http_header = ? AND http_request_method = ? AND url_time_response = ? AND timesec = ? AND exec_time = ? AND "
                      "output_length = ? AND is_vulnerable = ? AND data = ? AND cookie = ? AND tamper = ? AND target_os = ? AND web_root = ? AND tmp_path = ? AND "
-                     "second_url = ? AND second_req = ? AND csrf_token = ? AND csrf_url = ? AND csrf_method = ? AND csrf_data = ? AND value_encoding = ? AND value_replaced = ? LIMIT 1;")
+                     "second_url = ? AND second_req = ? AND csrf_token = ? AND csrf_url = ? AND csrf_method = ? AND csrf_data = ? AND value_encoding = ? AND value_replaced = ? AND tamper_state = ? LIMIT 1;")
 
       params = (str(url), str(technique), str(injection_type), str(separator), str(shell), str(vuln_parameter or ""),
                 str(prefix), str(suffix), str(TAG), str(interpreter), str(payload), str(settings.HTTP_HEADER),
                 str(http_request_method), int(url_time_response), int(timesec), int(exec_time),
-                int(output_length), str(is_vulnerable), str(menu.options.data), str(menu.options.cookie),
+                int(output_length), str(is_vulnerable), str(menu.options.data or ""), str(menu.options.cookie or ""),
                 str(menu.options.tamper or ""), str(settings.TARGET_OS), str(settings.WEB_ROOT or ""), str(_stored_tmp_path(technique)),
                 str(menu.options.second_url or ""), str(menu.options.second_req or ""), str(settings.CSRF_TOKEN_ORIGINAL or ""),
                 str(menu.options.csrf_url or ""), str(menu.options.csrf_method or ""), str(menu.options.csrf_data or ""),
-                json.dumps(settings.VALUE_ENCODING) if settings.VALUE_ENCODING else "", "1" if settings.REPLACE_VALUE else "")
+                json.dumps(settings.VALUE_ENCODING) if settings.VALUE_ENCODING else "", "1" if settings.REPLACE_VALUE else "",
+                checks.finding_tamper_state())
 
       if settings.BASE64_PADDING in params[0]:
         params = (params[0].replace(settings.BASE64_PADDING, _urllib.parse.quote(settings.BASE64_PADDING)),) + params[1:]
@@ -417,8 +420,8 @@ def import_injection_points(url, technique, injection_type, filename, separator,
         conn.execute("INSERT INTO \"" + table + "\" (url, technique, injection_type, separator, "
                      "shell, vuln_parameter, prefix, suffix, TAG, interpreter, payload, http_header, http_request_method, "
                      "url_time_response, timesec, exec_time, output_length, is_vulnerable, data, cookie, tamper, target_os, web_root, tmp_path, "
-                     "second_url, second_req, csrf_token, csrf_url, csrf_method, csrf_data, value_encoding, value_replaced) "
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", params)
+                     "second_url, second_req, csrf_token, csrf_url, csrf_method, csrf_data, value_encoding, value_replaced, tamper_state) "
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", params)
         conn.commit()
 
     # Any stand-in for the parameter's value is recorded with the finding rather than before it, so
@@ -727,8 +730,11 @@ def apply_stored_technique(row, current_url=None):
   value_encoding = row[31] if len(row) > 31 else None
   # Whether the finding was made with the value replaced, which the replay has to repeat to be asked the same way.
   value_replaced = row[32] if len(row) > 32 else None
+  # The tamper state it was made with, which a session written before it was recorded does not hold.
+  tamper_state = row[33] if len(row) > 33 else None
 
   if http_header:
+    checks.remember_before_replay(settings, "HTTP_HEADER")
     settings.HTTP_HEADER = http_header
   # The short stand-in the previous run put in place of the parameter's own value, if it used one.
   placeholder = check_stored_testable_value(url, vuln_parameter, http_request_method)
@@ -737,14 +743,18 @@ def apply_stored_technique(row, current_url=None):
     # Applied without having been asked for: said, so a cookie that has gone stale is not a mystery.
     if not settings.USER_APPLIED_COOKIE:
       say_once_that_a_stored_value_is_used("cookie", cookie)
+    checks.remember_before_replay(menu.options, "cookie")
     menu.options.cookie = cookie
   data = restore_option(data, settings.USER_APPLIED_DATA, "POST data", placeholder)
   if data:
     if not settings.USER_APPLIED_DATA:
       say_once_that_a_stored_value_is_used("POST data", data)
+    checks.remember_before_replay(settings, "IGNORE_USER_DEFINED_POST_DATA")
+    checks.remember_before_replay(menu.options, "data")
     settings.IGNORE_USER_DEFINED_POST_DATA = False
     menu.options.data = data
   if settings.INJECTION_LEVEL != is_vulnerable:
+    checks.remember_before_replay(settings, "INJECTION_LEVEL")
     settings.INJECTION_LEVEL = int(is_vulnerable)
   if tamper:
     if menu.options.tamper and menu.options.tamper != tamper:
@@ -752,6 +762,7 @@ def apply_stored_technique(row, current_url=None):
                   "which differs from the '--tamper' value provided now ('" + menu.options.tamper +
                   "'). Using the stored value to replay this technique consistently.")
       say_once_about_session(warn_msg)
+    checks.remember_before_replay(menu.options, "tamper")
     menu.options.tamper = tamper
   if target_os and target_os != "None":
     # What the two mean rather than how each was written: '--os' takes both spellings of the family
@@ -765,6 +776,7 @@ def apply_stored_technique(row, current_url=None):
                   "'). Using the stored value to replay this technique consistently.")
       settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
     # Stored as text, restored as one of the two values the rest of the code compares against.
+    checks.remember_before_replay(settings, "TARGET_OS")
     settings.TARGET_OS = settings.OS.WINDOWS if target_os.lower() == settings.OS.WINDOWS else settings.OS.UNIX
   if web_root and web_root != "None":
     # The stored payload writes to the document root it was found with, spelled out inside it - an
@@ -778,6 +790,7 @@ def apply_stored_technique(row, current_url=None):
       say_once_about_session(warn_msg)
       settings.STORED_TECHNIQUES.pop(technique, None)
       raise StoredWebRootConflict()
+    checks.remember_before_replay(settings, "WEB_ROOT")
     settings.WEB_ROOT = web_root
   for stored, applied_name, label, switch in ((second_url, "second_url", "second-order URL", "--second-url"),
                                              (second_req, "second_req", "second-order request file", "--second-req"),
@@ -790,6 +803,7 @@ def apply_stored_technique(row, current_url=None):
     elif not applied:
       info_msg = "The stored finding was made with the " + label + " '" + str(stored) + "', which is put back for this run."
       settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    checks.remember_before_replay(menu.options, applied_name)
     setattr(menu.options, applied_name, stored)
 
   # Where the token was read from, which a restored token name is of little use without.
@@ -802,6 +816,8 @@ def apply_stored_technique(row, current_url=None):
         info_msg += " (" + str(csrf_method).upper() + (" '" + str(csrf_data) + "'" if csrf_data and csrf_data != "None" else "") + ")"
       info_msg += ", which is put back for this run."
       settings.print_data_to_stdout(settings.print_info_msg(info_msg))
+    for name in ("csrf_url", "csrf_method", "csrf_data"):
+      checks.remember_before_replay(menu.options, name)
     menu.options.csrf_url = csrf_url
     if csrf_method and csrf_method != "None":
       menu.options.csrf_method = csrf_method
@@ -819,19 +835,30 @@ def apply_stored_technique(row, current_url=None):
       settings.VALUE_ENCODING = None
   # A session written before the column existed says nothing either way, so it is left as it was.
   if value_replaced is not None:
+    checks.remember_before_replay(settings, "REPLACE_VALUE")
     settings.REPLACE_VALUE = value_replaced == "1"
+  settings.STORED_TAMPER_STATE = None
+  if tamper_state:
+    try:
+      settings.STORED_TAMPER_STATE = json.loads(tamper_state)
+    except ValueError:
+      pass
 
   # Read back the way it was given, so what the token is looked up by is what it was found with.
   if csrf_token and csrf_token != "None":
+    for name in ("CSRF_TOKEN", "CSRF_TOKEN_ORIGINAL"):
+      checks.remember_before_replay(settings, name)
     checks.set_anticsrf_token(csrf_token)
   if second_req and second_req != "None" and os.path.isfile(second_req):
     from src.core.parse import request as request_parser
+    checks.remember_before_replay(settings, "SECOND_ORDER_REQUEST")
     settings.SECOND_ORDER_REQUEST = request_parser.parse_single_request(second_req, "second-order")
 
   if tmp_path and tmp_path != "None":
     # Likewise the temporary directory, for a finding that fell back to one.
     if settings.USER_APPLIED_TMP_PATH:
       announce_replay_conflict(tmp_path, menu.options.tmp_path, "temporary directory", "--tmp-path")
+    checks.remember_before_replay(menu.options, "tmp_path")
     menu.options.tmp_path = tmp_path
   """
   The interpreter and the delay are stored as they were used, and the replay below is handed both.

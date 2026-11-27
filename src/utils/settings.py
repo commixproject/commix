@@ -509,7 +509,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "367"
+REVISION = "368"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -1065,6 +1065,11 @@ exception - an interpreter's two-argument open() handed a leading '|' runs what 
 and a value in front of that pipe is read as a filename instead - so there the value has to go.
 """
 REPLACE_VALUE = False
+
+# The tamper state a stored finding was made with, while it is replayed; None where the session recorded none.
+STORED_TAMPER_STATE = None
+# What replaying a stored finding replaced, and what it held before, put back before the next parameter.
+REPLAYED_STATE_PRIOR = {}
 
 # Asked once for the run, like the whitespace and dash retries' own answers.
 REPLACE_VALUE_RETRY_CHOICE = None
@@ -1944,6 +1949,10 @@ BOOLEAN_BASED_STATE = None
 
 # Whether the POST body is a GraphQL document.
 IS_GRAPHQL = False
+
+# Whether the POST body is multipart/form-data, and what recognises one: a part naming its field.
+IS_MULTIPART = False
+MULTIPART_RECOGNITION_REGEX = r'(?i)Content-Disposition:[^;\r\n]+;\s*name='
 
 JSON_RECOGNITION_REGEX = r'(?s)\A(\s*\[)*\s*\{.*"[^"]+"\s*:\s*("[^"]*"|\d+|true|false|null).*\}\s*(\]\s*)*\Z'
 
@@ -3108,6 +3117,7 @@ DEFAULT_HTTP_CONTENT_TYPE_VALUE = "application/x-www-form-urlencoded"
 HTTP_CONTENT_TYPE_JSON_HEADER_VALUE = "application/json"
 HTTP_CONTENT_TYPE_XML_HEADER_VALUE = "application/xml"
 HTTP_CONTENT_TYPE_GRAPHQL_HEADER_VALUE = "application/graphql"
+HTTP_CONTENT_TYPE_MULTIPART_HEADER_VALUE = "multipart/form-data"
 # Only what the response handling can actually decompress is asked for.
 """
 The encodings a response may arrive in.

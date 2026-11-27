@@ -264,3 +264,330 @@ class ReplacedValue(unittest.TestCase):
     settings.REPLACE_VALUE = True
     payload, prefix = parameters.prefixes(";echo Hello", "'")
     self.assertEqual("';echo Hello", payload)
+
+class AMultipartBodyIsTestedFieldByField(unittest.TestCase):
+  """
+  A multipart form carries its fields in parts, each named in its own headers. Every field is a
+  parameter of its own, named as the form names it, with the payload placed where its value ends and
+  every boundary, header and other part left as it was; a file being uploaded is not one of them.
+  """
+  BODY = ('--BB\r\nContent-Disposition: form-data; name="host"\r\n\r\n127.0.0.1\r\n'
+          '--BB\r\nContent-Disposition: form-data; name="note"\r\n\r\nline one\r\nline two\r\n'
+          '--BB\r\nContent-Disposition: form-data; name="empty"\r\n\r\n\r\n'
+          '--BB\r\nContent-Disposition: form-data; name="upload"; filename="a.txt"\r\nContent-Type: text/plain\r\n\r\nfile body\r\n'
+          '--BB\r\nContent-Disposition: form-data; name="nested"\r\nContent-Type: multipart/mixed; boundary=CC\r\n\r\n--CC--\r\n'
+          '--BB--\r\n')
+
+  def setUp(self):
+    import copy
+    self._settings = dict((name, copy.deepcopy(value)) for name, value in vars(settings).items()
+                          if name.isupper() and isinstance(value, (str, int, float, bool, type(None), list, dict, set, tuple)))
+    self._options = dict((name, getattr(menu.options, name)) for name in ("batch", "skip_empty", "data", "test_parameter"))
+    menu.options.batch, menu.options.skip_empty, menu.options.test_parameter = True, False, None
+
+  def tearDown(self):
+    for name, value in self._options.items():
+      setattr(menu.options, name, value)
+    for name, value in self._settings.items():
+      setattr(settings, name, value)
+
+  def _fields(self, body):
+    return [(name, body[start:end]) for name, start, end in parameters.multipart_fields(body)]
+
+  def test_each_field_is_read_with_its_whole_value(self):
+    self.assertEqual([("host", "127.0.0.1"), ("note", "line one\r\nline two"), ("empty", "")], self._fields(self.BODY))
+
+  def test_a_body_written_with_bare_line_feeds_is_read_alike(self):
+    expected = [(name, value.replace("\r\n", "\n")) for name, value in self._fields(self.BODY)]
+    self.assertEqual(expected, self._fields(self.BODY.replace("\r\n", "\n")))
+
+  def test_one_candidate_per_field_with_the_tag_where_its_value_ends(self):
+    candidates = parameters.multipart_candidates(self.BODY)
+    self.assertEqual(3, len(candidates))
+    for candidate in candidates:
+      self.assertEqual(1, candidate.count(settings.INJECT_TAG))
+      self.assertEqual(self.BODY, candidate.replace(settings.INJECT_TAG, ""))
+    self.assertIn('name="host"\r\n\r\n127.0.0.1' + settings.INJECT_TAG + "\r\n--BB", candidates[0])
+
+  def test_the_file_and_the_nested_body_are_never_candidates(self):
+    for candidate in parameters.multipart_candidates(self.BODY):
+      self.assertNotIn("file body" + settings.INJECT_TAG, candidate)
+      self.assertNotIn("--CC--" + settings.INJECT_TAG, candidate)
+
+  def test_only_the_marked_field_is_a_candidate_where_the_user_marked_one(self):
+    settings.CUSTOM_INJECTION_MARKER = True
+    marked = self.BODY.replace("127.0.0.1", "127.0.0.1" + settings.ASTERISK_MARKER)
+    self.assertEqual([self.BODY.replace("127.0.0.1", "127.0.0.1" + settings.INJECT_TAG)], parameters.multipart_candidates(marked))
+
+  def test_an_empty_field_is_left_out_on_request(self):
+    menu.options.skip_empty = True
+    self.assertEqual(2, len(parameters.multipart_candidates(self.BODY)))
+
+  def test_a_candidate_is_named_after_its_field(self):
+    settings.IS_MULTIPART = True
+    candidate = parameters.multipart_candidates(self.BODY)[1]
+    self.assertEqual("note", parameters.vuln_POST_param(candidate, "http://t/"))
+    self.assertEqual("line one\r\nline two", settings.TESTABLE_VALUE)
+
+  def test_the_body_is_recognised_and_split_into_its_fields(self):
+    found = parameters.do_POST_check(self.BODY, "POST")
+    self.assertTrue(settings.IS_MULTIPART)
+    self.assertEqual(3, len(found))
+
+  def test_a_form_body_is_not_taken_for_one(self):
+    found = parameters.do_POST_check("host=127.0.0.1&name=form-data", "POST")
+    self.assertFalse(settings.IS_MULTIPART)
+    self.assertTrue(found)
+
+class AMultipartBodyGoesOutAsOne(unittest.TestCase):
+  """
+  A part is cut at the boundary the Content-Type names, so a multipart body is sent under that type
+  with its own boundary; a type the user names for the request is the one that goes out.
+  """
+  def setUp(self):
+    import copy
+    from src.core.requests import headers
+    self.headers = headers
+    self._settings = dict((name, copy.deepcopy(value)) for name, value in vars(settings).items()
+                          if name.isupper() and isinstance(value, (str, int, float, bool, type(None), list, dict, set, tuple)))
+    self._options = dict((name, getattr(menu.options, name)) for name in ("data", "header", "headers", "requestfile", "logfile", "url"))
+    menu.options.header = menu.options.headers = menu.options.requestfile = menu.options.logfile = None
+    menu.options.url = "http://t/upload.php"
+    menu.options.data = AMultipartBodyIsTestedFieldByField.BODY
+    settings.IS_MULTIPART, settings.EXTRA_HTTP_HEADERS, settings.RAW_HTTP_HEADERS = True, False, ""
+
+  def tearDown(self):
+    for name, value in self._options.items():
+      setattr(menu.options, name, value)
+    for name, value in self._settings.items():
+      setattr(settings, name, value)
+
+  def _type(self):
+    from src.thirdparty.six.moves import urllib as _urllib
+    request = _urllib.request.Request(menu.options.url, b"x", method="POST")
+    self.headers.do_check(request, safe=True)
+    return request.get_header("Content-type")
+
+  def test_it_is_sent_as_multipart_with_its_own_boundary(self):
+    self.assertEqual("multipart/form-data; boundary=BB", self._type())
+
+  def test_a_type_the_user_names_is_the_one_sent(self):
+    menu.options.header = "Content-Type: multipart/form-data; boundary=BB; charset=UTF-8"
+    settings.EXTRA_HTTP_HEADERS = True
+    self.assertEqual("multipart/form-data; boundary=BB; charset=UTF-8", self._type())
+
+class AStructuredFieldIsSetAsideByItsOwnName(unittest.TestCase):
+  """
+  A field is set aside for what its name says - an anti-CSRF token, session state, a value
+  '--randomize' refreshes - and never for what its value happens to hold. A JSON, XML or GraphQL
+  piece carries its name and value together, so it is read for its name first, the way a form
+  pair is; a value holding 'token' is ordinary input, and naming a field with '-p' tests it.
+  """
+  def setUp(self):
+    import copy
+    self._settings = dict((name, copy.deepcopy(value)) for name, value in vars(settings).items()
+                          if name.isupper() and isinstance(value, (str, int, float, bool, type(None), list, dict, set, tuple)))
+    self._options = dict((name, getattr(menu.options, name)) for name in ("batch", "skip_empty", "data", "test_parameter"))
+    menu.options.batch, menu.options.skip_empty, menu.options.test_parameter = True, False, None
+    settings.CSRF_TOKEN, settings.LOAD_SESSION = None, False
+    settings.TESTABLE_PARAMETERS_LIST, settings.RANDOMIZE_PARAMETERS_LIST = [], []
+
+  def tearDown(self):
+    for name, value in self._options.items():
+      setattr(menu.options, name, value)
+    for name, value in self._settings.items():
+      setattr(settings, name, value)
+
+  def _tested(self, body):
+    import io, contextlib
+    settings.USER_DEFINED_POST_DATA = menu.options.data = body
+    said = io.StringIO()
+    with contextlib.redirect_stdout(said):
+      found = parameters.do_POST_check(body, "POST")
+      found = [found] if isinstance(found, str) else found
+      names = [parameters.vuln_POST_param(_, "http://t/") for _ in found if settings.INJECT_TAG in _]
+    return names, [_ for _ in said.getvalue().splitlines() if "Ignoring" in _ or "Skipping" in _]
+
+  def test_each_format_names_a_piece_by_its_key(self):
+    settings.IS_JSON = True
+    self.assertEqual("host=mytoken.example.com", parameters.named_fragment('{"a":{"host":"mytoken.example.com"'))
+    self.assertEqual("b=2", parameters.named_fragment(' "b": "2"}}'))
+    self.assertEqual("host=1.2.3.4", parameters.named_fragment('{"query":"query { s(host: \\"1.2.3.4\\") }"}'))
+    settings.IS_JSON, settings.IS_XML = False, True
+    self.assertEqual("host=nonce", parameters.named_fragment("<host><![CDATA[nonce]]></host>"))
+    self.assertEqual("<r>", parameters.named_fragment("<r>"))
+    settings.IS_XML, settings.IS_GRAPHQL = False, True
+    self.assertEqual("host=token", parameters.named_fragment('query { s(host: "token"'))
+
+  def test_a_form_pair_is_left_as_it_is(self):
+    self.assertEqual("csrf_token=a=b", parameters.named_fragment("csrf_token=a=b"))
+
+  def test_a_value_holding_a_token_word_is_tested(self):
+    for body in ('{"host":"mytoken.example.com","b":"2"}', "<r><host>nonce.example.com</host><b>2</b></r>",
+                 'query { s(host: "xsrf.example.com", b: "2") { id } }'):
+      for flag in ("IS_JSON", "IS_XML", "IS_GRAPHQL"):
+        setattr(settings, flag, False)
+      self.assertEqual((["host", "b"], []), self._tested(body), body)
+
+  def test_a_key_naming_a_token_is_set_aside_with_a_word_said(self):
+    names, said = self._tested('{"csrf_token":"abc","host":"1"}')
+    self.assertEqual(["host"], names)
+    self.assertEqual(1, len(said))
+    self.assertIn("'csrf_token'", said[0])
+
+  def test_naming_the_field_tests_it(self):
+    settings.TESTABLE_PARAMETERS_LIST = ["csrf_token"]
+    self.assertIn("csrf_token", self._tested("<r><csrf_token>abc</csrf_token><host>1</host></r>")[0])
+
+  def test_a_nested_field_is_asked_for_by_its_path(self):
+    from src.core.controller import checks
+    settings.TESTABLE_PARAMETERS_LIST = ["a.csrf_token"]
+    self.assertTrue(checks.explicitly_testable("csrf_token=abc"))
+    settings.TESTABLE_PARAMETERS_LIST = ["a.host"]
+    self.assertFalse(checks.explicitly_testable("csrf_token=abc"))
+
+  def test_session_state_and_a_randomized_field_are_set_aside_by_name(self):
+    settings.RANDOMIZE_PARAMETERS_LIST = ["b"]
+    names, said = self._tested('{"__VIEWSTATE":"abc","host":"1","b":"2"}')
+    self.assertEqual(["host"], names)
+    self.assertEqual(2, len(said))
+
+  def test_the_question_names_the_key(self):
+    from src.utils import common
+    asked, read_input = [], common.read_input
+    common.read_input = lambda message, default=None, check_batch=True: "Y" if "process it" in message else (asked.append(message), "N")[1]
+    menu.options.batch = False
+    try:
+      self._tested('{"csrf_token":"abc","host":"mytoken.example.com"}')
+    finally:
+      common.read_input = read_input
+    self.assertEqual(1, len(asked))
+    self.assertIn("'csrf_token'", asked[0])
+
+class ABodyIsSentAsItIsWritten(unittest.TestCase):
+  """
+  A form, raw or GraphQL body goes out with every space the user wrote - in a value, in a name, in a
+  document - and a name written after a delimiter's space is reported without it, the way a cookie's is.
+  """
+  def setUp(self):
+    import copy
+    self._settings = dict((name, copy.deepcopy(value)) for name, value in vars(settings).items()
+                          if name.isupper() and isinstance(value, (str, int, float, bool, type(None), list, dict, set, tuple)))
+    self._options = dict((name, getattr(menu.options, name)) for name in ("batch", "skip_empty", "data", "test_parameter"))
+    menu.options.batch, menu.options.skip_empty, menu.options.test_parameter = True, False, None
+    settings.TESTABLE_PARAMETERS_LIST, settings.RANDOMIZE_PARAMETERS_LIST = [], []
+
+  def tearDown(self):
+    for name, value in self._options.items():
+      setattr(menu.options, name, value)
+    for name, value in self._settings.items():
+      setattr(settings, name, value)
+
+  def _sent(self, body):
+    import io, contextlib
+    from src.core.controller import controller
+    settings.USER_DEFINED_POST_DATA = menu.options.data = body
+    captured, do_injection = [], controller.do_injection
+    controller.do_injection = lambda found, *args: captured.extend(found)
+    try:
+      with contextlib.redirect_stdout(io.StringIO()):
+        controller.post_request("http://t/", "POST", None, 0)
+    finally:
+      controller.do_injection = do_injection
+    return [_ for _ in captured if settings.INJECT_TAG in _]
+
+  def test_a_value_keeps_its_spaces(self):
+    sent = self._sent("q=hello world&b=2")
+    self.assertEqual(2, len(sent))
+    for candidate in sent:
+      self.assertIn("q=hello world", candidate)
+
+  def test_a_name_keeps_its_space_and_is_reported_with_it(self):
+    sent = self._sent("my field=1&b=2")
+    self.assertIn("my field=1" + settings.INJECT_TAG, sent[0])
+    self.assertEqual("my field", parameters.vuln_POST_param(sent[0], "http://t/"))
+
+  def test_a_named_graphql_operation_is_left_valid(self):
+    sent = self._sent('query GetUser { user(name: "x") { id } }')
+    self.assertTrue(sent)
+    self.assertTrue(all(_.startswith("query GetUser { user(") for _ in sent))
+
+  def test_a_name_after_a_delimiters_space_is_read_without_it(self):
+    sent = self._sent("a=1& b=2")
+    self.assertIn("& b=2" + settings.INJECT_TAG, sent[1])
+    self.assertEqual("b", parameters.vuln_POST_param(sent[1], "http://t/"))
+    self.assertEqual("2", settings.TESTABLE_VALUE)
+
+class ANestedJsonFieldIsHeldToTheSameRules(unittest.TestCase):
+  """
+  A field inside a nested JSON object is a parameter like any other: where the user marked one, it
+  alone is tested, with the payload where the mark stood; one named like a token or session state is
+  set aside, without taking its neighbours with it; and each field is tested once.
+  """
+  def setUp(self):
+    import copy
+    self._settings = dict((name, copy.deepcopy(value)) for name, value in vars(settings).items()
+                          if name.isupper() and isinstance(value, (str, int, float, bool, type(None), list, dict, set, tuple)))
+    self._options = dict((name, getattr(menu.options, name)) for name in ("batch", "skip_empty", "data", "test_parameter"))
+    menu.options.batch, menu.options.skip_empty, menu.options.test_parameter = True, False, None
+    settings.TESTABLE_PARAMETERS_LIST, settings.RANDOMIZE_PARAMETERS_LIST = [], []
+
+  def tearDown(self):
+    for name, value in self._options.items():
+      setattr(menu.options, name, value)
+    for name, value in self._settings.items():
+      setattr(settings, name, value)
+
+  def _tested(self, body, marked=False):
+    import io, contextlib
+    settings.CUSTOM_INJECTION_MARKER = marked
+    body = body.replace("*", settings.ASTERISK_MARKER)
+    settings.USER_DEFINED_POST_DATA = menu.options.data = body
+    said = io.StringIO()
+    with contextlib.redirect_stdout(said):
+      found = parameters.do_POST_check(body, "POST")
+      found = [found] if isinstance(found, str) else found
+      found = [_ for _ in found if settings.INJECT_TAG in _]
+      names = [parameters.vuln_POST_param(_, "http://t/") for _ in found]
+    return names, found, [_ for _ in said.getvalue().splitlines() if "Ignoring" in _]
+
+  def test_the_marked_field_alone_is_tested_where_the_mark_stood(self):
+    names, found, _ = self._tested('{"a":{"b":"x*","d":"z"},"c":"y"}', marked=True)
+    self.assertEqual(["a.b"], names)
+    self.assertIn('"b":"x' + settings.INJECT_TAG + '"', found[0])
+    self.assertNotIn(settings.ASTERISK_MARKER, found[0])
+
+  def test_each_marked_field_is_a_candidate_of_its_own(self):
+    names, found, _ = self._tested('{"a":{"b":"x*","d":"z*"}}', marked=True)
+    self.assertEqual(["a.b", "a.d"], names)
+    self.assertFalse(any(settings.ASTERISK_MARKER in _ for _ in found))
+
+  def test_a_token_field_is_set_aside_without_its_neighbours(self):
+    for body in ('{"a":{"csrf_token":"abc","host":"1"}}', '{"a":{"host":"1","csrf_token":"abc"}}'):
+      names, _, said = self._tested(body)
+      self.assertEqual(["a.host"], names, body)
+      self.assertEqual(1, len(said), body)
+
+  def test_each_field_is_tested_once(self):
+    self.assertEqual(["a.x", "a.host", "c"], self._tested('{"a":{"x":"abc","host":"1"},"c":"2"}')[0])
+
+  def test_other_shapes_are_read_as_before(self):
+    self.assertEqual(["a", "e.f", "e.g"], self._tested('{"a":"1","e":{"f":"1","g":"2"}}')[0])
+    self.assertEqual(["a.x", "a.d.e"], self._tested('{"a":{"x":"1","d":{"e":"1"}}}')[0])
+    self.assertEqual(["e"], self._tested('{"a":["p","q"],"e":"y"}')[0])
+
+  def test_a_bracket_inside_a_string_does_not_count_as_depth(self):
+    self.assertEqual([0, 2, 1], parameters.json_fragment_depths(['{"a":{"x":"}{\\""', ' "y":"]"}', ' "c":"2"}']))
+
+  def test_only_marked_leaves_come_back_from_a_nested_object(self):
+    settings.CUSTOM_INJECTION_MARKER = True
+    body = '{"a":{"b":"x' + settings.ASTERISK_MARKER + '","d":"z"}}'
+    self.assertEqual(['{"a":{"b":"x' + settings.INJECT_TAG + '","d":"z"}}'], parameters.json_nested_leaf_candidates('{"a":{"b":"x' + settings.ASTERISK_MARKER + '"', body))
+
+  def test_a_mark_inside_a_value_takes_the_payload_there(self):
+    names, found, _ = self._tested('{"a":{"b":"x*y"},"c":"z"}', marked=True)
+    self.assertIn('"b":"x' + settings.INJECT_TAG + 'y"', found[0])
+
+  def test_no_field_is_tested_twice(self):
+    names = self._tested('{"a":{"k":"1"},"b":{"k":"1"}}')[0]
+    self.assertEqual(len(names), len(set(names)))
