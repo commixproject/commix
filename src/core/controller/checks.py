@@ -2938,7 +2938,7 @@ def note_evaluated_language(*banners):
           settings.IDENTIFIED_EVAL_LANGUAGE = language
           return
 
-def encode_payload(payload):
+def encode_payload(payload, url=None):
   """
   A payload, encoded for a carrier that is URL-encoded.
 
@@ -2948,13 +2948,16 @@ def encode_payload(payload):
   server answers 400 rather than running anything.
 
   So a '%' with no two hex digits behind it is made '%25' first - unless a tamper script is in play,
-  since those write escapes of their own and this cannot tell theirs from a stray one.
+  since those write escapes of their own and this cannot tell theirs from a stray one. Not so for a
+  payload going into the path of 'url': the server decodes a path itself, and refuses one carrying
+  such a '%' whoever wrote it.
   """
   # Sent as written, where the target is one that decodes what it is given a second time - or does
   # not decode it at all.
   if menu.options.skip_urlencode:
     return payload
-  if "%" in payload and not menu.options.tamper:
+  in_path = url is not None and settings.INJECT_TAG in re.split(r"[?#]", url, 1)[0]
+  if "%" in payload and (not menu.options.tamper or in_path):
     payload = re.sub(r"%(?![0-9a-fA-F]{2})", "%25", payload)
   return _urllib.parse.quote(payload, safe=settings.payload_safe_chars())
 

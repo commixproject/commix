@@ -951,7 +951,7 @@ def init_injection(payload, http_request_method, url):
 
   if settings.INJECT_TAG in url:
     vuln_parameter = parameters.vuln_GET_param(url)
-    target = checks.process_injectable_value(encoded_for_url(payload), url, pollute=True)
+    target = checks.process_injectable_value(checks.encode_payload(payload, url), url, pollute=True)
     # A body that carries no mark of its own is not the one under test, but it is still part of the request - the fields the target requires travel with it.
     if settings.USER_DEFINED_POST_DATA and (not settings.IGNORE_USER_DEFINED_POST_DATA or settings.INJECT_TAG not in settings.USER_DEFINED_POST_DATA):
       request = _urllib.request.Request(target, settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC), method=http_request_method)

@@ -683,3 +683,80 @@ class AJsonDocumentIsReadForEveryValue(unittest.TestCase):
     candidates = parameters.json_candidates(body)
     self.assertEqual(1, len(candidates))
     self.assertTrue(all(_.count(settings.INJECT_TAG) == 1 for _ in candidates))
+
+class APathMarkerIsAPlaceOfItsOwn(unittest.TestCase):
+  """
+  A marker in the path of a URL - where a REST-style address carries its values - is a place to test
+  of its own, with or without a query beside it: one per marker, named by its place among them, its
+  value the segment it sits in. A candidate that carries no tag is never handed on to be tested.
+  """
+  def setUp(self):
+    import copy
+    self._settings = dict((name, copy.deepcopy(value)) for name, value in vars(settings).items()
+                          if name.isupper() and isinstance(value, (str, int, float, bool, type(None), list, dict, set, tuple)))
+    self._options = dict((name, getattr(menu.options, name)) for name in ("batch", "skip_empty", "shellshock", "test_parameter", "tamper", "skip_urlencode"))
+    menu.options.batch, menu.options.skip_empty, menu.options.shellshock, menu.options.test_parameter = True, False, False, None
+    settings.TESTABLE_PARAMETERS_LIST, settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST = [], []
+    settings.USER_DEFINED_POST_DATA, settings.SKIP_NON_CUSTOM_PARAMS, settings.PATH_INJECTION_POINTS = None, None, {}
+
+  def tearDown(self):
+    for name, value in self._options.items():
+      setattr(menu.options, name, value)
+    for name, value in self._settings.items():
+      setattr(settings, name, value)
+
+  def _tested(self, address, marked=None):
+    import io, contextlib
+    settings.CUSTOM_INJECTION_MARKER = "*" in address if marked is None else marked
+    with contextlib.redirect_stdout(io.StringIO()):
+      found = parameters.do_GET_check("http://t/api/" + address, "GET")
+    if found is False:
+      return False
+    tested = []
+    for candidate in found:
+      name = parameters.vuln_GET_param(candidate)
+      tested.append((name, settings.TESTABLE_VALUE, candidate.replace("http://t/api/", "").replace(settings.INJECT_TAG, "<T>")))
+    return tested
+
+  def test_a_marker_in_a_path_without_a_query_is_tested(self):
+    self.assertEqual([("#1", "127.0.0.1", "127.0.0.1<T>")], self._tested("127.0.0.1*"))
+    self.assertEqual([("#1", "", "do/cmd/<T>")], self._tested("do/cmd/*"))
+
+  def test_a_marker_in_the_path_is_tested_beside_a_query_that_carries_none(self):
+    self.assertEqual([("#1", "127.0.0.1", "127.0.0.1<T>?a=1")], self._tested("127.0.0.1*?a=1"))
+
+  def test_a_marker_in_the_path_and_one_in_the_query_are_two_places(self):
+    self.assertEqual([("#1", "127.0.0.1", "127.0.0.1<T>?a=1"), ("a", "1", "127.0.0.1?a=1<T>")], self._tested("127.0.0.1*?a=1*"))
+
+  def test_every_marker_in_a_path_is_a_place_named_by_its_order(self):
+    self.assertEqual([("#1", "1", "x/1<T>/y/2"), ("#2", "2", "x/1/y/2<T>")], self._tested("x/1*/y/2*"))
+    self.assertEqual([("#1", "7", "x/7<T>/y")], self._tested("x/7*/y"))
+
+  def test_the_tag_written_out_in_the_path_is_tested_where_it_is(self):
+    self.assertEqual([("#1", "127.0.0.1", "127.0.0.1<T>")], self._tested("127.0.0.1" + settings.INJECT_TAG))
+    self.assertEqual([("#1", "", "<T>?a=1"), ("a", "1", "?a=1<T>")], self._tested(settings.INJECT_TAG + "?a=1"))
+
+  def test_a_query_without_a_value_does_not_end_a_marked_path(self):
+    self.assertEqual([("#1", "", "<T>?debug")], self._tested("*?debug"))
+
+  def test_a_path_marker_tested_in_its_own_pass_leaves_nothing_else_behind(self):
+    self.assertIs(False, self._tested("127.0.0.1*", marked=False))
+    self.assertEqual([("a", "1", "127.0.0.1?a=1<T>")], self._tested("127.0.0.1*?a=1", marked=False))
+
+  def test_a_query_is_tested_as_before(self):
+    self.assertEqual([("a", "1", "x?a=1<T>&b=2"), ("b", "2", "x?a=1&b=2<T>")], self._tested("x?a=1&b=2"))
+    self.assertEqual([("a", "1", "x?a=1<T>&b=2")], self._tested("x?a=1*&b=2"))
+    self.assertEqual([("a", "1", "x?a=1<T>")], self._tested("x?a=1*"))
+    # Tested in its own pass, the marked value is not handed on again without a tag.
+    self.assertEqual([], self._tested("x?a=1*", marked=False))
+
+  def test_a_payload_in_the_path_carries_no_stray_per_cent_sign_whatever_the_tampers(self):
+    from src.core.controller import checks
+    menu.options.tamper, menu.options.skip_urlencode = "space2ifs", False
+    path, query = "http://t/api/127.0.0.1" + settings.INJECT_TAG, "http://t/api?a=1" + settings.INJECT_TAG
+    self.assertEqual("printf%20%25s%09x", checks.encode_payload("printf %s%09x", path))
+    # Where the server does not decode the payload itself, a tamper's own '%' is still left as written.
+    self.assertEqual("printf%20%s%09x", checks.encode_payload("printf %s%09x", query))
+    self.assertEqual("printf%20%s%09x", checks.encode_payload("printf %s%09x"))
+    menu.options.tamper = None
+    self.assertEqual("printf%20%25s", checks.encode_payload("printf %s", query))

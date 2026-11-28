@@ -509,7 +509,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "370"
+REVISION = "371"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -794,6 +794,8 @@ IGNORE_USER_DEFINED_POST_DATA = False
 # Custom injection marker
 CUSTOM_INJECTION_MARKER_CHAR = "*"
 CUSTOM_INJECTION_MARKER = False
+# The name of each place a marker sets in a URL path ('#1' first), by the path it is tagged in.
+PATH_INJECTION_POINTS = {}
 ASTERISK_MARKER = "__ASTERISK__"
 CUSTOM_INJECTION_MARKER_PARAMETERS_LIST = []
 PRE_CUSTOM_INJECTION_MARKER_CHAR = ""

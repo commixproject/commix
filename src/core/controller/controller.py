@@ -240,7 +240,7 @@ def heuristic_request(url, http_request_method, check_parameter, payload, whites
       data = settings.USER_DEFINED_POST_DATA.encode(settings.DEFAULT_CODEC)
   if settings.INJECT_TAG in url:
     # Encode query string, preserving delimiters and configured parameter delimiter
-    encoded_payload = checks.encode_payload(payload)
+    encoded_payload = checks.encode_payload(payload, url)
     tmp_url = checks.process_injectable_value(encoded_payload, url, pollute=True)
   else:
     tmp_url = checks.remove_tags(tmp_url)

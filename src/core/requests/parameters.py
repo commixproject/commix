@@ -135,6 +135,29 @@ def restore_xml_shields(text_or_list, shielded):
   return _restore_one(text_or_list)
 
 """
+The places a marker sets in the path of a URL, which is where a REST-style address carries its values.
+
+One URL per marker, with that marker as the tag and every other one taken out, each named by its
+place among them ('#1' first); and the URL with all of them taken out, which is the one the query is
+tested with. A marker already tested in a pass of its own is only taken out.
+"""
+def path_injection_points(url):
+  start = url.find("/", url.find("://") + 3) if "://" in url else url.find("/")
+  if start == -1:
+    return url, []
+  end = min([url.find(_, start) for _ in ("?", "#") if url.find(_, start) != -1] or [len(url)])
+  path = url[start:end]
+  markers = [settings.INJECT_TAG] + ([settings.ASTERISK_MARKER] if settings.CUSTOM_INJECTION_MARKER else [])
+  parts = re.split("|".join(re.escape(_) for _ in markers), path)
+  rest = url[end:].replace(settings.ASTERISK_MARKER, "").replace(settings.INJECT_TAG, "").replace(settings.RANDOM_TAG, "")
+  points = []
+  for index in range(len(parts) - 1):
+    tagged = url[:start] + ("".join(parts[:index + 1]) + settings.INJECT_TAG + "".join(parts[index + 1:])).replace(settings.ASTERISK_MARKER, "")
+    settings.PATH_INJECTION_POINTS[tagged] = "#" + str(index + 1)
+    points.append(tagged + rest)
+  return url[:start] + "".join(parts).replace(settings.ASTERISK_MARKER, "") + url[end:], points
+
+"""
 Check if the 'INJECT_HERE' tag, is specified on GET Requests.
 """
 def do_GET_check(url, http_request_method):
@@ -151,8 +174,18 @@ def do_GET_check(url, http_request_method):
 
   # Replace with INJECT_HERE, honoring the custom marker character.
   url = checks.process_custom_injection_data(url)
+  # A marker in the path is a place of its own, tested before the query and whatever that carries.
+  marked = url
+  if not menu.options.shellshock:
+    url, points = path_injection_points(url)
+    if points:
+      query = url.split("?", 1)[1].split("#", 1)[0] if "?" in url else ""
+      return points + ([_ for _ in (do_GET_check(url, http_request_method) or []) if settings.INJECT_TAG in _] if "=" in query else [])
   # Check for REST-ful URLs format.
   if "?" not in url:
+    # The only place marked was tested in a pass of its own, so there is nothing left to test here.
+    if url != marked and settings.INJECT_TAG not in url:
+      return False
     if settings.INJECT_TAG not in url and not menu.options.shellshock:
       if len(settings.TESTABLE_PARAMETERS_LIST) != 0 or \
          len(settings.CUSTOM_INJECTION_MARKER_PARAMETERS_LIST) != 0 or \
@@ -215,7 +248,9 @@ def do_GET_check(url, http_request_method):
         # Reconstruct the URL
         url = url_part + "?" + parameters
         url = url.replace(settings.RANDOM_TAG, "").replace(settings.ASTERISK_MARKER,"")
-        urls_list.append(url)
+        # A value that carries no tag has nothing to be tested with.
+        if settings.INJECT_TAG in url:
+          urls_list.append(url)
         return urls_list
       else:
         # Multiple parameters without the INJECT_HERE tag.
@@ -248,7 +283,8 @@ def do_GET_check(url, http_request_method):
             # Reconstruct the URL
             url = url_part + "?" + parameter
             url = url.replace(settings.RANDOM_TAG, "").replace(settings.ASTERISK_MARKER,"")
-            urls_list.append(url)
+            if settings.INJECT_TAG in url:
+              urls_list.append(url)
         else:
           parameter = settings.URL_PARAM_DELIMITER.join(multi_parameters)
           # Reconstruct the URL
@@ -276,11 +312,16 @@ Define the vulnerable GET parameter.
 def vuln_GET_param(url):
   # Define the vulnerable parameter
   vuln_parameter = None
-  if "?" not in url:
-    # Grab the value of parameter.
-    value = re.findall(r'/(.*)/' + settings.INJECT_TAG + "", url)
-    value = ''.join(value)
-    vuln_parameter = re.sub(r"/(.*)/", "", value)
+  path = re.split(r"[?#]", url, 1)[0]
+  # A place in the path is named by its place among the markers there, and its value is its own segment.
+  if settings.INJECT_TAG in path:
+    segment = path[path.rfind("/", 0, path.find(settings.INJECT_TAG)) + 1:].split("/", 1)[0]
+    vuln_parameter = settings.PATH_INJECTION_POINTS.get(path, "#1")
+    if settings.CUSTOM_INJECTION_MARKER:
+      register_custom_injection_marker(vuln_parameter, segment)
+    settings.TESTABLE_VALUE = segment.replace(settings.INJECT_TAG, "")
+  elif "?" not in url:
+    vuln_parameter = ""
 
   # Allow a value with a space, and escape the delimiter (--pdel).
   elif re.search(re.escape(settings.URL_PARAM_DELIMITER) + r"(.*)=.*" + settings.INJECT_TAG, url) or \
