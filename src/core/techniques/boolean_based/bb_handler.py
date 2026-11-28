@@ -171,6 +171,16 @@ def output_length(channel, cmd, ceiling=None, payloads=None):
   return length
 
 """
+Whether this boundary reads a command's output back, asked with one character whose answer is known.
+
+A pipe written with backticks proves execution everywhere and carries the retrieval only on some
+sinks, so where it does is found out by asking rather than assumed either way.
+"""
+def reads_back(channel):
+  command, expected = settings.PIPE_RETRIEVAL_PROBE
+  return _byte_at(channel, command, 1) == ord(expected)
+
+"""
 One byte of the output, found by bisecting its ordinal.
 
 Over whatever pool the run is working with, which '--charset' narrows: a byte known to be one of a

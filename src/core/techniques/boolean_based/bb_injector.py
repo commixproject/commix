@@ -118,13 +118,17 @@ checks, the file access, '--os-cmd' and the shell - reaches this technique the w
 """
 def injection(separator, cmd, prefix, suffix, whitespace, http_request_method, url, vuln_parameter):
   from src.core.techniques.boolean_based import bb_handler as handler
-  # A boundary known to prove execution without carrying the retrieval is not asked for characters.
-  if checks.blind_retrieval_unavailable(separator):
-    checks.output_unavailable_notice(vuln_parameter)
-    return ""
   # Read against this finding's own calibration, whatever has calibrated since.
   checks.restore_oracle((url, vuln_parameter, settings.INJECTION_TECHNIQUE.BOOLEAN_BASED, separator))
   channel = handler.Channel(separator, prefix, suffix, whitespace, http_request_method, url, vuln_parameter)
+  # A pipe written with backticks is asked for one known character first, once per finding, and given up on only when that does not come back.
+  if checks.blind_retrieval_unavailable(separator):
+    key = (url, vuln_parameter, separator)
+    if key not in settings.PIPE_RETRIEVAL_PROBED:
+      settings.PIPE_RETRIEVAL_PROBED[key] = handler.reads_back(channel)
+    if not settings.PIPE_RETRIEVAL_PROBED[key]:
+      checks.output_unavailable_notice(vuln_parameter)
+      return ""
   return handler.retrieve(channel, cmd)
 
 # eof

@@ -4397,9 +4397,9 @@ def confirm_boundary(bare_prefix, bare_suffix, separator, whitespace):
   """
   if blind_retrieval_unavailable(separator) and not settings.PIPE_RETRIEVAL_NOTICE_GIVEN:
     settings.PIPE_RETRIEVAL_NOTICE_GIVEN = True
-    warn_msg = "The pipe this finding was confirmed on cannot carry the retrieval of a command's "
-    warn_msg += "output while the payload is written with backticks, so execution is proved but "
-    warn_msg += "nothing is read back through it. Another substitution reaches both."
+    warn_msg = "The pipe this finding was confirmed on may not carry the retrieval of a command's "
+    warn_msg += "output while the payload is written with backticks, so a character is asked through "
+    warn_msg += "it before any output is read. Another substitution reaches both."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
   if whitespace and settings.WHITESPACES and settings.WHITESPACES[0] != whitespace:
     settings.WHITESPACES = [whitespace] + [_ for _ in settings.WHITESPACES if _ != whitespace]
@@ -4421,8 +4421,8 @@ def output_unavailable_notice(vuln_parameter):
     return
   settings.OUTPUT_UNAVAILABLE_SAID.add(vuln_parameter)
   warn_msg = "Command execution on parameter '" + str(vuln_parameter) + "' was confirmed, but the output of a command cannot be "
-  warn_msg += "retrieved through the boolean-based technique: the pipe ('|') it was confirmed on cannot carry the "
-  warn_msg += "retrieval while commands are substituted with backticks."
+  warn_msg += "retrieved through the boolean-based technique: a character asked for through the pipe ('|') it was "
+  warn_msg += "confirmed on, with commands substituted with backticks, did not come back."
   settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
 
 # Takes back, whole, a boolean-based finding whose boundary cannot carry the retrieval, so the passes ahead can look for one that can; settle_held_findings() puts it back if none does.
@@ -4481,7 +4481,7 @@ def settle_held_findings(held_findings):
     settings.IDENTIFIED_COMMAND_INJECTION = held["identified"]
     settings.INJECTION_CHECKER = True
     restore_tamper_state(held["tampers"])
-    warn_msg = "No other pass found a boundary that can carry the retrieval, so the finding on " + held["parameter"] + " stands: command execution is confirmed, output retrieval is unavailable through it."
+    warn_msg = "No other pass found a boundary that can carry the retrieval, so the finding on " + held["parameter"] + " stands: command execution is confirmed, and output is read through it only where a character asked for comes back."
     settings.print_data_to_stdout(settings.print_warning_msg(warn_msg))
   del held_findings[:]
 

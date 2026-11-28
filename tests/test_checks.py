@@ -2613,7 +2613,7 @@ class AFindingTheOutputCannotBeReadBackThroughDoesNotEndThePasses(unittest.TestC
     self.assertEqual("|", settings.CONFIRMED_BOUNDARY[self.PARAMETER][2])
     # The substitution it was confirmed through comes back with it, so the retrieval is recognised as unavailable.
     self.assertTrue(checks.blind_retrieval_unavailable("|"))
-    self.assertTrue(any("output retrieval is unavailable" in _ for _ in self.said))
+    self.assertTrue(any("stands: command execution is confirmed" in _ for _ in self.said))
 
   def test_a_readable_finding_made_in_the_meantime_replaces_it(self):
     self._backticks()
@@ -2624,7 +2624,7 @@ class AFindingTheOutputCannotBeReadBackThroughDoesNotEndThePasses(unittest.TestC
     self.assertEqual([], held)
     self.assertEqual([settings.INJECTION_TECHNIQUE.RESULTS_BASED], [row[0] for row in settings.CONFIRMED_INJECTION_POINTS])
     self.assertFalse(settings.BOOLEAN_BASED_STATE)
-    self.assertFalse(any("output retrieval is unavailable" in _ for _ in self.said))
+    self.assertFalse(any("stands: command execution is confirmed" in _ for _ in self.said))
 
   def test_a_finding_on_a_boundary_that_can_carry_the_retrieval_is_left_alone(self):
     self._backticks()
@@ -2669,21 +2669,49 @@ class AFindingTheOutputCannotBeReadBackThroughDoesNotEndThePasses(unittest.TestC
     self._backticks()
     self.assertNotIn("one argument can hold", common.invalid_cmd_output("hostname"))
 
-  def test_no_character_is_asked_of_a_boundary_known_not_to_carry_the_retrieval(self):
+  def _read_through(self, separator, comes_back, commands=("hostname",)):
     from src.core.techniques.boolean_based import bb_injector, bb_handler
-    asked = []
-    real, real_restore = bb_handler.retrieve, checks.restore_oracle
+    asked, probed = [], []
+    real = (bb_handler.retrieve, bb_handler.reads_back, checks.restore_oracle, settings.PIPE_RETRIEVAL_PROBED)
     bb_handler.retrieve = lambda channel, cmd, **kwargs: asked.append(cmd) or "value"
+    bb_handler.reads_back = lambda channel: probed.append(channel.separator) or comes_back
     checks.restore_oracle = lambda key: None
+    settings.PIPE_RETRIEVAL_PROBED = {}
     try:
-      self._backticks()
-      self.assertEqual("", bb_injector.injection("|", "hostname", "", "", " ", "POST", "http://t/", "addr"))
-      self.assertEqual("", bb_injector.injection("|", "hostname", "", "", " ", "POST", "http://t/", "addr"))
-      self.assertEqual([], asked)
-      # Said once for the parameter, not once per command.
-      self.assertEqual(1, len([_ for _ in self.said if "cannot be retrieved" in _]))
-      # A boundary that can carry it is asked as it always was.
-      self.assertEqual("value", bb_injector.injection(";", "hostname", "", "", " ", "POST", "http://t/", "addr"))
-      self.assertEqual(["hostname"], asked)
+      read = [bb_injector.injection(separator, cmd, "", "", " ", "POST", "http://t/", "addr") for cmd in commands]
     finally:
-      bb_handler.retrieve, checks.restore_oracle = real, real_restore
+      bb_handler.retrieve, bb_handler.reads_back, checks.restore_oracle, settings.PIPE_RETRIEVAL_PROBED = real
+    return read, asked, probed
+
+  def test_the_probe_is_one_known_character_and_only_it_counts(self):
+    from src.core.techniques.boolean_based import bb_handler
+    asked, real = [], bb_handler._byte_at
+    try:
+      for answer, expected in ((ord("7"), True), (None, False), (ord("8"), False)):
+        bb_handler._byte_at = lambda channel, cmd, position, **kwargs: asked.append((cmd, position)) or answer
+        self.assertEqual(expected, bb_handler.reads_back(None))
+    finally:
+      bb_handler._byte_at = real
+    self.assertEqual([(settings.PIPE_RETRIEVAL_PROBE[0], 1)] * 3, asked)
+
+  def test_a_pipe_whose_probe_does_not_come_back_is_not_read(self):
+    self._backticks()
+    read, asked, probed = self._read_through("|", False, commands=("hostname", "id"))
+    self.assertEqual(["", ""], read)
+    self.assertEqual([], asked)
+    # Asked once for the finding, and said once for the parameter, not once per command.
+    self.assertEqual(["|"], probed)
+    self.assertEqual(1, len([_ for _ in self.said if "cannot be retrieved" in _]))
+
+  def test_a_pipe_whose_probe_comes_back_is_read(self):
+    self._backticks()
+    read, asked, probed = self._read_through("|", True, commands=("hostname", "id"))
+    self.assertEqual(["value", "value"], read)
+    self.assertEqual(["hostname", "id"], asked)
+    self.assertEqual(["|"], probed)
+    self.assertFalse([_ for _ in self.said if "cannot be retrieved" in _])
+
+  def test_a_boundary_that_can_carry_the_retrieval_is_read_without_a_probe(self):
+    self._backticks()
+    read, asked, probed = self._read_through(";", False)
+    self.assertEqual((["value"], ["hostname"], []), (read, asked, probed))

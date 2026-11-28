@@ -509,7 +509,7 @@ The global variables.
 DESCRIPTION_FULL = "Automated All-in-One OS Command Injection Exploitation Tool"
 AUTHOR  = "Anastasios Stasinopoulos"
 VERSION_NUM = "4.2"
-REVISION = "369"
+REVISION = "370"
 
 # How long an install may go without being updated before the run says so at the end. Read off the
 # files on disk rather than asked of anyone, so a run that never reaches the network still knows.
@@ -690,6 +690,10 @@ BACKTICK_SUBSTITUTION = "`"
 PIPE_RETRIEVAL_NOTICE_GIVEN = False
 # The parameters already told that a confirmed finding cannot be read back through its technique.
 OUTPUT_UNAVAILABLE_SAID = set()
+# Whether a pipe written with backticks read a known character back, per finding: it does on some sinks and not on others.
+PIPE_RETRIEVAL_PROBED = {}
+# What that is asked with, and what a boundary that carries the retrieval answers.
+PIPE_RETRIEVAL_PROBE = ("expr 7", "7")
 # The one that can, to go back to where a script that chose otherwise turns out not to apply.
 NESTING_SUBSTITUTION = ("$(", ")")
 CMD_SUB_PREFIX = "$("
